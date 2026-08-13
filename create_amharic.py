@@ -1,0 +1,77 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""Create proper Amharic .po file with UTF-8 encoding."""
+
+po_content = """msgid ""
+msgstr ""
+"Project-Id-Version: Django-Jobs 1.0\\n"
+"Report-Msgid-Bugs-To: \\n"
+"POT-Creation-Date: 2024-01-01 00:00+0000\\n"
+"PO-Revision-Date: 2024-01-01 00:00+0000\\n"
+"Last-Translator: Automatically generated\\n"
+"Language-Team: Amharic <am@li.org>\\n"
+"Language: am\\n"
+"MIME-Version: 1.0\\n"
+"Content-Type: text/plain; charset=UTF-8\\n"
+"Content-Transfer-Encoding: 8bit\\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\\n"
+
+msgid "About Django-Jobs"
+msgstr "ስለ Django-Jobs"
+
+msgid "Contact Us"
+msgstr "ከኛ ይገናኙ"
+
+msgid "Quick Links"
+msgstr "ፈጣን ማገናኛዎች"
+
+msgid "Follow Us"
+msgstr "ከኛ ይከተሉ"
+
+msgid "Home"
+msgstr "መነሻ"
+
+msgid "Jobs"
+msgstr "ሥራዎች"
+
+msgid "About Us"
+msgstr "ስለ እኛ"
+
+msgid "Contact"
+msgstr "እኹና"
+
+msgid "Your premier platform for connecting talented professionals with outstanding career opportunities. We simplify the job search and hiring process for both job seekers and employers."
+msgstr "ለምሽ ምሽ ተሾሥት ስራ ስራዎች ለምዕትን አስብያ ስራ ስራዎች ተመዝገቡ"
+
+msgid "Email:"
+msgstr "ኢሜይል:"
+
+msgid "Phone:"
+msgstr "ስልክ:"
+
+msgid "Location:"
+msgstr "አድራሻ:"
+
+msgid "+123 456 7890"
+msgstr "+123 456 7890"
+
+msgid "Addis Ababa, Ethiopia"
+msgstr "አዲስ አበባ፣ ኢትዮጵያ"
+
+msgid "Django-Jobs. All rights reserved."
+msgstr "Django-Jobs። መብቶች ሁሉ የተጠበቁ ናቸው።"
+
+msgid "info@django-jobs.com"
+msgstr "info@django-jobs.com"
+"""
+
+file_path = r"C:\Users\HP\Downloads\django-job-portal-master\locale\am\LC_MESSAGES\django.po"
+with open(file_path, 'w', encoding='utf-8') as f:
+    f.write(po_content)
+
+print("Amharic .po file created successfully with UTF-8 encoding!")
+
+import polib
+po = polib.pofile(file_path)
+po.save_as_mofile(file_path.replace('.po', '.mo'))
+print("Amharic .mo file compiled successfully!")

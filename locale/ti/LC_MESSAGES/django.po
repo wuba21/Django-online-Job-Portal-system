@@ -1,0 +1,141 @@
+# Tigrinya translations for django-job-portal
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: django-job-portal\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-05-02 12:00+0000\n"
+"PO-Revision-Date: 2026-05-02 12:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: Tigrinya\n"
+"Language: ti\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# Authentication
+msgid "Login"
+msgstr "እተወ"
+
+msgid "Register"
+msgstr "ተመዝገብ"
+
+msgid "Username"
+msgstr "ስም ተጠቃሚ"
+
+msgid "Password"
+msgstr "ምስጢር ቃል"
+
+msgid "Logout"
+msgstr "ውጻእ"
+
+# Job Portal
+msgid "Job Title"
+msgstr "ርእሲ ስራ"
+
+msgid "Apply Now"
+msgstr "ሕጂ ኣመልክት"
+
+msgid "Job Description"
+msgstr "መግለጺ ስራ"
+
+msgid "Submit Application"
+msgstr "ማመልከቻ ኣእቱ"
+
+msgid "Employer"
+msgstr "ቀጣሪ"
+
+# General UI
+msgid "Home"
+msgstr "መጀመርታ"
+
+msgid "Search"
+msgstr "ድለ"
+
+msgid "Save"
+msgstr "ኣቐምጥ"
+
+msgid "Cancel"
+msgstr "ሰርዝ"
+
+msgid "English"
+msgstr "እንግሊዝኛ"
+
+msgid "Amharic"
+msgstr "አማርኛ"
+
+msgid "Oromo"
+msgstr "ኦሮምኛ"
+
+msgid "Tigrinya"
+msgstr "ትግርኛ"
+
+msgid "Jobs"
+msgstr "ስራሕተት"
+
+msgid "Create ResumeCV"
+msgstr "ResumeCV ፍጠር"
+
+msgid "About Us"
+msgstr "ብዛዕባና"
+
+msgid "Dashboard"
+msgstr "ዳሽቦርድ"
+
+msgid "Applicants"
+msgstr "ማመልከችዋት"
+
+msgid "Post a new job"
+msgstr "ኣዲስ ስራ ለጥፋ"
+
+msgid "Favorites"
+msgstr "ዝወድትወን"
+
+msgid "My Applications"
+msgstr "ማመልከቻዎቼ"
+
+msgid "Edit Profile"
+msgstr "መግለጺ ኣስተካክል"
+
+msgid "My resumes"
+msgstr "Resumeዎቼ"
+
+msgid "Employee"
+msgstr "ሰራሕተኛ"
+
+msgid "Employers"
+msgstr "ሰራሕተኛታት"
+
+msgid "Log in"
+msgstr "እተወ"
+
+msgid "Login with Facebook"
+msgstr "ብFacebook እተወ"
+
+msgid "Login with Google"
+msgstr "ብGoogle እተወ"
+
+msgid "Login with Linkedin"
+msgstr "ብLinkedIn እተወ"
+
+msgid "Login with Github"
+msgstr "ብGitHub እተወ"
+
+msgid "Already our have account?"
+msgstr "መመዝገቢያ ኣለካ?"
+
+msgid "About django-jobs"
+msgstr "ብዛዕባ django-jobs"
+
+msgid "Contact Us"
+msgstr "ኣብ እኛ ይገናኙ"
+
+msgid "Follow Us"
+msgstr "ኣብ እኛ ይከተሉ"
+
+msgid "Email"
+msgstr "ኢሜይል"
+
+msgid "Phone"
+msgstr "ተላላይ"

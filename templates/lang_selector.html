@@ -1,0 +1,20 @@
+{% load i18n %}
+{% get_available_languages as languages %}
+{% get_current_language as LANGUAGE_CODE %}
+
+<li class="nav-item dropdown">
+    <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+       class="nav-link dropdown-toggle">
+        <em class="fa fa-language"></em>
+        {{ LANGUAGE_CODE|upper }}
+    </a>
+
+    <div class="dropdown-menu">
+        {% for lang_code, lang_name in languages %}
+            <a href="/{{ lang_code }}/" 
+               class="dropdown-item {% if lang_code == LANGUAGE_CODE %}active font-weight-bold{% endif %}">
+                {{ lang_name }}
+            </a>
+        {% endfor %}
+    </div>
+</li>

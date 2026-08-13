@@ -1,0 +1,283 @@
+{% load static i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{% block title %} {% endblock %} - Django {% trans "Jobs" %}</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="all,follow">
+    <!-- Bootstrap CSS-->
+    <link rel="stylesheet"
+          href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+    <!-- Font Awesome CSS-->
+    <link rel="stylesheet"
+          href="{% static 'vendor/font-awesome/css/font-awesome.min.css' %}">
+    <!-- Google fonts - Roboto for copy, Montserrat for headings-->
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,700">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Montserrat:400,700">
+    <!-- Noto Sans Ethiopic for Amharic, Oromo, Tigrinya -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;700&display=swap">
+    <!-- owl carousel-->
+    <link rel="stylesheet" href="{% static 'vendor/owl.carousel/assets/owl.carousel.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/owl.carousel/assets/owl.theme.default.css' %}">
+    <!-- theme stylesheet-->
+    <link rel="stylesheet" href="{% static 'css/style.default.css' %}" id="theme-stylesheet">
+    <!-- Custom stylesheet - for your changes-->
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"/>
+    {% block styles %}{% endblock %}
+    <!-- Favicon-->
+    <link rel="shortcut icon" href="favicon.png">
+    <!-- Tweaks for older IEs--><!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script><![endif]-->
+<link rel="stylesheet" href="{% static 'css/footer-modern.css' %}">
+    </head>
+<body>
+<!-- navbar-->
+{% csrf_token %}
+<header class="header">
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a href="{% url 'jobs:home' %}" class="navbar-brand">
+                <img src="{% static 'img/logo-small.jpg' %}" alt="logo" class="d-none d-lg-block" style="max-height: 40px; width: auto; max-width: 100%;">
+                <span class="sr-only">{% trans "Home" %}</span>
+            </a>
+            <button type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"
+                    class="navbar-toggler navbar-toggler-right">Menu<i class="fa fa-bars"></i>
+            </button>
+            <div id="navbarSupportedContent" class="collapse navbar-collapse">
+                {% with request.resolver_match.url_name as url_name %}
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item {% if url_name == 'home' %}active{% endif %}">
+                            <a href="{% url 'jobs:home' %}" class="nav-link">{% trans "Home" %} <span class="sr-only">(current)</span></a>
+                        </li>
+                        <li class="nav-item {% if url_name == 'jobs' %}active{% endif %}">
+                            <a href="{% url 'jobs:jobs' %}" class="nav-link">{% trans "Jobs" %}</a>
+                        </li>
+                        <li class="nav-item {% if url_name == 'templates' %}active{% endif %}">
+                            <a href="{% url 'resume_cv:templates' %}" class="nav-link">{% trans "Create ResumeCV" %}</a>
+                        </li>
+                        <li class="nav-item">
+                                <a href="/{{ LANGUAGE_CODE }}/about-us/" class="nav-link">{% trans "About Us" %}</a>
+                        </li>
+                        {% if request.user.is_authenticated and request.user.role == 'employer' %}
+                            <li class="nav-item dropdown">
+                                <a id="clientZone" href="#" data-toggle="dropdown"
+                                   aria-haspopup="true" aria-expanded="false"
+                                   class="nav-link dropdown-toggle has-img mb-3 mb-lg-0 mt-3 mt-lg-0">
+                                    <div class="client-menu-image">
+                                        <div class="inner">
+                                            <img src="{% static 'img/company-1.png' %}"
+                                                 alt="company image"
+                                                 class="img-fluid">
+                                        </div>
+                                    </div>
+                                    {% if request.user.role == 'employee' %}
+                                        {{ request.user.first_name }} {{ request.user.last_name }}
+                                    {% else %}
+                                        {{ request.user.first_name }}
+                                    {% endif %}
+                                </a>
+                                <div aria-labelledby="clientZone" class="dropdown-menu">
+                                    <a href="{% url 'jobs:employer-dashboard' %}"
+                                       class="dropdown-item {% if url_name == 'employer-dashboard' %}active{% endif %}"
+                                    >
+                                        {% trans "Dashboard" %}
+                                    </a>
+                                    <a href="{% url 'jobs:employer-all-applicants' %}"
+                                       class="dropdown-item {% if url_name == 'employer-all-applicants' %}active{% endif %}"
+                                    >
+                                        {% trans "Applicants" %}
+                                    </a>
+                                    <a href="{% url 'jobs:employer-jobs-create' %}"
+                                       class="dropdown-item {% if url_name == 'employer-jobs-create' %}active{% endif %}"
+                                    >
+                                        {% trans "Post a new job" %}
+                                    </a>
+                                    <a href="{% url 'accounts:logout' %}" class="dropdown-item">Logout</a>
+                                </div>
+                            </li>
+                        {% elif request.user.is_authenticated and request.user.role == 'employee' %}
+                             <li class="nav-item {% if url_name == 'employee-favorites' %}active{% endif %}">
+                                 <a href="{% url 'jobs:employee-favorites' %}" class="nav-link">{% trans "Favorites" %}</a>
+                             </li>
+                             <li class="nav-item {% if url_name == 'employee-my-applications' %}active{% endif %}">
+                                 <a href="{% url 'jobs:employee-my-applications' %}" class="nav-link">{% trans "My Applications" %}</a>
+                             </li>
+
+                            <li class="nav-item dropdown">
+                                <a id="clientZone" href="#" data-toggle="dropdown"
+                                   aria-haspopup="true" aria-expanded="false"
+                                   class="nav-link dropdown-toggle has-img mb-3 mb-lg-0 mt-3 mt-lg-0">
+                                    <div class="client-menu-image">
+                                        <div class="inner">
+                                            <img src="{% static 'img/company-1.png' %}"
+                                                 alt="company image"
+                                                 class="img-fluid">
+                                        </div>
+                                    </div>
+                                    {% if request.user.role == 'employee' %}
+                                        {{ request.user.first_name }} {{ request.user.last_name }}
+                                    {% else %}
+                                        {{ request.user.first_name }}
+                                    {% endif %}
+                                </a>
+                                <div aria-labelledby="clientZone" class="dropdown-menu">
+                                    <a href="{% url 'accounts:employee-profile-update' %}"
+                                       class="dropdown-item {% if url_name == 'employee-profile-update' %}active{% endif %}"
+                                    >
+                                        {% trans "Edit Profile" %}
+                                    </a>
+                                    <a href="{% url 'resume_cv:resumes' %}" class="dropdown-item">{% trans "My resumes" %}</a>
+                                    <a href="{% url 'accounts:logout' %}" class="dropdown-item">{% trans "Logout" %}</a>
+                                </div>
+                            </li>
+                        {% else %}
+                            <li class="nav-item dropdown {% if url_name == 'employee-register' or url_name == 'employer-register' %}active{% endif %}">
+                                <a id="pages" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                   class="nav-link dropdown-toggle "><i class="fa fa-signing"></i>Register
+                                </a>
+                                <div aria-labelledby="pages" class="dropdown-menu">
+                                <a href="{% url 'accounts:employee-register' %}"
+                                   class="dropdown-item {% if url_name == 'employee-register' %}active{% endif %}"
+                                >
+                                    {% trans "Employee" %}
+                                </a>
+                                <a href="{% url 'accounts:employer-register' %}"
+                                   class="dropdown-item {% if url_name == 'employer-register' %}active{% endif %}"
+                                >
+                                    {% trans "Employers" %}
+                                </a>
+                                </div>
+                            </li>
+                            <li class="nav-item" style="color: #fff">
+                                <a href="{% url 'accounts:login' %}"
+                                   class="btn navbar-btn btn-outline-light mb-5 mb-lg-0 {% if url_name == 'login' %}active text-primary{% endif %}"
+                                >
+                                    <i class="fa fa-sign-in"></i>
+                                    {% trans "Login" %}
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% include "lang_selector.html" %}
+                    </ul>
+                {% endwith %}
+            </div>
+        </div>
+    </nav>
+</header>
+<div>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            {#<li{% if message.tags %} class="alert alert-{{ message.tags }}"{% endif %}>{{ message }}</li>#}
+        {% endfor %}
+
+    {% endif %}
+    {% block content %} {% endblock %}
+</div>
+
+
+<footer style="background: #1a1a2e !important; color: #ffffff !important; padding: 60px 0 0 0 !important; margin-top: 0 !important;">
+    <div class="container">
+        <div class="row">
+            <!-- About Section -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <h4 style="font-size: 1.1rem !important; font-weight: 600 !important; margin-bottom: 20px !important; color: #ffffff !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; position: relative !important; padding-bottom: 10px !important;">
+                    {% trans "About Django-Jobs" %}
+                    <span style="position: absolute !important; left: 0 !important; bottom: 0 !important; width: 40px !important; height: 3px !important; background: #ffffff !important; border-radius: 2px !important;"></span>
+                </h4>
+                <p style="color: rgba(255,255,255,0.85) !important; line-height: 1.6 !important; font-size: 0.9rem !important;">
+                    {% trans "Your premier platform for connecting talented professionals with outstanding career opportunities. We simplify the job search and hiring process for both job seekers and employers." %}
+                </p>
+            </div>
+            
+            <!-- Contact Section -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <h4 style="font-size: 1.1rem !important; font-weight: 600 !important; margin-bottom: 20px !important; color: #ffffff !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; position: relative !important; padding-bottom: 10px !important;">
+                    {% trans "Contact Us" %}
+                    <span style="position: absolute !important; left: 0 !important; bottom: 0 !important; width: 40px !important; height: 3px !important; background: #ffffff !important; border-radius: 2px !important;"></span>
+                </h4>
+                <p style="color: rgba(255,255,255,0.85) !important; line-height: 1.6 !important; font-size: 0.9rem !important;"><i class="fa fa-envelope" style="margin-right: 8px;"></i> {% trans "Email" %}: info@jobportal.com</p>
+                <p style="color: rgba(255,255,255,0.85) !important; line-height: 1.6 !important; font-size: 0.9rem !important;"><i class="fa fa-phone" style="margin-right: 8px;"></i> {% trans "Phone" %}: +251939304457</p>
+                <p style="color: rgba(255,255,255,0.85) !important; line-height: 1.6 !important; font-size: 0.9rem !important;"><i class="fa fa-map-marker" style="margin-right: 8px;"></i> {% trans "Location" %}: Debre Markos , Ethiopia</p>
+            </div>
+            
+            <!-- Quick Links Section -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <h4 style="font-size: 1.1rem !important; font-weight: 600 !important; margin-bottom: 20px !important; color: #ffffff !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; position: relative !important; padding-bottom: 10px !important;">
+                    {% trans "Quick Links" %}
+                    <span style="position: absolute !important; left: 0 !important; bottom: 0 !important; width: 40px !important; height: 3px !important; background: #ffffff !important; border-radius: 2px !important;"></span>
+                </h4>
+                <a href="/" style="color: rgba(255,255,255,0.85) !important; text-decoration: none !important; display: block !important; margin-bottom: 10px !important; transition: all 0.3s ease !important;">{% trans "Home" %}</a>
+                <a href="/jobs/" style="color: rgba(255,255,255,0.85) !important; text-decoration: none !important; display: block !important; margin-bottom: 10px !important; transition: all 0.3s ease !important;">{% trans "Jobs" %}</a>
+                <a href="/{% get_current_language as LANGUAGE_CODE %}{{ LANGUAGE_CODE }}/about-us/" style="color: rgba(255,255,255,0.85) !important; text-decoration: none !important; display: block !important; margin-bottom: 10px !important; transition: all 0.3s ease !important;">{% trans "About Us" %}</a>
+            </div>
+            
+            <!-- Social Media Section -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <h4 style="font-size: 1.1rem !important; font-weight: 600 !important; margin-bottom: 20px !important; color: hsl(259, 96%, 50%) !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; position: relative !important; padding-bottom: 10px !important;">
+                    {% trans "Follow Us" %}
+                    <span style="position: absolute !important; left: 0 !important; bottom: 0 !important; width: 40px !important; height: 3px !important; background: #ffffff !important; border-radius: 2px !important;"></span>
+                </h4>
+                <div style="display: flex !important; gap: 15px !important;">
+                    <a href="https://web.facebook.com/profile.php?id=100077897349623&sk=directory_personal_details" target="_blank" rel="noopener" title="Facebook" style="color: #1877F2 !important; font-size: 1.3rem !important; width: 45px !important; height: 45px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; background: rgba(255,255,255,0.15) !important; border-radius: 50% !important; text-decoration: none !important; transition: all 0.3s ease !important;">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="https://linkedin.com/in/wubante-tilahun-776ab7377" target="_blank" rel="noopener" title="LinkedIn" style="color: #0A66C2 !important; font-size: 1.3rem !important; width: 45px !important; height: 45px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; background: rgba(255,255,255,0.15) !important; border-radius: 50% !important; text-decoration: none !important; transition: all 0.3s ease !important;">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="https://t.me/UOGwuba" target="_blank" rel="noopener" title="Telegram" style="color: #09a8f8 !important; font-size: 1.3rem !important; width: 45px !important; height: 45px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; background: rgba(255,255,255,0.15) !important; border-radius: 50% !important; text-decoration: none !important; transition: all 0.3s ease !important;">
+                        <i class="fab fa-telegram"></i>
+                    </a>
+                    <a href="https://wuba21.github.io" target="_blank" rel="noopener" title="GitHub" style="color: #5808e1 !important; font-size: 1.3rem !important; width: 45px !important; height: 45px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; background: rgba(255,255,255,0.15) !important; border-radius: 50% !important; text-decoration: none !important; transition: all 0.3s ease !important;">
+                        <i class="fab fa-github"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="margin-top: 40px !important; padding: 20px 0 !important; border-top: 1px solid rgba(255,255,255,0.1) !important; background: rgba(0,0,0,0.1) !important;">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <p style="margin-bottom: 0 !important; text-align: center !important; font-size: 0.85rem !important; color: rgba(255,255,255,0.7) !important;">
+                        &copy;{% now "Y" %} {% trans "Django-Jobs. All rights reserved." %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+<script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+<script src="{% static 'vendor/popper.js/umd/popper.min.js' %}"></script>
+<script src="{% static 'vendor/bootstrap/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'vendor/jquery.cookie/jquery.cookie.js' %}"></script>
+<script src="{% static 'vendor/owl.carousel/owl.carousel.min.js' %}"></script>
+<script src="{% static 'vendor/bootstrap-select/js/bootstrap-select.min.js' %}"></script>
+<script src="{% static 'js/front.js' %}"></script>
+<script src="{% static 'js/custom.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+{% block javascripts %}{% endblock %}
+
+<script type="text/javascript">
+    // Language switcher now uses forms in dropdown
+</script>
+
+</body>
+
+</html>

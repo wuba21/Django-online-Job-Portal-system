@@ -1,0 +1,141 @@
+# Oromo translations for django-job-portal
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: django-job-portal\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-05-02 12:00+0000\n"
+"PO-Revision-Date: 2026-05-02 12:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: Oromo\n"
+"Language: om\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# Authentication
+msgid "Login"
+msgstr "Seeni"
+
+msgid "Register"
+msgstr "Galmaa'i"
+
+msgid "Username"
+msgstr "Maqaa fayyadamaa"
+
+msgid "Password"
+msgstr "Jecha iccitii"
+
+msgid "Logout"
+msgstr "Ba'i"
+
+# Job Portal
+msgid "Job Title"
+msgstr "Mata duree hojii"
+
+msgid "Apply Now"
+msgstr "Amma iyyadhu"
+
+msgid "Job Description"
+msgstr "Ibsa hojii"
+
+msgid "Submit Application"
+msgstr "Iyyannoo galchi"
+
+msgid "Employer"
+msgstr "Qacaraa"
+
+# General UI
+msgid "Home"
+msgstr "Mana jalqabaa"
+
+msgid "Search"
+msgstr "Barbaadi"
+
+msgid "Save"
+msgstr "Olkaa'i"
+
+msgid "Cancel"
+msgstr "Haquu"
+
+msgid "English"
+msgstr "Ingiliffa"
+
+msgid "Amharic"
+msgstr "Amaara"
+
+msgid "Oromo"
+msgstr "Oromoo"
+
+msgid "Tigrinya"
+msgstr "Tigiree"
+
+msgid "Jobs"
+msgstr "Hojiiwwan"
+
+msgid "Create ResumeCV"
+msgstr "ResumeCV Uumu"
+
+msgid "About Us"
+msgstr "Waa'ee Keenya"
+
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Applicants"
+msgstr "Meeysitoota"
+
+msgid "Post a new job"
+msgstr "Hojii haaraa dhiheesi"
+
+msgid "Favorites"
+msgstr "Karaa'oo"
+
+msgid "My Applications"
+msgstr "Meeysa koo"
+
+msgid "Edit Profile"
+msgstr "Profile Jijjiiri"
+
+msgid "My resumes"
+msgstr "Resumewwan koo"
+
+msgid "Employee"
+msgstr "Hojjetaa"
+
+msgid "Employers"
+msgstr "Qacaroota"
+
+msgid "Log in"
+msgstr "Seeni"
+
+msgid "Login with Facebook"
+msgstr "Facebook waliin Seeni"
+
+msgid "Login with Google"
+msgstr "Google waliin Seeni"
+
+msgid "Login with Linkedin"
+msgstr "LinkedIn waliin Seeni"
+
+msgid "Login with Github"
+msgstr "GitHub waliin Seeni"
+
+msgid "Already our have account?"
+msgstr "Akkaawuntii nu qaba?"
+
+msgid "About django-jobs"
+msgstr "Waa'ee django-jobs"
+
+msgid "Contact Us"
+msgstr "Nu Qunnamaa"
+
+msgid "Follow Us"
+msgstr "Nu Hordofaa"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Phone"
+msgstr "Bilbilaa"
