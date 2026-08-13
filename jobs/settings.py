@@ -6,8 +6,11 @@ import environ
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 
-import pymysql
-pymysql.install_as_MySQLdb()
+try:
+    import pymysql
+    pymysql.install_as_MySQLdb()
+except ImportError:
+    pass
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
