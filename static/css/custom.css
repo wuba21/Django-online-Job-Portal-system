@@ -40,3 +40,263 @@
 .footer .col-lg-4 i {
     margin-right: 5px;
 }
+
+/* ============================================
+   MOBILE RESPONSIVE STYLES
+   ============================================ */
+
+/* Viewport fix */
+* {
+    box-sizing: border-box;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* ---- Navbar ---- */
+@media (max-width: 991px) {
+    .navbar {
+        padding: 10px 15px;
+    }
+
+    .navbar-brand img {
+        display: block !important;
+        max-height: 35px;
+    }
+
+    .navbar-toggler {
+        padding: 5px 10px;
+        font-size: 14px;
+    }
+
+    #navbarSupportedContent {
+        background: #fff;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-top: 10px;
+    }
+
+    .navbar-nav .nav-item {
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .navbar-nav .nav-item:last-child {
+        border-bottom: none;
+    }
+
+    .navbar-nav .nav-link {
+        padding: 10px 15px !important;
+    }
+
+    .navbar-nav .btn {
+        margin: 8px 15px !important;
+        display: block;
+        text-align: center;
+    }
+
+    /* Language selector */
+    .lang-selector {
+        padding: 8px 15px;
+    }
+}
+
+/* ---- Hero / Job Search Section ---- */
+@media (max-width: 768px) {
+    .job-form-section {
+        padding: 40px 15px !important;
+    }
+
+    .job-form-box {
+        padding: 20px 15px !important;
+    }
+
+    .job-form-box .heading {
+        font-size: 1.6rem !important;
+        text-align: center;
+    }
+
+    .job-main-form .row {
+        flex-direction: column;
+    }
+
+    .job-main-form .col-md-5,
+    .job-main-form .col-md-2 {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 10px;
+    }
+
+    .job-main-form__button {
+        width: 100% !important;
+        padding: 12px !important;
+    }
+}
+
+/* ---- Featured Jobs Cards ---- */
+@media (max-width: 991px) {
+    .featured .col-lg-4 {
+        margin-bottom: 20px;
+    }
+
+    .box-image-text .content {
+        padding: 15px !important;
+    }
+
+    .box-image-text h5 {
+        font-size: 1rem !important;
+    }
+}
+
+/* ---- Job Listings ---- */
+@media (max-width: 768px) {
+    .job-listing {
+        flex-direction: column !important;
+    }
+
+    .job-listing-about {
+        padding: 15px !important;
+    }
+
+    .job-listing-position {
+        font-size: 1rem !important;
+    }
+
+    .job-listing-company-logo {
+        width: 50px !important;
+        height: 50px !important;
+    }
+
+    /* Job detail badges */
+    .badge {
+        font-size: 11px !important;
+        padding: 4px 8px !important;
+        margin-bottom: 4px;
+        display: inline-block;
+    }
+}
+
+/* ---- Login / Register Forms ---- */
+@media (max-width: 768px) {
+    .login-page,
+    .register-page {
+        padding: 20px 15px !important;
+    }
+
+    .login-form,
+    .register-form {
+        padding: 20px !important;
+        margin: 10px 0 !important;
+    }
+
+    /* Social login buttons */
+    .social-login-buttons .btn,
+    .btn-social,
+    a[href*="social-auth"] {
+        width: 100% !important;
+        margin-bottom: 10px !important;
+        display: block !important;
+        text-align: center !important;
+    }
+}
+
+/* ---- Tables (Employer Dashboard) ---- */
+@media (max-width: 768px) {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+        min-width: 500px;
+    }
+}
+
+/* ---- Profile / Edit Forms ---- */
+@media (max-width: 768px) {
+    .profile-section {
+        padding: 15px !important;
+    }
+
+    .form-group label {
+        font-size: 14px;
+    }
+
+    .btn {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+}
+
+/* ---- Footer ---- */
+@media (max-width: 768px) {
+    .footer {
+        text-align: center !important;
+    }
+
+    .footer .col-lg-4,
+    .footer .col-lg-3 {
+        margin-bottom: 20px;
+    }
+
+    .footer .col-lg-4 a {
+        margin: 0 8px !important;
+    }
+
+    .footer__copyright {
+        text-align: center;
+        font-size: 13px;
+    }
+}
+
+/* ---- General Mobile Fixes ---- */
+@media (max-width: 576px) {
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    h1 { font-size: 1.8rem !important; }
+    h2 { font-size: 1.5rem !important; }
+    h3 { font-size: 1.3rem !important; }
+
+    .section {
+        padding: 30px 0 !important;
+    }
+
+    /* Cards full width on small phones */
+    .card {
+        margin-bottom: 15px;
+    }
+
+    /* Pagination */
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .page-item {
+        margin: 2px;
+    }
+}
+
+/* ---- Touch-friendly buttons ---- */
+@media (max-width: 768px) {
+    .btn, button, a.btn {
+        min-height: 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    select,
+    textarea {
+        font-size: 16px !important; /* Prevents iOS zoom on focus */
+        min-height: 42px;
+    }
+}
