@@ -36,6 +36,9 @@ class TemplateListView(ListView):
     template_name = "resumes/templates.html"
 
     def get_queryset(self):
+        category_id = self.request.GET.get("category")
+        if category_id and category_id.isdigit():
+            return self.model.objects.filter(category_id=category_id, active=True)
         return self.model.objects.filter(active=True)
 
     def get_context_data(self, **kwargs):
