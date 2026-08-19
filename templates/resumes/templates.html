@@ -4,18 +4,28 @@
 
 {% block styles %}
     <link rel="stylesheet" href="{% static 'css/templates.css' %}"/>
+    <style>
+        .template-card { transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+        .template-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important; }
+        .template-card .card-img-top { height: 240px; object-fit: cover; border-bottom: 1px solid #eee; }
+        .filter-btn-group .btn { border-radius: 20px; font-size: 0.85rem; padding: 0.35rem 1rem; }
+    </style>
 {% endblock %}
 
 {% block content %}
+<!-- Header -->
 <section class="bg-light-gray py-4">
     <div class="container text-center">
-        <h2 class="heading mb-3">Choose a Template for Your Resume / CV</h2>
-        <div class="d-flex justify-content-center flex-wrap gap-2 mb-4">
-            <a href="{% url 'resume_cv:templates' %}" class="btn btn-sm {% if not request.GET.category %}btn-danger{% else %}btn-outline-danger{% endif %} m-1">
+        <h2 class="heading mb-2">Choose a Template for Your Resume / CV</h2>
+        <p class="text-muted">Select a professional template and start building your resume in minutes</p>
+
+        <!-- Category Filter Buttons -->
+        <div class="filter-btn-group d-flex justify-content-center flex-wrap mt-3">
+            <a href="{% url 'resume_cv:templates' %}" class="btn btn-sm m-1 {% if not request.GET.category %}btn-danger{% else %}btn-outline-danger{% endif %}">
                 <i class="fa fa-th"></i> All Templates
             </a>
             {% for category in categories %}
-                <a href="{% url 'resume_cv:templates' %}?category={{ category.id }}" class="btn btn-sm {% if request.GET.category == category.id|stringformat:'s' %}btn-success{% else %}btn-outline-success{% endif %} m-1">
+                <a href="{% url 'resume_cv:templates' %}?category={{ category.id }}" class="btn btn-sm m-1 {% if request.GET.category == category.id|stringformat:'s' %}btn-success{% else %}btn-outline-success{% endif %}">
                     {{ category.name }}
                 </a>
             {% endfor %}
@@ -23,44 +33,69 @@
     </div>
 </section>
 
+<!-- Template Grid -->
 <section class="py-4">
     <div class="container">
         <div class="row">
             {% if templates %}
                 {% for template in templates %}
-                    <div class="col-md-4 mb-4">
-                        <div class="card border-0 shadow-sm h-100">
-                            <a href="#" data-id="{{ template.id }}" data-toggle="modal" data-target="#createModal" title="{{ template.name }}" class="btn_builder_template">
-                                <img src="{% if template.thumbnail %}{{ template.thumbnail.url }}{% else %}{% static 'img/featured1.jpg' %}{% endif %}" alt="{{ template.name }}" class="card-img-top" style="height: 220px; object-fit: cover;">
-                            </a>
-                            <div class="card-body d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h5 class="card-title mb-0 font-weight-bold">{{ template.name }}</h5>
-                                    <span class="badge badge-success mt-1">{% if template.is_premium %}Premium{% else %}Free{% endif %}</span>
-                                </div>
-                                <button type="button" class="btn btn-primary btn-sm btn_builder_template" data-id="{{ template.id }}" data-toggle="modal" data-target="#createModal">
-                                    <i class="fa fa-magic"></i> Use Template
-                                </button>
-                            </div>
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <div class="card border-0 shadow-sm template-card h-100"
+                         data-id="{{ template.id }}"
+                         data-toggle="modal"
+                         data-target="#createModal"
+                         onclick="setTemplateId({{ template.id }})">
+                        <!-- Thumbnail -->
+                        <img
+                            src="{% if template.thumbnail %}{{ template.thumbnail.url }}{% else %}{% static 'img/featured1.jpg' %}{% endif %}"
+                            alt="{{ template.name }}"
+                            class="card-img-top">
+
+                        <!-- Free / Premium Badge overlay -->
+                        <span class="badge badge-success" style="position:absolute; top:10px; left:10px; font-size:0.75rem; padding:4px 8px;">
+                            {% if template.is_premium %}Premium{% else %}Free{% endif %}
+                        </span>
+
+                        <!-- Card Footer -->
+                        <div class="card-body py-2 px-3 d-flex justify-content-between align-items-center">
+                            <span class="font-weight-bold text-dark">{{ template.name }}</span>
+                            <button type="button"
+                                    class="btn btn-primary btn-sm"
+                                    data-id="{{ template.id }}"
+                                    data-toggle="modal"
+                                    data-target="#createModal"
+                                    onclick="event.stopPropagation(); setTemplateId({{ template.id }})">
+                                <i class="fa fa-magic"></i> Use
+                            </button>
                         </div>
                     </div>
+                </div>
                 {% endfor %}
             {% else %}
                 <div class="col-12 text-center py-5">
-                    <i class="fa fa-file-text-o fa-3x text-muted mb-3"></i>
-                    <h5>No templates found for this category.</h5>
-                    <a href="{% url 'resume_cv:templates' %}" class="btn btn-outline-secondary btn-sm mt-2">View All Templates</a>
+                    <i class="fa fa-file-text-o fa-4x text-muted mb-3 d-block"></i>
+                    <h5 class="text-muted">No templates found for this category.</h5>
+                    <a href="{% url 'resume_cv:templates' %}" class="btn btn-outline-secondary btn-sm mt-2">
+                        <i class="fa fa-th"></i> View All Templates
+                    </a>
                 </div>
             {% endif %}
         </div>
+
+        {% if not request.user.is_authenticated %}
+        <div class="alert alert-info mt-2">
+            <i class="fa fa-info-circle"></i>
+            You need to <a href="{% url 'accounts:login' %}">log in</a> as a Job Seeker to create a resume.
+        </div>
+        {% endif %}
     </div>
 
     <!-- Create Resume Modal -->
-    <div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="createModalLabel" aria-hidden="true">
+    <div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title text-white" id="exampleModalLabel">Name Your Resume / CV</h5>
+                    <h5 class="modal-title text-white">Name Your Resume / CV</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -68,19 +103,32 @@
                 <form action="{% url 'resume_cv:create' %}" method="post">
                     {% csrf_token %}
                     <div class="modal-body">
-                        <input type="number" class="form-control" name="template" hidden required id="template_id_builder">
+                        <!-- Hidden: holds selected template ID -->
+                        <input type="number" name="template" id="template_id_builder" hidden required>
                         <div class="form-group">
-                            <label for="page-name" class="font-weight-bold">Resume Title:</label>
-                            <input type="text" class="form-control" name="name" required placeholder="e.g. My Software Engineer Resume" id="page-name">
+                            <label for="page-name" class="font-weight-bold">
+                                <i class="fa fa-file-text"></i> Resume Title:
+                            </label>
+                            <input type="text" class="form-control" name="name" id="page-name" required
+                                   placeholder="e.g. Software Engineer Resume">
+                            <small class="text-muted">Give your resume a recognizable name.</small>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-success" id="saveandbuilder"><i class="fa fa-wrench"></i> Start Building</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success" id="saveandbuilder">
+                            <i class="fa fa-wrench"></i> Start Building
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </section>
+
+<script>
+    function setTemplateId(id) {
+        document.getElementById('template_id_builder').value = id;
+    }
+</script>
 {% endblock %}
