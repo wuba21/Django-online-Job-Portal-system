@@ -45,9 +45,11 @@
                          data-toggle="modal"
                          data-target="#createModal"
                          onclick="setTemplateId({{ template.id }})">
-                        <!-- Thumbnail -->
+                        <!-- Thumbnail with static fallback -->
                         <img
                             src="{% if template.thumbnail %}{{ template.thumbnail.url }}{% else %}{% static 'img/featured1.jpg' %}{% endif %}"
+                            data-fallback="{% static 'img/resume-thumbnails/' %}{% if template.pk == 1 %}1VGE2R2iED2J3VaE5s20KXcLWPXrr6.png{% elif template.pk == 2 %}GobYkNGjKLMq57nrJbbr3m2fMpYZeW.png{% elif template.pk == 3 %}rrh11hPn7oiHIiVFt3S1rv28xv9qBY.png{% else %}SBH1pvrgUztNXXKL3eRS5GbcF0EHiC.png{% endif %}"
+                            onerror="if(this.getAttribute('data-fallback') && this.src !== this.getAttribute('data-fallback')){ this.src = this.getAttribute('data-fallback'); } else { this.onerror=null; this.src='{% static 'img/featured1.jpg' %}'; }"
                             alt="{{ template.name }}"
                             class="card-img-top">
 
