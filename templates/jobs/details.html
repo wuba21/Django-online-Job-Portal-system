@@ -1,97 +1,133 @@
 {% extends 'base.html' %}
-{% load static %}
-{% load is_already_applied %}
+{% load static i18n %}
 {% load humanize %}
-{% block title %}
-    Job details
-{% endblock %}
+{% block title %}{{ job.title }} - Details{% endblock %}
 
 {% block content %}
+<section class="bg-light-gray py-4">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="heading mb-2">{{ job.title }}</h1>
+                <p class="text-muted mb-2">
+                    at <strong class="text-dark">{{ job.company_name }}</strong> | 
+                    <i class="fa fa-map-marker text-primary"></i> <strong>{{ job.location }}</strong>
+                </p>
+                <div>
+                    {% if job.type == '1' %}
+                        <span class="badge badge-success px-3 py-2">Full Time</span>
+                    {% elif job.type == '2' %}
+                        <span class="badge badge-primary px-3 py-2">Part Time</span>
+                    {% else %}
+                        <span class="badge badge-warning px-3 py-2 text-white">Internship</span>
+                    {% endif %}
+                    <span class="badge badge-info px-3 py-2">{{ job.get_work_mode_display|default:job.work_mode }}</span>
+                    <span class="badge badge-secondary px-3 py-2">{{ job.get_experience_level_display|default:job.experience_level }}</span>
 
-    <section class="bg-light-gray">
-        <div class="container">
-            <h1 class="heading">{{ job.title }}<br>
-                <small>at <a href="#"> {{ job.company_name }}</a></small>
-            </h1>
-            <div class="job-detail-description"><i class="fa fa-map-marker job__location"> </i>
-                {{ job.location }} | Posted {{ job.created_at|timesince }} ({{ job.created_at }}) |
-                {% if job.type == '1' %}
-                    <span class="badge featured-badge badge-success">Full time</span>
-                {% elif job.type == '2' %}
-                    <span class="badge featured-badge badge-primary">Part time</span>
-                {% else %}
-                    <span style="color: #ffffff;" class="badge featured-badge badge-warning">Internship</span>
+                    {% if request.user.is_authenticated and request.user.is_employee and match_score > 0 %}
+                        <span class="badge badge-success px-3 py-2 ml-2"><i class="fa fa-magic"></i> {{ match_score }}% Match Score</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-4 text-md-right mt-3 mt-md-0">
+                {% if request.user.is_authenticated and request.user.role == 'employee' %}
+                    {% if already_applied %}
+                        <button class="btn btn-secondary btn-lg" disabled><i class="fa fa-check-circle"></i> Already Applied</button>
+                    {% elif job.is_expired %}
+                        <button class="btn btn-danger btn-lg" disabled><i class="fa fa-clock-o"></i> Application Closed</button>
+                    {% elif job.filled %}
+                        <button class="btn btn-secondary btn-lg" disabled><i class="fa fa-ban"></i> Position Filled</button>
+                    {% else %}
+                        <form action="{% url 'jobs:apply-job' job.id %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary btn-lg"><i class="fa fa-paper-plane"></i> Apply Now</button>
+                        </form>
+                    {% endif %}
+                {% elif not request.user.is_authenticated %}
+                    <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary btn-lg"><i class="fa fa-sign-in"></i> Login to Apply</a>
                 {% endif %}
             </div>
         </div>
-    </section>
-    <section>
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-8">
-                    <h3>Category: {{ job.category }}</h3>
-                    <h5>Last date: {{ job.last_date|date }}</h5>
-                    <h5 style="color: blueviolet;">Vacancy: {{ job.vacancy }}</h5>
-                    <h5 class="text-info">
-                        Salary: {% if job.salary > 0 %} {{ job.salary | intcomma }}/Monthly {% else %}
-                        Negotiable {% endif %}
-                    </h5>
-                    Tags:
-                    {% for tag in job.tags.all %}
-                        <span style="color: #ffffff;" class="badge featured-badge badge-secondary">{{ tag.name }}</span>
-                    {% endfor %}
-                    <blockquote class="blockquote">
-                        <p>{{ job.description | safe }}</p>
-                    </blockquote>
-                    <div class="job-detail__apply-bottom">
-                        {% if request.user.is_authenticated and user.role == 'employee' %}
-                            {% is_already_applied job request.user as is_applied %}
-                            {% if is_applied %}
-                                <input type="button" class="btn btn-outline-white-primary" value="Already applied"/>
-                            {% else %}
-                                <form action="{% url 'jobs:apply-job' job.id %}" method="post">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="job" value="{{ job.id }}">
-                                    <input type="submit" class="btn btn-outline-white-primary"
-                                           value="Apply for this job"/>
-                                </form>
-                            {% endif %}
-                        {% endif %}
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Job Overview Box -->
+                <div class="card border-0 shadow-sm p-4 mb-4">
+                    <h4 class="card-title text-primary border-bottom pb-2">Job Overview</h4>
+                    <div class="row text-center py-2">
+                        <div class="col-md-3 mb-2">
+                            <small class="text-muted d-block">Monthly Salary</small>
+                            <strong class="text-success">
+                                {% if job.salary > 0 %}
+                                    {{ job.salary|intcomma }} {% if job.salary_max %} - {{ job.salary_max|intcomma }}{% endif %} {{ job.currency }}
+                                {% else %}
+                                    Negotiable
+                                {% endif %}
+                            </strong>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <small class="text-muted d-block">Category</small>
+                            <strong>{{ job.category }}</strong>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <small class="text-muted d-block">Vacancies</small>
+                            <strong>{{ job.vacancy }} Openings</strong>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <small class="text-muted d-block">Deadline</small>
+                            <strong class="{% if job.is_expired %}text-danger{% else %}text-dark{% endif %}">{{ job.last_date|date:"M d, Y" }}</strong>
+                        </div>
+                    </div>
+
+                    {% if job.tags.all %}
+                        <div class="mt-3">
+                            <small class="text-muted d-block mb-1">Required Skills & Tags:</small>
+                            {% for tag in job.tags.all %}
+                                <span class="badge badge-light border text-dark p-2 mr-1 mb-1">{{ tag.name }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Job Description -->
+                <div class="card border-0 shadow-sm p-4 mb-4">
+                    <h4 class="card-title text-primary border-bottom pb-2">Job Description & Requirements</h4>
+                    <div class="job-description-body py-2">
+                        {{ job.description|safe|linebreaks }}
                     </div>
                 </div>
-                <div class="col-lg-1"></div>
-                <div class="col-lg-3">
-                    <h4>About {{ job.company_name }}</h4>
-                    <p class="job-detail__company-description">{{ job.company_description | safe }}</p>
-                    <p class="job-detail__social social social--outline">
-                        <a href="{{ job.website }}" data-toggle="tooltip" data-placement="top" title="Website"
-                           class="link">
-                            <i class="fa fa-link"></i>
+
+                <!-- Action Bar -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <button type="button" class="btn btn-outline-info" onclick="navigator.clipboard.writeText(window.location.href); alert('Job link copied to clipboard!');">
+                        <i class="fa fa-share-alt"></i> Share Job
+                    </button>
+                    {% if request.user.is_authenticated and request.user.role == 'employee' %}
+                        <button type="button" class="btn btn-outline-danger make-favorite" data-id="{{ job.id }}">
+                            <i class="fa fa-heart"></i> {% if is_favorited %}Unsave Job{% else %}Save Job{% endif %}
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Company Info Column -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm p-4 mb-4">
+                    <h4 class="card-title text-dark border-bottom pb-2">About {{ job.company_name }}</h4>
+                    <p class="text-muted">{{ job.company_description|default:"No company description provided." }}</p>
+
+                    {% if job.website %}
+                        <a href="{{ job.website }}" target="_blank" class="btn btn-outline-primary btn-block btn-sm">
+                            <i class="fa fa-external-link"></i> Visit Website
                         </a>
-                        <a href="#" data-toggle="tooltip" data-placement="top" title="Twitter" class="twitter">
-                            <i class="fa fa-twitter"></i>
-                        </a>
-                        <a href="#" data-toggle="tooltip" data-placement="top" title="Facebook" class="facebook">
-                            <i class="fa fa-facebook"></i>
-                        </a>
-                    </p>
-                    {% if user.is_authenticated and user.role == 'employee' %}
-                        <div class="job-detail__apply-top">
-                            {% if is_applied %}
-                                <input type="button" class="btn btn-outline-white-primary" value="Already applied"/>
-                            {% else %}
-                                <form action="{% url 'jobs:apply-job' job.id %}" method="post">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="job" value="{{ job.id }}">
-                                    <input type="submit" class="btn btn-outline-white-primary"
-                                           value="Apply for this job"/>
-                                </form>
-                            {% endif %}
-                        </div>
                     {% endif %}
                 </div>
             </div>
         </div>
-    </section>
-
+    </div>
+</section>
 {% endblock %}

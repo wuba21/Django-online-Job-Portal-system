@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+{% block title %}Platform Admin Dashboard{% endblock %}
+
+{% block content %}
+<section class="bg-light-gray py-4">
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fa fa-shield text-warning"></i> Platform Admin Dashboard</h2>
+            <a href="/admin/" class="btn btn-outline-dark"><i class="fa fa-cogs"></i> Django Native Admin</a>
+        </div>
+
+        <!-- Metric Stat Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card border-0 shadow-sm p-3 text-center border-left border-primary" style="border-left-width: 4px !important;">
+                    <h3 class="font-weight-bold text-primary mb-0">{{ total_users }}</h3>
+                    <small class="text-muted text-uppercase">Total Users</small>
+                    <div class="mt-2 text-muted small">
+                        <span>Applicants: <strong>{{ total_applicants }}</strong></span> | 
+                        <span>Employers: <strong>{{ total_employers }}</strong></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card border-0 shadow-sm p-3 text-center border-left border-success" style="border-left-width: 4px !important;">
+                    <h3 class="font-weight-bold text-success mb-0">{{ total_jobs }}</h3>
+                    <small class="text-muted text-uppercase">Total Jobs</small>
+                    <div class="mt-2 text-muted small">
+                        <span>Active: <strong>{{ active_jobs }}</strong></span> | 
+                        <span>Pending: <strong>{{ pending_jobs }}</strong></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card border-0 shadow-sm p-3 text-center border-left border-info" style="border-left-width: 4px !important;">
+                    <h3 class="font-weight-bold text-info mb-0">{{ total_applications }}</h3>
+                    <small class="text-muted text-uppercase">Total Applications</small>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card border-0 shadow-sm p-3 text-center border-left border-warning" style="border-left-width: 4px !important;">
+                    <h3 class="font-weight-bold text-warning mb-0">{{ categories.count }}</h3>
+                    <small class="text-muted text-uppercase">Job Categories</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Jobs Moderation -->
+            <div class="col-lg-7 mb-4">
+                <div class="card border-0 shadow-sm p-3">
+                    <h5 class="card-title text-dark mb-3"><i class="fa fa-briefcase text-primary"></i> Job Listings Moderation</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Job Title</th>
+                                    <th>Employer</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for job in recent_jobs %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'jobs:jobs-detail' job.id %}" class="font-weight-bold text-dark">{{ job.title }}</a>
+                                        <small class="d-block text-muted">{{ job.location }} | {{ job.created_at|date:"M d, Y" }}</small>
+                                    </td>
+                                    <td>{{ job.company_name }}</td>
+                                    <td>
+                                        {% if job.status == 'approved' %}
+                                            <span class="badge badge-success">Approved</span>
+                                        {% elif job.status == 'pending' %}
+                                            <span class="badge badge-warning">Pending Approval</span>
+                                        {% else %}
+                                            <span class="badge badge-danger">Rejected</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if job.status != 'approved' %}
+                                            <a href="{% url 'jobs:admin-approve-job' job.id %}" class="btn btn-xs btn-success mr-1">Approve</a>
+                                        {% endif %}
+                                        <a href="{% url 'jobs:admin-delete-job' job.id %}" class="btn btn-xs btn-danger" onclick="return confirm('Delete this job listing?');">Delete</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Moderation -->
+            <div class="col-lg-5 mb-4">
+                <div class="card border-0 shadow-sm p-3">
+                    <h5 class="card-title text-dark mb-3"><i class="fa fa-users text-info"></i> User Accounts Management</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>User</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for u in recent_users %}
+                                <tr>
+                                    <td>
+                                        <span class="font-weight-bold d-block text-dark">{{ u.get_full_name|default:u.email }}</span>
+                                        <small class="text-muted">{{ u.email }}</small>
+                                    </td>
+                                    <td><span class="badge badge-secondary">{{ u.role|capfirst }}</span></td>
+                                    <td>
+                                        {% if u.is_active %}
+                                            <span class="badge badge-success">Active</span>
+                                        {% else %}
+                                            <span class="badge badge-danger">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'jobs:admin-toggle-user' u.id %}" class="btn btn-xs {% if u.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+                                            {% if u.is_active %}Deactivate{% else %}Activate{% endif %}
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

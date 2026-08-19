@@ -1,0 +1,42 @@
+/* your styles go here */
+.favorite {
+    color: #ff7473 !important;
+}
+
+/* Remove white border/space under footer */
+.footer {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    border-bottom: none !important;
+}
+
+.footer__copyright {
+    margin-top: 0 !important;
+    padding-top: 20px !important;
+    padding-bottom: 20px !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    background-color: #2b90d9 !important;
+    color: white !important;
+}
+
+.footer__copyright p {
+    color: white !important;
+    margin-bottom: 0 !important;
+}
+
+/* Horizontal social media links */
+.footer .col-lg-4 a {
+    display: inline-block !important;
+    margin-right: 15px;
+    color: white !important;
+    text-decoration: none !important;
+}
+
+.footer .col-lg-4 a:hover {
+    color: #fafafa !important;
+}
+
+.footer .col-lg-4 i {
+    margin-right: 5px;
+}

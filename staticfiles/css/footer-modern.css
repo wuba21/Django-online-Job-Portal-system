@@ -1,0 +1,129 @@
+/* Modern Professional Footer Styles */
+.footer {
+    background: #1a1a2e;
+    color: #ffffff;
+    padding: 60px 0 0 0;
+    margin-top: 0;
+    font-family: 'Montserrat', 'Helvetica', Arial, sans-serif;
+}
+
+.footer h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.footer h4:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 40px;
+    height: 3px;
+    background: #ffffff;
+    border-radius: 2px;
+}
+
+.footer p {
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.6;
+    font-size: 0.9rem;
+}
+
+.footer a {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.footer a:hover {
+    color: #ffffff;
+    padding-left: 5px;
+    text-decoration: none;
+}
+
+/* Social Media Links - FIXED COLORS */
+.footer .social-links {
+    display: flex;
+    gap: 15px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.footer .social-links a {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    color: #ffffff !important;  /* WHITE COLOR - VISIBLE ON DARK */
+    font-size: 1.3rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    margin: 0;
+}
+
+.footer .social-links a:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-3px);
+    color: #ffffff !important;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.footer .social-links a i {
+    color: #ffffff !important;  /* ENSURE ICONS ARE WHITE */
+}
+
+.footer__copyright {
+    margin-top: 40px;
+    padding: 20px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.footer__copyright p {
+    margin-bottom: 0;
+    text-align: center;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Quick Links Section */
+.footer .col-lg-3 a {
+    display: block;
+    margin-bottom: 10px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.footer .col-lg-3 a:hover {
+    color: #ffffff;
+    padding-left: 5px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .footer {
+        padding: 40px 0 0 0;
+    }
+    
+    .footer h4 {
+        margin-top: 25px;
+    }
+    
+    .footer .social-links a {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+}

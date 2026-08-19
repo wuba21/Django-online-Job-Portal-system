@@ -2,14 +2,18 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import Http404, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
 from accounts.forms import EmployerProfileUpdateForm
+from accounts.models import Company
 from jobsapp.decorators import user_is_employer
-from jobsapp.forms import CreateJobForm
+from jobsapp.forms import CompanyForm, CreateJobForm
 from jobsapp.models import Applicant, Job
+from jobsapp.utils.notifications import create_notification, send_event_email
 from tags.models import Tag
 
 
@@ -26,6 +30,26 @@ class DashboardView(ListView):
     def get_queryset(self):
         return self.model.objects.filter(user_id=self.request.user.id)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_jobs = self.get_queryset()
+        user_applicants = Applicant.objects.filter(job__user=self.request.user)
+
+        context["total_jobs"] = user_jobs.count()
+        context["active_jobs"] = user_jobs.filter(filled=False, last_date__gte=timezone.now()).count()
+        context["expired_jobs"] = user_jobs.filter(last_date__lt=timezone.now()).count()
+        context["total_applications"] = user_applicants.count()
+        context["pending_applications"] = user_applicants.filter(status=1).count()
+        context["shortlisted_applications"] = user_applicants.filter(status=2).count()
+        context["accepted_applications"] = user_applicants.filter(status=4).count()
+
+        company, _ = Company.objects.get_or_create(
+            user=self.request.user,
+            defaults={"name": self.request.user.get_full_name() or "Company"}
+        )
+        context["company"] = company
+        return context
+
 
 class ApplicantPerJobView(ListView):
     model = Applicant
@@ -39,11 +63,16 @@ class ApplicantPerJobView(ListView):
         return super().dispatch(self.request, *args, **kwargs)
 
     def get_queryset(self):
-        return Applicant.objects.filter(job_id=self.kwargs["job_id"]).order_by("id")
+        job = get_object_or_404(Job, id=self.kwargs["job_id"], user=self.request.user)
+        queryset = Applicant.objects.filter(job=job).order_by("id")
+        status_param = self.request.GET.get("status")
+        if status_param and status_param.isdigit():
+            queryset = queryset.filter(status=int(status_param))
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["job"] = Job.objects.get(id=self.kwargs["job_id"])
+        context["job"] = get_object_or_404(Job, id=self.kwargs["job_id"], user=self.request.user)
         return context
 
 
@@ -56,10 +85,6 @@ class JobCreateView(CreateView):
     @method_decorator(login_required(login_url=reverse_lazy("accounts:login")))
     @method_decorator(user_is_employer)
     def dispatch(self, request, *args, **kwargs):
-        if not self.request.user.is_authenticated:
-            return reverse_lazy("accounts:login")
-        if self.request.user.is_authenticated and self.request.user.role != "employer":
-            return reverse_lazy("accounts:login")
         return super().dispatch(self.request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -69,15 +94,13 @@ class JobCreateView(CreateView):
 
     def form_valid(self, form):
         form.instance.user = self.request.user
+        company, _ = Company.objects.get_or_create(
+            user=self.request.user,
+            defaults={"name": form.cleaned_data.get("company_name", "Company")}
+        )
+        form.instance.company = company
+        messages.success(self.request, "Job posted successfully.")
         return super(JobCreateView, self).form_valid(form)
-
-    def post(self, request, *args, **kwargs):
-        self.object = None
-        form = self.get_form()
-        if form.is_valid():
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
 
 
 @method_decorator(login_required(login_url=reverse_lazy("accounts:login")), name="dispatch")
@@ -91,9 +114,6 @@ class JobUpdateView(UpdateView):
     success_url = reverse_lazy("jobs:employer-dashboard")
     context_object_name = "job"
 
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(self.request, *args, **kwargs)
-
     def get_queryset(self):
         return Job.objects.filter(user_id=self.request.user.id)
 
@@ -104,16 +124,18 @@ class JobUpdateView(UpdateView):
 
     def form_valid(self, form):
         form.instance.user = self.request.user
-        messages.success(self.request, "Job updated successfully")
+        messages.success(self.request, "Job updated successfully.")
         return super(JobUpdateView, self).form_valid(form)
 
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        form = self.get_form()
-        if form.is_valid():
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
+
+@login_required(login_url=reverse_lazy("accounts:login"))
+@user_is_employer
+def delete_employer_job(request, job_id):
+    job = get_object_or_404(Job, id=job_id, user=request.user)
+    title = job.title
+    job.delete()
+    messages.success(request, f"Job '{title}' deleted successfully.")
+    return redirect("jobs:employer-dashboard")
 
 
 class ApplicantsListView(ListView):
@@ -127,23 +149,21 @@ class ApplicantsListView(ListView):
         return super().dispatch(self.request, *args, **kwargs)
 
     def get_queryset(self):
-        # jobs = Job.objects.filter(user_id=self.request.user.id)
-        # return self.model.objects.filter(job__user_id=self.request.user.id)
-        self.queryset = self.model.objects.filter(job__user_id=self.request.user.id).order_by("id")
-        if "status" in self.request.GET and len(self.request.GET.get("status")) > 0:
-            self.queryset = self.queryset.filter(status=int(self.request.GET.get("status")))
+        self.queryset = self.model.objects.filter(job__user_id=self.request.user.id).order_by("-id")
+        status_param = self.request.GET.get("status")
+        if status_param and status_param.isdigit():
+            self.queryset = self.queryset.filter(status=int(status_param))
         return self.queryset
 
 
 @login_required(login_url=reverse_lazy("accounts:login"))
 @user_is_employer
 def filled(request, job_id=None):
-    try:
-        job = Job.objects.get(user_id=request.user.id, id=job_id)
-        job.filled = True
-        job.save()
-    except IntegrityError as e:
-        return HttpResponseRedirect(reverse_lazy("jobs:employer-dashboard"))
+    job = get_object_or_404(Job, user_id=request.user.id, id=job_id)
+    job.filled = not job.filled
+    job.save()
+    status_text = "marked as filled" if job.filled else "reopened"
+    messages.success(request, f"Job '{job.title}' {status_text}.")
     return HttpResponseRedirect(reverse_lazy("jobs:employer-dashboard"))
 
 
@@ -156,15 +176,8 @@ class AppliedApplicantView(DetailView):
     slug_field = "id"
     slug_url_kwarg = "applicant_id"
 
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(self.request, *args, **kwargs)
-
     def get_queryset(self):
-        return Applicant.objects.select_related("job").filter(job_id=self.kwargs["job_id"])
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
+        return Applicant.objects.select_related("job", "user").filter(job__user=self.request.user)
 
 
 @method_decorator(login_required(login_url=reverse_lazy("accounts:login")), name="dispatch")
@@ -175,40 +188,50 @@ class SendResponseView(UpdateView):
     pk_url_kwarg = "applicant_id"
     fields = ("status", "comment")
 
+    def get_queryset(self):
+        return Applicant.objects.filter(job__user=self.request.user)
+
     def get_success_url(self):
         return reverse_lazy(
             "jobs:applied-applicant-view",
-            kwargs={"job_id": self.request.POST.get("job_id"), "applicant_id": self.get_object().id},
+            kwargs={"job_id": self.object.job.id, "applicant_id": self.object.id},
         )
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if self.object.status != request.POST.get("status"):
-            if request.POST.get("status") == "1":
-                status = "Pending"
-            elif request.POST.get("status") == "2":
-                status = "Accepted"
-            else:
-                status = "Rejected"
-            messages.success(self.request, "Response was successfully sent")
-            # notify_candidate_about_job_status_change.delay(self.object.user.get_full_name(),
-            # self.object.user.email, self.object.job.id, self.object.job.title, status)
-        else:
-            messages.warning(self.request, "Response already sent")
-        return super().post(request, *args, **kwargs)
+        new_status = int(request.POST.get("status", 1))
+        old_status = self.object.status
 
-    def get_object(self, queryset=None):
-        if queryset is None:
-            queryset = self.get_queryset()
-        pk = self.kwargs.get(self.pk_url_kwarg)
-        queryset = queryset.filter(pk=pk)
-        try:
-            obj = queryset.get()
-        except queryset.model.DoesNotExist:
-            raise Http404(
-                "No %(verbose_name)s found matching the query" % {"verbose_name": queryset.model._meta.verbose_name}
-            )
-        return obj
+        self.object.status = new_status
+        self.object.comment = request.POST.get("comment", "")
+        self.object.save()
+
+        status_labels = {
+            1: "Pending",
+            2: "Shortlisted",
+            3: "Interview Stage",
+            4: "Accepted",
+            5: "Rejected",
+        }
+        status_name = status_labels.get(new_status, "Updated")
+
+        messages.success(self.request, f"Applicant status updated to '{status_name}'.")
+
+        # Notify Candidate
+        create_notification(
+            user=self.object.user,
+            title=f"Application Update: {self.object.job.title}",
+            message=f"Your application status for '{self.object.job.title}' has been updated to '{status_name}'.",
+            link=reverse_lazy("jobs:employee-my-applications")
+        )
+
+        send_event_email(
+            user_email=self.object.user.email,
+            subject=f"Job Application Update - {self.object.job.title}",
+            message=f"Hello {self.object.user.get_full_name() or 'Candidate'},\n\nYour application status for the position '{self.object.job.title}' at {self.object.job.company_name} has been updated to: {status_name}.\n\nComment from employer: {self.object.comment or 'None'}\n\nLog in to your dashboard to view details."
+        )
+
+        return HttpResponseRedirect(self.get_success_url())
 
 
 class EmployerProfileEditView(UpdateView):
@@ -222,15 +245,34 @@ class EmployerProfileEditView(UpdateView):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(self.request, *args, **kwargs)
 
-    def get(self, request, *args, **kwargs):
-        try:
-            self.object = self.get_object()
-        except Http404:
-            raise Http404("User doesn't exists")
-        return self.render_to_response(self.get_context_data())
-
     def get_object(self, queryset=None):
-        obj = self.request.user
-        if obj is None:
-            raise Http404("Job doesn't exists")
-        return obj
+        return self.request.user
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        company, _ = Company.objects.get_or_create(
+            user=self.request.user,
+            defaults={"name": self.request.user.get_full_name() or "Company"}
+        )
+        context["company_form"] = CompanyForm(instance=company)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        user_form = EmployerProfileUpdateForm(request.POST, request.FILES, instance=self.object)
+        company, _ = Company.objects.get_or_create(
+            user=self.request.user,
+            defaults={"name": self.request.user.get_full_name() or "Company"}
+        )
+        company_form = CompanyForm(request.POST, request.FILES, instance=company)
+
+        if user_form.is_valid() and company_form.is_valid():
+            user_form.save()
+            company_form.save()
+            messages.success(request, "Company and profile updated successfully.")
+            return redirect("jobs:employer-dashboard")
+
+        context = self.get_context_data()
+        context["form"] = user_form
+        context["company_form"] = company_form
+        return self.render_to_response(context)

@@ -1,156 +1,146 @@
 {% extends 'base.html' %}
-{% block title %}
-    Applicants
-{% endblock %}
-{% load static %}
-{% block styles %}
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.3.200/pdf_viewer.css"/>
-    <link rel="stylesheet" href="{% static 'vendor/font-awesome/css/font-awesome.min.css' %}"/>
-
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-        }
-
-        .top-bar {
-            background: #333;
-            color: #fff;
-            padding: 1rem;
-        }
-
-        .btn-pdf {
-            background: coral;
-            color: #fff;
-            border: none;
-            outline: none;
-            cursor: pointer;
-            padding: 0.7rem 2rem;
-        }
-
-        .btn-pdf:hover {
-            opacity: 0.9;
-        }
-
-        .page-info {
-            margin-left: 1rem;
-        }
-
-        .error {
-            background: orangered;
-            color: #fff;
-            padding: 1rem;
-        }
-    </style>
-
-{% endblock %}
+{% load static i18n %}
+{% block title %}Applicant Review - {{ applicant.user.get_full_name }}{% endblock %}
 
 {% block content %}
-
-    <section class="bg-light-gray">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-8 mx-auto">
-                    <h1 class="heading">{{ applicant.user.get_full_name }}</h1>
-                    <h6 class="heading">Applied for: {{ applicant.job.title }}</h6>
-                </div>
+<section class="bg-light-gray py-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h2>{{ applicant.user.get_full_name|default:applicant.user.email }}</h2>
+                <p class="text-muted mb-0">Applied for: <strong class="text-dark">{{ applicant.job.title }}</strong> on {{ applicant.created_at|date:"M d, Y" }}</p>
+            </div>
+            <div>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#statusModal">
+                    <i class="fa fa-sliders"></i> Change Application Stage
+                </button>
             </div>
         </div>
-    </section>
-    <section>
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-8">
-                    {% if applicant.cv.name %}
-                        <div class="top-bar hidden">
-                            <button class="btn btn-pdf" id="prev-page">
-                                <i class="fa fa-arrow-circle-left"></i> Prev Page
-                            </button>
-                            <button class="btn btn-pdf" id="next-page">
-                                Next Page <i class="fa fa-arrow-circle-right"></i>
-                            </button>
-                            <span class="page-info">
-                            Page <span id="page-num"></span> of <span id="page-count"></span>
-                        </span>
-                        </div>
+    </div>
+</section>
 
-                        <canvas id="pdf-render"></canvas>
+<section class="py-4">
+    <div class="container">
+        <div class="row">
+            <!-- Candidate Profile Info -->
+            <div class="col-lg-5 mb-4">
+                <div class="card border-0 shadow-sm p-4 mb-4">
+                    <h5 class="card-title text-primary border-bottom pb-2">Candidate Overview</h5>
+                    <p class="mb-2"><strong>Email:</strong> {{ applicant.user.email }}</p>
+                    <p class="mb-2"><strong>Gender:</strong> {{ applicant.user.gender|capfirst|default:"Not specified" }}</p>
+                    <p class="mb-2">
+                        <strong>Current Status:</strong>
+                        {% if applicant.status == 1 %}<span class="badge badge-warning">Pending</span>
+                        {% elif applicant.status == 2 %}<span class="badge badge-info">Shortlisted</span>
+                        {% elif applicant.status == 3 %}<span class="badge badge-primary">Interview</span>
+                        {% elif applicant.status == 4 %}<span class="badge badge-success">Accepted</span>
+                        {% elif applicant.status == 5 %}<span class="badge badge-danger">Rejected</span>
+                        {% endif %}
+                    </p>
+
+                    {% if applicant.comment %}
+                        <div class="bg-light p-3 rounded mt-2">
+                            <small class="text-muted d-block">Employer Comment:</small>
+                            <p class="mb-0 small text-dark">{{ applicant.comment }}</p>
+                        </div>
+                    {% endif %}
+
+                    {% if applicant.cv or applicant.user.applicant_profile.cv_file %}
+                        <div class="mt-3">
+                            <a href="{% if applicant.cv %}{{ applicant.cv.url }}{% else %}{{ applicant.user.applicant_profile.cv_file.url }}{% endif %}" target="_blank" class="btn btn-outline-success btn-block btn-sm">
+                                <i class="fa fa-download"></i> Download / View Attached CV
+                            </a>
+                        </div>
                     {% else %}
-                        <h3>CV not available</h3>
+                        <div class="mt-3">
+                            <span class="text-muted small">No CV document uploaded.</span>
+                        </div>
                     {% endif %}
                 </div>
-                <div class="col-lg-4">
-                    <h4>About: {{ applicant.user.get_full_name }}</h4>
-                    <h6>Skills:
-                        {% for tag in applicant.user.profile.tags.all %}
-                            <span style="color: #ffffff;"
-                                  class="badge featured-badge badge-secondary">{{ tag.name }}
-                            </span>
-                        {% endfor %}
-                    </h6>
-                    <h6>Gender: {{ applicant.user.gender }}</h6>
-                    <h6>Email: {{ applicant.user.email }}</h6>
-                    <h6 class="text-success">Status: {% if applicant.status == 1 %}
-                        Pending {% elif applicant.status == 2 %} Accepted {% elif applicant.status == 3 %}
-                        Rejected {% endif %}</h6>
-                    <p class="job-detail__company-description">{{ job.company_description }}</p>
-                    <p class="job-detail__social social social--outline">
-                        <a href="{{ job.website }}" data-toggle="tooltip" data-placement="top" title="Website"
-                           class="link">
-                            <i class="fa fa-link"></i>
-                        </a>
-                    </p>
-                    <input type="button" class="btn btn-outline-white-primary" {% if applicant.status != 1 %}
-                           disabled {% endif %} value="Send Response" data-toggle="modal"
-                           data-target="#myModal"/>
-                </div>
-                {% if applicant.status == 1 %}
-                    <div class="modal fade" id="myModal">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
 
-                                <div class="modal-header">
-                                    <h4 class="modal-title">Send response</h4>
-                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                </div>
-
-                                <form action="{% url 'jobs:applicant-send-response' applicant.id %}" method="POST">
-                                    {% csrf_token %}
-                                    <div class="modal-body">
-                                        <input type="hidden" name="job_id" value="{{ applicant.job.id }}">
-                                        <div class="form-group">
-                                            <label for="status">Status</label>
-                                            <select id="status" name="status" class="form-control">
-                                                <option value="2" {% if applicant.status == 2 %} selected
-                                                        disabled {% endif %}>
-                                                    Accepted
-                                                </option>
-                                                <option value="3" {% if applicant.status == 3 %} selected
-                                                        disabled {% endif %}>
-                                                    Rejected
-                                                </option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="Comment">Comment</label>
-                                            <textarea id="Comment" name="comment" rows="3" required
-                                                      class="form-control">{{ applicant.comment|default_if_none:"" }}</textarea>
-                                        </div>
-                                    </div>
-
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                                        <input type="submit" class="btn btn-success" value="Send"/>
-                                    </div>
-                                </form>
-
-                            </div>
+                <!-- Skills -->
+                <div class="card border-0 shadow-sm p-4 mb-4">
+                    <h5 class="card-title text-dark border-bottom pb-2">Candidate Skills</h5>
+                    {% if applicant.user.skills.all %}
+                        <div class="d-flex flex-wrap">
+                            {% for s in applicant.user.skills.all %}
+                                <span class="badge badge-light border p-2 mr-1 mb-1">{{ s.name }} ({{ s.get_level_display }})</span>
+                            {% endfor %}
                         </div>
-                    </div>
-                {% endif %}
+                    {% else %}
+                        <p class="text-muted small">No structured skills listed.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Candidate Education & Experience -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm p-4 mb-4">
+                    <h5 class="card-title text-primary border-bottom pb-2">Work Experience</h5>
+                    {% if applicant.user.experiences.all %}
+                        {% for exp in applicant.user.experiences.all %}
+                            <div class="mb-3 pb-2 border-bottom">
+                                <h6 class="mb-0 font-weight-bold">{{ exp.title }} at {{ exp.company }}</h6>
+                                <small class="text-muted">{{ exp.start_date|date:"M Y" }} - {% if exp.is_current %}Present{% else %}{{ exp.end_date|date:"M Y" }}{% endif %}</small>
+                                <p class="small text-secondary mb-0 mt-1">{{ exp.description }}</p>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted small">No work experience listed.</p>
+                    {% endif %}
+                </div>
+
+                <div class="card border-0 shadow-sm p-4">
+                    <h5 class="card-title text-primary border-bottom pb-2">Education</h5>
+                    {% if applicant.user.educations.all %}
+                        {% for edu in applicant.user.educations.all %}
+                            <div class="mb-3 pb-2 border-bottom">
+                                <h6 class="mb-0 font-weight-bold">{{ edu.degree }} - {{ edu.field_of_study }}</h6>
+                                <small class="text-muted">{{ edu.institution }} ({{ edu.start_date|date:"Y" }} - {{ edu.end_date|date:"Y" }})</small>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted small">No education records listed.</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
+<!-- Status Update Modal -->
+<div class="modal fade" id="statusModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title text-white">Update Candidate Application Stage</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <form action="{% url 'jobs:applicant-send-response' applicant.id %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="job_id" value="{{ applicant.job.id }}">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Application Stage</label>
+                        <select name="status" class="form-control">
+                            <option value="1" {% if applicant.status == 1 %}selected{% endif %}>Pending</option>
+                            <option value="2" {% if applicant.status == 2 %}selected{% endif %}>Shortlisted</option>
+                            <option value="3" {% if applicant.status == 3 %}selected{% endif %}>Interview Stage</option>
+                            <option value="4" {% if applicant.status == 4 %}selected{% endif %}>Accepted</option>
+                            <option value="5" {% if applicant.status == 5 %}selected{% endif %}>Rejected</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Message / Note to Candidate</label>
+                        <textarea name="comment" rows="4" class="form-control" placeholder="Provide feedback or interview instructions...">{{ applicant.comment|default_if_none:'' }}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> Save & Send Notification</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

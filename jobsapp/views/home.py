@@ -1,14 +1,18 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import Http404, HttpResponseRedirect, JsonResponse, HttpResponseNotAllowed
+from django.db.models import Q
+from django.http import Http404, HttpResponseNotAllowed, HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic import CreateView, DetailView, ListView, TemplateView
 
-from ..decorators import user_is_employee
-from ..forms import ApplyJobForm
-from ..models import Applicant, Favorite, Job
+from categories.models import Category
+from jobsapp.decorators import user_is_employee
+from jobsapp.forms import ApplyJobForm
+from jobsapp.models import Applicant, ETHIOPIAN_LOCATIONS, EXPERIENCE_LEVEL_CHOICES, Favorite, Job, WORK_MODE_CHOICES
+from jobsapp.utils.notifications import create_notification, send_event_email
+from jobsapp.utils.recommendation import calculate_job_match_score
 
 
 class HomeView(ListView):
@@ -17,11 +21,23 @@ class HomeView(ListView):
     context_object_name = "jobs"
 
     def get_queryset(self):
-        return self.model.objects.unfilled()[:6]
+        return self.model.objects.select_related("user", "company").filter(filled=False, status="approved")[:6]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["trendings"] = self.model.objects.unfilled(created_at__month=timezone.now().month)[:3]
+        context["trendings"] = self.model.objects.select_related("user", "company").filter(filled=False, status="approved")[:3]
+        context["categories"] = Category.objects.all()[:8]
+        context["locations"] = ETHIOPIAN_LOCATIONS
+
+        if self.request.user.is_authenticated and self.request.user.is_employee:
+            all_jobs = self.model.objects.filter(filled=False, status="approved")[:10]
+            recommended = []
+            for j in all_jobs:
+                score = calculate_job_match_score(self.request.user, j)
+                recommended.append({"job": j, "match_score": score})
+            recommended.sort(key=lambda x: x["match_score"], reverse=True)
+            context["recommended_jobs"] = recommended[:3]
+
         return context
 
 
@@ -33,29 +49,76 @@ class SearchView(ListView):
     model = Job
     template_name = "jobs/search.html"
     context_object_name = "jobs"
+    paginate_by = 6
 
     def get_queryset(self):
-        # q = JobDocument.search().query("match", title=self.request.GET['position']).to_queryset()
-        # print(q)
-        # return q
-        return self.model.objects.filter(
-            location__contains=self.request.GET.get("location", ""),
-            title__contains=self.request.GET.get("position", ""),
-        )
+        queryset = self.model.objects.select_related("user", "company").filter(filled=False, status="approved")
+
+        # Filters
+        position = self.request.GET.get("position") or self.request.GET.get("q")
+        location = self.request.GET.get("location")
+        category = self.request.GET.get("category")
+        work_mode = self.request.GET.get("work_mode")
+        experience = self.request.GET.get("experience")
+        min_salary = self.request.GET.get("min_salary")
+        sort_by = self.request.GET.get("sort_by")
+
+        if position:
+            queryset = queryset.filter(
+                Q(title__icontains=position) |
+                Q(description__icontains=position) |
+                Q(company_name__icontains=position)
+            )
+        if location and location != "All" and location != "Any":
+            queryset = queryset.filter(location__icontains=location)
+        if category and category != "All":
+            queryset = queryset.filter(category__icontains=category)
+        if work_mode and work_mode != "All":
+            queryset = queryset.filter(work_mode=work_mode)
+        if experience and experience != "All":
+            queryset = queryset.filter(experience_level=experience)
+        if min_salary and min_salary.isdigit():
+            queryset = queryset.filter(salary__gte=int(min_salary))
+
+        # Sorting
+        if sort_by == "salary":
+            queryset = queryset.order_by("-salary", "-id")
+        elif sort_by == "oldest":
+            queryset = queryset.order_by("created_at")
+        else:
+            queryset = queryset.order_by("-created_at")
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["categories"] = Category.objects.all()
+        context["locations"] = ETHIOPIAN_LOCATIONS
+        context["experience_levels"] = EXPERIENCE_LEVEL_CHOICES
+        context["work_modes"] = WORK_MODE_CHOICES
+        context["selected_position"] = self.request.GET.get("position", "")
+        context["selected_location"] = self.request.GET.get("location", "")
+        context["selected_category"] = self.request.GET.get("category", "")
+        context["selected_work_mode"] = self.request.GET.get("work_mode", "")
+        context["selected_experience"] = self.request.GET.get("experience", "")
+        context["selected_sort"] = self.request.GET.get("sort_by", "recent")
+        return context
 
 
 class JobListView(ListView):
     model = Job
     template_name = "jobs/jobs.html"
     context_object_name = "jobs"
-    paginate_by = 5
+    paginate_by = 6
 
     def get_queryset(self):
-        return self.model.objects.unfilled()
+        return self.model.objects.select_related("user", "company").filter(filled=False, status="approved").order_by("-created_at")
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data["total_jobs"] = self.model.objects.unfilled().count()
+        data["total_jobs"] = self.model.objects.filter(filled=False, status="approved").count()
+        data["categories"] = Category.objects.all()
+        data["locations"] = ETHIOPIAN_LOCATIONS
         return data
 
 
@@ -66,19 +129,27 @@ class JobDetailsView(DetailView):
     pk_url_kwarg = "id"
 
     def get_object(self, queryset=None):
-        obj = super(JobDetailsView, self).get_object(queryset=queryset)
-        if obj is None:
-            raise Http404("Job doesn't exists")
-        return obj
+        job = super(JobDetailsView, self).get_object(queryset=queryset)
+        if job is None:
+            raise Http404("Job doesn't exist")
+        return job
 
-    def get(self, request, *args, **kwargs):
-        try:
-            self.object = self.get_object()
-        except Http404:
-            # raise error
-            raise Http404("Job doesn't exists")
-        context = self.get_context_data(object=self.object)
-        return self.render_to_response(context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        job = self.object
+        user = self.request.user
+
+        context["already_applied"] = False
+        context["is_favorited"] = False
+        context["match_score"] = 0
+
+        if user.is_authenticated:
+            context["already_applied"] = Applicant.objects.filter(user=user, job=job).exists()
+            context["is_favorited"] = Favorite.objects.filter(user=user, job=job, soft_deleted=False).exists()
+            if user.is_employee:
+                context["match_score"] = calculate_job_match_score(user, job)
+
+        return context
 
 
 class ApplyJobView(CreateView):
@@ -96,48 +167,68 @@ class ApplyJobView(CreateView):
         return HttpResponseNotAllowed(self._allowed_methods())
 
     def post(self, request, *args, **kwargs):
+        job = get_object_or_404(Job, id=self.kwargs["job_id"])
+
+        if job.filled or job.is_expired:
+            messages.error(request, "This job is closed or has expired.")
+            return HttpResponseRedirect(reverse_lazy("jobs:jobs-detail", kwargs={"id": job.id}))
+
+        existing = Applicant.objects.filter(user=request.user, job=job).exists()
+        if existing:
+            messages.info(request, "You have already applied for this job.")
+            return HttpResponseRedirect(reverse_lazy("jobs:jobs-detail", kwargs={"id": job.id}))
+
         form = self.get_form()
         if form.is_valid():
-            messages.info(self.request, "Successfully applied for the job!")
-            return self.form_valid(form)
+            applicant = form.save(commit=False)
+            applicant.user = request.user
+            applicant.job = job
+            applicant.save()
+
+            messages.success(request, f"Successfully applied for '{job.title}'!")
+
+            # Trigger Candidate Notification
+            create_notification(
+                user=request.user,
+                title=f"Application Submitted: {job.title}",
+                message=f"You successfully applied for {job.title} at {job.company_name}.",
+                link=reverse_lazy("jobs:employee-my-applications")
+            )
+
+            # Trigger Employer Notification
+            create_notification(
+                user=job.user,
+                title=f"New Applicant for {job.title}",
+                message=f"{request.user.get_full_name() or request.user.email} applied for {job.title}.",
+                link=reverse_lazy("jobs:employer-dashboard-applicants", kwargs={"job_id": job.id})
+            )
+
+            # Send Email Alerts
+            send_event_email(
+                user_email=request.user.email,
+                subject=f"Application Confirmation - {job.title}",
+                message=f"Hello {request.user.get_full_name() or 'Candidate'},\n\nYour application for '{job.title}' at {job.company_name} has been received. You can track your status in your dashboard."
+            )
+
+            return HttpResponseRedirect(reverse_lazy("jobs:jobs-detail", kwargs={"id": job.id}))
         else:
-            return HttpResponseRedirect(reverse_lazy("jobs:home"))
-
-    def get_success_url(self):
-        return reverse_lazy("jobs:jobs-detail", kwargs={"id": self.kwargs["job_id"]})
-
-    # def get_form_kwargs(self):
-    #     kwargs = super(ApplyJobView, self).get_form_kwargs()
-    #     print(kwargs)
-    #     kwargs['job'] = 1
-    #     return kwargs
-
-    def form_valid(self, form):
-        # check if user already applied
-        applicant = Applicant.objects.filter(user_id=self.request.user.id, job_id=self.kwargs["job_id"])
-        if applicant:
-            messages.info(self.request, "You already applied for this job")
-            return HttpResponseRedirect(self.get_success_url())
-        # save applicant
-        form.instance.user = self.request.user
-        form.save()
-        return super().form_valid(form)
+            messages.error(request, "Error submitting application. Please try again.")
+            return HttpResponseRedirect(reverse_lazy("jobs:jobs-detail", kwargs={"id": job.id}))
 
 
 def favorite(request):
     if not request.user.is_authenticated:
-        return JsonResponse(data={"auth": False, "status": "error"})
+        return JsonResponse(data={"auth": False, "status": "error", "message": "Login required"})
 
     job_id = request.POST.get("job_id")
     user_id = request.user.id
     try:
         fav = Favorite.objects.get(job_id=job_id, user_id=user_id, soft_deleted=False)
-        if fav:
-            fav.soft_deleted = True
-            fav.save()
-            return JsonResponse(
-                data={"auth": True, "status": "removed", "message": "Job removed from your favorite list"}
-            )
+        fav.soft_deleted = True
+        fav.save()
+        return JsonResponse(
+            data={"auth": True, "status": "removed", "message": "Job removed from your saved list"}
+        )
     except Favorite.DoesNotExist:
-        Favorite.objects.create(job_id=job_id, user_id=user_id)
-        return JsonResponse(data={"auth": True, "status": "added", "message": "Job added to your favorite list"})
+        Favorite.objects.create(job_id=job_id, user_id=user_id, soft_deleted=False)
+        return JsonResponse(data={"auth": True, "status": "added", "message": "Job saved successfully"})

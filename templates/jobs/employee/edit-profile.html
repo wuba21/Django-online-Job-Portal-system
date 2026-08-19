@@ -1,71 +1,239 @@
 {% extends 'base.html' %}
-{% load static %}
-{% block title %}
-    Edit Profile
-{% endblock %}
+{% load static i18n %}
+{% block title %}Edit Profile{% endblock %}
 
 {% block content %}
-    <div class="col-lg-6 offset-3">
-        <div class="box">
-            <h3 class="heading">Edit Profile</h3>
-            {% if form.errors %}
-                {% for field in form %}
-                    {% for error in field.errors %}
-                        <div class="alert alert-danger alert-dismissable">
-                            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                            <strong>{{ error|escape }}</strong>
-                        </div>
-                    {% endfor %}
-                {% endfor %}
-                {% for error in form.non_field_errors %}
-                    <div class="alert alert-danger alert-dismissable">
-                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                        <strong>{{ error|escape }}</strong>
+<section class="bg-light-gray py-4">
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar Navigation -->
+            <div class="col-lg-3 mb-4">
+                <div class="card border-0 shadow-sm p-3">
+                    <div class="text-center mb-3">
+                        <img src="{% static 'img/avatar.png' %}" class="rounded-circle mb-2" width="70" alt="Avatar">
+                        <h6 class="mb-0 font-weight-bold">{{ request.user.get_full_name|default:request.user.email }}</h6>
+                        <small class="text-muted">{{ profile.title|default:"Job Seeker" }}</small>
                     </div>
-                {% endfor %}
-            {% endif %}
-            <form action="" method="post">
-                {% csrf_token %}
-                {% for field in form %}
-                    {% if field.name == 'gender' %}
-
-                        <div class="form-group">
-                            <label for="gender">Gender</label>
-                            <br>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" {% if field.value == 'male' %} checked {% endif %}
-                                       type="radio" name="gender" id="male gender"
-                                       value="male">
-                                <label class="form-check-label" for="male">Male</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" {% if field.value == 'female' %} checked {% endif %}
-                                       type="radio" name="gender" id="female"
-                                       value="female">
-                                <label class="form-check-label" for="female">Female</label>
-                            </div>
-                        </div>
-
-                    {% else %}
-
-                        <div class="form-group">
-                            <label for="id_{{ field.name }}">{{ field.label }}</label>
-                            <input type="{{ field.field.widget.input_type }}"
-                                   class="form-control"
-                                   name="{{ field.name }}"
-                                   id="id_{{ field.name }}"
-                                   value="{{ field.value }}"
-                                   placeholder="{{ field.field.widget.attrs.placeholder }}">
-                        </div>
-
-                    {% endif %}
-                {% endfor %}
-                <div class="text-center">
-                    <button type="submit" class="btn btn-outline-white-primary">
-                        <i class="fa fa-signing"></i> Update
-                    </button>
+                    <div class="nav flex-column nav-pills" role="tablist">
+                        <a class="nav-link active" data-toggle="pill" href="#tab-basic" role="tab"><i class="fa fa-user"></i> Basic Info & Summary</a>
+                        <a class="nav-link" data-toggle="pill" href="#tab-skills" role="tab"><i class="fa fa-tags"></i> Skills</a>
+                        <a class="nav-link" data-toggle="pill" href="#tab-education" role="tab"><i class="fa fa-graduation-cap"></i> Education</a>
+                        <a class="nav-link" data-toggle="pill" href="#tab-experience" role="tab"><i class="fa fa-briefcase"></i> Experience</a>
+                    </div>
                 </div>
-            </form>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="col-lg-9">
+                <div class="tab-content">
+                    <!-- Tab 1: Basic Info -->
+                    <div class="tab-pane fade show active" id="tab-basic" role="tabpanel">
+                        <div class="card border-0 shadow-sm p-4">
+                            <h4 class="card-title text-primary mb-3">Personal & Professional Profile</h4>
+                            <form action="" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-md-6 form-group">
+                                        <label>First Name</label>
+                                        <input type="text" name="first_name" value="{{ form.first_name.value|default:'' }}" class="form-control">
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label>Last Name</label>
+                                        <input type="text" name="last_name" value="{{ form.last_name.value|default:'' }}" class="form-control">
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 form-group">
+                                        <label>Professional Title</label>
+                                        {{ profile_form.title }}
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label>Location (Ethiopian Cities)</label>
+                                        {{ profile_form.location }}
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Professional Bio / Summary</label>
+                                    {{ profile_form.bio }}
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4 form-group">
+                                        <label>GitHub Profile</label>
+                                        {{ profile_form.github_link }}
+                                    </div>
+                                    <div class="col-md-4 form-group">
+                                        <label>LinkedIn Profile</label>
+                                        {{ profile_form.linkedin_link }}
+                                    </div>
+                                    <div class="col-md-4 form-group">
+                                        <label>Portfolio / Website</label>
+                                        {{ profile_form.website }}
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Upload / Update CV Document (PDF / DOCX)</label>
+                                    {{ profile_form.cv_file }}
+                                    {% if request.user.applicant_profile.cv_file %}
+                                        <small class="d-block mt-1"><i class="fa fa-file"></i> Current CV: <a href="{{ request.user.applicant_profile.cv_file.url }}" target="_blank">Download Resume</a></small>
+                                    {% endif %}
+                                </div>
+
+                                <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save Profile</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Skills -->
+                    <div class="tab-pane fade" id="tab-skills" role="tabpanel">
+                        <div class="card border-0 shadow-sm p-4 mb-4">
+                            <h4 class="card-title text-primary mb-3">Add Skill</h4>
+                            <form action="{% url 'jobs:add-skill' %}" method="post">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-md-6 form-group">
+                                        <label>Skill Name</label>
+                                        {{ skill_form.name }}
+                                    </div>
+                                    <div class="col-md-4 form-group">
+                                        <label>Proficiency Level</label>
+                                        {{ skill_form.level }}
+                                    </div>
+                                    <div class="col-md-2 form-group d-flex align-items-end">
+                                        <button type="submit" class="btn btn-success btn-block"><i class="fa fa-plus"></i> Add</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="card border-0 shadow-sm p-4">
+                            <h5 class="card-title mb-3">Your Skills</h5>
+                            {% if skills %}
+                                <div class="d-flex flex-wrap">
+                                    {% for s in skills %}
+                                        <div class="badge badge-light border p-2 mr-2 mb-2 d-flex align-items-center">
+                                            <span class="font-weight-bold mr-2">{{ s.name }}</span>
+                                            <span class="badge badge-secondary mr-2">{{ s.get_level_display }}</span>
+                                            <a href="{% url 'jobs:delete-skill' s.id %}" class="text-danger" title="Remove">&times;</a>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No skills added yet.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Education -->
+                    <div class="tab-pane fade" id="tab-education" role="tabpanel">
+                        <div class="card border-0 shadow-sm p-4 mb-4">
+                            <h4 class="card-title text-primary mb-3">Add Education</h4>
+                            <form action="{% url 'jobs:add-education' %}" method="post">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-md-6 form-group">
+                                        <label>Institution / University</label>
+                                        {{ education_form.institution }}
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label>Degree (e.g. B.Sc, M.Sc)</label>
+                                        {{ education_form.degree }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 form-group">
+                                        <label>Field of Study</label>
+                                        {{ education_form.field_of_study }}
+                                    </div>
+                                    <div class="col-md-3 form-group">
+                                        <label>Start Date</label>
+                                        {{ education_form.start_date }}
+                                    </div>
+                                    <div class="col-md-3 form-group">
+                                        <label>End Date</label>
+                                        {{ education_form.end_date }}
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-success"><i class="fa fa-plus"></i> Add Education</button>
+                            </form>
+                        </div>
+
+                        <div class="card border-0 shadow-sm p-4">
+                            <h5 class="card-title mb-3">Education History</h5>
+                            {% if educations %}
+                                {% for edu in educations %}
+                                    <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                                        <div>
+                                            <h6 class="mb-0 font-weight-bold">{{ edu.degree }} - {{ edu.field_of_study }}</h6>
+                                            <small class="text-muted">{{ edu.institution }} ({{ edu.start_date|date:"Y" }} - {% if edu.is_current %}Present{% else %}{{ edu.end_date|date:"Y" }}{% endif %})</small>
+                                        </div>
+                                        <a href="{% url 'jobs:delete-education' edu.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete education record?');"><i class="fa fa-trash"></i></a>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted">No education records added.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Tab 4: Work Experience -->
+                    <div class="tab-pane fade" id="tab-experience" role="tabpanel">
+                        <div class="card border-0 shadow-sm p-4 mb-4">
+                            <h4 class="card-title text-primary mb-3">Add Work Experience</h4>
+                            <form action="{% url 'jobs:add-experience' %}" method="post">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-md-6 form-group">
+                                        <label>Job Title</label>
+                                        {{ experience_form.title }}
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label>Company / Organization</label>
+                                        {{ experience_form.company }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 form-group">
+                                        <label>Start Date</label>
+                                        {{ experience_form.start_date }}
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label>End Date</label>
+                                        {{ experience_form.end_date }}
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Description of Responsibilities</label>
+                                    {{ experience_form.description }}
+                                </div>
+                                <button type="submit" class="btn btn-success"><i class="fa fa-plus"></i> Add Experience</button>
+                            </form>
+                        </div>
+
+                        <div class="card border-0 shadow-sm p-4">
+                            <h5 class="card-title mb-3">Work History</h5>
+                            {% if experiences %}
+                                {% for exp in experiences %}
+                                    <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                                        <div>
+                                            <h6 class="mb-0 font-weight-bold">{{ exp.title }} at {{ exp.company }}</h6>
+                                            <small class="text-muted">{{ exp.start_date|date:"M Y" }} - {% if exp.is_current %}Present{% else %}{{ exp.end_date|date:"M Y" }}{% endif %}</small>
+                                            <p class="text-secondary small mb-0">{{ exp.description }}</p>
+                                        </div>
+                                        <a href="{% url 'jobs:delete-experience' exp.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete work experience?');"><i class="fa fa-trash"></i></a>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted">No work experience records added.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+</section>
 {% endblock %}

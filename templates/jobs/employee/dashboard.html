@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+{% block title %}Applicant Dashboard{% endblock %}
+
+{% block content %}
+<section class="bg-light-gray py-4">
+    <div class="container">
+        <!-- Dashboard Header -->
+        <div class="row mb-4">
+            <div class="col-lg-12">
+                <div class="card border-0 shadow-sm p-4">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap">
+                        <div class="d-flex align-items-center mb-3 mb-md-0">
+                            <img src="{% static 'img/avatar.png' %}" class="rounded-circle mr-3" width="60" alt="Avatar">
+                            <div>
+                                <h3 class="mb-1">{% trans "Welcome back" %}, {{ request.user.get_full_name|default:request.user.email }}!</h3>
+                                <p class="text-muted mb-0"><i class="fa fa-briefcase"></i> {{ profile.title|default:"Job Seeker" }} | <i class="fa fa-map-marker"></i> {{ profile.location|default:"Addis Ababa" }}</p>
+                            </div>
+                        </div>
+                        <a href="{% url 'accounts:employee-profile-update' %}" class="btn btn-outline-primary"><i class="fa fa-edit"></i> Edit Profile & CV</a>
+                    </div>
+                    <!-- Profile Completion Progress -->
+                    <div class="mt-4">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <small class="font-weight-bold">Profile Completion</small>
+                            <small class="font-weight-bold text-primary">{{ completion_percentage }}%</small>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ completion_percentage }}%;" aria-valuenow="{{ completion_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metric Stat Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3 mb-md-0">
+                <div class="card border-0 shadow-sm text-center p-3">
+                    <h2 class="text-primary font-weight-bold mb-0">{{ total_applications }}</h2>
+                    <span class="text-muted small text-uppercase">Total Applied</span>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3 mb-md-0">
+                <div class="card border-0 shadow-sm text-center p-3">
+                    <h2 class="text-warning font-weight-bold mb-0">{{ pending_applications }}</h2>
+                    <span class="text-muted small text-uppercase">Pending Review</span>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3 mb-md-0">
+                <div class="card border-0 shadow-sm text-center p-3">
+                    <h2 class="text-info font-weight-bold mb-0">{{ shortlisted_applications }}</h2>
+                    <span class="text-muted small text-uppercase">Shortlisted</span>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3 mb-md-0">
+                <div class="card border-0 shadow-sm text-center p-3">
+                    <h2 class="text-success font-weight-bold mb-0">{{ accepted_applications }}</h2>
+                    <span class="text-muted small text-uppercase">Accepted</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Applications Table -->
+            <div class="col-lg-8 mb-4">
+                <div class="card border-0 shadow-sm p-3">
+                    <h4 class="card-title mb-3"><i class="fa fa-paper-plane text-primary"></i> Recent Applications</h4>
+                    {% if applications %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Job Title</th>
+                                    <th>Company</th>
+                                    <th>Date Applied</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for app in applications %}
+                                <tr>
+                                    <td><a href="{% url 'jobs:jobs-detail' app.job.id %}" class="font-weight-bold text-dark">{{ app.job.title }}</a></td>
+                                    <td>{{ app.job.company_name }}</td>
+                                    <td>{{ app.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if app.status == 1 %}<span class="badge badge-warning">Pending</span>
+                                        {% elif app.status == 2 %}<span class="badge badge-info">Shortlisted</span>
+                                        {% elif app.status == 3 %}<span class="badge badge-primary">Interview</span>
+                                        {% elif app.status == 4 %}<span class="badge badge-success">Accepted</span>
+                                        {% elif app.status == 5 %}<span class="badge badge-danger">Rejected</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if app.status == 1 %}
+                                            <a href="{% url 'jobs:withdraw-application' app.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Withdraw this application?');">Withdraw</a>
+                                        {% else %}
+                                            <span class="text-muted small">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <p class="text-muted mb-2">You haven't applied for any jobs yet.</p>
+                            <a href="{% url 'jobs:jobs' %}" class="btn btn-primary btn-sm">Browse Available Jobs</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recommended Jobs Side Column -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm p-3 mb-4">
+                    <h5 class="card-title text-primary"><i class="fa fa-magic"></i> Recommended for You</h5>
+                    <hr class="mt-2 mb-3">
+                    {% if recommended_jobs %}
+                        {% for item in recommended_jobs %}
+                        <div class="mb-3 pb-2 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <a href="{% url 'jobs:jobs-detail' item.job.id %}" class="font-weight-bold text-dark text-truncate" style="max-width: 180px;">{{ item.job.title }}</a>
+                                <span class="badge badge-success">{{ item.match_score }}% Match</span>
+                            </div>
+                            <small class="text-muted d-block">{{ item.job.company_name }} | <i class="fa fa-map-marker"></i> {{ item.job.location }}</small>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted small mb-0">No job recommendations found based on your current profile skills.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

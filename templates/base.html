@@ -66,6 +66,23 @@
                         <li class="nav-item">
                                 <a href="/{{ LANGUAGE_CODE }}/about-us/" class="nav-link">{% trans "About Us" %}</a>
                         </li>
+                        {% if request.user.is_authenticated %}
+                            <li class="nav-item">
+                                <a href="{% url 'jobs:notifications' %}" class="nav-link" title="Notifications">
+                                    <i class="fa fa-bell"></i>
+                                    {% if request.user.notifications.all %}
+                                        <span class="badge badge-pill badge-danger" style="font-size: 10px; position: relative; top: -8px;">{{ request.user.notifications.all.count }}</span>
+                                    {% endif %}
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% if request.user.is_authenticated and request.user.is_staff %}
+                            <li class="nav-item {% if url_name == 'admin-dashboard' %}active{% endif %}">
+                                <a href="{% url 'jobs:admin-dashboard' %}" class="nav-link text-warning"><i class="fa fa-shield"></i> Admin Panel</a>
+                            </li>
+                        {% endif %}
+
                         {% if request.user.is_authenticated and request.user.role == 'employer' %}
                             <li class="nav-item dropdown">
                                 <a id="clientZone" href="#" data-toggle="dropdown"
@@ -78,11 +95,7 @@
                                                  class="img-fluid">
                                         </div>
                                     </div>
-                                    {% if request.user.role == 'employee' %}
-                                        {{ request.user.first_name }} {{ request.user.last_name }}
-                                    {% else %}
-                                        {{ request.user.first_name }}
-                                    {% endif %}
+                                    {{ request.user.first_name|default:request.user.email }}
                                 </a>
                                 <div aria-labelledby="clientZone" class="dropdown-menu">
                                     <a href="{% url 'jobs:employer-dashboard' %}"
@@ -100,10 +113,14 @@
                                     >
                                         {% trans "Post a new job" %}
                                     </a>
-                                    <a href="{% url 'accounts:logout' %}" class="dropdown-item">Logout</a>
+                                    <a href="{% url 'accounts:employer-profile-update' %}" class="dropdown-item">{% trans "Edit Profile" %}</a>
+                                    <a href="{% url 'accounts:logout' %}" class="dropdown-item">{% trans "Logout" %}</a>
                                 </div>
                             </li>
                         {% elif request.user.is_authenticated and request.user.role == 'employee' %}
+                             <li class="nav-item {% if url_name == 'applicant-dashboard' %}active{% endif %}">
+                                 <a href="{% url 'jobs:applicant-dashboard' %}" class="nav-link">{% trans "Dashboard" %}</a>
+                             </li>
                              <li class="nav-item {% if url_name == 'employee-favorites' %}active{% endif %}">
                                  <a href="{% url 'jobs:employee-favorites' %}" class="nav-link">{% trans "Favorites" %}</a>
                              </li>
@@ -117,24 +134,21 @@
                                    class="nav-link dropdown-toggle has-img mb-3 mb-lg-0 mt-3 mt-lg-0">
                                     <div class="client-menu-image">
                                         <div class="inner">
-                                            <img src="{% static 'img/company-1.png' %}"
-                                                 alt="company image"
+                                            <img src="{% static 'img/avatar.png' %}"
+                                                 alt="user avatar"
                                                  class="img-fluid">
                                         </div>
                                     </div>
-                                    {% if request.user.role == 'employee' %}
-                                        {{ request.user.first_name }} {{ request.user.last_name }}
-                                    {% else %}
-                                        {{ request.user.first_name }}
-                                    {% endif %}
+                                    {{ request.user.first_name|default:request.user.email }}
                                 </a>
                                 <div aria-labelledby="clientZone" class="dropdown-menu">
+                                    <a href="{% url 'jobs:applicant-dashboard' %}" class="dropdown-item">{% trans "Dashboard" %}</a>
                                     <a href="{% url 'accounts:employee-profile-update' %}"
                                        class="dropdown-item {% if url_name == 'employee-profile-update' %}active{% endif %}"
                                     >
                                         {% trans "Edit Profile" %}
                                     </a>
-                                    <a href="{% url 'resume_cv:resumes' %}" class="dropdown-item">{% trans "My resumes" %}</a>
+                                    <a href="{% url 'resume_cv:resumes' %}" class="dropdown-item">{% trans "My Resumes" %}</a>
                                     <a href="{% url 'accounts:logout' %}" class="dropdown-item">{% trans "Logout" %}</a>
                                 </div>
                             </li>
