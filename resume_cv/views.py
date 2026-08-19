@@ -16,7 +16,6 @@ from django.views.generic import ListView
 from django.utils.text import get_valid_filename
 
 import io
-from playwright.sync_api import sync_playwright
 
 from jobsapp.decorators import user_is_employee
 
@@ -179,6 +178,7 @@ def download_resume(request, id):
         """
         
         try:
+            from playwright.sync_api import sync_playwright
             with sync_playwright() as p:
                 browser = p.chromium.launch(headless=True)
                 page = browser.new_page()
@@ -193,7 +193,8 @@ def download_resume(request, id):
             return response
         except Exception as e:
             import logging
-            logging.error("Playwright PDF generation failed. Error: %s", repr(e))
-            return HttpResponse(f"PDF generation failed. Ensure Playwright browser is fully installed. Error: {repr(e)}", status=500)
+            logging.error("PDF generation failed. Error: %s", repr(e))
+            # Fallback to HTML print view
+            return HttpResponse(html_string, content_type="text/html")
             
     return redirect("resume_cv:resumes")
