@@ -1,4 +1,4 @@
-def calculate_job_match_score(user, job):
+def calculate_job_match_score(user, job, user_skills=None, user_title=None, user_location=None):
     """
     Explainable job matching algorithm comparing applicant skills, location, category,
     and experience requirements against the job listing.
@@ -8,11 +8,11 @@ def calculate_job_match_score(user, job):
         return 0
 
     score = 0
-    total_weights = 100
 
     # 1. Category / Title overlap (35 points)
     category_match = 0
-    user_title = getattr(getattr(user, "applicant_profile", None), "title", "") or ""
+    if user_title is None:
+        user_title = getattr(getattr(user, "applicant_profile", None), "title", "") or ""
     job_category = job.category.lower() if job.category else ""
     job_title = job.title.lower() if job.title else ""
 
@@ -25,9 +25,13 @@ def calculate_job_match_score(user, job):
     score += category_match
 
     # 2. Skills Overlap (40 points)
-    user_skills = set(user.skills.values_list("name", flat=True))
+    if user_skills is None:
+        user_skills = set(user.skills.values_list("name", flat=True)) if hasattr(user, "skills") else set()
+
     if user_skills:
-        job_text = f"{job.title} {job.description} {' '.join([t.name for t in job.tags.all()])}".lower()
+        # Avoid job.tags.all() query if pre-fetched or using title/description
+        tags_str = " ".join([t.name for t in getattr(job, "prefetched_tags", job.tags.all())]) if hasattr(job, "tags") else ""
+        job_text = f"{job.title} {job.description} {tags_str}".lower()
         matched_skills = [skill for skill in user_skills if skill.lower() in job_text]
         if matched_skills:
             skill_ratio = len(matched_skills) / len(user_skills)
@@ -38,7 +42,8 @@ def calculate_job_match_score(user, job):
         score += 15
 
     # 3. Location match (15 points)
-    user_location = getattr(getattr(user, "applicant_profile", None), "location", "") or ""
+    if user_location is None:
+        user_location = getattr(getattr(user, "applicant_profile", None), "location", "") or ""
     if user_location and job.location:
         if user_location.lower() == job.location.lower() or job.work_mode == "remote":
             score += 15

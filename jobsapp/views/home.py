@@ -30,10 +30,14 @@ class HomeView(ListView):
         context["locations"] = ETHIOPIAN_LOCATIONS
 
         if self.request.user.is_authenticated and self.request.user.is_employee:
-            all_jobs = self.model.objects.filter(filled=False, status="approved")[:10]
+            user_skills = set(self.request.user.skills.values_list("name", flat=True)) if hasattr(self.request.user, "skills") else set()
+            user_title = getattr(getattr(self.request.user, "applicant_profile", None), "title", "") or ""
+            user_location = getattr(getattr(self.request.user, "applicant_profile", None), "location", "") or ""
+            
+            all_jobs = self.model.objects.select_related("user", "company").filter(filled=False, status="approved")[:10]
             recommended = []
             for j in all_jobs:
-                score = calculate_job_match_score(self.request.user, j)
+                score = calculate_job_match_score(self.request.user, j, user_skills=user_skills, user_title=user_title, user_location=user_location)
                 recommended.append({"job": j, "match_score": score})
             recommended.sort(key=lambda x: x["match_score"], reverse=True)
             context["recommended_jobs"] = recommended[:3]

@@ -70,14 +70,14 @@ class Job(models.Model):
     company_name = models.CharField(max_length=100)
     company_description = models.CharField(max_length=300, blank=True, null=True)
     website = models.CharField(max_length=100, default="", blank=True, null=True)
-    created_at = models.DateTimeField(default=timezone.now)
-    filled = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now, db_index=True)
+    filled = models.BooleanField(default=False, db_index=True)
     salary = models.IntegerField(default=0, blank=True)
     salary_max = models.IntegerField(default=0, blank=True, null=True)
     currency = models.CharField(max_length=10, default="ETB")
     experience_level = models.CharField(max_length=20, choices=EXPERIENCE_LEVEL_CHOICES, default="fresh")
     work_mode = models.CharField(max_length=20, choices=WORK_MODE_CHOICES, default="on-site")
-    status = models.CharField(max_length=20, choices=JOB_STATUS_CHOICES, default="approved")
+    status = models.CharField(max_length=20, choices=JOB_STATUS_CHOICES, default="approved", db_index=True)
     tags = models.ManyToManyField(Tag, blank=True)
     vacancy = models.IntegerField(default=1)
 
@@ -226,8 +226,8 @@ class Notification(models.Model):
     title = models.CharField(max_length=255)
     message = models.TextField()
     link = models.CharField(max_length=255, blank=True, null=True)
-    is_read = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
         ordering = ["-created_at"]
