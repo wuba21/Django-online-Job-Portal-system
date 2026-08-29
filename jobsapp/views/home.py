@@ -21,11 +21,11 @@ class HomeView(ListView):
     context_object_name = "jobs"
 
     def get_queryset(self):
-        return self.model.objects.select_related("user", "company").filter(filled=False, status="approved")[:6]
+        return self.model.objects.select_related("user", "company").prefetch_related("tags").filter(filled=False, status="approved")[:6]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["trendings"] = self.model.objects.select_related("user", "company").filter(filled=False, status="approved")[:3]
+        context["trendings"] = self.model.objects.select_related("user", "company").prefetch_related("tags").filter(filled=False, status="approved")[:3]
         context["categories"] = Category.objects.all()[:8]
         context["locations"] = ETHIOPIAN_LOCATIONS
 
@@ -34,7 +34,7 @@ class HomeView(ListView):
             user_title = getattr(getattr(self.request.user, "applicant_profile", None), "title", "") or ""
             user_location = getattr(getattr(self.request.user, "applicant_profile", None), "location", "") or ""
             
-            all_jobs = self.model.objects.select_related("user", "company").filter(filled=False, status="approved")[:10]
+            all_jobs = self.model.objects.select_related("user", "company").prefetch_related("tags").filter(filled=False, status="approved")[:10]
             recommended = []
             for j in all_jobs:
                 score = calculate_job_match_score(self.request.user, j, user_skills=user_skills, user_title=user_title, user_location=user_location)
@@ -56,7 +56,7 @@ class SearchView(ListView):
     paginate_by = 6
 
     def get_queryset(self):
-        queryset = self.model.objects.select_related("user", "company").filter(filled=False, status="approved")
+        queryset = self.model.objects.select_related("user", "company").prefetch_related("tags").filter(filled=False, status="approved")
 
         # Filters
         position = self.request.GET.get("position") or self.request.GET.get("q")
@@ -116,7 +116,7 @@ class JobListView(ListView):
     paginate_by = 6
 
     def get_queryset(self):
-        return self.model.objects.select_related("user", "company").filter(filled=False, status="approved").order_by("-created_at")
+        return self.model.objects.select_related("user", "company").prefetch_related("tags").filter(filled=False, status="approved").order_by("-created_at")
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
