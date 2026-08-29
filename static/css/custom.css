@@ -49,10 +49,13 @@ html {
     height: 100% !important;
     width: 100% !important;
     overflow-x: hidden !important;
+    background-color: #1a1a2e !important;
 }
 
 body {
     min-height: 100vh !important;
+    min-height: 100dvh !important;
+    min-height: -webkit-fill-available !important;
     display: flex !important;
     flex-direction: column !important;
     width: 100% !important;
@@ -60,6 +63,7 @@ body {
     overflow-x: hidden !important;
     margin: 0 !important;
     padding: 0 !important;
+    background-color: #1a1a2e !important;
 }
 
 body > div.flex-grow-1,
@@ -68,6 +72,7 @@ main {
     flex: 1 0 auto !important;
     width: 100% !important;
     max-width: 100% !important;
+    background-color: #f8f9fa !important;
 }
 
 footer {
