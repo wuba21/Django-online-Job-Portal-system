@@ -266,18 +266,42 @@
                     {% trans "Follow Us" %}
                     <span style="position: absolute !important; left: 0 !important; bottom: 0 !important; width: 40px !important; height: 3px !important; background: #ffffff !important; border-radius: 2px !important;"></span>
                 </h4>
-                <div style="display: flex !important; gap: 15px !important;">
-                    <a href="https://web.facebook.com/profile.php?id=100077897349623&sk=directory_personal_details" target="_blank" rel="noopener" title="Facebook" style="color: #1877F2 !important; font-size: 1.3rem !important; width: 45px !important; height: 45px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; background: rgba(255,255,255,0.15) !important; border-radius: 50% !important; text-decoration: none !important; transition: all 0.3s ease !important;">
-                        <i class="fab fa-facebook-f"></i>
+                <div style="display: flex !important; gap: 12px !important; flex-wrap: wrap !important;">
+                    <!-- Facebook -->
+                    <a href="https://web.facebook.com/profile.php?id=100077897349623" target="_blank" rel="noopener" title="Facebook"
+                       style="width:45px;height:45px;display:inline-flex;align-items:center;justify-content:center;background:#1877F2;border-radius:50%;text-decoration:none;transition:transform 0.3s ease,box-shadow 0.3s ease;flex-shrink:0;"
+                       onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 8px 20px rgba(24,119,242,0.5)'"
+                       onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none'">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
+                            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                        </svg>
                     </a>
-                    <a href="https://linkedin.com/in/wubante-tilahun-776ab7377" target="_blank" rel="noopener" title="LinkedIn" style="color: #0A66C2 !important; font-size: 1.3rem !important; width: 45px !important; height: 45px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; background: rgba(255,255,255,0.15) !important; border-radius: 50% !important; text-decoration: none !important; transition: all 0.3s ease !important;">
-                        <i class="fab fa-linkedin-in"></i>
+                    <!-- LinkedIn -->
+                    <a href="https://linkedin.com/in/wubante-tilahun-776ab7377" target="_blank" rel="noopener" title="LinkedIn"
+                       style="width:45px;height:45px;display:inline-flex;align-items:center;justify-content:center;background:#0A66C2;border-radius:50%;text-decoration:none;transition:transform 0.3s ease,box-shadow 0.3s ease;flex-shrink:0;"
+                       onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 8px 20px rgba(10,102,194,0.5)'"
+                       onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none'">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
+                            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
+                        </svg>
                     </a>
-                    <a href="https://t.me/UOGwuba" target="_blank" rel="noopener" title="Telegram" style="color: #09a8f8 !important; font-size: 1.3rem !important; width: 45px !important; height: 45px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; background: rgba(255,255,255,0.15) !important; border-radius: 50% !important; text-decoration: none !important; transition: all 0.3s ease !important;">
-                        <i class="fab fa-telegram"></i>
+                    <!-- Telegram -->
+                    <a href="https://t.me/UOGwuba" target="_blank" rel="noopener" title="Telegram"
+                       style="width:45px;height:45px;display:inline-flex;align-items:center;justify-content:center;background:#229ED9;border-radius:50%;text-decoration:none;transition:transform 0.3s ease,box-shadow 0.3s ease;flex-shrink:0;"
+                       onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 8px 20px rgba(34,158,217,0.5)'"
+                       onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none'">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
+                            <path d="M21.944 3.068a1 1 0 0 0-1.024-.147L2.92 10.38a1 1 0 0 0 .06 1.874l4.267 1.415 1.898 5.695a1 1 0 0 0 1.684.37l2.726-2.725 4.498 3.33a1 1 0 0 0 1.564-.697l2-16a1 1 0 0 0-.673-1.074zM10.5 16.293l-1.146-3.437 7.243-5.608-6.097 9.045z"/>
+                        </svg>
                     </a>
-                    <a href="https://wuba21.github.io" target="_blank" rel="noopener" title="GitHub" style="color: #5808e1 !important; font-size: 1.3rem !important; width: 45px !important; height: 45px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; background: rgba(255,255,255,0.15) !important; border-radius: 50% !important; text-decoration: none !important; transition: all 0.3s ease !important;">
-                        <i class="fab fa-github"></i>
+                    <!-- GitHub -->
+                    <a href="https://wuba21.github.io" target="_blank" rel="noopener" title="GitHub"
+                       style="width:45px;height:45px;display:inline-flex;align-items:center;justify-content:center;background:#333;border-radius:50%;text-decoration:none;transition:transform 0.3s ease,box-shadow 0.3s ease;flex-shrink:0;"
+                       onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 8px 20px rgba(51,51,51,0.6)'"
+                       onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none'">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
+                            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                        </svg>
                     </a>
                 </div>
             </div>
