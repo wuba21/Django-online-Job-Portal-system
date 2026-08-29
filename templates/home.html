@@ -93,37 +93,25 @@
             <div class="container">
                 <h4 class="heading">{% trans "Trending this month" %}</h4>
                 {% for trending in trendings %}
-                    <div class="job-listing  job-listing--last">
-                        <div class="row">
-                            <div class="col-md-12 col-lg-6">
-                                <div class="row">
-                                    <div class="col-2">
-                                        <img src="{% static 'img/company-1.png' %}"
-                                             alt="ShareBoardd " class="img-fluid">
-                                    </div>
-                                    <div class="col-10">
-                                        <h4 class="job__title">
+                    <div class="job-listing mb-3 p-3 bg-white rounded shadow-sm border">
+                        <div class="row align-items-center">
+                            <div class="col-12 col-md-6 col-lg-5 mb-2 mb-md-0">
+                                <div class="d-flex align-items-center">
+                                    <img src="{% static 'img/company-1.png' %}"
+                                         alt="company image" class="img-fluid mr-3" style="max-width: 48px; max-height: 48px;">
+                                    <div>
+                                        <h5 class="job__title mb-1 font-weight-bold">
                                             <a href="{% url 'jobs:jobs-detail' trending.id %}">{{ trending.title }}</a>
-                                        </h4>
-                                        <p class="job__company">
-                                            {{ trending.company_name }}
-                                        </p>
+                                        </h5>
+                                        <p class="job__company text-muted mb-1 small">{{ trending.company_name }}</p>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-10 col-md-3 col-lg-2 ml-auto"><i class="fa fa-map-marker job__location"></i>
-                                {{ trending.location }}
+                            <div class="col-6 col-md-3 col-lg-3 text-muted small">
+                                <i class="fa fa-map-marker job__location mr-1"></i>{{ trending.location }}
                             </div>
-                            <div class="col-10 col-md-3 col-lg-3 ml-auto">
-                                <p>Posted {{ trending.created_at|timesince }}</p>
-                            </div>
-                            <div class="col-sm-12 col-md-2 col-lg-1">
-                                <div class="job__star">
-                                    <a href="#" data-toggle="tooltip" data-placement="top"
-                                       title="Save to favourites" class="job__star__link">
-                                        <i class="fa fa-star"></i>
-                                    </a>
-                                </div>
+                            <div class="col-6 col-md-3 col-lg-4 text-muted small text-md-right">
+                                <i class="fa fa-clock-o mr-1"></i>Posted {{ trending.created_at|timesince }} ago
                             </div>
                         </div>
                     </div>

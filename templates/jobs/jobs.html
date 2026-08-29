@@ -38,47 +38,43 @@
         <div class="container">
             <h3 class="heading">{% trans "We have found" %} <span class="accent">{{ total_jobs }}</span> {% trans "jobs" %}</h3>
             {% for job in jobs %}
-                <div class="job-listing  ">
-                    <div class="row">
-                        <div class="col-md-12 col-lg-6">
-                            <div class="row">
-                                <div class="col-2">
-                                    <img src="{% static 'img/company-1.png' %}"
-                                         alt="company image " class="img-fluid">
-                                </div>
-                                <div class="col-10">
-                                    <h4 class="job__title"><a
-                                            href="{% url 'jobs:jobs-detail' job.id %}">{{ job.title }}</a></h4>
-                                    <p class="job__company">
-                                        {{ job.company_name }}
-                                    </p>
+                <div class="job-listing mb-3 p-3 bg-white rounded shadow-sm border">
+                    <div class="row align-items-center">
+                        <div class="col-12 col-md-6 col-lg-5 mb-2 mb-md-0">
+                            <div class="d-flex align-items-center">
+                                <img src="{% static 'img/company-1.png' %}"
+                                     alt="company image" class="img-fluid mr-3" style="max-width: 48px; max-height: 48px;">
+                                <div>
+                                    <h5 class="job__title mb-1 font-weight-bold">
+                                        <a href="{% url 'jobs:jobs-detail' job.id %}">{{ job.title }}</a>
+                                    </h5>
+                                    <p class="job__company text-muted mb-1 small">{{ job.company_name }}</p>
                                     {% for tag in job.tags.all %}
-                                        <span style="color: #ffffff;" class="badge featured-badge badge-secondary">{{ tag.name }}</span>
+                                        <span class="badge badge-secondary mr-1">{{ tag.name }}</span>
                                     {% endfor %}
                                 </div>
                             </div>
                         </div>
-                        <div class="col-10 col-md-3 col-lg-2 ml-auto">
-                            <i class="fa fa-map-marker job__location"></i>
-                            {{ job.location }}
+                        <div class="col-6 col-md-3 col-lg-3 text-muted small">
+                            <i class="fa fa-map-marker job__location mr-1"></i>{{ job.location }}
                         </div>
-                        <div class="col-10 col-md-3 col-lg-3 ml-auto">
-                            <p>Posted {{ job.created_at|timesince }}</p>
+                        <div class="col-6 col-md-3 col-lg-3 text-muted small text-md-right">
+                            <i class="fa fa-clock-o mr-1"></i>Posted {{ job.created_at|timesince }} ago
                         </div>
                         {% if user.is_authenticated and request.user.role == 'employee' %}
-                            <div class="col-sm-12 col-md-2 col-lg-1">
+                            <div class="col-12 col-lg-1 text-right mt-2 mt-lg-0">
                                 <div class="job__star">
                                     {% is_favorited job as is_already_favorited %}
                                     {% if is_already_favorited %}
                                         <a href="javascript:void(0)" data-toggle="tooltip" data-id="{{ job.id }}"
-                                           data-placement="top" title="Saved to favourites"
+                                           title="Saved to favourites"
                                            class="job__star__link favorite">
-                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star fa-lg"></i>
                                         </a>
                                     {% else %}
                                         <a href="javascript:void(0)" data-toggle="tooltip" data-id="{{ job.id }}"
-                                           data-placement="top" title="Save to favourites" class="job__star__link">
-                                            <i class="fa fa-star"></i>
+                                           title="Save to favourites" class="job__star__link">
+                                            <i class="fa fa-star-o fa-lg"></i>
                                         </a>
                                     {% endif %}
                                 </div>
