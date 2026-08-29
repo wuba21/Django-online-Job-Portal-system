@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static i18n %}
+{% load static i18n humanize %}
 {% block title %}Employer Dashboard{% endblock %}
 
 {% block content %}
@@ -56,9 +56,11 @@
                     <table class="table table-hover align-middle">
                         <thead class="thead-light">
                             <tr>
-                                <th>Job Title</th>
+                                <th>Job Title & Location</th>
+                                <th>Experience & Mode</th>
+                                <th>Salary / Currency</th>
+                                <th>Required Skills</th>
                                 <th>Status</th>
-                                <th>Posted</th>
                                 <th>Deadline</th>
                                 <th>Applicants</th>
                                 <th>Actions</th>
@@ -69,7 +71,27 @@
                             <tr>
                                 <td>
                                     <a href="{% url 'jobs:jobs-detail' job.id %}" class="font-weight-bold text-dark">{{ job.title }}</a>
-                                    <small class="d-block text-muted">{{ job.location }} | {{ job.get_work_mode_display }}</small>
+                                    <small class="d-block text-muted"><i class="fa fa-map-marker text-danger"></i> {{ job.location }} | {{ job.category }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge badge-info mb-1 d-inline-block">{{ job.get_work_mode_display|default:job.work_mode }}</span>
+                                    <span class="badge badge-secondary d-inline-block">{{ job.get_experience_level_display|default:job.experience_level }}</span>
+                                </td>
+                                <td>
+                                    <strong class="text-success small">
+                                        {% if job.salary > 0 %}
+                                            {{ job.salary|intcomma }} {% if job.salary_max %}- {{ job.salary_max|intcomma }}{% endif %} {{ job.currency }}
+                                        {% else %}
+                                            Negotiable
+                                        {% endif %}
+                                    </strong>
+                                </td>
+                                <td>
+                                    {% for tag in job.tags.all %}
+                                        <span class="badge badge-primary px-2 py-1 mb-1 d-inline-block">{{ tag.name }}</span>
+                                    {% empty %}
+                                        <span class="text-muted small">No skills specified</span>
+                                    {% endfor %}
                                 </td>
                                 <td>
                                     {% if job.filled %}
@@ -80,19 +102,18 @@
                                         <span class="badge badge-success">Active</span>
                                     {% endif %}
                                 </td>
-                                <td>{{ job.created_at|date:"M d, Y" }}</td>
-                                <td>{{ job.last_date|date:"M d, Y" }}</td>
+                                <td><small>{{ job.last_date|date:"M d, Y" }}</small></td>
                                 <td>
                                     <a href="{% url 'jobs:employer-dashboard-applicants' job.id %}" class="btn btn-sm btn-info">
                                         <i class="fa fa-users"></i> {{ job.applicants.count }} Applicants
                                     </a>
                                 </td>
                                 <td>
-                                    <a href="{% url 'jobs:employer-jobs-edit' job.id %}" class="btn btn-sm btn-outline-primary" title="Edit"><i class="fa fa-edit"></i> Edit</a>
-                                    <a href="{% url 'jobs:job-mark-filled' job.id %}" class="btn btn-sm btn-outline-warning" title="Toggle Filled">
+                                    <a href="{% url 'jobs:employer-jobs-edit' job.id %}" class="btn btn-sm btn-outline-primary mb-1" title="Edit"><i class="fa fa-edit"></i> Edit</a>
+                                    <a href="{% url 'jobs:job-mark-filled' job.id %}" class="btn btn-sm btn-outline-warning mb-1" title="Toggle Filled">
                                         {% if job.filled %}Reopen{% else %}Mark Filled{% endif %}
                                     </a>
-                                    <a href="{% url 'jobs:employer-job-delete' job.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this job listing?');" title="Delete"><i class="fa fa-trash"></i></a>
+                                    <a href="{% url 'jobs:employer-job-delete' job.id %}" class="btn btn-sm btn-outline-danger mb-1" onclick="return confirm('Delete this job listing?');" title="Delete"><i class="fa fa-trash"></i></a>
                                 </td>
                             </tr>
                             {% endfor %}

@@ -28,7 +28,7 @@ class DashboardView(ListView):
         return super().dispatch(self.request, *args, **kwargs)
 
     def get_queryset(self):
-        return self.model.objects.filter(user_id=self.request.user.id)
+        return self.model.objects.filter(user_id=self.request.user.id).prefetch_related("tags")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

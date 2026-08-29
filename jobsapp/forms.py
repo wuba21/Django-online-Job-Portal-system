@@ -7,14 +7,17 @@ from jobsapp.models import (
     Applicant, Job, ApplicantProfile, Education, WorkExperience, CandidateSkill
 )
 from accounts.models import Company
+from tags.models import Tag
 
 
 class CreateJobForm(forms.ModelForm):
+    tags = forms.MultipleChoiceField(required=False)
+
     class Meta:
         model = Job
         exclude = ("user", "created_at", "filled", "company", "status")
         widgets = {
-            "last_date": forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control"}),
+            "last_date": forms.DateTimeInput(attrs={"type": "date", "class": "form-control"}),
             "description": forms.Textarea(attrs={"rows": 5, "class": "form-control"}),
             "title": forms.TextInput(attrs={"class": "form-control"}),
             "location": forms.Select(attrs={"class": "form-control"}),
@@ -37,6 +40,62 @@ class CreateJobForm(forms.ModelForm):
             "salary_max": "Maximum Salary (ETB)",
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        try:
+            tag_choices = [(str(t.id), t.name) for t in Tag.objects.all()]
+            # Include custom submitted values if any
+            if self.data and "tags" in self.data:
+                if hasattr(self.data, "getlist"):
+                    extra = self.data.getlist("tags")
+                else:
+                    extra = self.data.get("tags")
+                    if not isinstance(extra, (list, tuple)):
+                        extra = [extra]
+                for val in extra:
+                    if val and not any(str(val) == choice[0] for choice in tag_choices):
+                        tag_choices.append((str(val), str(val)))
+            self.fields["tags"].choices = tag_choices
+        except Exception:
+            self.fields["tags"].choices = []
+        self.fields["tags"].required = False
+        self.fields["salary"].required = False
+        self.fields["salary_max"].required = False
+        self.fields["experience_level"].required = False
+        self.fields["work_mode"].required = False
+        self.fields["currency"].required = False
+        self.fields["company_description"].required = False
+        self.fields["website"].required = False
+        self.fields["vacancy"].required = False
+
+    def clean_salary(self):
+        salary = self.cleaned_data.get("salary")
+        if salary is None or salary == "":
+            return 0
+        return salary
+
+    def clean_salary_max(self):
+        salary_max = self.cleaned_data.get("salary_max")
+        if salary_max is None or salary_max == "":
+            return 0
+        return salary_max
+
+    def clean_experience_level(self):
+        val = self.cleaned_data.get("experience_level")
+        return val if val else "fresh"
+
+    def clean_work_mode(self):
+        val = self.cleaned_data.get("work_mode")
+        return val if val else "on-site"
+
+    def clean_currency(self):
+        val = self.cleaned_data.get("currency")
+        return val if val else "ETB"
+
+    def clean_vacancy(self):
+        val = self.cleaned_data.get("vacancy")
+        return val if val else 1
+
     def clean_last_date(self):
         date = self.cleaned_data.get("last_date")
         if date and date.date() < timezone.now().date():
@@ -53,9 +112,30 @@ class CreateJobForm(forms.ModelForm):
         job = super(CreateJobForm, self).save(commit=False)
         if commit:
             job.save()
-            if "tags" in self.cleaned_data:
-                for tag in self.cleaned_data["tags"]:
-                    job.tags.add(tag)
+            if hasattr(self.data, "getlist"):
+                raw_tags = self.data.getlist("tags")
+            else:
+                raw_tags = self.data.get("tags")
+                if isinstance(raw_tags, str):
+                    raw_tags = [raw_tags]
+            if raw_tags:
+                job.tags.clear()
+                for tag_val in raw_tags[:6]:
+                    tag_val = str(tag_val).strip()
+                    if not tag_val:
+                        continue
+                    if tag_val.isdigit():
+                        try:
+                            tag_obj = Tag.objects.get(id=int(tag_val))
+                            job.tags.add(tag_obj)
+                        except Tag.DoesNotExist:
+                            tag_obj, _ = Tag.objects.get_or_create(name=tag_val)
+                            job.tags.add(tag_obj)
+                    else:
+                        tag_obj, _ = Tag.objects.get_or_create(name=tag_val)
+                        job.tags.add(tag_obj)
+            elif "tags" in self.cleaned_data:
+                job.tags.set(self.cleaned_data["tags"])
         return job
 
 

@@ -71,13 +71,45 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-lg-6 form-group">
-                                <label for="salary">Salary(Leave empty if it's negotiable)</label>
-                                <input id="salary" name="salary" type="number" min="1000" class="form-control"
+                            <div class="col-lg-4 form-group">
+                                <label for="salary">Minimum Salary (Leave empty if negotiable)</label>
+                                <input id="salary" name="salary" type="number" min="0" class="form-control"
                                        value="{{ form.salary.value|default_if_none:"" }}">
                             </div>
+                            <div class="col-lg-4 form-group">
+                                <label for="salary_max">Maximum Salary (Optional)</label>
+                                <input id="salary_max" name="salary_max" type="number" min="0" class="form-control"
+                                       value="{{ form.salary_max.value|default_if_none:"" }}">
+                            </div>
+                            <div class="col-lg-4 form-group">
+                                <label for="currency">Currency</label>
+                                <input id="currency" name="currency" type="text" class="form-control"
+                                       value="{{ form.currency.value|default:"ETB" }}">
+                            </div>
+                        </div>
+                        <div class="row">
                             <div class="col-lg-6 form-group">
-                                <label for="tags">Required skills</label>
+                                <label for="experience_level">Experience Level</label>
+                                <select id="experience_level" name="experience_level" class="form-control">
+                                    <option value="fresh" {% if form.experience_level.value == "fresh" or not form.experience_level.value %}selected{% endif %}>Fresh Graduate</option>
+                                    <option value="entry" {% if form.experience_level.value == "entry" %}selected{% endif %}>Entry Level</option>
+                                    <option value="mid" {% if form.experience_level.value == "mid" %}selected{% endif %}>Mid Level</option>
+                                    <option value="senior" {% if form.experience_level.value == "senior" %}selected{% endif %}>Senior Level</option>
+                                    <option value="executive" {% if form.experience_level.value == "executive" %}selected{% endif %}>Executive</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-6 form-group">
+                                <label for="work_mode">Work Mode</label>
+                                <select id="work_mode" name="work_mode" class="form-control">
+                                    <option value="on-site" {% if form.work_mode.value == "on-site" or not form.work_mode.value %}selected{% endif %}>On-site</option>
+                                    <option value="remote" {% if form.work_mode.value == "remote" %}selected{% endif %}>Remote</option>
+                                    <option value="hybrid" {% if form.work_mode.value == "hybrid" %}selected{% endif %}>Hybrid</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6 form-group">
+                                <label for="tags">Required skills / Tags</label>
                                 <select id="tags" class="js-select2 form-control" name="tags" style="border-radius: 0"
                                         multiple="multiple" data-placeholder="Select Tags">
                                     {% for tag in tags %}
@@ -87,64 +119,41 @@
                                     {% endfor %}
                                 </select>
                             </div>
-                        </div>
-                        <div class="row">
                             <div class="col-lg-6 form-group">
                                 <label for="location">Location</label>
-                                <input id="location" name="location" type="text" placeholder="e.g. Dhaka, Bangladesh"
-                                       class="form-control" value="{{ form.location.value|default_if_none:"" }}">
+                                <input id="location" name="location" type="text" placeholder="e.g. Addis Ababa, Hawassa"
+                                       class="form-control" value="{{ form.location.value|default_if_none:"Addis Ababa" }}">
                             </div>
-                            <div class="col-lg-6 form-group">
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-4 form-group">
                                 <label for="type">Type</label>
-                                <select id="type" name="type" placeholder="Choose job type"
-                                        class="form-control select2">
-                                    <option value="1" {% if form.type.value == "1" %} selected {% endif %}>Full time
-                                    </option>
-                                    <option value="2" {% if form.type.value == "2" %} selected {% endif %}>Part time
-                                    </option>
-                                    <option value="3" {% if form.type.value == "3" %} selected {% endif %}>Internship
-                                    </option>
+                                <select id="type" name="type" class="form-control">
+                                    <option value="1" {% if form.type.value == "1" or not form.type.value %} selected {% endif %}>Full time</option>
+                                    <option value="2" {% if form.type.value == "2" %} selected {% endif %}>Part time</option>
+                                    <option value="3" {% if form.type.value == "3" %} selected {% endif %}>Internship</option>
                                 </select>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-6 form-group">
+                            <div class="col-lg-4 form-group">
                                 <label for="category">Category</label>
-                                <select id="category" name="category" class="form-control select2">
-                                    <option value="web-design" {% if form.category.value == "web-design" %}
-                                            selected {% endif %}>Web design
-                                    </option>
-                                    <option value="graphic-design" {% if form.category.value == "graphic-design" %}
-                                            selected {% endif %}>Graphic design
-                                    </option>
-                                    <option value="web-development" {% if form.category.value == "web-development" %}
-                                            selected {% endif %}>Web development
-                                    </option>
-                                    <option value="human-resource" {% if form.category.value == "human-resource" %}
-                                            selected {% endif %}>Human Resources
-                                    </option>
-                                    <option value="support" {% if form.category.value == "support" %}
-                                            selected {% endif %}>Support
-                                    </option>
-                                    <option value="android" {% if form.category.value == "android" %}
-                                            selected {% endif %}>Android
-                                    </option>
+                                <select id="category" name="category" class="form-control">
+                                    <option value="web-development" {% if form.category.value == "web-development" or not form.category.value %}selected{% endif %}>Web development</option>
+                                    <option value="web-design" {% if form.category.value == "web-design" %}selected{% endif %}>Web design</option>
+                                    <option value="graphic-design" {% if form.category.value == "graphic-design" %}selected{% endif %}>Graphic design</option>
+                                    <option value="human-resource" {% if form.category.value == "human-resource" %}selected{% endif %}>Human Resources</option>
+                                    <option value="support" {% if form.category.value == "support" %}selected{% endif %}>Support</option>
+                                    <option value="android" {% if form.category.value == "android" %}selected{% endif %}>Android</option>
                                 </select>
                             </div>
-                            <div class="col-lg-6 form-group">
-                                <label for="vacancy">Vacancy: </label>
+                            <div class="col-lg-4 form-group">
+                                <label for="vacancy">Vacancy count</label>
                                 <input id="vacancy" name="vacancy" type="number" min="1" class="form-control"
-                                        value="{{ form.vacancy.value | default_if_none:"" }}">
+                                        value="{{ form.vacancy.value|default:"1" }}">
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-xl-6 form-group">
-                                <label for="apply_url">Apply URL <span
-                                        class="note">(users will apply on your website)</span></label>
-                                <input id="apply_url" type="url" class="form-control">
-                            </div>
-                            <div class="col-xl-6 form-group">
-                                <label for="validity">Validity of the post</label>
+                            <div class="col-xl-12 form-group">
+                                <label for="validity">Application Deadline</label>
                                 <input id="validity" name="last_date" type="date" class="form-control"
                                        value="{{ form.last_date.value|default_if_none:"" }}">
                             </div>
@@ -204,7 +213,12 @@
 
     <script>
         $(document).ready(function () {
-            $('.js-select2').select2();
+            $('.js-select2').select2({
+                tags: true,
+                tokenSeparators: [',', ' '],
+                width: '100%',
+                placeholder: "Select or type skills..."
+            });
 
             tinymce.init({
                 selector: 'textarea',
