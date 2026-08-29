@@ -42,11 +42,19 @@
 }
 
 /* ============================================
-   MOBILE RESPONSIVE & VIEWPORT FIXES
+   UNIVERSAL MOBILE RESPONSIVE & ANTI-OVERFLOW SYSTEM
    ============================================ */
 
-/* Viewport Lock & Anti-Horizontal-Overflow Fix */
-html, body {
+html {
+    height: 100% !important;
+    width: 100% !important;
+    overflow-x: hidden !important;
+}
+
+body {
+    min-height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
     width: 100% !important;
     max-width: 100% !important;
     overflow-x: hidden !important;
@@ -54,13 +62,56 @@ html, body {
     padding: 0 !important;
 }
 
-* {
-    box-sizing: border-box;
+body > div.flex-grow-1,
+#content,
+main {
+    flex: 1 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
 }
 
-img {
-    max-width: 100%;
-    height: auto;
+footer {
+    flex-shrink: 0 !important;
+    margin-top: auto !important;
+    width: 100% !important;
+}
+
+* {
+    box-sizing: border-box !important;
+}
+
+img, video, iframe, canvas, svg {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+/* Ensure no container or row leaks beyond 100% screen width */
+@media (max-width: 991px) {
+    .container, .container-fluid {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding-left: 15px !important;
+        padding-right: 15px !important;
+        box-sizing: border-box !important;
+    }
+
+    .row {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    /* Wrap all wide tables into responsive scroll boxes automatically */
+    .table-responsive, table {
+        display: block !important;
+        width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    /* Prevent offset margin overflow on mobile screens for ALL pages */
+    [class*="offset-"] {
+        margin-left: 0 !important;
+    }
 }
 
 /* ---- Navbar Mobile Responsive ---- */
