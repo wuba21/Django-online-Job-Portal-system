@@ -5,59 +5,72 @@
 {% endblock %}
 
 {% block content %}
-
-    <div class="col-lg-6 offset-3 mt-3">
-        <div class="box">
-            <h3 class="heading">{% trans "Login" %}</h3>
-            <p class="lead">{% trans "Already our have account?" %}</p>
-            {% if form.errors %}
-                {% for error in form.non_field_errors %}
-                    <div class="alert alert-danger alert-dismissable">
-                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                        <strong>{{ error|escape }}</strong>
-                    </div>
-                {% endfor %}
-            {% endif %}
-            <form action="" method="post">
-                {% csrf_token %}
-                {% for field in form %}
-                    <div class="form-group">
-                        <label for="id_{{ field.name }}">{{ field.label }}</label>
-                        <input type="{{ field.field.widget.input_type }}"
-                               class="form-control"
-                               name="{{ field.name }}"
-                               id="id_{{ field.name }}"
-                               placeholder="{{ field.field.widget.attrs.placeholder }}">
-                        {% for error in field.errors %}
-                            <div class="alert alert-danger alert-dismissable">
-                                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+<section class="py-5 bg-light-gray">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6">
+                <div class="card border-0 shadow-sm rounded-lg p-4 bg-white">
+                    <h3 class="heading text-center mb-3">{% trans "Login" %}</h3>
+                    <p class="lead text-center text-muted mb-4" style="font-size: 1rem;">{% trans "Already have an account?" %}</p>
+                    
+                    {% if form.errors %}
+                        {% for error in form.non_field_errors %}
+                            <div class="alert alert-danger alert-dismissible fade show">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">&times;</button>
                                 <strong>{{ error|escape }}</strong>
                             </div>
                         {% endfor %}
+                    {% endif %}
+                    
+                    <form action="" method="post">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="form-group mb-3">
+                                <label for="id_{{ field.name }}" class="font-weight-bold text-secondary">{{ field.label }}</label>
+                                <input type="{{ field.field.widget.input_type }}"
+                                       class="form-control"
+                                       name="{{ field.name }}"
+                                       id="id_{{ field.name }}"
+                                       placeholder="{{ field.field.widget.attrs.placeholder }}"
+                                       required>
+                                {% for error in field.errors %}
+                                    <div class="alert alert-danger alert-dismissible fade show mt-1">
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">&times;</button>
+                                        <strong>{{ error|escape }}</strong>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary btn-block py-2 font-weight-bold">
+                                <i class="fa fa-sign-in mr-2"></i>{% trans "Log in" %}
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center my-3 text-muted position-relative">
+                        <hr>
+                        <span class="bg-white px-2 text-uppercase text-muted" style="position: relative; top: -28px; font-size: 0.75rem;">{% trans "Or login with" %}</span>
                     </div>
-                {% endfor %}
-                <div class="text-center">
-                    <button type="submit" class="btn btn-outline-white-primary"><i class="fa fa-sign-in"></i> {% trans "Log in" %}
-                    </button>
-                    <br>
-                    <div class="btn btn-outline-white-primary btn-sm" style="border-color:black">
-                        <a href="{% url "social:begin" "facebook" %}" style="color:black"><i
-                                class="fa fa-facebook-square"></i>{% trans "Login with Facebook" %} </a>
-                    </div>
-                    <div class="btn btn-outline-white-primary btn-sm" style="border-color:black">
-                        <a href="{% url "social:begin" "google-oauth2" %}" style="color:black"><i
-                                class="fa fa-google-plus-square"></i>{% trans "Login with Google" %} </a>
-                    </div>
-                    <div class="btn btn-outline-white-primary btn-sm" style="border-color:black">
-                        <a href="{% url "social:begin" "linkedin-oauth2" %}" style="color:black"><i
-                                class="fa fa-linkedin-square"></i>{% trans "Login with Linkedin" %} </a>
-                    </div>
-                    <div class="btn btn-outline-white-primary btn-sm" style="border-color:black">
-                        <a href="{% url "social:begin" "github" %}" style="color:black"><i
-                                class="fa fa-github-square"></i>{% trans "Login with Github" %} </a>
+
+                    <div class="social-login-buttons">
+                        <a href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-block btn-outline-danger mb-2 font-weight-bold">
+                            <i class="fa fa-google mr-2"></i>{% trans "Login with Google" %}
+                        </a>
+                        <a href="{% url 'social:begin' 'github' %}" class="btn btn-block btn-outline-dark mb-2 font-weight-bold">
+                            <i class="fa fa-github mr-2"></i>{% trans "Login with GitHub" %}
+                        </a>
+                        <a href="{% url 'social:begin' 'facebook' %}" class="btn btn-block btn-outline-primary mb-2 font-weight-bold">
+                            <i class="fa fa-facebook-official mr-2"></i>{% trans "Login with Facebook" %}
+                        </a>
+                        <a href="{% url 'social:begin' 'linkedin-oauth2' %}" class="btn btn-block btn-outline-info mb-2 font-weight-bold">
+                            <i class="fa fa-linkedin-square mr-2"></i>{% trans "Login with LinkedIn" %}
+                        </a>
                     </div>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
+</section>
 {% endblock %}
