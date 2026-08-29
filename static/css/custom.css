@@ -42,10 +42,18 @@
 }
 
 /* ============================================
-   MOBILE RESPONSIVE STYLES
+   MOBILE RESPONSIVE & VIEWPORT FIXES
    ============================================ */
 
-/* Viewport fix */
+/* Viewport Lock & Anti-Horizontal-Overflow Fix */
+html, body {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
 * {
     box-sizing: border-box;
 }
