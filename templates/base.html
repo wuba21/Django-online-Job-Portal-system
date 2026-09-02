@@ -66,71 +66,14 @@
                         <li class="nav-item">
                                 <a href="/{{ LANGUAGE_CODE }}/about-us/" class="nav-link">{% trans "About Us" %}</a>
                         </li>
-                        {% if request.user.is_authenticated and request.user.role == 'employer' %}
+                        {% if request.user.is_authenticated %}
                             <li class="nav-item dropdown">
                                 <a id="clientZone" href="#" data-toggle="dropdown"
                                    aria-haspopup="true" aria-expanded="false"
                                    class="nav-link dropdown-toggle has-img mb-3 mb-lg-0 mt-3 mt-lg-0">
                                     <div class="client-menu-image" style="position: relative; display: inline-block;">
                                         <div class="inner">
-                                            <img src="{% static 'img/company-1.png' %}"
-                                                 alt="company image"
-                                                 class="img-fluid">
-                                        </div>
-                                        {% if request.user.notifications.all %}
-                                            <span class="badge badge-pill badge-danger" style="position: absolute; top: -4px; right: -4px; font-size: 9px; padding: 2px 4px;">{{ request.user.notifications.all.count }}</span>
-                                        {% endif %}
-                                    </div>
-                                    {{ request.user.first_name|default:request.user.email }}
-                                </a>
-                                <div aria-labelledby="clientZone" class="dropdown-menu dropdown-menu-right">
-                                    <a href="{% url 'jobs:employer-dashboard' %}"
-                                       class="dropdown-item {% if url_name == 'employer-dashboard' %}active{% endif %}"
-                                    >
-                                        <i class="fa fa-tachometer mr-2"></i> {% trans "Dashboard" %}
-                                    </a>
-                                    <a href="{% url 'jobs:notifications' %}" class="dropdown-item {% if url_name == 'notifications' %}active{% endif %}">
-                                        <i class="fa fa-bell mr-2"></i> {% trans "Notifications" %}
-                                        {% if request.user.notifications.all %}
-                                            <span class="badge badge-danger ml-2">{{ request.user.notifications.all.count }}</span>
-                                        {% endif %}
-                                    </a>
-                                    <a href="{% url 'jobs:employer-all-applicants' %}"
-                                       class="dropdown-item {% if url_name == 'employer-all-applicants' %}active{% endif %}"
-                                    >
-                                        <i class="fa fa-users mr-2"></i> {% trans "Applicants" %}
-                                    </a>
-                                    <a href="{% url 'jobs:employer-jobs-create' %}"
-                                       class="dropdown-item {% if url_name == 'employer-jobs-create' %}active{% endif %}"
-                                    >
-                                        <i class="fa fa-plus mr-2"></i> {% trans "Post a new job" %}
-                                    </a>
-                                    <a href="{% url 'accounts:employer-profile-update' %}" class="dropdown-item">
-                                        <i class="fa fa-building mr-2"></i> {% trans "Edit Profile" %}
-                                    </a>
-                                    {% if request.user.is_staff %}
-                                        <div class="dropdown-divider"></div>
-                                        <a href="{% url 'jobs:admin-dashboard' %}" class="dropdown-item text-warning">
-                                            <i class="fa fa-shield mr-2"></i> Admin Panel
-                                        </a>
-                                        <a href="{% url 'jobs:admin-analytics-dashboard' %}" class="dropdown-item text-info">
-                                            <i class="fa fa-bar-chart mr-2"></i> System Analytics
-                                        </a>
-                                    {% endif %}
-                                    <div class="dropdown-divider"></div>
-                                    <a href="{% url 'accounts:logout' %}" class="dropdown-item text-danger">
-                                        <i class="fa fa-sign-out mr-2"></i> {% trans "Logout" %}
-                                    </a>
-                                </div>
-                            </li>
-                        {% elif request.user.is_authenticated and request.user.role == 'employee' %}
-                            <li class="nav-item dropdown">
-                                <a id="clientZone" href="#" data-toggle="dropdown"
-                                   aria-haspopup="true" aria-expanded="false"
-                                   class="nav-link dropdown-toggle has-img mb-3 mb-lg-0 mt-3 mt-lg-0">
-                                    <div class="client-menu-image" style="position: relative; display: inline-block;">
-                                        <div class="inner">
-                                            <img src="{% static 'img/avatar.png' %}"
+                                            <img src="{% if request.user.role == 'employer' %}{% static 'img/company-1.png' %}{% else %}{% static 'img/avatar.png' %}{% endif %}"
                                                  alt="user avatar"
                                                  class="img-fluid">
                                         </div>
@@ -141,39 +84,59 @@
                                     {{ request.user.first_name|default:request.user.email }}
                                 </a>
                                 <div aria-labelledby="clientZone" class="dropdown-menu dropdown-menu-right">
-                                    <a href="{% url 'jobs:applicant-dashboard' %}" class="dropdown-item {% if url_name == 'applicant-dashboard' %}active{% endif %}">
-                                        <i class="fa fa-tachometer mr-2"></i> {% trans "Dashboard" %}
-                                    </a>
-                                    <a href="{% url 'jobs:notifications' %}" class="dropdown-item {% if url_name == 'notifications' %}active{% endif %}">
-                                        <i class="fa fa-bell mr-2"></i> {% trans "Notifications" %}
-                                        {% if request.user.notifications.all %}
-                                            <span class="badge badge-danger ml-2">{{ request.user.notifications.all.count }}</span>
-                                        {% endif %}
-                                    </a>
-                                    <a href="{% url 'jobs:employee-favorites' %}" class="dropdown-item {% if url_name == 'employee-favorites' %}active{% endif %}">
-                                        <i class="fa fa-heart mr-2"></i> {% trans "Favorites" %}
-                                    </a>
-                                    <a href="{% url 'jobs:employee-my-applications' %}" class="dropdown-item {% if url_name == 'employee-my-applications' %}active{% endif %}">
-                                        <i class="fa fa-briefcase mr-2"></i> {% trans "My Applications" %}
-                                    </a>
-                                    <a href="{% url 'resume_cv:auto_builder' %}" class="dropdown-item {% if url_name == 'auto_builder' %}active{% endif %}">
-                                        <i class="fa fa-magic mr-2"></i> {% trans "Auto CV Builder" %}
-                                    </a>
-                                    <a href="{% url 'resume_cv:resumes' %}" class="dropdown-item {% if url_name == 'resumes' %}active{% endif %}">
-                                        <i class="fa fa-file-text mr-2"></i> {% trans "My Resumes" %}
-                                    </a>
-                                    <a href="{% url 'accounts:employee-profile-update' %}"
-                                       class="dropdown-item {% if url_name == 'employee-profile-update' %}active{% endif %}"
-                                    >
-                                        <i class="fa fa-user mr-2"></i> {% trans "Edit Profile" %}
-                                    </a>
-                                    {% if request.user.is_staff %}
-                                        <div class="dropdown-divider"></div>
-                                        <a href="{% url 'jobs:admin-dashboard' %}" class="dropdown-item text-warning">
-                                            <i class="fa fa-shield mr-2"></i> Admin Panel
+                                    {% if request.user.role == 'employer' %}
+                                        <a href="{% url 'jobs:employer-dashboard' %}" class="dropdown-item {% if url_name == 'employer-dashboard' %}active{% endif %}">
+                                            <i class="fa fa-tachometer mr-2"></i> {% trans "Dashboard" %}
                                         </a>
+                                        <a href="{% url 'jobs:notifications' %}" class="dropdown-item {% if url_name == 'notifications' %}active{% endif %}">
+                                            <i class="fa fa-bell mr-2"></i> {% trans "Notifications" %}
+                                            {% if request.user.notifications.all %}
+                                                <span class="badge badge-danger ml-2">{{ request.user.notifications.all.count }}</span>
+                                            {% endif %}
+                                        </a>
+                                        <a href="{% url 'jobs:employer-all-applicants' %}" class="dropdown-item {% if url_name == 'employer-all-applicants' %}active{% endif %}">
+                                            <i class="fa fa-users mr-2"></i> {% trans "Applicants" %}
+                                        </a>
+                                        <a href="{% url 'jobs:employer-jobs-create' %}" class="dropdown-item {% if url_name == 'employer-jobs-create' %}active{% endif %}">
+                                            <i class="fa fa-plus mr-2"></i> {% trans "Post a new job" %}
+                                        </a>
+                                        <a href="{% url 'accounts:employer-profile-update' %}" class="dropdown-item">
+                                            <i class="fa fa-building mr-2"></i> {% trans "Edit Profile" %}
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'jobs:applicant-dashboard' %}" class="dropdown-item {% if url_name == 'applicant-dashboard' %}active{% endif %}">
+                                            <i class="fa fa-tachometer mr-2"></i> {% trans "Dashboard" %}
+                                        </a>
+                                        <a href="{% url 'jobs:notifications' %}" class="dropdown-item {% if url_name == 'notifications' %}active{% endif %}">
+                                            <i class="fa fa-bell mr-2"></i> {% trans "Notifications" %}
+                                            {% if request.user.notifications.all %}
+                                                <span class="badge badge-danger ml-2">{{ request.user.notifications.all.count }}</span>
+                                            {% endif %}
+                                        </a>
+                                        <a href="{% url 'jobs:employee-favorites' %}" class="dropdown-item {% if url_name == 'employee-favorites' %}active{% endif %}">
+                                            <i class="fa fa-heart mr-2"></i> {% trans "Favorites" %}
+                                        </a>
+                                        <a href="{% url 'jobs:employee-my-applications' %}" class="dropdown-item {% if url_name == 'employee-my-applications' %}active{% endif %}">
+                                            <i class="fa fa-briefcase mr-2"></i> {% trans "My Applications" %}
+                                        </a>
+                                        <a href="{% url 'resume_cv:auto_builder' %}" class="dropdown-item {% if url_name == 'auto_builder' %}active{% endif %}">
+                                            <i class="fa fa-magic mr-2"></i> {% trans "Auto CV Builder" %}
+                                        </a>
+                                        <a href="{% url 'resume_cv:resumes' %}" class="dropdown-item {% if url_name == 'resumes' %}active{% endif %}">
+                                            <i class="fa fa-file-text mr-2"></i> {% trans "My Resumes" %}
+                                        </a>
+                                        <a href="{% url 'accounts:employee-profile-update' %}" class="dropdown-item {% if url_name == 'employee-profile-update' %}active{% endif %}">
+                                            <i class="fa fa-user mr-2"></i> {% trans "Edit Profile" %}
+                                        </a>
+                                    {% endif %}
+
+                                    {% if request.user.is_staff or request.user.is_superuser %}
+                                        <div class="dropdown-divider"></div>
                                         <a href="{% url 'jobs:admin-analytics-dashboard' %}" class="dropdown-item text-info">
                                             <i class="fa fa-bar-chart mr-2"></i> System Analytics
+                                        </a>
+                                        <a href="{% url 'jobs:admin-dashboard' %}" class="dropdown-item text-warning">
+                                            <i class="fa fa-shield mr-2"></i> Admin Panel
                                         </a>
                                     {% endif %}
                                     <div class="dropdown-divider"></div>
@@ -183,6 +146,32 @@
                                 </div>
                             </li>
                         {% else %}
+                            <li class="nav-item dropdown {% if url_name == 'employee-register' or url_name == 'employer-register' %}active{% endif %}">
+                                <a id="pages" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                   class="nav-link dropdown-toggle "><i class="fa fa-signing"></i>Register
+                                </a>
+                                <div aria-labelledby="pages" class="dropdown-menu">
+                                <a href="{% url 'accounts:employee-register' %}"
+                                   class="dropdown-item {% if url_name == 'employee-register' %}active{% endif %}"
+                                >
+                                    {% trans "Employee" %}
+                                </a>
+                                <a href="{% url 'accounts:employer-register' %}"
+                                   class="dropdown-item {% if url_name == 'employer-register' %}active{% endif %}"
+                                >
+                                    {% trans "Employers" %}
+                                </a>
+                                </div>
+                            </li>
+                            <li class="nav-item" style="color: #fff">
+                                <a href="{% url 'accounts:login' %}"
+                                   class="btn navbar-btn btn-outline-light mb-5 mb-lg-0 {% if url_name == 'login' %}active text-primary{% endif %}"
+                                >
+                                    <i class="fa fa-sign-in"></i>
+                                    {% trans "Login" %}
+                                </a>
+                            </li>
+                        {% endif %}
                             <li class="nav-item dropdown {% if url_name == 'employee-register' or url_name == 'employer-register' %}active{% endif %}">
                                 <a id="pages" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
                                    class="nav-link dropdown-toggle "><i class="fa fa-signing"></i>Register
