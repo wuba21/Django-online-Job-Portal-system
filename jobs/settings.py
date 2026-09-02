@@ -28,8 +28,15 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
 SESSION_COOKIE_HTTPONLY = True
-CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False
 SECURE_REFERRER_POLICY = "same-origin"
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.pythonanywhere.com",
+    "https://wubante.pythonanywhere.com",
+    "http://127.0.0.1",
+    "http://localhost",
+]
 
 # DEBUG = True
 SITE_ID = 1

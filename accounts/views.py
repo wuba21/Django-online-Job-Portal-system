@@ -108,9 +108,9 @@ class LogoutView(RedirectView):
     Provides users the ability to logout
     """
 
-    url = "/login"
+    pattern_name = "accounts:login"
 
     def get(self, request, *args, **kwargs):
         auth.logout(request)
         messages.success(request, "You are now logged out")
-        return super(LogoutView, self).get(request, *args, **kwargs)
+        return redirect("accounts:login")
