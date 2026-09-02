@@ -85,8 +85,6 @@ MIDDLEWARE = [
     "social_django.middleware.SocialAuthExceptionMiddleware",
 ]
 
-SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
-
 ROOT_URLCONF = "jobs.urls"
 
 TEMPLATES = [
