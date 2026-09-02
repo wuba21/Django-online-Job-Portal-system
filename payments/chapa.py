@@ -14,7 +14,7 @@ def initialize_chapa_payment(tx_ref, amount, email, first_name, last_name, retur
     Initializes a Chapa payment checkout session.
     If secret key is default/mock, returns a mock checkout URL for testing.
     """
-    if CHAPA_SECRET_KEY == "CHAPA_TEST_SECRET_KEY_MOCK" or not CHAPA_SECRET_KEY.startswith("CHAPUBK"):
+    if CHAPA_SECRET_KEY == "CHAPA_TEST_SECRET_KEY_MOCK" or not (CHAPA_SECRET_KEY.startswith("CHASECK") or CHAPA_SECRET_KEY.startswith("CHAPUBK")):
         # Sandbox / Fallback mode
         return {
             "status": "success",
@@ -69,7 +69,7 @@ def verify_chapa_payment(tx_ref):
     """
     Verifies a transaction using Chapa verification API.
     """
-    if CHAPA_SECRET_KEY == "CHAPA_TEST_SECRET_KEY_MOCK" or not CHAPA_SECRET_KEY.startswith("CHAPUBK"):
+    if CHAPA_SECRET_KEY == "CHAPA_TEST_SECRET_KEY_MOCK" or not (CHAPA_SECRET_KEY.startswith("CHASECK") or CHAPA_SECRET_KEY.startswith("CHAPUBK")):
         return {"status": "success", "message": "Transaction verified (Mock)"}
 
     url = f"{CHAPA_VERIFY_URL}{tx_ref}"
