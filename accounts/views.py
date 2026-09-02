@@ -75,28 +75,33 @@ class LoginView(FormView):
 
     def dispatch(self, request, *args, **kwargs):
         if self.request.user.is_authenticated:
-            return HttpResponseRedirect(self.get_success_url())
+            return HttpResponseRedirect(self._redirect_for_user(self.request.user))
         return super().dispatch(self.request, *args, **kwargs)
 
-    def get_success_url(self):
-        if "next" in self.request.GET and self.request.GET["next"] != "":
-            return self.request.GET["next"]
-        user = self.request.user
-        if user.is_authenticated:
+    def _redirect_for_user(self, user):
+        """Return the correct URL based on user role."""
+        try:
+            if "next" in self.request.GET and self.request.GET["next"]:
+                return self.request.GET["next"]
             if user.is_superuser or user.is_staff:
-                return reverse_lazy("jobs:admin-analytics-dashboard")
-            elif user.role == "employer":
-                return reverse_lazy("jobs:employer-dashboard")
-            elif user.role == "employee":
-                return reverse_lazy("jobs:applicant-dashboard")
+                return "/analytics-dashboard/"
+            if getattr(user, "role", None) == "employer":
+                return "/en/employer/dashboard/"
+            if getattr(user, "role", None) == "employee":
+                return "/en/applicant/dashboard/"
+        except Exception:
+            pass
         return self.success_url
+
+    def get_success_url(self):
+        return self._redirect_for_user(self.request.user)
 
     def get_form_class(self):
         return self.form_class
 
     def form_valid(self, form):
         auth.login(self.request, form.get_user())
-        return HttpResponseRedirect(self.get_success_url())
+        return HttpResponseRedirect(self._redirect_for_user(form.get_user()))
 
     def form_invalid(self, form):
         """If the form is invalid, render the invalid form."""
