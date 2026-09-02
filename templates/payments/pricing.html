@@ -87,6 +87,21 @@ header.header, .navbar {
     gap: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
+.method-option {
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.method-option:hover, .method-option.selected {
+    border-color: #0284c7;
+    background-color: #f0f9ff;
+}
 </style>
 {% endblock %}
 
@@ -133,17 +148,9 @@ header.header, .navbar {
                             <li><i class="fa fa-check text-success me-2"></i> Recommended to top matching candidate profiles</li>
                             <li><i class="fa fa-check text-success me-2"></i> 30-day VIP duration</li>
                         </ul>
-                        {% if user.is_authenticated and user.is_employer %}
-                            <form action="{% url 'payments:initiate_checkout' %}" method="POST">
-                                {% csrf_token %}
-                                <input type="hidden" name="purpose" value="featured_job">
-                                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
-                                    <i class="fa fa-bolt me-1"></i> Feature a Job Now
-                                </button>
-                            </form>
-                        {% else %}
-                            <a href="{% url 'accounts:login' %}" class="btn btn-primary w-100 py-2 fw-semibold">Login to Purchase</a>
-                        {% endif %}
+                        <button type="button" class="btn btn-primary w-100 py-2 fw-semibold" onclick="openPaymentModal('featured_job', 'Featured VIP Job', '500')">
+                            <i class="fa fa-bolt me-1"></i> Feature a Job Now (500 ETB)
+                        </button>
                     </div>
                 </div>
 
@@ -159,17 +166,9 @@ header.header, .navbar {
                             <li><i class="fa fa-check text-success me-2"></i> Direct candidate resume downloads</li>
                             <li><i class="fa fa-check text-success me-2"></i> Priority customer support</li>
                         </ul>
-                        {% if user.is_authenticated and user.is_employer %}
-                            <form action="{% url 'payments:initiate_checkout' %}" method="POST">
-                                {% csrf_token %}
-                                <input type="hidden" name="purpose" value="employer_subscription">
-                                <button type="submit" class="btn btn-dark w-100 py-2 fw-semibold">
-                                    Subscribe Pro (1,500 ETB)
-                                </button>
-                            </form>
-                        {% else %}
-                            <a href="{% url 'accounts:login' %}" class="btn btn-dark w-100 py-2 fw-semibold">Login to Subscribe</a>
-                        {% endif %}
+                        <button type="button" class="btn btn-dark w-100 py-2 fw-semibold" onclick="openPaymentModal('employer_subscription', 'Business Pro Package', '1500')">
+                            Subscribe Pro (1,500 ETB)
+                        </button>
                     </div>
                 </div>
             </div>
@@ -194,23 +193,15 @@ header.header, .navbar {
                             <li><i class="fa fa-check text-success me-2"></i> Boosted application ranking on recruiter lists</li>
                             <li><i class="fa fa-check text-success me-2"></i> Automatic match alerts for top-paying openings</li>
                         </ul>
-                        {% if user.is_authenticated %}
-                            <form action="{% url 'payments:initiate_checkout' %}" method="POST">
-                                {% csrf_token %}
-                                <input type="hidden" name="purpose" value="candidate_vip">
-                                <button type="submit" class="btn btn-info text-white w-100 py-2 fw-semibold">
-                                    <i class="fa fa-rocket me-1"></i> Upgrade to Candidate VIP (300 ETB)
-                                </button>
-                            </form>
-                        {% else %}
-                            <a href="{% url 'accounts:login' %}" class="btn btn-info text-white w-100 py-2 fw-semibold">Login to Upgrade</a>
-                        {% endif %}
+                        <button type="button" class="btn btn-info text-white w-100 py-2 fw-semibold" onclick="openPaymentModal('candidate_vip', 'Candidate VIP Boost', '300')">
+                            <i class="fa fa-rocket me-1"></i> Upgrade to Candidate VIP (300 ETB)
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Payment Gateways Supported Banner -->
+        <!-- Supported Gateways Banner -->
         <div class="text-center mt-5">
             <p class="text-muted small uppercase fw-semibold mb-3" style="letter-spacing: 0.08em;">Instant Local Ethiopian Payment Methods Supported</p>
             <div class="payment-gateways">
@@ -227,4 +218,135 @@ header.header, .navbar {
         </div>
     </div>
 </div>
+
+<!-- Ethiopian Payment Gateway Selection Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="paymentModalLabel" style="color: #0f172a;">
+                    <i class="fa fa-credit-card text-primary me-2"></i> Select Payment Method
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body pt-3">
+                <div class="bg-light p-3 rounded mb-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted small">Selected Package:</span>
+                        <span class="fw-bold text-dark" id="modalPackageName">Package</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <span class="text-muted small">Total Amount:</span>
+                        <span class="fw-bold text-primary fs-5" id="modalPackagePrice">0 ETB</span>
+                    </div>
+                </div>
+
+                <form id="paymentForm" action="{% url 'payments:initiate_checkout' %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="purpose" id="modalPurposeInput" value="">
+                    <input type="hidden" name="payment_method" id="modalMethodInput" value="telebirr">
+                    
+                    {% if user_jobs %}
+                        <div class="form-group mb-3" id="jobSelectGroup" style="display: none;">
+                            <label class="small text-muted fw-semibold mb-1">Select Job to Feature:</label>
+                            <select name="job_id" class="form-control">
+                                {% for job in user_jobs %}
+                                    <option value="{{ job.id }}">{{ job.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% endif %}
+
+                    <label class="small text-muted fw-semibold mb-2">Choose your preferred Ethiopian payment option:</label>
+
+                    <!-- Telebirr Option -->
+                    <div class="method-option selected" onclick="selectPaymentMethod('telebirr', this)">
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="fa fa-mobile-phone fa-2x text-success"></i>
+                            <div>
+                                <h6 class="fw-bold mb-0 text-success">Telebirr</h6>
+                                <span class="small text-muted">Direct Telebirr app checkout</span>
+                            </div>
+                        </div>
+                        <i class="fa fa-check-circle text-success fs-5 check-icon"></i>
+                    </div>
+
+                    <!-- CBE Birr Option -->
+                    <div class="method-option" onclick="selectPaymentMethod('cbe_birr', this)">
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="fa fa-university fa-2x text-primary"></i>
+                            <div>
+                                <h6 class="fw-bold mb-0 text-primary">CBE Birr</h6>
+                                <span class="small text-muted">Commercial Bank of Ethiopia</span>
+                            </div>
+                        </div>
+                        <i class="fa fa-circle-o text-muted fs-5 check-icon"></i>
+                    </div>
+
+                    <!-- Chapa (Cards) Option -->
+                    <div class="method-option" onclick="selectPaymentMethod('chapa', this)">
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="fa fa-credit-card fa-2x text-info"></i>
+                            <div>
+                                <h6 class="fw-bold mb-0 text-info">Chapa (Visa / Mastercard / Cards)</h6>
+                                <span class="small text-muted">Secure online card checkout</span>
+                            </div>
+                        </div>
+                        <i class="fa fa-circle-o text-muted fs-5 check-icon"></i>
+                    </div>
+
+                    {% if user.is_authenticated %}
+                        <button type="submit" class="btn btn-primary w-100 py-3 mt-3 fw-bold shadow-sm" style="border-radius: 10px;">
+                            <i class="fa fa-lock me-1"></i> Proceed to Pay <span id="btnPayAmount">500</span> ETB
+                        </button>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}?next=/en/payments/pricing/" class="btn btn-primary w-100 py-3 mt-3 fw-bold shadow-sm" style="border-radius: 10px;">
+                            <i class="fa fa-sign-in me-1"></i> Login to Pay <span id="btnLoginAmount">500</span> ETB
+                        </a>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openPaymentModal(purpose, name, price) {
+    document.getElementById('modalPurposeInput').value = purpose;
+    document.getElementById('modalPackageName').innerText = name;
+    document.getElementById('modalPackagePrice').innerText = price + ' ETB';
+    
+    var btnPay = document.getElementById('btnPayAmount');
+    if (btnPay) btnPay.innerText = price;
+    
+    var btnLogin = document.getElementById('btnLoginAmount');
+    if (btnLogin) btnLogin.innerText = price;
+
+    var jobGroup = document.getElementById('jobSelectGroup');
+    if (jobGroup) {
+        jobGroup.style.display = (purpose === 'featured_job') ? 'block' : 'none';
+    }
+
+    $('#paymentModal').modal('show');
+}
+
+function selectPaymentMethod(method, element) {
+    document.getElementById('modalMethodInput').value = method;
+    var options = document.querySelectorAll('.method-option');
+    options.forEach(function(opt) {
+        opt.classList.remove('selected');
+        var icon = opt.querySelector('.check-icon');
+        if (icon) {
+            icon.className = 'fa fa-circle-o text-muted fs-5 check-icon';
+        }
+    });
+    element.classList.add('selected');
+    var selectedIcon = element.querySelector('.check-icon');
+    if (selectedIcon) {
+        selectedIcon.className = 'fa fa-check-circle text-success fs-5 check-icon';
+    }
+}
+</script>
 {% endblock %}

@@ -17,10 +17,14 @@ def pricing_page(request):
     """
     employer_plans = SubscriptionPlan.objects.filter(target_role="employer").order_by("price")
     candidate_plans = SubscriptionPlan.objects.filter(target_role="employee").order_by("price")
+    user_jobs = []
+    if request.user.is_authenticated:
+        user_jobs = Job.objects.filter(user=request.user)
     
     return render(request, "payments/pricing.html", {
         "employer_plans": employer_plans,
         "candidate_plans": candidate_plans,
+        "user_jobs": user_jobs,
     })
 
 
@@ -38,10 +42,14 @@ def initiate_checkout(request):
     description = "Payment for Ethiopian Job Portal Services"
     job = None
 
-    if purpose == "featured_job" and job_id:
-        job = get_object_or_404(Job, id=job_id, user=request.user)
+    if purpose == "featured_job":
         amount = 500.00
-        title = f"Featured Job: {job.title}"
+        if job_id:
+            job = get_object_or_404(Job, id=job_id, user=request.user)
+        else:
+            job = Job.objects.filter(user=request.user).first()
+        job_title_str = f": {job.title}" if job else ""
+        title = f"Featured VIP Job{job_title_str}"
         description = "Highlight job listing on home page & top search results for 30 days"
 
     elif purpose == "candidate_vip":
