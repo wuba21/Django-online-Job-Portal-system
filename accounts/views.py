@@ -1,6 +1,7 @@
 from django.contrib import auth, messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
+from django.urls import reverse_lazy
 from django.views.generic import CreateView, FormView, RedirectView
 
 from accounts.forms import *
@@ -80,8 +81,15 @@ class LoginView(FormView):
     def get_success_url(self):
         if "next" in self.request.GET and self.request.GET["next"] != "":
             return self.request.GET["next"]
-        else:
-            return self.success_url
+        user = self.request.user
+        if user.is_authenticated:
+            if user.is_superuser or user.is_staff:
+                return reverse_lazy("jobs:admin-analytics-dashboard")
+            elif user.role == "employer":
+                return reverse_lazy("jobs:employer-dashboard")
+            elif user.role == "employee":
+                return reverse_lazy("jobs:applicant-dashboard")
+        return self.success_url
 
     def get_form_class(self):
         return self.form_class
