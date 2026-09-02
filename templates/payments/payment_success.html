@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Payment Successful" %} - Django Jobs{% endblock %}
+
+{% block styles %}
+<style>
+header.header, .navbar {
+    background-color: #1a2536 !important;
+}
+.success-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    max-width: 550px;
+    margin: 50px auto;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+}
+.success-icon {
+    width: 80px;
+    height: 80px;
+    background: #dcfce7;
+    color: #16a34a;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    margin: 0 auto 24px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="success-card">
+        <div class="success-icon">
+            <i class="fa fa-check"></i>
+        </div>
+        <h3 class="fw-bold mb-2" style="color: #0f172a;">{% trans "Payment Completed Successfully!" %}</h3>
+        <p class="text-muted mb-4">
+            {% trans "Thank you for your payment. Your premium features have been activated automatically." %}
+        </p>
+
+        <div class="bg-light p-3 rounded text-start mb-4">
+            <div class="d-flex justify-content-between small text-muted mb-2">
+                <span>Transaction Ref:</span>
+                <span class="fw-bold text-dark">{{ transaction.tx_ref }}</span>
+            </div>
+            <div class="d-flex justify-content-between small text-muted mb-2">
+                <span>Amount Paid:</span>
+                <span class="fw-bold text-dark">{{ transaction.amount }} {{ transaction.currency }}</span>
+            </div>
+            <div class="d-flex justify-content-between small text-muted">
+                <span>Status:</span>
+                <span class="badge bg-success">COMPLETED</span>
+            </div>
+        </div>
+
+        <a href="{% url 'jobs:home' %}" class="btn btn-primary px-4 py-2 fw-semibold">
+            <i class="fa fa-home me-1"></i> Back to Home
+        </a>
+    </div>
+</div>
+{% endblock %}

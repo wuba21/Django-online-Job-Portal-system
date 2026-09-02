@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "resume_cv",
     "accounts",
     "tags",
+    "payments",
     "oauth2_provider",
     "social_django",
     # "rest_framework_social_oauth2",
@@ -107,16 +108,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "jobs.wsgi.application"
 
-# Database
-# https://docs.djangoproject.com/en/2.1/ref/settings/#databases
-
+# Database (PostgreSQL / MySQL / SQLite)
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
-        "CONN_MAX_AGE": 0,
-    }
+    "default": env.db("DATABASE_URL", default=f"sqlite:///{os.path.join(BASE_DIR, 'db.sqlite3')}")
 }
+
+# Chapa Payment Integration Key
+CHAPA_SECRET_KEY = env("CHAPA_SECRET_KEY", default="CHAPA_TEST_SECRET_KEY_MOCK")
+
+# Cloudinary Cloud Storage Config (For CV PDFs & Company Logos)
+CLOUDINARY_URL = env("CLOUDINARY_URL", default="")
+if CLOUDINARY_URL:
+    INSTALLED_APPS += ["cloudinary_storage", "cloudinary"]
+    DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 CACHES = {
     "default": {

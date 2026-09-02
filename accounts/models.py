@@ -19,6 +19,7 @@ class User(AbstractUser):
     email = models.EmailField(
         unique=True, blank=False, error_messages={"unique": "A user with that email already exists."}
     )
+    is_vip = models.BooleanField(default=False, db_index=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []

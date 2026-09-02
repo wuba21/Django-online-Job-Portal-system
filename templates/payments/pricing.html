@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Pricing & VIP Subscriptions" %} - Django Jobs{% endblock %}
+
+{% block styles %}
+<style>
+header.header, .navbar {
+    background-color: #1a2536 !important;
+}
+.pricing-section {
+    padding: 50px 0;
+    background-color: #f8fafc;
+    min-height: calc(100vh - 120px);
+}
+.pricing-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 32px 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 2px solid #e2e8f0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+.pricing-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+.pricing-card.featured {
+    border-color: #0284c7;
+    background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
+}
+.badge-popular {
+    position: absolute;
+    top: -14px;
+    right: 24px;
+    background: linear-gradient(135deg, #0284c7, #2563eb);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.price-tag {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 16px 0 8px;
+}
+.price-tag span {
+    font-size: 1rem;
+    color: #64748b;
+    font-weight: 500;
+}
+.feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 24px 0;
+    flex-grow: 1;
+}
+.feature-list li {
+    padding: 8px 0;
+    color: #334155;
+    font-size: 0.95rem;
+}
+.payment-gateways {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    align-items: center;
+    margin-top: 40px;
+}
+.gateway-badge {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pricing-section">
+    <div class="container">
+        <!-- Section Header -->
+        <div class="text-center max-w-2xl mx-auto mb-5">
+            <h2 class="fw-bold display-6 mb-2" style="color: #0f172a;">{% trans "Simple, Transparent Pricing" %}</h2>
+            <p class="text-muted lead" style="font-size: 1.1rem;">
+                {% trans "Boost your job postings & candidate profiles with Ethiopia's leading payment integration." %}
+            </p>
+        </div>
+
+        <!-- Employer Packages -->
+        <div class="mb-5">
+            <h4 class="fw-bold mb-4" style="color: #0f172a;"><i class="fa fa-building text-primary me-2"></i> Employer Monetization Packages</h4>
+            <div class="row g-4">
+                <!-- Standard Job Listing -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="pricing-card">
+                        <h5 class="fw-bold">Standard Job Post</h5>
+                        <p class="text-muted small">Single standard job opening</p>
+                        <div class="price-tag">0 <span>ETB / Post</span></div>
+                        <ul class="feature-list">
+                            <li><i class="fa fa-check text-success me-2"></i> Standard job listing</li>
+                            <li><i class="fa fa-check text-success me-2"></i> 30-day listing duration</li>
+                            <li><i class="fa fa-check text-success me-2"></i> Basic applicant dashboard</li>
+                        </ul>
+                        <a href="{% url 'jobs:employer-jobs-create' %}" class="btn btn-outline-secondary w-100 py-2 fw-semibold">Post Free Job</a>
+                    </div>
+                </div>
+
+                <!-- Featured / VIP Job Listing -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="pricing-card featured">
+                        <span class="badge-popular">Most Popular</span>
+                        <h5 class="fw-bold text-primary">Featured VIP Job</h5>
+                        <p class="text-muted small">Maximized applicant reach & speed</p>
+                        <div class="price-tag">500 <span>ETB / Post</span></div>
+                        <ul class="feature-list">
+                            <li><i class="fa fa-star text-warning me-2"></i> <strong>VIP Highlight Badge on Home Page</strong></li>
+                            <li><i class="fa fa-check text-success me-2"></i> Top priority in search results</li>
+                            <li><i class="fa fa-check text-success me-2"></i> Recommended to top matching candidate profiles</li>
+                            <li><i class="fa fa-check text-success me-2"></i> 30-day VIP duration</li>
+                        </ul>
+                        {% if user.is_authenticated and user.is_employer %}
+                            <form action="{% url 'payments:initiate_checkout' %}" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="purpose" value="featured_job">
+                                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                                    <i class="fa fa-bolt me-1"></i> Feature a Job Now
+                                </button>
+                            </form>
+                        {% else %}
+                            <a href="{% url 'accounts:login' %}" class="btn btn-primary w-100 py-2 fw-semibold">Login to Purchase</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Employer Business Pro Subscription -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="pricing-card">
+                        <h5 class="fw-bold">Business Pro Package</h5>
+                        <p class="text-muted small">For active hiring teams & agencies</p>
+                        <div class="price-tag">1,500 <span>ETB / Month</span></div>
+                        <ul class="feature-list">
+                            <li><i class="fa fa-check text-success me-2"></i> Unlimited job postings</li>
+                            <li><i class="fa fa-check text-success me-2"></i> 5 Featured VIP listings included</li>
+                            <li><i class="fa fa-check text-success me-2"></i> Direct candidate resume downloads</li>
+                            <li><i class="fa fa-check text-success me-2"></i> Priority customer support</li>
+                        </ul>
+                        {% if user.is_authenticated and user.is_employer %}
+                            <form action="{% url 'payments:initiate_checkout' %}" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="purpose" value="employer_subscription">
+                                <button type="submit" class="btn btn-dark w-100 py-2 fw-semibold">
+                                    Subscribe Pro (1,500 ETB)
+                                </button>
+                            </form>
+                        {% else %}
+                            <a href="{% url 'accounts:login' %}" class="btn btn-dark w-100 py-2 fw-semibold">Login to Subscribe</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Candidate VIP Packages -->
+        <div class="mb-5">
+            <h4 class="fw-bold mb-4" style="color: #0f172a;"><i class="fa fa-user-circle text-info me-2"></i> Candidate VIP Resume Services</h4>
+            <div class="row justify-content-center">
+                <div class="col-lg-6 col-md-8">
+                    <div class="pricing-card featured">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="fw-bold text-info mb-1"><i class="fa fa-shield me-1"></i> VIP Candidate Profile Boost</h5>
+                                <p class="text-muted small mb-0">Get noticed first by top Ethiopian recruiters</p>
+                            </div>
+                            <div class="price-tag my-0">300 <span>ETB / Month</span></div>
+                        </div>
+                        <hr>
+                        <ul class="feature-list">
+                            <li><i class="fa fa-star text-warning me-2"></i> <strong>VIP Verified Badge on Candidate Profile</strong></li>
+                            <li><i class="fa fa-check text-success me-2"></i> Boosted application ranking on recruiter lists</li>
+                            <li><i class="fa fa-check text-success me-2"></i> Automatic match alerts for top-paying openings</li>
+                        </ul>
+                        {% if user.is_authenticated %}
+                            <form action="{% url 'payments:initiate_checkout' %}" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="purpose" value="candidate_vip">
+                                <button type="submit" class="btn btn-info text-white w-100 py-2 fw-semibold">
+                                    <i class="fa fa-rocket me-1"></i> Upgrade to Candidate VIP (300 ETB)
+                                </button>
+                            </form>
+                        {% else %}
+                            <a href="{% url 'accounts:login' %}" class="btn btn-info text-white w-100 py-2 fw-semibold">Login to Upgrade</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Gateways Supported Banner -->
+        <div class="text-center mt-5">
+            <p class="text-muted small uppercase fw-semibold mb-3" style="letter-spacing: 0.08em;">Instant Local Ethiopian Payment Methods Supported</p>
+            <div class="payment-gateways">
+                <div class="gateway-badge text-success">
+                    <i class="fa fa-mobile-phone fa-lg text-success"></i> Telebirr
+                </div>
+                <div class="gateway-badge text-primary">
+                    <i class="fa fa-university fa-lg text-primary"></i> CBE Birr
+                </div>
+                <div class="gateway-badge text-info">
+                    <i class="fa fa-credit-card fa-lg text-info"></i> Chapa (Cards)
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

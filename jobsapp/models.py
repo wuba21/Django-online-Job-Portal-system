@@ -80,6 +80,8 @@ class Job(models.Model):
     status = models.CharField(max_length=20, choices=JOB_STATUS_CHOICES, default="approved", db_index=True)
     tags = models.ManyToManyField(Tag, blank=True)
     vacancy = models.IntegerField(default=1)
+    is_featured = models.BooleanField(default=False, db_index=True)
+    featured_until = models.DateTimeField(blank=True, null=True)
 
     objects = JobManager()
 

@@ -31,6 +31,7 @@ lang_patterns = i18n_patterns(
     path("", include("jobsapp.urls")),
     path("", include("accounts.urls")),
     path("", include("resume_cv.urls")),
+    path("payments/", include("payments.urls")),
 )
 
 # sitemaps = {
