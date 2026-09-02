@@ -113,6 +113,9 @@
                                         <a href="{% url 'jobs:admin-dashboard' %}" class="dropdown-item text-warning">
                                             <i class="fa fa-shield mr-2"></i> Admin Panel
                                         </a>
+                                        <a href="{% url 'jobs:admin-analytics-dashboard' %}" class="dropdown-item text-info">
+                                            <i class="fa fa-bar-chart mr-2"></i> System Analytics
+                                        </a>
                                     {% endif %}
                                     <div class="dropdown-divider"></div>
                                     <a href="{% url 'accounts:logout' %}" class="dropdown-item text-danger">
@@ -153,6 +156,9 @@
                                     <a href="{% url 'jobs:employee-my-applications' %}" class="dropdown-item {% if url_name == 'employee-my-applications' %}active{% endif %}">
                                         <i class="fa fa-briefcase mr-2"></i> {% trans "My Applications" %}
                                     </a>
+                                    <a href="{% url 'resume_cv:auto_builder' %}" class="dropdown-item {% if url_name == 'auto_builder' %}active{% endif %}">
+                                        <i class="fa fa-magic mr-2"></i> {% trans "Auto CV Builder" %}
+                                    </a>
                                     <a href="{% url 'resume_cv:resumes' %}" class="dropdown-item {% if url_name == 'resumes' %}active{% endif %}">
                                         <i class="fa fa-file-text mr-2"></i> {% trans "My Resumes" %}
                                     </a>
@@ -165,6 +171,9 @@
                                         <div class="dropdown-divider"></div>
                                         <a href="{% url 'jobs:admin-dashboard' %}" class="dropdown-item text-warning">
                                             <i class="fa fa-shield mr-2"></i> Admin Panel
+                                        </a>
+                                        <a href="{% url 'jobs:admin-analytics-dashboard' %}" class="dropdown-item text-info">
+                                            <i class="fa fa-bar-chart mr-2"></i> System Analytics
                                         </a>
                                     {% endif %}
                                     <div class="dropdown-divider"></div>

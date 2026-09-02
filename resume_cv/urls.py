@@ -9,11 +9,13 @@ from .views import (
     upload_image,
     update_builder,
     load_builder,
+    auto_cv_builder,
 )
 
 app_name = "resume_cv"
 
 urlpatterns = [
+    path("auto-builder/", auto_cv_builder, name="auto_builder"),
     path("templates", TemplateListView.as_view(), name="templates"),
     path("resume-cv/create", ResumeCVCreateView.as_view(), name="create"),
     path("templates/builder/<code>", resume_builder, name="builder"),

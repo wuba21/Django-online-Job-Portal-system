@@ -1,7 +1,7 @@
 from django.urls import include, path
 
 from jobsapp.views.admin_dashboard import (
-    AdminDashboardView, approve_job, delete_job, toggle_user_active
+    AdminDashboardView, admin_analytics_dashboard, approve_job, delete_job, toggle_user_active
 )
 from jobsapp.views.employee import (
     ApplicantDashboardView, EditProfileView, EmployeeMyJobsListView, FavoriteListView,
@@ -69,8 +69,9 @@ urlpatterns = [
         ),
     ),
 
-    # Custom Platform Admin Dashboard
+    # Custom Platform Admin Dashboard & Analytics
     path("platform-admin/", AdminDashboardView.as_view(), name="admin-dashboard"),
+    path("analytics-dashboard/", admin_analytics_dashboard, name="admin-analytics-dashboard"),
     path("platform-admin/toggle-user/<int:user_id>/", toggle_user_active, name="admin-toggle-user"),
     path("platform-admin/approve-job/<int:job_id>/", approve_job, name="admin-approve-job"),
     path("platform-admin/delete-job/<int:job_id>/", delete_job, name="admin-delete-job"),

@@ -18,10 +18,18 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 env = environ.Env()
 
-SECRET_KEY = "@pzqp#x^+#(olu#wy(6=mi9&a8n+g&x#af#apn07@j=5oin=xb"
+SECRET_KEY = env("SECRET_KEY", default="@pzqp#x^+#(olu#wy(6=mi9&a8n+g&x#af#apn07@j=5oin=xb")
 
-DEBUG = env("DEBUG", default=False)
+DEBUG = env("DEBUG", default=True)
 print("DEBUG: ", DEBUG)
+
+# Production Security Hardening Headers
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
+SECURE_REFERRER_POLICY = "same-origin"
 
 # DEBUG = True
 SITE_ID = 1

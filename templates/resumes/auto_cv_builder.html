@@ -1,0 +1,342 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Auto CV Builder" %} - Django Jobs{% endblock %}
+
+{% block styles %}
+<style>
+/* Page Layout */
+.cv-builder-wrapper {
+    padding: 30px 0;
+    background-color: #f1f5f9;
+    min-height: calc(100vh - 120px);
+}
+
+.cv-toolbar {
+    background: #ffffff;
+    padding: 15px 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.theme-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 2px solid transparent;
+    font-weight: 600;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.theme-btn.active {
+    border-color: #0f172a;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* CV A4 Sheet */
+.cv-paper {
+    background: #ffffff;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    color: #334155;
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* Theme 1: Modern Teal (Default) */
+.cv-paper.theme-teal .cv-header {
+    background: linear-gradient(135deg, #0d9488 0%, #115e59 100%);
+    color: #ffffff;
+    padding: 40px;
+}
+.cv-paper.theme-teal .cv-section-title {
+    color: #0d9488;
+    border-bottom: 2px solid #ccfbf1;
+}
+.cv-paper.theme-teal .skill-tag {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+/* Theme 2: Executive Navy */
+.cv-paper.theme-navy .cv-header {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: #ffffff;
+    padding: 40px;
+}
+.cv-paper.theme-navy .cv-section-title {
+    color: #1e293b;
+    border-bottom: 2px solid #cbd5e1;
+}
+.cv-paper.theme-navy .skill-tag {
+    background: #f1f5f9;
+    color: #334155;
+}
+
+/* Theme 3: Minimal Slate */
+.cv-paper.theme-slate .cv-header {
+    background: #f8fafc;
+    color: #0f172a;
+    padding: 40px;
+    border-bottom: 3px solid #0f172a;
+}
+.cv-paper.theme-slate .cv-section-title {
+    color: #0f172a;
+    border-bottom: 2px solid #0f172a;
+}
+.cv-paper.theme-slate .skill-tag {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+/* Inner Elements */
+.cv-header-content {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+.cv-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+}
+.cv-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0;
+}
+.cv-job-title {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-top: 4px;
+}
+.cv-contact-info {
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+.cv-contact-info i {
+    margin-right: 5px;
+}
+
+.cv-body {
+    padding: 40px;
+}
+.cv-section {
+    margin-bottom: 30px;
+}
+.cv-section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-bottom: 8px;
+    margin-bottom: 18px;
+}
+.cv-item {
+    margin-bottom: 18px;
+}
+.cv-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-weight: 600;
+}
+.cv-item-title {
+    font-size: 1rem;
+    color: #0f172a;
+}
+.cv-item-sub {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-top: 2px;
+}
+.cv-item-date {
+    font-size: 0.85rem;
+    color: #64748b;
+}
+.skill-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.skill-tag {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* @media print PDF Styles */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .cv-paper, .cv-paper * {
+        visibility: visible;
+    }
+    .cv-paper {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+    }
+    .cv-toolbar, .header, footer, .navbar {
+        display: none !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cv-builder-wrapper">
+    <div class="container">
+        <!-- Control Toolbar -->
+        <div class="cv-toolbar">
+            <div class="d-flex align-items-center gap-2">
+                <span class="fw-bold me-2" style="font-size: 0.9rem;">{% trans "Select Theme:" %}</span>
+                <button class="theme-btn theme-teal active" onclick="switchTheme('teal')">Teal Modern</button>
+                <button class="theme-btn theme-navy" onclick="switchTheme('navy')">Executive Navy</button>
+                <button class="theme-btn theme-slate" onclick="switchTheme('slate')">Minimal Slate</button>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'accounts:employee-profile-update' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fa fa-edit me-1"></i> {% trans "Edit Data" %}
+                </a>
+                <button class="btn btn-primary btn-sm" onclick="window.print()">
+                    <i class="fa fa-download me-1"></i> {% trans "Download / Print PDF" %}
+                </button>
+            </div>
+        </div>
+
+        <!-- A4 Printable CV Paper -->
+        <div class="cv-paper theme-teal" id="cvPaper">
+            <!-- Header Section -->
+            <div class="cv-header">
+                <div class="cv-header-content">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name }}" class="cv-avatar">
+                    {% else %}
+                        <img src="{% static 'images/default-avatar.png' %}" alt="Avatar" class="cv-avatar">
+                    {% endif %}
+                    <div>
+                        <h1 class="cv-name">{{ user.get_full_name|default:user.email }}</h1>
+                        <div class="cv-job-title">{{ profile.title|default:"Job Candidate" }}</div>
+                        <div class="cv-contact-info">
+                            <span><i class="fa fa-envelope"></i> {{ user.email }}</span>
+                            {% if user.phone_number %}
+                                <span><i class="fa fa-phone"></i> {{ user.phone_number }}</span>
+                            {% endif %}
+                            {% if profile.location %}
+                                <span><i class="fa fa-map-marker"></i> {{ profile.location }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body Section -->
+            <div class="cv-body">
+                <!-- Professional Summary -->
+                {% if profile.bio or user.bio %}
+                <div class="cv-section">
+                    <div class="cv-section-title">{% trans "Professional Summary" %}</div>
+                    <p style="line-height: 1.6; font-size: 0.95rem;">
+                        {{ profile.bio|default:user.bio }}
+                    </p>
+                </div>
+                {% endif %}
+
+                <!-- Work Experience -->
+                <div class="cv-section">
+                    <div class="cv-section-title">{% trans "Work Experience" %}</div>
+                    {% if experiences %}
+                        {% for exp in experiences %}
+                        <div class="cv-item">
+                            <div class="cv-item-header">
+                                <div class="cv-item-title">{{ exp.title }}</div>
+                                <div class="cv-item-date">
+                                    {{ exp.start_date|date:"M Y" }} - 
+                                    {% if exp.is_current %}{% trans "Present" %}{% else %}{{ exp.end_date|date:"M Y" }}{% endif %}
+                                </div>
+                            </div>
+                            <div class="cv-item-sub">{{ exp.company }} {% if exp.location %}| {{ exp.location }}{% endif %}</div>
+                            {% if exp.description %}
+                                <p style="font-size: 0.9rem; margin-top: 6px; color: #475569;">{{ exp.description }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p style="font-size: 0.9rem; color: #94a3b8; italic;">{% trans "No work experiences listed yet." %}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Education -->
+                <div class="cv-section">
+                    <div class="cv-section-title">{% trans "Education" %}</div>
+                    {% if educations %}
+                        {% for edu in educations %}
+                        <div class="cv-item">
+                            <div class="cv-item-header">
+                                <div class="cv-item-title">{{ edu.degree }} {% if edu.field_of_study %}in {{ edu.field_of_study }}{% endif %}</div>
+                                <div class="cv-item-date">
+                                    {{ edu.start_date|date:"Y" }} - {% if edu.is_current %}{% trans "Present" %}{% else %}{{ edu.end_date|date:"Y" }}{% endif %}
+                                </div>
+                            </div>
+                            <div class="cv-item-sub">{{ edu.institution }}</div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p style="font-size: 0.9rem; color: #94a3b8;">{% trans "No education history added yet." %}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Key Skills -->
+                <div class="cv-section">
+                    <div class="cv-section-title">{% trans "Skills & Expertise" %}</div>
+                    {% if skills %}
+                        <div class="skill-list">
+                            {% for skill in skills %}
+                                <span class="skill-tag">{{ skill.name }} ({{ skill.get_level_display }})</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p style="font-size: 0.9rem; color: #94a3b8;">{% trans "No skills added to profile yet." %}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function switchTheme(themeName) {
+    const paper = document.getElementById('cvPaper');
+    paper.className = 'cv-paper theme-' + themeName;
+    
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+}
+</script>
+{% endblock %}

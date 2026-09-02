@@ -198,3 +198,22 @@ def download_resume(request, id):
             return HttpResponse(html_string, content_type="text/html")
             
     return redirect("resume_cv:resumes")
+
+
+@login_required
+@user_is_employee
+def auto_cv_builder(request):
+    user = request.user
+    profile = getattr(user, "applicant_profile", None)
+    educations = user.educations.all()
+    experiences = user.experiences.all()
+    skills = user.skills.all()
+
+    context = {
+        "user": user,
+        "profile": profile,
+        "educations": educations,
+        "experiences": experiences,
+        "skills": skills,
+    }
+    return render(request, "resumes/auto_cv_builder.html", context)
