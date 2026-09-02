@@ -114,7 +114,7 @@ DATABASES = {
 }
 
 # Chapa Payment Integration Key
-CHAPA_SECRET_KEY = env("CHAPA_SECRET_KEY", default="CHAPA_TEST_SECRET_KEY_MOCK")
+CHAPA_SECRET_KEY = env("CHAPA_SECRET_KEY", default="CHASECK_TEST-LpIMynCSj89EOX7AgFurw1o6d7M9sLca")
 
 # Cloudinary Cloud Storage Config (For CV PDFs & Company Logos)
 CLOUDINARY_URL = env("CLOUDINARY_URL", default="")
