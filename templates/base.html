@@ -73,9 +73,11 @@
                                    class="nav-link dropdown-toggle has-img mb-3 mb-lg-0 mt-3 mt-lg-0">
                                     <div class="client-menu-image" style="position: relative; display: inline-block;">
                                         <div class="inner">
-                                            <img src="{% if request.user.role == 'employer' %}{% static 'img/company-1.png' %}{% else %}{% static 'img/avatar.png' %}{% endif %}"
-                                                 alt="user avatar"
-                                                 class="img-fluid">
+                                            {% if request.user.role == 'employer' %}
+                                                <img src="{% static 'img/company-1.png' %}" alt="company avatar" class="img-fluid">
+                                            {% else %}
+                                                <img src="{% static 'img/avatar.png' %}" alt="user avatar" class="img-fluid">
+                                            {% endif %}
                                         </div>
                                         {% if request.user.notifications.all %}
                                             <span class="badge badge-pill badge-danger" style="position: absolute; top: -4px; right: -4px; font-size: 9px; padding: 2px 4px;">{{ request.user.notifications.all.count }}</span>
