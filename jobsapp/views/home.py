@@ -182,42 +182,42 @@ class ApplyJobView(CreateView):
             messages.info(request, "You have already applied for this job.")
             return HttpResponseRedirect(reverse_lazy("jobs:jobs-detail", kwargs={"id": job.id}))
 
-        form = self.get_form()
-        if form.is_valid():
-            applicant = form.save(commit=False)
-            applicant.user = request.user
-            applicant.job = job
+        # Create application directly
+        applicant = Applicant.objects.create(
+            user=request.user,
+            job=job,
+            comment=request.POST.get("comment", ""),
+        )
+        if "cv" in request.FILES:
+            applicant.cv = request.FILES["cv"]
             applicant.save()
 
-            messages.success(request, f"Successfully applied for '{job.title}'!")
+        messages.success(request, f"🎉 Successfully applied for '{job.title}'!")
 
-            # Trigger Candidate Notification
-            create_notification(
-                user=request.user,
-                title=f"Application Submitted: {job.title}",
-                message=f"You successfully applied for {job.title} at {job.company_name}.",
-                link=reverse_lazy("jobs:employee-my-applications")
-            )
+        # Trigger Candidate Notification
+        create_notification(
+            user=request.user,
+            title=f"Application Submitted: {job.title}",
+            message=f"You successfully applied for {job.title} at {job.company_name}.",
+            link=reverse_lazy("jobs:employee-my-applications")
+        )
 
-            # Trigger Employer Notification
-            create_notification(
-                user=job.user,
-                title=f"New Applicant for {job.title}",
-                message=f"{request.user.get_full_name() or request.user.email} applied for {job.title}.",
-                link=reverse_lazy("jobs:employer-dashboard-applicants", kwargs={"job_id": job.id})
-            )
+        # Trigger Employer Notification
+        create_notification(
+            user=job.user,
+            title=f"New Applicant for {job.title}",
+            message=f"{request.user.get_full_name() or request.user.email} applied for {job.title}.",
+            link=reverse_lazy("jobs:employer-dashboard-applicants", kwargs={"job_id": job.id})
+        )
 
-            # Send Email Alerts
-            send_event_email(
-                user_email=request.user.email,
-                subject=f"Application Confirmation - {job.title}",
-                message=f"Hello {request.user.get_full_name() or 'Candidate'},\n\nYour application for '{job.title}' at {job.company_name} has been received. You can track your status in your dashboard."
-            )
+        # Send Email Alerts
+        send_event_email(
+            user_email=request.user.email,
+            subject=f"Application Confirmation - {job.title}",
+            message=f"Hello {request.user.get_full_name() or 'Candidate'},\n\nYour application for '{job.title}' at {job.company_name} has been received. You can track your status in your dashboard."
+        )
 
-            return HttpResponseRedirect(reverse_lazy("jobs:jobs-detail", kwargs={"id": job.id}))
-        else:
-            messages.error(request, "Error submitting application. Please try again.")
-            return HttpResponseRedirect(reverse_lazy("jobs:jobs-detail", kwargs={"id": job.id}))
+        return HttpResponseRedirect(reverse_lazy("jobs:jobs-detail", kwargs={"id": job.id}))
 
 
 def favorite(request):
