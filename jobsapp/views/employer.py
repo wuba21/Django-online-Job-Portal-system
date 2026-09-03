@@ -276,3 +276,34 @@ class EmployerProfileEditView(UpdateView):
         context["form"] = user_form
         context["company_form"] = company_form
         return self.render_to_response(context)
+
+
+@login_required(login_url=reverse_lazy("accounts:login"))
+@user_is_employer
+def export_applicants_csv(request, job_id):
+    """
+    Exports all applicants for a specific job into a clean CSV spreadsheet.
+    """
+    import csv
+    from django.http import HttpResponse
+
+    job = get_object_or_404(Job, id=job_id, user=request.user)
+    applicants = Applicant.objects.select_related("user").filter(job=job)
+
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="Applicants_{job.id}_{job.title.replace(" ", "_")}.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(["Applicant Name", "Email", "Phone Number", "Applied Date", "Status", "Comment"])
+
+    for app in applicants:
+        writer.writerow([
+            app.user.get_full_name() or app.user.email,
+            app.user.email,
+            getattr(app.user, "phone_number", "") or "N/A",
+            app.created_at.strftime("%Y-%m-%d %H:%M"),
+            app.get_status,
+            app.comment or ""
+        ])
+
+    return response

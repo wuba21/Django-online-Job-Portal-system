@@ -10,7 +10,8 @@ from jobsapp.views.employee import (
 )
 from jobsapp.views.employer import (
     ApplicantPerJobView, ApplicantsListView, AppliedApplicantView, DashboardView,
-    EmployerProfileEditView, JobCreateView, JobUpdateView, SendResponseView, delete_employer_job, filled
+    EmployerProfileEditView, JobCreateView, JobUpdateView, SendResponseView, delete_employer_job, filled,
+    export_applicants_csv
 )
 from jobsapp.views.home import (
     AboutUsView, ApplyJobView, HomeView, JobDetailsView, JobListView, SearchView, favorite
@@ -36,6 +37,7 @@ urlpatterns = [
                 path("", DashboardView.as_view(), name="employer-dashboard"),
                 path("all-applicants/", ApplicantsListView.as_view(), name="employer-all-applicants"),
                 path("applicants/<int:job_id>/", ApplicantPerJobView.as_view(), name="employer-dashboard-applicants"),
+                path("applicants/<int:job_id>/export/", export_applicants_csv, name="export-applicants-csv"),
                 path(
                     "applied-applicant/<int:job_id>/view/<int:applicant_id>",
                     AppliedApplicantView.as_view(),

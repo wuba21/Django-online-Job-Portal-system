@@ -116,6 +116,19 @@ DATABASES = {
 # Chapa Payment Integration Key
 CHAPA_SECRET_KEY = env("CHAPA_SECRET_KEY", default="CHASECK_TEST-LpIMynCSj89EOX7AgFurw1o6d7M9sLca")
 
+# Telegram Bot Vacancy Broadcast Config
+TELEGRAM_BOT_TOKEN = env("TELEGRAM_BOT_TOKEN", default="")
+TELEGRAM_CHAT_ID = env("TELEGRAM_CHAT_ID", default="")
+
+# SMTP Real Email Server Config
+EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
+EMAIL_HOST = env("EMAIL_HOST", default="smtp.gmail.com")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="EthioJobPortal <noreply@ethiojobs.com>")
+
 # Cloudinary Cloud Storage Config (For CV PDFs & Company Logos)
 CLOUDINARY_URL = env("CLOUDINARY_URL", default="")
 if CLOUDINARY_URL:

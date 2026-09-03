@@ -44,6 +44,14 @@ def approve_job(request, job_id):
     job = get_object_or_404(Job, id=job_id)
     job.status = "approved"
     job.save()
+    
+    # Broadcast vacancy alert to Telegram Channel/Bot
+    try:
+        from jobsapp.utils.telegram import broadcast_job_to_telegram
+        broadcast_job_to_telegram(job)
+    except Exception:
+        pass
+
     messages.success(request, f"Job '{job.title}' approved successfully.")
     return redirect("jobs:admin-dashboard")
 
