@@ -32,19 +32,21 @@
             <div class="col-md-4 text-md-right mt-3 mt-md-0">
                 {% if request.user.is_authenticated and request.user.role == 'employee' %}
                     {% if already_applied %}
-                        <button class="btn btn-secondary btn-lg" disabled><i class="fa fa-check-circle"></i> Already Applied</button>
+                        <button class="btn btn-secondary btn-lg shadow-sm px-4 py-3 fw-bold w-100 w-md-auto" disabled><i class="fa fa-check-circle me-1"></i> Already Applied</button>
                     {% elif job.is_expired %}
-                        <button class="btn btn-danger btn-lg" disabled><i class="fa fa-clock-o"></i> Application Closed</button>
+                        <button class="btn btn-danger btn-lg shadow-sm px-4 py-3 fw-bold w-100 w-md-auto" disabled><i class="fa fa-clock-o me-1"></i> Application Closed</button>
                     {% elif job.filled %}
-                        <button class="btn btn-secondary btn-lg" disabled><i class="fa fa-ban"></i> Position Filled</button>
+                        <button class="btn btn-secondary btn-lg shadow-sm px-4 py-3 fw-bold w-100 w-md-auto" disabled><i class="fa fa-ban me-1"></i> Position Filled</button>
                     {% else %}
-                        <form action="{% url 'jobs:apply-job' job.id %}" method="post" class="d-inline">
+                        <form action="{% url 'jobs:apply-job' job.id %}" method="post" class="d-inline-block w-100 w-md-auto">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-primary btn-lg"><i class="fa fa-paper-plane"></i> Apply Now</button>
+                            <button type="submit" class="btn btn-primary btn-lg shadow-sm px-4 py-3 fw-bold w-100"><i class="fa fa-paper-plane me-1"></i> APPLY NOW</button>
                         </form>
                     {% endif %}
                 {% elif not request.user.is_authenticated %}
-                    <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary btn-lg"><i class="fa fa-sign-in"></i> Login to Apply</a>
+                    <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary btn-lg shadow-sm px-4 py-3 fw-bold d-block d-md-inline-block"><i class="fa fa-paper-plane me-1"></i> APPLY NOW</a>
+                {% else %}
+                    <span class="badge badge-info p-3 d-inline-block text-white fw-semibold"><i class="fa fa-info-circle me-1"></i> Logged in as Employer</span>
                 {% endif %}
             </div>
         </div>
@@ -97,7 +99,11 @@
                 <div class="card border-0 shadow-sm p-4 mb-4">
                     <h4 class="card-title text-primary border-bottom pb-2">Job Description & Requirements</h4>
                     <div class="job-description-body py-2">
-                        {{ job.description|safe|linebreaks }}
+                        {% if "<p" in job.description or "<div" in job.description or "<br" in job.description %}
+                            {{ job.description|safe }}
+                        {% else %}
+                            {{ job.description|linebreaks }}
+                        {% endif %}
                     </div>
                 </div>
 
@@ -118,7 +124,11 @@
             <div class="col-lg-4">
                 <div class="card border-0 shadow-sm p-4 mb-4">
                     <h4 class="card-title text-dark border-bottom pb-2">About {{ job.company_name }}</h4>
-                    <p class="text-muted">{{ job.company_description|default:"No company description provided." }}</p>
+                    {% if "<p" in job.company_description or "<div" in job.company_description or "<br" in job.company_description %}
+                        {{ job.company_description|safe }}
+                    {% else %}
+                        <p class="text-muted">{{ job.company_description|default:"No company description provided."|linebreaks }}</p>
+                    {% endif %}
 
                     {% if job.website %}
                         <a href="{{ job.website }}" target="_blank" class="btn btn-outline-primary btn-block btn-sm">

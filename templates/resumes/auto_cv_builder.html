@@ -237,9 +237,9 @@ header.header, .navbar {
             <div class="cv-header">
                 <div class="cv-header-content">
                     {% if user.avatar %}
-                        <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name }}" class="cv-avatar">
+                        <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name }}" class="cv-avatar" onerror="this.onerror=null; this.src='{% static 'img/avatar.png' %}';">
                     {% else %}
-                        <img src="{% static 'images/default-avatar.png' %}" alt="Avatar" class="cv-avatar">
+                        <img src="{% static 'img/avatar.png' %}" alt="Avatar" class="cv-avatar">
                     {% endif %}
                     <div>
                         <h1 class="cv-name">{{ user.get_full_name|default:user.email }}</h1>
