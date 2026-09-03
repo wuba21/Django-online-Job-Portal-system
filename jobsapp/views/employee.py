@@ -135,8 +135,20 @@ def add_education(request):
             edu.save()
             messages.success(request, "Education added successfully.")
         else:
-            messages.error(request, "Error adding education. Please check your input.")
-    return redirect("jobs:employee-profile-update")
+            institution = request.POST.get("institution", "").strip()
+            degree = request.POST.get("degree", "").strip()
+            field_of_study = request.POST.get("field_of_study", "").strip()
+            if institution and degree:
+                Education.objects.create(
+                    user=request.user,
+                    institution=institution,
+                    degree=degree,
+                    field_of_study=field_of_study
+                )
+                messages.success(request, "Education added successfully.")
+            else:
+                messages.error(request, "Please fill in Institution and Degree fields.")
+    return redirect("accounts:employee-profile-update")
 
 
 @login_required(login_url=reverse_lazy("accounts:login"))
@@ -145,7 +157,7 @@ def delete_education(request, pk):
     edu = get_object_or_404(Education, pk=pk, user=request.user)
     edu.delete()
     messages.success(request, "Education deleted successfully.")
-    return redirect("jobs:employee-profile-update")
+    return redirect("accounts:employee-profile-update")
 
 
 @login_required(login_url=reverse_lazy("accounts:login"))
@@ -157,10 +169,22 @@ def add_experience(request):
             exp = form.save(commit=False)
             exp.user = request.user
             exp.save()
-            messages.success(request, "Experience added successfully.")
+            messages.success(request, "Work experience added successfully.")
         else:
-            messages.error(request, "Error adding experience.")
-    return redirect("jobs:employee-profile-update")
+            title = request.POST.get("title", "").strip()
+            company = request.POST.get("company", "").strip()
+            description = request.POST.get("description", "").strip()
+            if title and company:
+                WorkExperience.objects.create(
+                    user=request.user,
+                    title=title,
+                    company=company,
+                    description=description
+                )
+                messages.success(request, "Work experience added successfully.")
+            else:
+                messages.error(request, "Please fill in Job Title and Company fields.")
+    return redirect("accounts:employee-profile-update")
 
 
 @login_required(login_url=reverse_lazy("accounts:login"))
@@ -169,22 +193,25 @@ def delete_experience(request, pk):
     exp = get_object_or_404(WorkExperience, pk=pk, user=request.user)
     exp.delete()
     messages.success(request, "Work experience deleted successfully.")
-    return redirect("jobs:employee-profile-update")
+    return redirect("accounts:employee-profile-update")
 
 
 @login_required(login_url=reverse_lazy("accounts:login"))
 @user_is_employee
 def add_skill(request):
     if request.method == "POST":
-        form = CandidateSkillForm(request.POST)
-        if form.is_valid():
-            skill = form.save(commit=False)
-            skill.user = request.user
-            skill.save()
-            messages.success(request, "Skill added successfully.")
+        name = request.POST.get("name", "").strip()
+        level = request.POST.get("level", "intermediate")
+        if name:
+            CandidateSkill.objects.update_or_create(
+                user=request.user,
+                name=name,
+                defaults={"level": level}
+            )
+            messages.success(request, f"Skill '{name}' added successfully.")
         else:
-            messages.error(request, "Skill already exists or invalid.")
-    return redirect("jobs:employee-profile-update")
+            messages.error(request, "Please enter a valid skill name.")
+    return redirect("accounts:employee-profile-update")
 
 
 @login_required(login_url=reverse_lazy("accounts:login"))
@@ -193,7 +220,7 @@ def delete_skill(request, pk):
     skill = get_object_or_404(CandidateSkill, pk=pk, user=request.user)
     skill.delete()
     messages.success(request, "Skill deleted successfully.")
-    return redirect("jobs:employee-profile-update")
+    return redirect("accounts:employee-profile-update")
 
 
 @login_required(login_url=reverse_lazy("accounts:login"))
