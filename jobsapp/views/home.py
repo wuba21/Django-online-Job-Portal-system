@@ -171,53 +171,69 @@ class ApplyJobView(CreateView):
         return HttpResponseNotAllowed(self._allowed_methods())
 
     def post(self, request, *args, **kwargs):
-        job = get_object_or_404(Job, id=self.kwargs["job_id"])
+        try:
+            job_id = self.kwargs.get("job_id")
+            job = get_object_or_404(Job, id=job_id)
 
-        if job.filled or job.is_expired:
-            messages.error(request, "This job is closed or has expired.")
+            if job.filled or job.is_expired:
+                messages.error(request, "This job is closed or has expired.")
+                return HttpResponseRedirect(reverse_lazy("jobs:jobs-detail", kwargs={"id": job.id}))
+
+            existing = Applicant.objects.filter(user=request.user, job=job).exists()
+            if existing:
+                messages.info(request, "You have already applied for this job.")
+                return HttpResponseRedirect(reverse_lazy("jobs:jobs-detail", kwargs={"id": job.id}))
+
+            # Create application safely
+            applicant, created = Applicant.objects.get_or_create(
+                user=request.user,
+                job=job,
+                defaults={"comment": request.POST.get("comment", "")}
+            )
+            if "cv" in request.FILES:
+                applicant.cv = request.FILES["cv"]
+                applicant.save()
+
+            messages.success(request, f"🎉 Successfully applied for '{job.title}'!")
+
+            # Trigger Candidate Notification safely
+            try:
+                create_notification(
+                    user=request.user,
+                    title=f"Application Submitted: {job.title}",
+                    message=f"You successfully applied for {job.title} at {job.company_name}.",
+                    link=reverse_lazy("jobs:employee-my-applications")
+                )
+            except Exception:
+                pass
+
+            # Trigger Employer Notification safely if job owner exists
+            try:
+                if getattr(job, "user", None):
+                    create_notification(
+                        user=job.user,
+                        title=f"New Applicant for {job.title}",
+                        message=f"{request.user.get_full_name() or request.user.email} applied for {job.title}.",
+                        link=reverse_lazy("jobs:employer-dashboard-applicants", kwargs={"job_id": job.id})
+                    )
+            except Exception:
+                pass
+
+            # Send Email Alerts safely
+            try:
+                if request.user.email:
+                    send_event_email(
+                        user_email=request.user.email,
+                        subject=f"Application Confirmation - {job.title}",
+                        message=f"Hello {request.user.get_full_name() or 'Candidate'},\n\nYour application for '{job.title}' at {job.company_name} has been received. You can track your status in your dashboard."
+                    )
+            except Exception:
+                pass
+
             return HttpResponseRedirect(reverse_lazy("jobs:jobs-detail", kwargs={"id": job.id}))
-
-        existing = Applicant.objects.filter(user=request.user, job=job).exists()
-        if existing:
-            messages.info(request, "You have already applied for this job.")
-            return HttpResponseRedirect(reverse_lazy("jobs:jobs-detail", kwargs={"id": job.id}))
-
-        # Create application directly
-        applicant = Applicant.objects.create(
-            user=request.user,
-            job=job,
-            comment=request.POST.get("comment", ""),
-        )
-        if "cv" in request.FILES:
-            applicant.cv = request.FILES["cv"]
-            applicant.save()
-
-        messages.success(request, f"🎉 Successfully applied for '{job.title}'!")
-
-        # Trigger Candidate Notification
-        create_notification(
-            user=request.user,
-            title=f"Application Submitted: {job.title}",
-            message=f"You successfully applied for {job.title} at {job.company_name}.",
-            link=reverse_lazy("jobs:employee-my-applications")
-        )
-
-        # Trigger Employer Notification
-        create_notification(
-            user=job.user,
-            title=f"New Applicant for {job.title}",
-            message=f"{request.user.get_full_name() or request.user.email} applied for {job.title}.",
-            link=reverse_lazy("jobs:employer-dashboard-applicants", kwargs={"job_id": job.id})
-        )
-
-        # Send Email Alerts
-        send_event_email(
-            user_email=request.user.email,
-            subject=f"Application Confirmation - {job.title}",
-            message=f"Hello {request.user.get_full_name() or 'Candidate'},\n\nYour application for '{job.title}' at {job.company_name} has been received. You can track your status in your dashboard."
-        )
-
-        return HttpResponseRedirect(reverse_lazy("jobs:jobs-detail", kwargs={"id": job.id}))
+        except Exception as e:
+            messages.error(request, f"Application notice: {str(e)}")
+            return HttpResponseRedirect(reverse_lazy("jobs:jobs-detail", kwargs={"id": self.kwargs.get("job_id", 1)}))
 
 
 def favorite(request):
