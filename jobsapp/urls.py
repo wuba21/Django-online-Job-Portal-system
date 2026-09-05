@@ -89,5 +89,6 @@ urlpatterns = [
     path("apply-job/<int:job_id>/", ApplyJobView.as_view(), name="apply-job"),
     path("jobs/", JobListView.as_view(), name="jobs"),
     path("jobs/<int:id>/", JobDetailsView.as_view(), name="jobs-detail"),
+    path("jobs/<slug:slug>/", JobDetailsView.as_view(), name="jobs-detail-slug"),
     path("about-us/", AboutUsView.as_view(), name="about-us"),
 ]

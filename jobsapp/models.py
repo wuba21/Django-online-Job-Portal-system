@@ -1,7 +1,9 @@
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.text import slugify
 from datetime import timedelta
+import uuid
 
 from accounts.models import User, Company
 from tags.models import Tag
@@ -62,6 +64,7 @@ class Job(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True, blank=True, related_name="jobs")
     title = models.CharField(max_length=300)
+    slug = models.SlugField(max_length=350, unique=True, blank=True, null=True, db_index=True)
     description = models.TextField()
     location = models.CharField(max_length=150, default="Addis Ababa")
     type = models.CharField(choices=JOB_TYPE, max_length=10)
@@ -88,7 +91,23 @@ class Job(models.Model):
     class Meta:
         ordering = ["-id"]
 
+    def _generate_unique_slug(self):
+        base_slug = slugify(self.title)
+        slug = base_slug
+        counter = 1
+        while Job.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        return slug
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = self._generate_unique_slug()
+        super().save(*args, **kwargs)
+
     def get_absolute_url(self):
+        if self.slug:
+            return f"/{self.slug}/"
         return reverse("jobs:jobs-detail", args=[self.id])
 
     def __str__(self):

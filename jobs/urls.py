@@ -56,9 +56,10 @@ urlpatterns = lang_patterns + [
         ),
     ),
     path("social-auth/", include("social_django.urls", namespace="social")),
-    # url(r"^(?P<url>.*/)$", flatpages_views.flatpage),
     path("sitemap.xml/", sitemap, {"sitemaps": dict(Sitemaps())}, name="django.contrib.sitemaps.views.sitemap"),
     path("graphql/", csrf_exempt(FileUploadGraphQLView.as_view(graphiql=True))),
+    # Root-level SEO Slug URLs: e.g. /ethiopian-airlines-group-vacancy-2026/
+    path("<slug:slug>/", include("jobsapp.slug_urls")),
 ]
 
 if settings.ENABLE_PROMETHEUS:

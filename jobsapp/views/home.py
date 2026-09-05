@@ -134,10 +134,14 @@ class JobDetailsView(DetailView):
     pk_url_kwarg = "id"
 
     def get_object(self, queryset=None):
-        job = super(JobDetailsView, self).get_object(queryset=queryset)
-        if job is None:
-            raise Http404("Job doesn't exist")
-        return job
+        # Try slug from URL kwargs (root-level or /jobs/<slug>/ URLs)
+        slug = self.kwargs.get("slug")
+        pk = self.kwargs.get("id")
+        if slug:
+            return get_object_or_404(Job, slug=slug)
+        if pk:
+            return get_object_or_404(Job, pk=pk)
+        raise Http404("Job doesn't exist")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
