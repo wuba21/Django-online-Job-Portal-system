@@ -117,7 +117,7 @@ DATABASES = {
 CHAPA_SECRET_KEY = env("CHAPA_SECRET_KEY", default="CHASECK_TEST-LpIMynCSj89EOX7AgFurw1o6d7M9sLca")
 
 # Telegram Bot Vacancy Broadcast Config
-TELEGRAM_BOT_TOKEN = env("TELEGRAM_BOT_TOKEN", default="")
+TELEGRAM_BOT_TOKEN = env("TELEGRAM_BOT_TOKEN", default="8487911861:AAEtEz13n_5PcZKiXCP9e8ouHlS0kiSW-b4")
 TELEGRAM_CHAT_ID = env("TELEGRAM_CHAT_ID", default="")
 
 # SMTP Real Email Server Config
