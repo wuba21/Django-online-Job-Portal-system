@@ -13,14 +13,9 @@ def broadcast_job_to_telegram(job, domain="https://wubante.pythonanywhere.com"):
     chat_id = getattr(settings, "TELEGRAM_CHAT_ID", "")
 
     if not bot_token or not chat_id:
-        print("[Telegram Broadcast] Skipped: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is missing.")
         return False
 
-    if getattr(job, "slug", None):
-        job_url = f"{domain}/{job.slug}/"
-    else:
-        job_url = f"{domain}/en/jobs/{job.id}/"
-
+    job_url = f"{domain}/en/jobs/{job.id}/"
     salary_text = f"{job.salary:,} {job.currency}" if job.salary > 0 else "Negotiable"
 
     message_html = (
@@ -52,12 +47,7 @@ def broadcast_job_to_telegram(job, domain="https://wubante.pythonanywhere.com"):
     try:
         with urllib.request.urlopen(req, timeout=10) as response:
             res = json.loads(response.read().decode("utf-8"))
-            print(f"[Telegram Broadcast] Success: {res.get('ok', False)}")
             return res.get("ok", False)
-    except urllib.error.HTTPError as he:
-        err_body = he.read().decode("utf-8", errors="ignore")
-        print(f"[Telegram Broadcast HTTP Error {he.code}]: {err_body}")
-        return False
     except Exception as e:
-        print(f"[Telegram Broadcast Error]: {e}")
+        print(f"Telegram broadcast error: {e}")
         return False

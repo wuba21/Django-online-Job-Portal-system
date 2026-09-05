@@ -99,17 +99,8 @@ class JobCreateView(CreateView):
             defaults={"name": form.cleaned_data.get("company_name", "Company")}
         )
         form.instance.company = company
-        response = super(JobCreateView, self).form_valid(form)
-
-        # Broadcast new vacancy alert directly to Telegram Channel
-        try:
-            from jobsapp.utils.telegram import broadcast_job_to_telegram
-            broadcast_job_to_telegram(self.object)
-        except Exception as e:
-            print(f"Telegram broadcast error on create: {e}")
-
         messages.success(self.request, "Job posted successfully.")
-        return response
+        return super(JobCreateView, self).form_valid(form)
 
 
 @method_decorator(login_required(login_url=reverse_lazy("accounts:login")), name="dispatch")
