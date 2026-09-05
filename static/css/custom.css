@@ -459,5 +459,84 @@ img, video, iframe, canvas, svg {
     }
 }
 
+/* ===================================================
+   SLEEK DARK NAVBAR THEME (MATCHING USER DESIGN)
+   =================================================== */
+header.header, .navbar {
+    background-color: #111827 !important; /* Sleek Dark Navy */
+    background: #111827 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+.navbar ul.navbar-nav > li > a:not(.navbar-btn) {
+    color: #f3f4f6 !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.05em !important;
+    font-size: 0.83rem !important;
+    transition: color 0.2s ease !important;
+}
+
+@media (min-width: 992px) {
+    .navbar ul.navbar-nav > li > a:not(.navbar-btn) {
+        border-top: none !important;
+        padding: 26px 14px !important;
+    }
+    .navbar ul.navbar-nav > li > a:not(.navbar-btn):hover {
+        color: #60a5fa !important;
+        border-top: none !important;
+    }
+    .navbar ul.navbar-nav > li.active > a,
+    .navbar ul.navbar-nav > li.show > a {
+        color: #3b82f6 !important;
+        font-weight: 800 !important;
+        border-top: none !important;
+    }
+}
+
+.navbar .dropdown-menu {
+    background-color: #1f2937 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+    border-radius: 8px !important;
+}
+
+.navbar .dropdown-menu .dropdown-item {
+    color: #e5e7eb !important;
+    font-size: 0.85rem !important;
+    padding: 10px 20px !important;
+    transition: background 0.2s ease, color 0.2s ease !important;
+}
+
+.navbar .dropdown-menu .dropdown-item:hover,
+.navbar .dropdown-menu .dropdown-item:focus {
+    background-color: #374151 !important;
+    color: #ffffff !important;
+}
+
+.navbar .dropdown-menu .dropdown-item.active {
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+}
+
+.navbar .dropdown-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.navbar .navbar-toggler {
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+#clientZone.has-img {
+    color: #ffffff !important;
+}
+
+.client-menu-image {
+    background: #1f2937 !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+
 
 
