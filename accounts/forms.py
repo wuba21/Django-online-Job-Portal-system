@@ -11,6 +11,7 @@ class EmployeeRegistrationForm(UserCreationForm):
     # gender = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, choices=GENDER_CHOICES)
     first_name = forms.CharField(required=True)
     last_name = forms.CharField(required=True)
+    email = forms.EmailField(required=True)
 
     def __init__(self, *args, **kwargs):
         super(EmployeeRegistrationForm, self).__init__(*args, **kwargs)
@@ -20,12 +21,10 @@ class EmployeeRegistrationForm(UserCreationForm):
         self.fields["password1"].label = "Password"
         self.fields["password2"].label = "Confirm Password"
 
-        # self.fields['gender'].widget = forms.CheckboxInput()
-
         self.fields["first_name"].widget.attrs.update({"placeholder": "Enter First Name"})
         self.fields["last_name"].widget.attrs.update({"placeholder": "Enter Last Name"})
-        self.fields["email"].widget.attrs.update({"placeholder": "Enter Email"})
-        self.fields["password1"].widget.attrs.update({"placeholder": "Enter Password"})
+        self.fields["email"].widget.attrs.update({"placeholder": "Enter Email Address"})
+        self.fields["password1"].widget.attrs.update({"placeholder": "Enter Password (min 6 chars)"})
         self.fields["password2"].widget.attrs.update({"placeholder": "Confirm Password"})
 
     class Meta:
@@ -35,7 +34,28 @@ class EmployeeRegistrationForm(UserCreationForm):
             "first_name": {"required": "First name is required", "max_length": "Name is too long"},
             "last_name": {"required": "Last name is required", "max_length": "Last Name is too long"},
             "gender": {"required": "Gender is required"},
+            "email": {"required": "Email is required", "invalid": "Enter a valid email address"},
         }
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email", "").strip().lower()
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("A user with this email address already exists. Please login instead.")
+        return email
+
+    def clean_password1(self):
+        password = self.cleaned_data.get("password1")
+        if password and len(password) < 6:
+            raise forms.ValidationError("Password must be at least 6 characters long.")
+        return password
+
+    def clean(self):
+        cleaned_data = super().clean()
+        p1 = cleaned_data.get("password1")
+        p2 = cleaned_data.get("password2")
+        if p1 and p2 and p1 != p2:
+            self.add_error("password2", "Passwords do not match.")
+        return cleaned_data
 
     def clean_gender(self):
         gender = self.cleaned_data.get("gender")
@@ -45,6 +65,7 @@ class EmployeeRegistrationForm(UserCreationForm):
 
     def save(self, commit=True):
         user = super(UserCreationForm, self).save(commit=False)
+        user.email = self.cleaned_data.get("email").strip().lower()
         user.role = "employee"
         if commit:
             user.save()
@@ -54,6 +75,7 @@ class EmployeeRegistrationForm(UserCreationForm):
 class EmployerRegistrationForm(UserCreationForm):
     first_name = forms.CharField(required=True)
     last_name = forms.CharField(required=True)
+    email = forms.EmailField(required=True)
 
     def __init__(self, *args, **kwargs):
         super(EmployerRegistrationForm, self).__init__(*args, **kwargs)
@@ -64,20 +86,42 @@ class EmployerRegistrationForm(UserCreationForm):
 
         self.fields["first_name"].widget.attrs.update({"placeholder": "Enter Company Name"})
         self.fields["last_name"].widget.attrs.update({"placeholder": "Enter Company Address"})
-        self.fields["email"].widget.attrs.update({"placeholder": "Enter Email"})
-        self.fields["password1"].widget.attrs.update({"placeholder": "Enter Password"})
+        self.fields["email"].widget.attrs.update({"placeholder": "Enter Email Address"})
+        self.fields["password1"].widget.attrs.update({"placeholder": "Enter Password (min 6 chars)"})
         self.fields["password2"].widget.attrs.update({"placeholder": "Confirm Password"})
 
     class Meta:
         model = User
         fields = ["first_name", "last_name", "email", "password1", "password2"]
         error_messages = {
-            "first_name": {"required": "First name is required", "max_length": "Name is too long"},
-            "last_name": {"required": "Last name is required", "max_length": "Last Name is too long"},
+            "first_name": {"required": "Company name is required", "max_length": "Company Name is too long"},
+            "last_name": {"required": "Company address is required", "max_length": "Company Address is too long"},
+            "email": {"required": "Email is required", "invalid": "Enter a valid email address"},
         }
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email", "").strip().lower()
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("An employer account with this email address already exists. Please login.")
+        return email
+
+    def clean_password1(self):
+        password = self.cleaned_data.get("password1")
+        if password and len(password) < 6:
+            raise forms.ValidationError("Password must be at least 6 characters long.")
+        return password
+
+    def clean(self):
+        cleaned_data = super().clean()
+        p1 = cleaned_data.get("password1")
+        p2 = cleaned_data.get("password2")
+        if p1 and p2 and p1 != p2:
+            self.add_error("password2", "Passwords do not match.")
+        return cleaned_data
 
     def save(self, commit=True):
         user = super(UserCreationForm, self).save(commit=False)
+        user.email = self.cleaned_data.get("email").strip().lower()
         user.role = "employer"
         if commit:
             user.save()
