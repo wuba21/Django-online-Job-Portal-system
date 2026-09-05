@@ -70,6 +70,13 @@ urlpatterns = [
             ]
         ),
     ),
+    # Root level aliases for profile actions
+    path("education/add/", add_education, name="root-add-education"),
+    path("education/delete/<int:pk>/", delete_education, name="root-delete-education"),
+    path("experience/add/", add_experience, name="root-add-experience"),
+    path("experience/delete/<int:pk>/", delete_experience, name="root-delete-experience"),
+    path("skill/add/", add_skill, name="root-add-skill"),
+    path("skill/delete/<int:pk>/", delete_skill, name="root-delete-skill"),
 
     # Custom Platform Admin Dashboard & Analytics
     path("platform-admin/", AdminDashboardView.as_view(), name="admin-dashboard"),

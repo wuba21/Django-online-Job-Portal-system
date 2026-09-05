@@ -16,6 +16,8 @@ app_name = "resume_cv"
 
 urlpatterns = [
     path("auto-builder/", auto_cv_builder, name="auto_builder"),
+    path("auto-cv-builder/", auto_cv_builder, name="auto_cv_builder"),
+    path("resumes/auto-cv-builder/", auto_cv_builder, name="resumes_auto_cv_builder"),
     path("templates", TemplateListView.as_view(), name="templates"),
     path("resume-cv/create", ResumeCVCreateView.as_view(), name="create"),
     path("templates/builder/<code>", resume_builder, name="builder"),
