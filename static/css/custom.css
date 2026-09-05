@@ -119,6 +119,77 @@ img, video, iframe, canvas, svg {
     }
 }
 
+/* ============================================
+   PREMIUM DARK NAVY NAVBAR (DESKTOP & MOBILE)
+   ============================================ */
+.header {
+    background: #1a2536 !important;
+}
+
+.navbar {
+    background: #1a2536 !important; /* Premium dark navy header bar across the whole portal */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Desktop Navbar Links */
+@media (min-width: 992px) {
+    .navbar {
+        padding: 0 1.5rem !important;
+    }
+
+    .navbar ul.navbar-nav > li > a:not(.navbar-btn) {
+        color: #e2e8f0 !important;
+        font-weight: 500 !important;
+        letter-spacing: 0.06em !important;
+        font-size: 0.82rem !important;
+        border-top: 4px solid transparent !important;
+        padding: 26px 14px !important;
+        transition: all 0.25s ease !important;
+    }
+
+    .navbar ul.navbar-nav > li > a:not(.navbar-btn):hover {
+        color: #38bdf8 !important; /* Sky Blue glow on hover */
+        border-top-color: #38bdf8 !important;
+        background: rgba(255, 255, 255, 0.04) !important;
+    }
+
+    .navbar ul.navbar-nav > li.active > a,
+    .navbar ul.navbar-nav > li.show > a {
+        color: #38bdf8 !important;
+        border-top-color: #38bdf8 !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    /* Desktop Dropdown Menus */
+    .navbar .dropdown-menu {
+        background: #1e293b !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+        padding: 8px 0 !important;
+        margin-top: 0 !important;
+    }
+
+    .navbar .dropdown-menu .dropdown-item {
+        color: #e2e8f0 !important;
+        font-size: 0.84rem !important;
+        font-weight: 500 !important;
+        padding: 10px 18px !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .navbar .dropdown-menu .dropdown-item:hover,
+    .navbar .dropdown-menu .dropdown-item.active {
+        color: #ffffff !important;
+        background: #2b90d9 !important;
+    }
+
+    .navbar .dropdown-menu .dropdown-divider {
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+}
+
 /* ---- Navbar Mobile Responsive ---- */
 @media (max-width: 991px) {
     .header {
