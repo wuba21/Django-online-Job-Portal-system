@@ -31,7 +31,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"/>
     {% block styles %}{% endblock %}
     <!-- Favicon-->
-    <link rel="shortcut icon" href="favicon.png">
+    <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
+    <link rel="shortcut icon" href="{% static 'img/favicon.svg' %}">
     <!-- Tweaks for older IEs--><!--[if lt IE 9]>
     <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script><![endif]-->
@@ -43,8 +44,8 @@
 <header class="header">
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-            <a href="{% url 'jobs:home' %}" class="navbar-brand">
-                <img src="{% static 'img/logo-small.jpg' %}" alt="logo" style="max-height: 38px; width: auto; max-width: 100%;">
+            <a href="{% url 'jobs:home' %}" class="navbar-brand d-inline-flex align-items-center" style="padding: 6px 0;">
+                <img src="{% static 'img/logo.svg' %}" alt="ETHIO JOBS PORTAL" style="height: 42px; width: auto; max-width: 100%; display: block;">
                 <span class="sr-only">{% trans "Home" %}</span>
             </a>
             <button type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
