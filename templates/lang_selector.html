@@ -1,20 +1,48 @@
 {% load i18n %}
-{% get_available_languages as languages %}
 {% get_current_language as LANGUAGE_CODE %}
 
 <li class="nav-item dropdown">
     <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-       class="nav-link dropdown-toggle">
-        <em class="fa fa-language"></em>
-        {{ LANGUAGE_CODE|upper }}
+       class="nav-link dropdown-toggle d-flex align-items-center">
+        <i class="fa fa-globe text-warning mr-1"></i>
+        <span>{{ LANGUAGE_CODE|upper }}</span>
     </a>
 
-    <div class="dropdown-menu">
-        {% for lang_code, lang_name in languages %}
-            <a href="/{{ lang_code }}/" 
-               class="dropdown-item {% if lang_code == LANGUAGE_CODE %}active font-weight-bold{% endif %}">
-                {{ lang_name }}
-            </a>
-        {% endfor %}
+    <div class="dropdown-menu dropdown-menu-right shadow">
+        <form action="{% url 'set_language' %}" method="post" id="lang-form-en">
+            {% csrf_token %}
+            <input name="next" type="hidden" value="{{ request.get_full_path }}">
+            <input name="language" type="hidden" value="en">
+            <button type="submit" class="dropdown-item {% if LANGUAGE_CODE == 'en' %}active font-weight-bold{% endif %}">
+                🇬🇧 English
+            </button>
+        </form>
+
+        <form action="{% url 'set_language' %}" method="post" id="lang-form-am">
+            {% csrf_token %}
+            <input name="next" type="hidden" value="{{ request.get_full_path }}">
+            <input name="language" type="hidden" value="am">
+            <button type="submit" class="dropdown-item {% if LANGUAGE_CODE == 'am' %}active font-weight-bold{% endif %}">
+                🇪🇹 አማርኛ (Amharic)
+            </button>
+        </form>
+
+        <form action="{% url 'set_language' %}" method="post" id="lang-form-om">
+            {% csrf_token %}
+            <input name="next" type="hidden" value="{{ request.get_full_path }}">
+            <input name="language" type="hidden" value="om">
+            <button type="submit" class="dropdown-item {% if LANGUAGE_CODE == 'om' %}active font-weight-bold{% endif %}">
+                🌳 Afaan Oromoo (Oromo)
+            </button>
+        </form>
+
+        <form action="{% url 'set_language' %}" method="post" id="lang-form-ti">
+            {% csrf_token %}
+            <input name="next" type="hidden" value="{{ request.get_full_path }}">
+            <input name="language" type="hidden" value="ti">
+            <button type="submit" class="dropdown-item {% if LANGUAGE_CODE == 'ti' %}active font-weight-bold{% endif %}">
+                ⛰️ ትግርኛ (Tigrinya)
+            </button>
+        </form>
     </div>
 </li>

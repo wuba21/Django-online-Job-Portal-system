@@ -1,141 +1,121 @@
-# Tigrinya translations for django-job-portal
-#
 msgid ""
 msgstr ""
-"Project-Id-Version: django-job-portal\n"
+"Project-Id-Version: EthioJobs 2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-02 12:00+0000\n"
-"PO-Revision-Date: 2026-05-02 12:00+0000\n"
-"Last-Translator: \n"
-"Language-Team: Tigrinya\n"
+"POT-Creation-Date: 2026-09-05 12:00+0000\n"
+"PO-Revision-Date: 2026-09-05 12:00+0000\n"
+"Last-Translator: EthioJobs Team\n"
+"Language-Team: ti <ti@li.org>\n"
 "Language: ti\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-# Authentication
-msgid "Login"
-msgstr "እተወ"
-
-msgid "Register"
-msgstr "ተመዝገብ"
-
-msgid "Username"
-msgstr "ስም ተጠቃሚ"
-
-msgid "Password"
-msgstr "ምስጢር ቃል"
-
-msgid "Logout"
-msgstr "ውጻእ"
-
-# Job Portal
-msgid "Job Title"
-msgstr "ርእሲ ስራ"
-
-msgid "Apply Now"
-msgstr "ሕጂ ኣመልክት"
-
-msgid "Job Description"
-msgstr "መግለጺ ስራ"
-
-msgid "Submit Application"
-msgstr "ማመልከቻ ኣእቱ"
-
-msgid "Employer"
-msgstr "ቀጣሪ"
-
-# General UI
 msgid "Home"
-msgstr "መጀመርታ"
-
-msgid "Search"
-msgstr "ድለ"
-
-msgid "Save"
-msgstr "ኣቐምጥ"
-
-msgid "Cancel"
-msgstr "ሰርዝ"
-
-msgid "English"
-msgstr "እንግሊዝኛ"
-
-msgid "Amharic"
-msgstr "አማርኛ"
-
-msgid "Oromo"
-msgstr "ኦሮምኛ"
-
-msgid "Tigrinya"
-msgstr "ትግርኛ"
+msgstr "መጀምርታ"
 
 msgid "Jobs"
-msgstr "ስራሕተት"
+msgstr "ስራሕታት"
 
 msgid "Create ResumeCV"
-msgstr "ResumeCV ፍጠር"
+msgstr "CV ምድላው"
 
 msgid "About Us"
 msgstr "ብዛዕባና"
 
+msgid "Pricing & VIP"
+msgstr "ዋጋታትን VIP"
+
+msgid "Login"
+msgstr "እተው"
+
+msgid "Register"
+msgstr "ተመዝገብ"
+
+msgid "Employee"
+msgstr "ስራሕ ደላይ"
+
+msgid "Employers"
+msgstr "አስራሕቲ"
+
 msgid "Dashboard"
 msgstr "ዳሽቦርድ"
 
-msgid "Applicants"
-msgstr "ማመልከችዋት"
-
-msgid "Post a new job"
-msgstr "ኣዲስ ስራ ለጥፋ"
+msgid "Notifications"
+msgstr "መልእኽትታት"
 
 msgid "Favorites"
-msgstr "ዝወድትወን"
+msgstr "ዝተፈተው"
 
 msgid "My Applications"
-msgstr "ማመልከቻዎቼ"
+msgstr "ዘመልከትክዎም"
+
+msgid "Auto CV Builder"
+msgstr "ኦቶ CV ሰራሒ"
+
+msgid "My Resumes"
+msgstr "ናተይ CV"
 
 msgid "Edit Profile"
-msgstr "መግለጺ ኣስተካክል"
+msgstr "ፕሮፋይል አርም"
 
-msgid "My resumes"
-msgstr "Resumeዎቼ"
+msgid "Logout"
+msgstr "ወፅእ"
 
-msgid "Employee"
-msgstr "ሰራሕተኛ"
+msgid "Find a job you will love"
+msgstr "ዝፈትውዎ ስራሕ ይድለዩ"
 
-msgid "Employers"
-msgstr "ሰራሕተኛታት"
+msgid "Position"
+msgstr "ቦታ ስራሕ"
 
-msgid "Log in"
-msgstr "እተወ"
+msgid "Location"
+msgstr "ቦታ"
 
-msgid "Login with Facebook"
-msgstr "ብFacebook እተወ"
+msgid "Featured jobs"
+msgstr "ዝተሓረዩ ስራሕታት"
 
-msgid "Login with Google"
-msgstr "ብGoogle እተወ"
+msgid "Full time"
+msgstr "ምሉእ ግዜ"
 
-msgid "Login with Linkedin"
-msgstr "ብLinkedIn እተወ"
+msgid "Part time"
+msgstr "ትርፊ ግዜ"
 
-msgid "Login with Github"
-msgstr "ብGitHub እተወ"
+msgid "Internship"
+msgstr "ልምምድ"
 
-msgid "Already our have account?"
-msgstr "መመዝገቢያ ኣለካ?"
+msgid "Trending this month"
+msgstr "ኣብዚ ወርሒ ዝተፈተው"
 
-msgid "About django-jobs"
-msgstr "ብዛዕባ django-jobs"
+msgid "Start searching for your new job now!"
+msgstr "ሕዚ ሓዱሽ ስራሕኩም ምድላይ ጀምሩ!"
+
+msgid "See our job offers"
+msgstr "ዕድላት ስራሕ ርኣዩ"
+
+msgid "About Django-Jobs"
+msgstr "ብዛዕባ ኢትዮ ጆብስ"
 
 msgid "Contact Us"
-msgstr "ኣብ እኛ ይገናኙ"
+msgstr "ርኸቡና"
+
+msgid "Quick Links"
+msgstr "ቀልጣፋ መላገቢታት"
 
 msgid "Follow Us"
-msgstr "ኣብ እኛ ይከተሉ"
+msgstr "ስዐቡና"
 
-msgid "Email"
-msgstr "ኢሜይል"
+msgid "Email:"
+msgstr "ኢሜይል:"
 
-msgid "Phone"
-msgstr "ተላላይ"
+msgid "Phone:"
+msgstr "ስልኪ:"
+
+msgid "Location:"
+msgstr "ቦታ:"
+
+msgid "Django-Jobs. All rights reserved."
+msgstr "ኢትዮ ጆብስ። ኩሉ መብቲ ዝተሓለወ እዩ።"
+
+msgid "Your premier platform for connecting talented professionals with outstanding career opportunities. We simplify the job search and hiring process for both job seekers and employers."
+msgstr "ኣብ ኢትዮጵያ ስራሕ ደለይትን አስራሕትን ዘራኽብ ቀዳማይ መድረኽ።"

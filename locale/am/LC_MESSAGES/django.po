@@ -1,29 +1,16 @@
-#
 msgid ""
 msgstr ""
-"Project-Id-Version: Django-Jobs 1.0\n"
+"Project-Id-Version: EthioJobs 2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-01 00:00+0000\n"
-"PO-Revision-Date: 2024-01-01 00:00+0000\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: Amharic <am@li.org>\n"
+"POT-Creation-Date: 2026-09-05 12:00+0000\n"
+"PO-Revision-Date: 2026-09-05 12:00+0000\n"
+"Last-Translator: EthioJobs Team\n"
+"Language-Team: am <am@li.org>\n"
 "Language: am\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-msgid "About Django-Jobs"
-msgstr "ስለ Django-Jobs"
-
-msgid "Contact Us"
-msgstr "ከኛ ይገናኙ"
-
-msgid "Quick Links"
-msgstr "ፈጣን ማገናኛዎች"
-
-msgid "Follow Us"
-msgstr "ከኛ ይከተሉ"
 
 msgid "Home"
 msgstr "መነሻ"
@@ -31,17 +18,92 @@ msgstr "መነሻ"
 msgid "Jobs"
 msgstr "ሥራዎች"
 
+msgid "Create ResumeCV"
+msgstr "ሲቪ አዘጋጅ"
+
 msgid "About Us"
 msgstr "ስለ እኛ"
 
-msgid "Contact"
-msgstr "እኹና"
+msgid "Pricing & VIP"
+msgstr "ዋጋዎች እና VIP"
 
-msgid ""
-"Your premier platform for connecting talented professionals with outstanding"
-" career opportunities. We simplify the job search and hiring process for "
-"both job seekers and employers."
-msgstr "ለምሽ ምሽ ተሾሥት ስራ ስራዎች ለምዕትን አስብያ ስራ ስራዎች ተመዝገቡ"
+msgid "Login"
+msgstr "ግባ"
+
+msgid "Register"
+msgstr "ተመዝገብ"
+
+msgid "Employee"
+msgstr "ሥራ ፈላጊ"
+
+msgid "Employers"
+msgstr "አሠሪዎች"
+
+msgid "Dashboard"
+msgstr "ዳሽቦርድ"
+
+msgid "Notifications"
+msgstr "ማሳወቂያዎች"
+
+msgid "Favorites"
+msgstr "የተወደዱ"
+
+msgid "My Applications"
+msgstr "ማመልከቻዎቼ"
+
+msgid "Auto CV Builder"
+msgstr "አውቶ ሲቪ ማዘጋጃ"
+
+msgid "My Resumes"
+msgstr "የእኔ ሲቪዎች"
+
+msgid "Edit Profile"
+msgstr "ፕሮፋይል አርም"
+
+msgid "Logout"
+msgstr "ውጣ"
+
+msgid "Find a job you will love"
+msgstr "የሚወዱትን ሥራ ይፈልጉ"
+
+msgid "Position"
+msgstr "የሥራ መደብ"
+
+msgid "Location"
+msgstr "ቦታ"
+
+msgid "Featured jobs"
+msgstr "ተመራጭ ሥራዎች"
+
+msgid "Full time"
+msgstr "ሙሉ ጊዜ"
+
+msgid "Part time"
+msgstr "ትርፍ ጊዜ"
+
+msgid "Internship"
+msgstr "ልምምድ"
+
+msgid "Trending this month"
+msgstr "በዚህ ወር ተወዳጅ የሆኑ"
+
+msgid "Start searching for your new job now!"
+msgstr "አሁን አዲስ ሥራዎን መፈለግ ይጀምሩ!"
+
+msgid "See our job offers"
+msgstr "የሥራ ዕድሎችን ይመልከቱ"
+
+msgid "About Django-Jobs"
+msgstr "ስለ ኢትዮ ጆብስ"
+
+msgid "Contact Us"
+msgstr "አግኙን"
+
+msgid "Quick Links"
+msgstr "ፈጣን ማገናኛዎች"
+
+msgid "Follow Us"
+msgstr "ይከተሉን"
 
 msgid "Email:"
 msgstr "ኢሜይል:"
@@ -52,14 +114,8 @@ msgstr "ስልክ:"
 msgid "Location:"
 msgstr "አድራሻ:"
 
-msgid "+123 456 7890"
-msgstr "+123 456 7890"
-
-msgid "Addis Ababa, Ethiopia"
-msgstr "አዲስ አበባ፣ ኢትዮጵያ"
-
 msgid "Django-Jobs. All rights reserved."
-msgstr "Django-Jobs። መብቶች ሁሉ የተጠበቁ ናቸው።"
+msgstr "ኢትዮ ጆብስ። መብቱ በሕግ የተጠበቀ ነው።"
 
-msgid "info@django-jobs.com"
-msgstr "info@django-jobs.com"
+msgid "Your premier platform for connecting talented professionals with outstanding career opportunities. We simplify the job search and hiring process for both job seekers and employers."
+msgstr "በኢትዮጵያ ውስጥ ሥራ ፈላጊዎችን ከአሠሪዎች ጋር የሚያገናኝ ቀዳሚው የሥራ ፖርታል መድረክ።"
