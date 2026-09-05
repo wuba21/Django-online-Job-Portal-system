@@ -1,3 +1,4 @@
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: EthioJobs 2.0\n"
@@ -117,5 +118,8 @@ msgstr "ቦታ:"
 msgid "Django-Jobs. All rights reserved."
 msgstr "ኢትዮ ጆብስ። ኩሉ መብቲ ዝተሓለወ እዩ።"
 
-msgid "Your premier platform for connecting talented professionals with outstanding career opportunities. We simplify the job search and hiring process for both job seekers and employers."
+msgid ""
+"Your premier platform for connecting talented professionals with outstanding"
+" career opportunities. We simplify the job search and hiring process for "
+"both job seekers and employers."
 msgstr "ኣብ ኢትዮጵያ ስራሕ ደለይትን አስራሕትን ዘራኽብ ቀዳማይ መድረኽ።"
