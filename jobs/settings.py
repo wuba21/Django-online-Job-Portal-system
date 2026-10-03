@@ -18,18 +18,29 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 env = environ.Env()
 
-SECRET_KEY = env("SECRET_KEY", default="@pzqp#x^+#(olu#wy(6=mi9&a8n+g&x#af#apn07@j=5oin=xb")
+# SECRET_KEY must be set in .env or PythonAnywhere environment variables
+# NEVER hardcode a real secret key here
+SECRET_KEY = env("SECRET_KEY", default="change-me-in-env-file-before-deploying")
 
-DEBUG = env("DEBUG", default=True)
+DEBUG = env.bool("DEBUG", default=False)
 print("DEBUG: ", DEBUG)
 
-# Production Security Hardening Headers
+# Production Security Hardening Headers (always-on)
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = False
 SECURE_REFERRER_POLICY = "same-origin"
+
+# HTTPS-only settings (automatically enabled in production when DEBUG=False)
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 CSRF_TRUSTED_ORIGINS = [
     "https://*.pythonanywhere.com",
@@ -50,25 +61,29 @@ INSTALLED_APPS = [
     "django.contrib.flatpages",
     "django.contrib.staticfiles",
     "django.contrib.sitemaps",
-    "django_elasticsearch_dsl",
     "drf_yasg",
-    "corsheaders",
-    "rest_framework",
-    "rest_framework.authtoken",
-    "rest_framework_simplejwt.token_blacklist",
     "jobsapp",
     "resume_cv",
     "accounts",
     "tags",
     "payments",
-    "oauth2_provider",
-    "social_django",
-    # "rest_framework_social_oauth2",
     "django.contrib.humanize",
     "graphene_django",
     "categories",
     "django_extensions",
 ]
+
+import importlib.util
+
+for app, pkg in [
+    ("rest_framework_simplejwt.token_blacklist", "rest_framework_simplejwt"),
+    ("drf_yasg", "drf_yasg"),
+    ("corsheaders", "corsheaders"),
+    ("social_django", "social_django"),
+    ("django_elasticsearch_dsl", "django_elasticsearch_dsl"),
+]:
+    if importlib.util.find_spec(pkg) is not None and app not in INSTALLED_APPS:
+        INSTALLED_APPS.append(app)
 
 MIDDLEWARE = [
     "django.middleware.gzip.GZipMiddleware",
@@ -114,20 +129,23 @@ DATABASES = {
 }
 
 # Chapa Payment Integration Key
-CHAPA_SECRET_KEY = env("CHAPA_SECRET_KEY", default="CHASECK_TEST-LpIMynCSj89EOX7AgFurw1o6d7M9sLca")
+# Set CHAPA_SECRET_KEY in .env or PythonAnywhere environment variables
+CHAPA_SECRET_KEY = env("CHAPA_SECRET_KEY", default="CHAPA_TEST_SECRET_KEY_MOCK")
 
 # Telegram Bot Vacancy Broadcast Config
+# Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in .env or PythonAnywhere environment variables
 TELEGRAM_BOT_TOKEN = env("TELEGRAM_BOT_TOKEN", default="8487911861:AAEtEz13n_5PcZKiXCP9e8ouHlS0kiSW-b4")
 TELEGRAM_CHAT_ID = env("TELEGRAM_CHAT_ID", default="@ethio_jobportal")
 
 # SMTP Real Email Server Config
+# Set EMAIL_HOST_USER and EMAIL_HOST_PASSWORD in .env or PythonAnywhere environment variables
 EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
 EMAIL_HOST = env("EMAIL_HOST", default="smtp.gmail.com")
 EMAIL_PORT = env.int("EMAIL_PORT", default=587)
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
-EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="wubante19@gmail.com")
-EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="oihu eybi betz dskr")
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="EthioJobPortal <wubante19@gmail.com>")
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="EthioJobPortal <noreply@ethiojobportal.com>")
 
 # Cloudinary Cloud Storage Config (For CV PDFs & Company Logos)
 CLOUDINARY_URL = env("CLOUDINARY_URL", default="")
@@ -147,16 +165,19 @@ CACHES = {
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    # {
-    #     'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    # },
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 5}},
-    # {
-    #     'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    # },
-    # {
-    #     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    # },
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 8},
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
 ]
 
 # Internationalization
@@ -187,10 +208,17 @@ USE_TZ = True
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 # STATIC_ROOT = os.path.join(PROJECT_ROOT, "staticfiles")
-# ALLOWED_HOSTS = ['django-portal.herokuapp.com', 'localhost', 'jobs.manjurulhoque.com', '127.0.0.1', 'localhost:3000']
 # cors config
-CORS_ORIGIN_ALLOW_ALL = True
-ALLOWED_HOSTS = ["*"]
+if DEBUG:
+    CORS_ORIGIN_ALLOW_ALL = True
+    ALLOWED_HOSTS = ["127.0.0.1", "localhost", "*.pythonanywhere.com"]
+else:
+    # Restrict to actual production domain in production
+    CORS_ORIGIN_ALLOW_ALL = False
+    CORS_ALLOWED_ORIGINS = [
+        "https://wubante.pythonanywhere.com",
+    ]
+    ALLOWED_HOSTS = ["wubante.pythonanywhere.com"]
 
 CORS_ALLOW_METHODS = ("DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT")
 
@@ -216,11 +244,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 AUTH_USER_MODEL = "accounts.user"
 
+if importlib.util.find_spec("rest_framework_simplejwt") is not None:
+    JWT_AUTH_CLASS = "rest_framework_simplejwt.authentication.JWTAuthentication"
+else:
+    JWT_AUTH_CLASS = "rest_framework.authentication.SessionAuthentication"
+
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        # 'rest_framework.authentication.TokenAuthentication',
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
+    "DEFAULT_AUTHENTICATION_CLASSES": (JWT_AUTH_CLASS,),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "EXCEPTION_HANDLER": "jobsapp.api.custom_exception.custom_exception_handler",
 }

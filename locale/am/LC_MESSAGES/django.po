@@ -19,6 +19,9 @@ msgstr "መነሻ"
 msgid "Jobs"
 msgstr "ሥራዎች"
 
+msgid "Online Sra"
+msgstr "ኦንላይን ሥራ"
+
 msgid "Create ResumeCV"
 msgstr "ሲቪ አዘጋጅ"
 

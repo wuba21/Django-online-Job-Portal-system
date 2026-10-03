@@ -45,8 +45,8 @@ class EmployeeRegistrationForm(UserCreationForm):
 
     def clean_password1(self):
         password = self.cleaned_data.get("password1")
-        if password and len(password) < 6:
-            raise forms.ValidationError("Password must be at least 6 characters long.")
+        if password and len(password) < 8:
+            raise forms.ValidationError("Password must be at least 8 characters long.")
         return password
 
     def clean(self):
@@ -107,8 +107,8 @@ class EmployerRegistrationForm(UserCreationForm):
 
     def clean_password1(self):
         password = self.cleaned_data.get("password1")
-        if password and len(password) < 6:
-            raise forms.ValidationError("Password must be at least 6 characters long.")
+        if password and len(password) < 8:
+            raise forms.ValidationError("Password must be at least 8 characters long.")
         return password
 
     def clean(self):
