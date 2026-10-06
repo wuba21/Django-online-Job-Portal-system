@@ -20,6 +20,8 @@ def initialize_chapa_payment(tx_ref, amount, email, first_name, last_name, retur
     Initializes a Chapa payment checkout session.
     Dynamically loads CHAPA_SECRET_KEY from settings.
     """
+    import re
+
     secret_key = get_chapa_secret_key()
 
     if secret_key == "CHAPA_TEST_SECRET_KEY_MOCK" or not (secret_key.startswith("CHASECK") or secret_key.startswith("CHAPUBK")):
@@ -30,7 +32,12 @@ def initialize_chapa_payment(tx_ref, amount, email, first_name, last_name, retur
             "checkout_url": f"{return_url}?tx_ref={tx_ref}&status=success&mock=true",
         }
 
-    import re
+    # Validate email - Chapa strictly requires a valid email format
+    email_pattern = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+    if not email or not email_pattern.match(str(email).strip()):
+        logger.warning(f"Invalid or missing email '{email}' for tx_ref {tx_ref}, using fallback.")
+        email = f"user_{tx_ref[:8]}@ethiojobportal.com"
+
     clean_title = re.sub(r'[^a-zA-Z0-9\-_ \.]', '', str(title))[:16].strip() or "Job Portal"
     clean_desc = re.sub(r'[^a-zA-Z0-9\-_ \.]', '', str(description))[:50].strip() or "Payment for services."
 
@@ -114,5 +121,17 @@ def verify_chapa_payment(tx_ref):
             if res_data.get("status") == "success":
                 return {"status": "success", "data": res_data.get("data")}
             return {"status": "error", "message": res_data.get("message", "Verification failed.")}
+    except urllib.error.HTTPError as e:
+        err_body = e.read().decode("utf-8")
+        logger.error(f"Chapa verify HTTP Error {e.code}: {err_body}")
+        # 404 means Chapa has no record of this transaction (payment was not completed)
+        if e.code == 404:
+            return {"status": "error", "message": "Transaction not found. Payment may not have been completed."}
+        return {"status": "error", "message": f"Verification error ({e.code}): {err_body[:200]}"}
+    except urllib.error.URLError as e:
+        # Network error during verification - fail safe (don't auto-approve)
+        logger.error(f"Chapa verify network error: {e}")
+        return {"status": "error", "message": f"Network error during verification: {str(e)}"}
     except Exception as e:
-        return {"status": "success", "message": str(e)}
+        logger.error(f"Chapa verify unexpected error: {e}")
+        return {"status": "error", "message": str(e)}
