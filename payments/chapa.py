@@ -30,6 +30,10 @@ def initialize_chapa_payment(tx_ref, amount, email, first_name, last_name, retur
             "checkout_url": f"{return_url}?tx_ref={tx_ref}&status=success&mock=true",
         }
 
+    import re
+    clean_title = re.sub(r'[^a-zA-Z0-9\-_ \.]', '', str(title))[:16].strip() or "Job Portal"
+    clean_desc = re.sub(r'[^a-zA-Z0-9\-_ \.]', '', str(description))[:50].strip() or "Payment for services."
+
     payload = {
         "amount": str(amount),
         "currency": "ETB",
@@ -39,8 +43,8 @@ def initialize_chapa_payment(tx_ref, amount, email, first_name, last_name, retur
         "tx_ref": str(tx_ref),
         "return_url": return_url,
         "customization": {
-            "title": title,
-            "description": description,
+            "title": clean_title,
+            "description": clean_desc,
         },
     }
 

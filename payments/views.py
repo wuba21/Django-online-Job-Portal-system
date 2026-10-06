@@ -38,8 +38,8 @@ def initiate_checkout(request):
     payment_method = request.POST.get("payment_method", "chapa")
     
     amount = 500.00  # Default 500 ETB
-    title = "Job Portal Service"
-    description = "Payment for Ethiopian Job Portal Services"
+    title = "Job Portal"
+    description = "Payment for Ethiopian Job Portal services."
     job = None
 
     if purpose == "featured_job":
@@ -48,19 +48,18 @@ def initiate_checkout(request):
             job = get_object_or_404(Job, id=job_id, user=request.user)
         else:
             job = Job.objects.filter(user=request.user).first()
-        job_title_str = f": {job.title}" if job else ""
-        title = f"Featured VIP Job{job_title_str}"
-        description = "Highlight job listing on home page & top search results for 30 days"
+        title = "Featured Job"
+        description = "VIP featured job listing for 30 days."
 
     elif purpose == "candidate_vip":
         amount = 300.00
-        title = "Candidate VIP Badge"
-        description = "VIP Applicant highlight & top resume recommendation for 30 days"
+        title = "Candidate VIP"
+        description = "Candidate VIP profile badge for 30 days."
 
     elif purpose == "employer_subscription":
         amount = 1500.00
-        title = "Employer Business Pro Package"
-        description = "Unlimited Job postings + 5 Featured listings for 30 days"
+        title = "Employer Pro"
+        description = "Employer Business Pro plan subscription."
 
     # Create pending transaction
     tx = PaymentTransaction.objects.create(
