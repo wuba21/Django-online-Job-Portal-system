@@ -23,7 +23,6 @@ def initialize_chapa_payment(tx_ref, amount, email, first_name, last_name, retur
     secret_key = get_chapa_secret_key()
 
     if secret_key == "CHAPA_TEST_SECRET_KEY_MOCK" or not (secret_key.startswith("CHASECK") or secret_key.startswith("CHAPUBK")):
-        # Mock mode only if explicitly set to MOCK or invalid prefix
         logger.info("Chapa running in Mock Sandbox Mode.")
         return {
             "status": "success",
@@ -71,18 +70,20 @@ def initialize_chapa_payment(tx_ref, amount, email, first_name, last_name, retur
     except urllib.error.HTTPError as e:
         err_body = e.read().decode("utf-8")
         logger.error(f"Chapa API HTTP Error {e.code}: {err_body}")
-        # Try fallback if sandbox key expired
+        try:
+            err_json = json.loads(err_body)
+            msg = err_json.get("message") or err_body
+        except Exception:
+            msg = err_body
         return {
-            "status": "success",
-            "message": f"Chapa API Notice: {err_body}",
-            "checkout_url": f"{return_url}?tx_ref={tx_ref}&status=success&mock=true",
+            "status": "error",
+            "message": f"Chapa API Error ({e.code}): {msg}",
         }
     except Exception as e:
         logger.error(f"Chapa initialization network exception: {e}")
         return {
-            "status": "success",
-            "message": f"Chapa API Notice: {str(e)}",
-            "checkout_url": f"{return_url}?tx_ref={tx_ref}&status=success&mock=true",
+            "status": "error",
+            "message": f"Payment Network Error: {str(e)}",
         }
 
 
