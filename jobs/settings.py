@@ -130,7 +130,7 @@ DATABASES = {
 
 # Chapa Payment Integration Key
 # Set CHAPA_SECRET_KEY in .env or PythonAnywhere environment variables
-CHAPA_SECRET_KEY = env("CHAPA_SECRET_KEY", default="CHAPA_TEST_SECRET_KEY_MOCK")
+CHAPA_SECRET_KEY = env("CHAPA_SECRET_KEY", default="CHASECK_TEST-LpIMynCSj89EOX7AgFurw1o6d7M9sLca")
 
 # Telegram Bot Vacancy Broadcast Config
 # Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in .env or PythonAnywhere environment variables
