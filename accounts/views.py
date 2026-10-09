@@ -30,8 +30,10 @@ class RegisterEmployeeView(CreateView):
             password = form.cleaned_data.get("password1")
             user.set_password(password)
             user.save()
+            messages.success(request, "Account created successfully! Please log in with your email and password.")
             return redirect("accounts:login")
         else:
+            messages.error(request, "Please check the form and correct the highlighted errors.")
             return render(request, "accounts/employee/register.html", {"form": form})
 
 
@@ -57,8 +59,15 @@ class RegisterEmployerView(CreateView):
             password = form.cleaned_data.get("password1")
             user.set_password(password)
             user.save()
+            # Ensure Company record is created for this employer
+            from accounts.models import Company
+            company_name = form.cleaned_data.get("first_name", "Company")
+            company_location = form.cleaned_data.get("last_name", "")
+            Company.objects.get_or_create(user=user, defaults={"name": company_name, "location": company_location})
+            messages.success(request, "Employer account created successfully! Please log in with your email and password.")
             return redirect("accounts:login")
         else:
+            messages.error(request, "Please check the form and correct the highlighted errors.")
             return render(request, "accounts/employer/register.html", {"form": form})
 
 

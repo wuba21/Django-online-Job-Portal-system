@@ -52,6 +52,7 @@
                                            class="form-control"
                                            name="{{ field.name }}"
                                            id="id_{{ field.name }}"
+                                           value="{% if field.field.widget.input_type != 'password' %}{{ field.value|default_if_none:'' }}{% endif %}"
                                            placeholder="{{ field.field.widget.attrs.placeholder }}"
                                            required>
                                     {% for error in field.errors %}

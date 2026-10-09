@@ -31,11 +31,27 @@ class AdminDashboardView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["total_jobs"] = Job.objects.count()
-        context["pending_jobs"] = Job.objects.filter(status="pending").count()
-        context["approved_jobs"] = Job.objects.filter(status="approved").count()
-        context["total_users"] = User.objects.count()
-        context["users"] = User.objects.all().order_by("-date_joined")[:10]
+        total_users = User.objects.count()
+        total_jobs = Job.objects.count()
+        pending_jobs = Job.objects.filter(status="pending").count()
+        approved_jobs = Job.objects.filter(status="approved").count()
+
+        context["total_users"] = total_users
+        context["total_applicants"] = User.objects.filter(role="employee").count()
+        context["total_employers"] = User.objects.filter(role="employer").count()
+        context["total_jobs"] = total_jobs
+        context["active_jobs"] = approved_jobs
+        context["pending_jobs"] = pending_jobs
+        context["approved_jobs"] = approved_jobs
+        context["total_applications"] = Applicant.objects.count()
+        context["categories_count"] = Job.objects.values("category").distinct().count()
+
+        # Provide recent users and jobs under both variable names (users/recent_users, jobs/recent_jobs)
+        recent_users = User.objects.all().order_by("-date_joined")[:25]
+        recent_jobs = Job.objects.select_related("user", "company").all().order_by("-created_at")[:25]
+        context["users"] = recent_users
+        context["recent_users"] = recent_users
+        context["recent_jobs"] = recent_jobs
         return context
 
 
