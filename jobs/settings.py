@@ -61,16 +61,12 @@ INSTALLED_APPS = [
     "django.contrib.flatpages",
     "django.contrib.staticfiles",
     "django.contrib.sitemaps",
-    "drf_yasg",
     "jobsapp",
     "resume_cv",
     "accounts",
     "tags",
     "payments",
     "django.contrib.humanize",
-    "graphene_django",
-    "categories",
-    "django_extensions",
 ]
 
 import importlib.util
@@ -81,13 +77,15 @@ for app, pkg in [
     ("corsheaders", "corsheaders"),
     ("social_django", "social_django"),
     ("django_elasticsearch_dsl", "django_elasticsearch_dsl"),
+    ("graphene_django", "graphene_django"),
+    ("categories", "categories"),
+    ("django_extensions", "django_extensions"),
 ]:
     if importlib.util.find_spec(pkg) is not None and app not in INSTALLED_APPS:
         INSTALLED_APPS.append(app)
 
 MIDDLEWARE = [
     "django.middleware.gzip.GZipMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -98,8 +96,13 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.http.ConditionalGetMiddleware",
-    "social_django.middleware.SocialAuthExceptionMiddleware",
 ]
+
+if importlib.util.find_spec("corsheaders") is not None:
+    MIDDLEWARE.insert(1, "corsheaders.middleware.CorsMiddleware")
+
+if importlib.util.find_spec("social_django") is not None:
+    MIDDLEWARE.append("social_django.middleware.SocialAuthExceptionMiddleware")
 
 ROOT_URLCONF = "jobs.urls"
 
