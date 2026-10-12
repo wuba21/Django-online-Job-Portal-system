@@ -143,14 +143,17 @@ class UserLoginForm(forms.Form):
         password = self.cleaned_data.get("password")
 
         if email and password:
-            self.user = authenticate(email=email, password=password)
+            email = email.strip().lower()
+            user_obj = User.objects.filter(email__iexact=email).first()
+            if user_obj is None:
+                raise forms.ValidationError("No account found with this email address.")
 
+            if not user_obj.is_active:
+                raise forms.ValidationError("This user account is inactive. Please contact support.")
+
+            self.user = authenticate(email=user_obj.email, password=password)
             if self.user is None:
-                raise forms.ValidationError("User Does Not Exist.")
-            if not self.user.check_password(password):
-                raise forms.ValidationError("Password Does not Match.")
-            if not self.user.is_active:
-                raise forms.ValidationError("User is not Active.")
+                raise forms.ValidationError("Invalid password. Please check your password and try again.")
 
         return super(UserLoginForm, self).clean(*args, **kwargs)
 
