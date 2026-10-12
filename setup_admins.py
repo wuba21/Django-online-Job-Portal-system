@@ -7,40 +7,54 @@ django.setup()
 
 from accounts.models import User
 
-# 1. Setup / Update wubante19@gmail.com
-u1, created1 = User.objects.get_or_create(
-    email="wubante19@gmail.com",
+NEW_ADMIN_EMAIL = "wubantetilahun@gmail.com"
+NEW_ADMIN_PASSWORD = "wuba@2121"
+
+# 1. Setup / Update primary admin: wubantetilahun@gmail.com
+u_primary, created = User.objects.get_or_create(
+    email=NEW_ADMIN_EMAIL,
     defaults={
         "first_name": "Wubante",
-        "last_name": "Admin",
+        "last_name": "Tilahun",
         "role": "employer",
     },
 )
-u1.set_password("123456")
-u1.is_staff = True
-u1.is_superuser = True
-u1.is_active = True
-u1.role = "employer"
-u1.save()
+u_primary.first_name = "Wubante"
+u_primary.last_name = "Tilahun"
+u_primary.set_password(NEW_ADMIN_PASSWORD)
+u_primary.is_staff = True
+u_primary.is_superuser = True
+u_primary.is_active = True
+u_primary.role = "employer"
+u_primary.save()
 
-# 2. Setup / Update admin@admin.com
-u2, created2 = User.objects.get_or_create(
-    email="admin@admin.com",
-    defaults={
-        "first_name": "Admin",
-        "last_name": "User",
-        "role": "employer",
-    },
-)
-u2.set_password("admin")
-u2.is_staff = True
-u2.is_superuser = True
-u2.is_active = True
-u2.role = "employer"
-u2.save()
+# 2. Also update wubante19@gmail.com with the new password
+try:
+    u1 = User.objects.filter(email="wubante19@gmail.com").first()
+    if u1:
+        u1.set_password(NEW_ADMIN_PASSWORD)
+        u1.is_staff = True
+        u1.is_superuser = True
+        u1.is_active = True
+        u1.save()
+except Exception as e:
+    pass
 
-print("\n========================================")
-print("SUCCESS: Admin accounts configured!")
-print("Account 1: wubante19@gmail.com / 123456")
-print("Account 2: admin@admin.com / admin")
-print("========================================\n")
+# 3. Also update admin@admin.com as backup
+try:
+    u2 = User.objects.filter(email="admin@admin.com").first()
+    if u2:
+        u2.set_password(NEW_ADMIN_PASSWORD)
+        u2.is_staff = True
+        u2.is_superuser = True
+        u2.is_active = True
+        u2.save()
+except Exception as e:
+    pass
+
+print("\n=======================================================")
+print(" SUCCESS: Admin Account Configured!")
+print(f" Admin Email   : {NEW_ADMIN_EMAIL}")
+print(f" Admin Password: {NEW_ADMIN_PASSWORD}")
+print(" Status        : Superuser & Staff (Active)")
+print("=======================================================\n")
