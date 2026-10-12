@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.forms import UserCreationForm
 
 from accounts.models import User
+from accounts.validators import validate_legitimate_email, validate_secure_password
 
 GENDER_CHOICES = (("male", "Male"), ("female", "Female"))
 
@@ -23,9 +24,9 @@ class EmployeeRegistrationForm(UserCreationForm):
 
         self.fields["first_name"].widget.attrs.update({"placeholder": "Enter First Name"})
         self.fields["last_name"].widget.attrs.update({"placeholder": "Enter Last Name"})
-        self.fields["email"].widget.attrs.update({"placeholder": "Enter Email Address"})
-        self.fields["password1"].widget.attrs.update({"placeholder": "Enter Password (min 6 chars)"})
-        self.fields["password2"].widget.attrs.update({"placeholder": "Confirm Password"})
+        self.fields["email"].widget.attrs.update({"placeholder": "Enter valid email (e.g. name@gmail.com)"})
+        self.fields["password1"].widget.attrs.update({"placeholder": "Enter strong password (min 8 chars, A-Z, 0-9, symbol)"})
+        self.fields["password2"].widget.attrs.update({"placeholder": "Confirm password"})
 
     class Meta:
         model = User
@@ -39,14 +40,14 @@ class EmployeeRegistrationForm(UserCreationForm):
 
     def clean_email(self):
         email = self.cleaned_data.get("email", "").strip().lower()
+        validate_legitimate_email(email)
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError("A user with this email address already exists. Please login instead.")
         return email
 
     def clean_password1(self):
         password = self.cleaned_data.get("password1")
-        if password and len(password) < 8:
-            raise forms.ValidationError("Password must be at least 8 characters long.")
+        validate_secure_password(password)
         return password
 
     def clean(self):
@@ -86,9 +87,9 @@ class EmployerRegistrationForm(UserCreationForm):
 
         self.fields["first_name"].widget.attrs.update({"placeholder": "Enter Company Name"})
         self.fields["last_name"].widget.attrs.update({"placeholder": "Enter Company Address"})
-        self.fields["email"].widget.attrs.update({"placeholder": "Enter Email Address"})
-        self.fields["password1"].widget.attrs.update({"placeholder": "Enter Password (min 6 chars)"})
-        self.fields["password2"].widget.attrs.update({"placeholder": "Confirm Password"})
+        self.fields["email"].widget.attrs.update({"placeholder": "Enter valid email (e.g. company@gmail.com)"})
+        self.fields["password1"].widget.attrs.update({"placeholder": "Enter strong password (min 8 chars, A-Z, 0-9, symbol)"})
+        self.fields["password2"].widget.attrs.update({"placeholder": "Confirm password"})
 
     class Meta:
         model = User
@@ -101,14 +102,14 @@ class EmployerRegistrationForm(UserCreationForm):
 
     def clean_email(self):
         email = self.cleaned_data.get("email", "").strip().lower()
+        validate_legitimate_email(email)
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError("An employer account with this email address already exists. Please login.")
         return email
 
     def clean_password1(self):
         password = self.cleaned_data.get("password1")
-        if password and len(password) < 8:
-            raise forms.ValidationError("Password must be at least 8 characters long.")
+        validate_secure_password(password)
         return password
 
     def clean(self):

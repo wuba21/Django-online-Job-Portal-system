@@ -35,6 +35,17 @@
                                        value="{% if field.field.widget.input_type != 'password' %}{{ field.value|default_if_none:'' }}{% endif %}"
                                        placeholder="{{ field.field.widget.attrs.placeholder }}"
                                        required>
+                                {% if field.name == 'email' %}
+                                    <small class="form-text text-muted mt-1">
+                                        <i class="fa fa-envelope-o text-primary mr-1"></i>
+                                        {% trans "Please use an authentic Google (@gmail.com) or active company email." %}
+                                    </small>
+                                {% elif field.name == 'password1' %}
+                                    <small class="form-text text-muted mt-1">
+                                        <i class="fa fa-shield text-success mr-1"></i>
+                                        {% trans "Requires min 8 characters with uppercase (A-Z), lowercase (a-z), number (0-9), and symbol (@, #, $, etc.)." %}
+                                    </small>
+                                {% endif %}
                                 {% for error in field.errors %}
                                     <div class="alert alert-danger alert-dismissible fade show mt-1">
                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">&times;</button>
