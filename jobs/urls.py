@@ -1,3 +1,4 @@
+import importlib.util
 from django.urls import re_path
 from django.conf import settings
 from django.conf.urls.i18n import i18n_patterns
@@ -44,11 +45,13 @@ lang_patterns = i18n_patterns(
 )
 
 api_patterns = [
-    path("", include("accounts.api.urls")),
     path("", include("jobsapp.api.urls")),
     path("", include("tags.api.urls")),
     path("", include("categories.urls")),
 ]
+if importlib.util.find_spec("social_django") is not None:
+    api_patterns.insert(0, path("", include("accounts.api.urls")))
+
 if schema_view is not None:
     api_patterns.insert(0, path("swagger", schema_view.with_ui("swagger", cache_timeout=0)))
 
@@ -57,9 +60,11 @@ urlpatterns = lang_patterns + [
     re_path(r"^i18n/", include("django.conf.urls.i18n")),
     path("admin/", admin.site.urls),
     path("api/", include(api_patterns)),
-    path("social-auth/", include("social_django.urls", namespace="social")),
     path("sitemap.xml/", sitemap, {"sitemaps": dict(Sitemaps())}, name="django.contrib.sitemaps.views.sitemap"),
 ]
+
+if importlib.util.find_spec("social_django") is not None:
+    urlpatterns.append(path("social-auth/", include("social_django.urls", namespace="social")))
 
 if FileUploadGraphQLView is not None:
     urlpatterns.append(path("graphql/", csrf_exempt(FileUploadGraphQLView.as_view(graphiql=True))))
