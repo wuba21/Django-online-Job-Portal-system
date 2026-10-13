@@ -50,6 +50,10 @@ class AboutUsView(TemplateView):
     template_name = "about_us.html"
 
 
+class SalaryCalculatorView(TemplateView):
+    template_name = "jobs/salary_calculator.html"
+
+
 class SearchView(ListView):
     model = Job
     template_name = "jobs/search.html"

@@ -66,8 +66,48 @@
                         <li class="nav-item {% if url_name == 'home' %}active{% endif %}">
                             <a href="{% url 'jobs:home' %}" class="nav-link">{% trans "Home" %} <span class="sr-only">(current)</span></a>
                         </li>
-                        <li class="nav-item {% if url_name == 'jobs' %}active{% endif %}">
-                            <a href="{% url 'jobs:jobs' %}" class="nav-link">{% trans "Jobs" %}</a>
+                        <!-- Jobs Dropdown -->
+                        <li class="nav-item dropdown {% if url_name == 'jobs' or url_name == 'search' %}active{% endif %}">
+                            <a href="#" class="nav-link dropdown-toggle" id="jobsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fa fa-briefcase mr-1"></i>{% trans "Jobs" %}
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="jobsDropdown" style="min-width:220px; border-radius:10px; box-shadow:0 8px 30px rgba(0,0,0,0.15); border:none; overflow:hidden; padding:0;">
+                                <div style="background:linear-gradient(135deg,#1e3a5f,#2563eb); padding:12px 16px;">
+                                    <small style="color:rgba(255,255,255,0.75); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:600;">{% trans "Browse by Category" %}</small>
+                                </div>
+                                <a href="{% url 'jobs:jobs' %}" class="dropdown-item py-2" style="font-weight:500;">
+                                    <i class="fa fa-th-large mr-2 text-primary"></i>{% trans "All Jobs" %}
+                                </a>
+                                <div class="dropdown-divider my-0"></div>
+                                <a href="{% url 'jobs:search' %}?category=NGO&position=NGO" class="dropdown-item py-2">
+                                    <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:#16a34a;border-radius:5px;margin-right:8px;">
+                                        <i class="fa fa-globe" style="color:#fff;font-size:12px;"></i>
+                                    </span>
+                                    <strong>{% trans "NGO Jobs" %}</strong>
+                                </a>
+                                <a href="{% url 'jobs:search' %}?category=Fresh+Graduate&position=Fresh+Graduate" class="dropdown-item py-2">
+                                    <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:#7c3aed;border-radius:5px;margin-right:8px;">
+                                        <i class="fa fa-graduation-cap" style="color:#fff;font-size:12px;"></i>
+                                    </span>
+                                    <strong>{% trans "Fresh Graduate" %}</strong>
+                                </a>
+                                <a href="{% url 'jobs:search' %}?category=Banking&position=Banking" class="dropdown-item py-2">
+                                    <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:#0891b2;border-radius:5px;margin-right:8px;">
+                                        <i class="fa fa-bank" style="color:#fff;font-size:12px;"></i>
+                                    </span>
+                                    <strong>{% trans "Banking Jobs" %}</strong>
+                                </a>
+                                <div class="dropdown-divider my-0"></div>
+                                <a href="{% url 'jobs:search' %}" class="dropdown-item py-2 text-muted" style="font-size:0.85rem;">
+                                    <i class="fa fa-search mr-2"></i>{% trans "Advanced Search" %}
+                                </a>
+                            </div>
+                        </li>
+                        <!-- Salary Calculator -->
+                        <li class="nav-item {% if url_name == 'salary-calculator' %}active{% endif %}">
+                            <a href="{% url 'jobs:salary-calculator' %}" class="nav-link">
+                                <i class="fa fa-calculator mr-1"></i>{% trans "Salary Calculator" %}
+                            </a>
                         </li>
                         <li class="nav-item {% if url_name == 'templates' %}active{% endif %}">
                             <a href="{% url 'resume_cv:templates' %}" class="nav-link">{% trans "Create ResumeCV" %}</a>

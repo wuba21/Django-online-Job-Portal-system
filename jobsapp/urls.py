@@ -14,7 +14,7 @@ from jobsapp.views.employer import (
     export_applicants_csv
 )
 from jobsapp.views.home import (
-    AboutUsView, ApplyJobView, HomeView, JobDetailsView, JobListView, SearchView, favorite
+    AboutUsView, ApplyJobView, HomeView, JobDetailsView, JobListView, SearchView, SalaryCalculatorView, favorite
 )
 
 app_name = "jobs"
@@ -23,6 +23,7 @@ urlpatterns = [
     path("", HomeView.as_view(), name="home"),
     path("favorite/", favorite, name="favorite"),
     path("search/", SearchView.as_view(), name="search"),
+    path("salary-calculator/", SalaryCalculatorView.as_view(), name="salary-calculator"),
 
     # Notifications
     path("notifications/", notifications_view, name="notifications"),
