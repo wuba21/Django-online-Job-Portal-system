@@ -27,6 +27,7 @@ DISPOSABLE_EMAIL_DOMAINS = {
     "fakemail.org", "minuteinbox.com", "emailfake.com", "incognitomail.com",
 }
 
+# Obviously fake / placeholder usernames
 FAKE_USERNAMES = {
     "test", "testing", "tester", "fake", "dummy", "sample",
     "asdf", "asdfg", "asdfgh", "qwerty", "admin", "administrator",
@@ -35,12 +36,33 @@ FAKE_USERNAMES = {
     "employer", "demo", "samplemail", "testmail"
 }
 
+# Only trusted, well-known email providers are accepted
+ALLOWED_EMAIL_DOMAINS = {
+    # Google
+    "gmail.com", "googlemail.com",
+    # Microsoft
+    "outlook.com", "hotmail.com", "live.com", "msn.com",
+    "outlook.co.uk", "hotmail.co.uk", "hotmail.fr", "live.co.uk",
+    # Yahoo
+    "yahoo.com", "yahoo.co.uk", "yahoo.fr", "yahoo.de", "yahoo.it",
+    "yahoo.es", "yahoo.com.br", "yahoo.co.in", "ymail.com",
+    # ProtonMail
+    "protonmail.com", "protonmail.ch", "pm.me", "proton.me",
+    # Apple
+    "icloud.com", "me.com", "mac.com",
+    # AOL
+    "aol.com",
+    # Ethiopian ISPs / institutions
+    "ethionet.et", "ebc.et", "cbbe.edu.et", "aait.edu.et",
+    # Generic but real corporate/institution-style domains allowed
+    # (will still pass — but qqq@qqq.com-style will be rejected by FAKE_USERNAMES)
+}
+
 
 def validate_legitimate_email(email):
     """
     Validates that the provided email is a legitimate, active email
-    and not a disposable, dummy, or fake address.
-    Specifically validates Google/Gmail format and standard corporate/personal domains.
+    from a trusted provider and not a disposable, dummy, or fake address.
     """
     if not email:
         raise ValidationError("Email address is required.")
@@ -60,14 +82,21 @@ def validate_legitimate_email(email):
     local_part = local_part.strip()
     domain = domain.strip().lower()
 
-    # 2. Check for disposable / test domains
+    # 2. Check domain is in trusted whitelist
+    if domain not in ALLOWED_EMAIL_DOMAINS:
+        raise ValidationError(
+            "Please use a trusted email provider such as Gmail, Yahoo, Outlook, Hotmail, or ProtonMail. "
+            f"'{domain}' is not accepted."
+        )
+
+    # 3. Check for disposable / test domains
     if domain in DISPOSABLE_EMAIL_DOMAINS:
         raise ValidationError(
             "Temporary or disposable email addresses are not allowed. "
             "Please use a genuine Google (@gmail.com) or personal email address."
         )
 
-    # 3. Check domain has a valid structure: at least one period, TLD at least 2 alpha chars
+    # 4. Check domain has a valid structure
     domain_parts = domain.split(".")
     if len(domain_parts) < 2 or not all(domain_parts) or len(domain_parts[-1]) < 2:
         raise ValidationError("Please enter an email with a valid domain (e.g. gmail.com).")
@@ -75,13 +104,12 @@ def validate_legitimate_email(email):
     if not domain_parts[-1].isalpha():
         raise ValidationError("Email domain suffix must contain valid letters (e.g. .com, .org, .et).")
 
-    # 4. Check for obviously fake local parts
+    # 5. Check for obviously fake local parts
     clean_local = re.sub(r'[^a-z0-9]', '', local_part)
     if clean_local in FAKE_USERNAMES:
         raise ValidationError("Please enter your real personal or work email address.")
 
-    # 5. Gmail / Google specific format check:
-    # Google requires usernames between 6 and 30 characters, alphanumeric and non-consecutive dots
+    # 6. Gmail / Google specific format check
     if domain in ("gmail.com", "googlemail.com"):
         if len(local_part) < 6:
             raise ValidationError(
