@@ -99,7 +99,7 @@
                 <div class="card border-0 shadow-sm p-4 mb-4">
                     <h4 class="card-title text-primary border-bottom pb-2">Job Description & Requirements</h4>
                     <div class="job-description-body py-2">
-                        {% if "<p" in job.description or "<div" in job.description or "<br" in job.description %}
+                        {% if "<" in job.description and ">" in job.description %}
                             {{ job.description|safe }}
                         {% else %}
                             {{ job.description|linebreaks }}
@@ -124,8 +124,10 @@
             <div class="col-lg-4">
                 <div class="card border-0 shadow-sm p-4 mb-4">
                     <h4 class="card-title text-dark border-bottom pb-2">About {{ job.company_name }}</h4>
-                    {% if "<p" in job.company_description or "<div" in job.company_description or "<br" in job.company_description %}
-                        {{ job.company_description|safe }}
+                    {% if "<" in job.company_description and ">" in job.company_description %}
+                        <div class="company-desc-content text-muted">
+                            {{ job.company_description|safe }}
+                        </div>
                     {% else %}
                         <p class="text-muted">{{ job.company_description|default:"No company description provided."|linebreaks }}</p>
                     {% endif %}
