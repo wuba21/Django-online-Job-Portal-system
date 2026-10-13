@@ -56,11 +56,11 @@
                             <div class="top">
                                 <a href="#">
                                     <div class="image">
-                                        <img src="{% static 'img/featured1.jpg' %}" alt="" class="img-fluid">
+                                        <img src="{% static 'img/featured1.jpg' %}" alt="" class="img-fluid" loading="lazy" decoding="async">
                                     </div>
                                     <div class="bg"></div>
                                     <div class="logo">
-                                        <img src="{% static 'img/company-1.png' %}" alt="" style="max-width: 80px;">
+                                        <img src="{% static 'img/company-1.png' %}" alt="" style="max-width: 80px;" loading="lazy" decoding="async">
                                     </div>
                                 </a>
                             </div>
@@ -101,7 +101,7 @@
                             <div class="col-12 col-md-6 col-lg-5 mb-2 mb-md-0">
                                 <div class="d-flex align-items-center">
                                     <img src="{% static 'img/company-1.png' %}"
-                                         alt="company image" class="img-fluid mr-3" style="max-width: 48px; max-height: 48px;">
+                                         alt="company image" class="img-fluid mr-3" style="max-width: 48px; max-height: 48px;" loading="lazy" decoding="async">
                                     <div>
                                         <h5 class="job__title mb-1 font-weight-bold">
                                             <a href="{% url 'jobs:jobs-detail' trending.id %}">{{ trending.title }}</a>

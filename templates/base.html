@@ -6,46 +6,67 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{% block title %} {% endblock %} - {% trans "Online Sra" %}</title>
-    <meta name="description" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="robots" content="all,follow">
-    <!-- Bootstrap CSS-->
-    <link rel="stylesheet"
-          href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
-    <!-- Font Awesome CSS-->
-    <link rel="stylesheet" href="{% static 'vendor/font-awesome/css/font-awesome.min.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <meta name="theme-color" content="#111827">
+    <title>{% block title %} {% endblock %} - {% trans "Online Sra" %}</title>
+    <meta name="description" content="{% block meta_description %}Ethiopia's premier job portal — find NGO, Banking, Fresh Graduate and other jobs.{% endblock %}">
 
-    <!-- Preconnect for Google Fonts Speed -->
+    <!-- DNS Prefetch for speed -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+
+    <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Bootstrap CSS (critical — load first) -->
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+
+    <!-- Font Awesome — local only (no duplicate CDN) -->
+    <link rel="stylesheet" href="{% static 'vendor/font-awesome/css/font-awesome.min.css' %}">
+
+    <!-- Google Fonts — display=swap for non-blocking -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@300;400;700&family=Noto+Sans+Ethiopic:wght@400;700&display=swap">
-    <!-- owl carousel-->
+
+    <!-- Owl carousel -->
     <link rel="stylesheet" href="{% static 'vendor/owl.carousel/assets/owl.carousel.css' %}">
     <link rel="stylesheet" href="{% static 'vendor/owl.carousel/assets/owl.theme.default.css' %}">
-    <!-- theme stylesheet-->
+
+    <!-- Theme stylesheet -->
     <link rel="stylesheet" href="{% static 'css/style.default.css' %}" id="theme-stylesheet">
-    <!-- Custom stylesheet - for your changes-->
-    <link rel="stylesheet" href="{% static 'css/custom.css' %}?v=7.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"/>
+
+    <!-- Custom stylesheet -->
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}?v=8.0">
+    <link rel="stylesheet" href="{% static 'css/footer-modern.css' %}">
+
+    <!-- Toastr CSS — defer via media trick -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"></noscript>
+
     {% block styles %}{% endblock %}
-    <!-- Favicon-->
+
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
     <link rel="shortcut icon" href="{% static 'img/favicon.svg' %}">
-    <!-- Tweaks for older IEs--><!--[if lt IE 9]>
+
+    <!-- IE fallbacks --><!--[if lt IE 9]>
     <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script><![endif]-->
-<link rel="stylesheet" href="{% static 'css/footer-modern.css' %}">
+
     <style>
         /* PERMANENT FIXED Sleek Dark Navy Navbar */
         header.header, .navbar {
             background-color: #111827 !important;
             background: #111827 !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-bottom: 1px solid rgba(255,255,255,0.08) !important;
         }
+        /* Critical above-fold render — prevent layout shift */
+        body { margin: 0; }
+        .navbar-brand img { height: 42px; width: auto; }
     </style>
-    </head>
+</head>
 <body class="d-flex flex-column min-vh-100">
 <!-- navbar-->
 {% csrf_token %}

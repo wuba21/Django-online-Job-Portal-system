@@ -195,14 +195,28 @@ img, video, iframe, canvas, svg {
         border-radius: 6px !important;
     }
 
-    /* Mobile Dropdown Menus (User Profile, Register, Languages) */
+    /* Mobile Dropdown Menus (User Profile, Register, Languages, Jobs) */
     .navbar .dropdown-menu {
-        background: #243044 !important;
+        background: #1f2937 !important;
         border: 1px solid rgba(255, 255, 255, 0.12) !important;
-        border-radius: 6px !important;
+        border-radius: 8px !important;
         margin-top: 6px !important;
-        padding: 8px 0 !important;
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25) !important;
+        padding: 6px 0 !important;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
+    }
+
+    /* Jobs category dropdown items on mobile */
+    #jobsDropdown + .dropdown-menu .dropdown-item {
+        padding: 10px 16px !important;
+        font-size: 0.9rem !important;
+        color: #e2e8f0 !important;
+        display: flex !important;
+        align-items: center !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    #jobsDropdown + .dropdown-menu .dropdown-item:last-child {
+        border-bottom: none;
     }
 
     .navbar .dropdown-menu .dropdown-item {

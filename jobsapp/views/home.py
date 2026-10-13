@@ -26,8 +26,10 @@ class HomeView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["trendings"] = self.model.objects.select_related("user", "company").prefetch_related("tags").filter(filled=False, status="approved")[:3]
-        context["categories"] = Category.objects.all()[:8]
+        # Reuse already fetched jobs for trending to eliminate redundant DB query
+        jobs_list = list(context["jobs"])
+        context["trendings"] = jobs_list[:3]
+        context["categories"] = Category.objects.only("id", "name")[:8]
         context["locations"] = ETHIOPIAN_LOCATIONS
 
         if self.request.user.is_authenticated and self.request.user.is_employee:
