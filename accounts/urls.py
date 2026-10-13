@@ -18,4 +18,6 @@ urlpatterns = [
     path("accounts/employer/register/", RegisterEmployerView.as_view(), name="accounts-employer-register-alias"),
     path("employee/profile/update/", EditProfileView.as_view(), name="employee-profile-update"),
     path("employer/profile/update/", EmployerProfileEditView.as_view(), name="employer-profile-update"),
+    path("verify-email/<uuid:token>/", VerifyEmailView.as_view(), name="verify-email"),
+    path("resend-verification/", ResendVerificationView.as_view(), name="resend-verification"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

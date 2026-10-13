@@ -84,6 +84,37 @@
                             <i class="fa fa-linkedin-square mr-2"></i>{% trans "Login with LinkedIn" %}
                         </a>
                     </div>
+
+                    {# ── Resend Verification ── #}
+                    <div class="mt-4">
+                        <p class="text-center text-muted" style="font-size:0.85rem;">
+                            Didn't receive the verification email?
+                            <a href="#resendVerifyPanel" data-toggle="collapse" class="text-primary font-weight-bold">
+                                Resend it
+                            </a>
+                        </p>
+                        <div class="collapse" id="resendVerifyPanel">
+                            <div class="card card-body bg-light border-0 rounded mt-2">
+                                <p class="text-muted mb-2" style="font-size:0.85rem;">
+                                    <i class="fa fa-envelope-o mr-1"></i>
+                                    Enter your registered email and we will send you a new verification link.
+                                </p>
+                                <form method="post" action="{% url 'accounts:resend-verification' %}">
+                                    {% csrf_token %}
+                                    <div class="input-group">
+                                        <input type="email" name="email" class="form-control"
+                                               placeholder="your@email.com" required>
+                                        <div class="input-group-append">
+                                            <button type="submit" class="btn btn-warning font-weight-bold">
+                                                <i class="fa fa-paper-plane mr-1"></i> Send
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>

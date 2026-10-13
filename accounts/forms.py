@@ -150,6 +150,11 @@ class UserLoginForm(forms.Form):
                 raise forms.ValidationError("No account found with this email address.")
 
             if not user_obj.is_active:
+                if not user_obj.email_verified:
+                    raise forms.ValidationError(
+                        "Your email address has not been verified yet. "
+                        "Please check your inbox for the verification link or request a new one below."
+                    )
                 raise forms.ValidationError("This user account is inactive. Please contact support.")
 
             self.user = authenticate(email=user_obj.email, password=password)

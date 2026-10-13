@@ -1,9 +1,12 @@
 from django.contrib import auth, messages
 from django.http import HttpResponseRedirect
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
+from django.utils import timezone
+from django.views import View
 from django.views.generic import CreateView, FormView, RedirectView
 
+from accounts.email_verification import send_verification_email
 from accounts.forms import *
 from accounts.models import User
 
@@ -22,15 +25,28 @@ class RegisterEmployeeView(CreateView):
         return super().dispatch(self.request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-
         form = self.form_class(data=request.POST)
 
         if form.is_valid():
             user = form.save(commit=False)
             password = form.cleaned_data.get("password1")
             user.set_password(password)
+            user.is_active = False  # inactive until email verified
             user.save()
-            messages.success(request, "Account created successfully! Please log in with your email and password.")
+
+            sent = send_verification_email(request, user)
+            if sent:
+                messages.success(
+                    request,
+                    f"✅ Account created! A verification link has been sent to <strong>{user.email}</strong>. "
+                    "Please check your inbox (and spam folder) and click the link to activate your account."
+                )
+            else:
+                messages.warning(
+                    request,
+                    "Account created but we could not send the verification email. "
+                    "Please contact support."
+                )
             return redirect("accounts:login")
         else:
             messages.error(request, "Please check the form and correct the highlighted errors.")
@@ -51,24 +67,115 @@ class RegisterEmployerView(CreateView):
         return super().dispatch(self.request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-
         form = self.form_class(data=request.POST)
 
         if form.is_valid():
             user = form.save(commit=False)
             password = form.cleaned_data.get("password1")
             user.set_password(password)
+            user.is_active = False  # inactive until email verified
             user.save()
+
             # Ensure Company record is created for this employer
             from accounts.models import Company
             company_name = form.cleaned_data.get("first_name", "Company")
             company_location = form.cleaned_data.get("last_name", "")
             Company.objects.get_or_create(user=user, defaults={"name": company_name, "location": company_location})
-            messages.success(request, "Employer account created successfully! Please log in with your email and password.")
+
+            sent = send_verification_email(request, user)
+            if sent:
+                messages.success(
+                    request,
+                    f"✅ Employer account created! A verification link has been sent to <strong>{user.email}</strong>. "
+                    "Please check your inbox (and spam folder) and click the link to activate your account."
+                )
+            else:
+                messages.warning(
+                    request,
+                    "Account created but we could not send the verification email. "
+                    "Please contact support."
+                )
             return redirect("accounts:login")
         else:
             messages.error(request, "Please check the form and correct the highlighted errors.")
             return render(request, "accounts/employer/register.html", {"form": form})
+
+
+class VerifyEmailView(View):
+    """
+    Handles the email verification link: /verify-email/<token>/
+    Activates the user account if the token is valid and not expired.
+    """
+
+    def get(self, request, token, *args, **kwargs):
+        try:
+            user = User.objects.get(email_token=token)
+        except User.DoesNotExist:
+            messages.error(request, "❌ This verification link is invalid or has already been used.")
+            return redirect("accounts:login")
+
+        if user.email_verified:
+            messages.info(request, "✅ Your email is already verified. Please log in.")
+            return redirect("accounts:login")
+
+        if timezone.now() > user.email_token_expires:
+            # Token expired — resend
+            sent = send_verification_email(request, user)
+            if sent:
+                messages.warning(
+                    request,
+                    f"⏰ Your verification link expired. A new link has been sent to <strong>{user.email}</strong>."
+                )
+            else:
+                messages.error(request, "Your verification link expired. Please register again.")
+            return redirect("accounts:login")
+
+        # Success — activate the account
+        user.email_verified = True
+        user.is_active = True
+        user.save(update_fields=["email_verified", "is_active"])
+        messages.success(
+            request,
+            "🎉 Your email has been verified! Your account is now active. Please log in."
+        )
+        return redirect("accounts:login")
+
+
+class ResendVerificationView(View):
+    """
+    Resends the verification email from the login page link.
+    """
+
+    def post(self, request, *args, **kwargs):
+        email = request.POST.get("email", "").strip().lower()
+        if not email:
+            messages.error(request, "Please provide your email address.")
+            return redirect("accounts:login")
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            # Don't reveal existence
+            messages.success(
+                request,
+                f"If {email} is registered and unverified, a new verification link has been sent."
+            )
+            return redirect("accounts:login")
+
+        if user.email_verified:
+            messages.info(request, "Your email is already verified. Please log in.")
+            return redirect("accounts:login")
+
+        sent = send_verification_email(request, user)
+        if sent:
+            messages.success(
+                request,
+                f"A new verification link has been sent to <strong>{user.email}</strong>. "
+                "Please check your inbox."
+            )
+        else:
+            messages.error(request, "Could not send verification email. Please try again later.")
+        return redirect("accounts:login")
 
 
 class LoginView(FormView):

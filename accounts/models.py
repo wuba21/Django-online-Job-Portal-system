@@ -1,5 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
+from datetime import timedelta
+import uuid
 
 from accounts.managers import UserManager
 
@@ -20,6 +23,9 @@ class User(AbstractUser):
         unique=True, blank=False, error_messages={"unique": "A user with that email already exists."}
     )
     is_vip = models.BooleanField(default=False, db_index=True)
+    email_verified = models.BooleanField(default=False, db_index=True)
+    email_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    email_token_expires = models.DateTimeField(default=timezone.now)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
