@@ -137,12 +137,33 @@
                             <div class="col-lg-4 form-group">
                                 <label for="category">Category</label>
                                 <select id="category" name="category" class="form-control">
-                                    <option value="web-development" {% if form.category.value == "web-development" or not form.category.value %}selected{% endif %}>Web development</option>
-                                    <option value="web-design" {% if form.category.value == "web-design" %}selected{% endif %}>Web design</option>
-                                    <option value="graphic-design" {% if form.category.value == "graphic-design" %}selected{% endif %}>Graphic design</option>
-                                    <option value="human-resource" {% if form.category.value == "human-resource" %}selected{% endif %}>Human Resources</option>
-                                    <option value="support" {% if form.category.value == "support" %}selected{% endif %}>Support</option>
-                                    <option value="android" {% if form.category.value == "android" %}selected{% endif %}>Android</option>
+                                    <optgroup label="Popular Sectors">
+                                        <option value="Banking & Finance" {% if form.category.value == "Banking & Finance" or form.category.value == "Banking" %}selected{% endif %}>Banking & Finance</option>
+                                        <option value="NGO & Civil Society" {% if form.category.value == "NGO & Civil Society" or form.category.value == "NGO" %}selected{% endif %}>NGO & Civil Society</option>
+                                        <option value="Information Technology" {% if form.category.value == "Information Technology" or form.category.value == "web-development" or not form.category.value %}selected{% endif %}>Information Technology (IT/Software)</option>
+                                        <option value="Accounting & Audit" {% if form.category.value == "Accounting & Audit" %}selected{% endif %}>Accounting & Audit</option>
+                                        <option value="Healthcare & Medical" {% if form.category.value == "Healthcare & Medical" %}selected{% endif %}>Healthcare & Medical</option>
+                                        <option value="Education & Teaching" {% if form.category.value == "Education & Teaching" %}selected{% endif %}>Education & Teaching</option>
+                                        <option value="Engineering & Construction" {% if form.category.value == "Engineering & Construction" %}selected{% endif %}>Engineering & Construction</option>
+                                        <option value="Sales & Marketing" {% if form.category.value == "Sales & Marketing" %}selected{% endif %}>Sales & Marketing</option>
+                                        <option value="Human Resources" {% if form.category.value == "Human Resources" or form.category.value == "human-resource" %}selected{% endif %}>Human Resources (HR)</option>
+                                        <option value="Administrative & Clerical" {% if form.category.value == "Administrative & Clerical" %}selected{% endif %}>Administrative & Clerical</option>
+                                        <option value="Logistics & Supply Chain" {% if form.category.value == "Logistics & Supply Chain" %}selected{% endif %}>Logistics & Supply Chain</option>
+                                        <option value="Legal & Law" {% if form.category.value == "Legal & Law" %}selected{% endif %}>Legal & Law</option>
+                                        <option value="Hotel & Hospitality" {% if form.category.value == "Hotel & Hospitality" %}selected{% endif %}>Hotel & Hospitality</option>
+                                        <option value="Agriculture & Farming" {% if form.category.value == "Agriculture & Farming" %}selected{% endif %}>Agriculture & Farming</option>
+                                        <option value="Manufacturing & Factory" {% if form.category.value == "Manufacturing & Factory" %}selected{% endif %}>Manufacturing & Factory</option>
+                                        <option value="Media & Journalism" {% if form.category.value == "Media & Journalism" %}selected{% endif %}>Media & Journalism</option>
+                                        <option value="Customer Support" {% if form.category.value == "Customer Support" or form.category.value == "support" %}selected{% endif %}>Customer Support</option>
+                                        <option value="Other" {% if form.category.value == "Other" %}selected{% endif %}>Other / General</option>
+                                    </optgroup>
+                                    {% if categories %}
+                                    <optgroup label="System Categories">
+                                        {% for cat in categories %}
+                                            <option value="{{ cat.name }}" {% if form.category.value == cat.name %}selected{% endif %}>{{ cat.name }}</option>
+                                        {% endfor %}
+                                    </optgroup>
+                                    {% endif %}
                                 </select>
                             </div>
                             <div class="col-lg-4 form-group">
