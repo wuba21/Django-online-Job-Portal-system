@@ -27,12 +27,12 @@ DISPOSABLE_EMAIL_DOMAINS = {
     "fakemail.org", "minuteinbox.com", "emailfake.com", "incognitomail.com",
 }
 
-# Obviously fake / placeholder usernames
 FAKE_USERNAMES = {
     "test", "testing", "tester", "fake", "dummy", "sample",
     "asdf", "asdfg", "asdfgh", "qwerty", "admin", "administrator",
     "user", "anonymous", "nobody", "null", "123456", "12345678",
-    "random", "junk", "trash", "temp", "tempuser"
+    "random", "junk", "trash", "temp", "tempuser", "employee",
+    "employer", "demo", "samplemail", "testmail"
 }
 
 

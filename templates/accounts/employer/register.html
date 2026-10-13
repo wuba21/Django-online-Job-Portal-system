@@ -28,13 +28,29 @@
                         {% for field in form %}
                             <div class="form-group mb-3">
                                 <label for="id_{{ field.name }}" class="font-weight-bold text-secondary">{{ field.label }}</label>
-                                <input type="{{ field.field.widget.input_type }}"
-                                       class="form-control"
-                                       name="{{ field.name }}"
-                                       id="id_{{ field.name }}"
-                                       value="{% if field.field.widget.input_type != 'password' %}{{ field.value|default_if_none:'' }}{% endif %}"
-                                       placeholder="{{ field.field.widget.attrs.placeholder }}"
-                                       required>
+                                {% if field.field.widget.input_type == 'password' %}
+                                    <div class="input-group">
+                                        <input type="password"
+                                               class="form-control"
+                                               name="{{ field.name }}"
+                                               id="id_{{ field.name }}"
+                                               placeholder="{{ field.field.widget.attrs.placeholder }}"
+                                               required>
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-secondary toggle-password-btn" type="button" data-target="id_{{ field.name }}" style="border-color: #ced4da;">
+                                                <i class="fa fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <input type="{{ field.field.widget.input_type }}"
+                                           class="form-control"
+                                           name="{{ field.name }}"
+                                           id="id_{{ field.name }}"
+                                           value="{{ field.value|default_if_none:'' }}"
+                                           placeholder="{{ field.field.widget.attrs.placeholder }}"
+                                           required>
+                                {% endif %}
                                 {% if field.name == 'email' %}
                                     <small class="form-text text-muted mt-1">
                                         <i class="fa fa-envelope-o text-primary mr-1"></i>
@@ -66,4 +82,23 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    $(document).ready(function() {
+        $('.toggle-password-btn').on('click', function() {
+            var targetId = $(this).data('target');
+            var input = $('#' + targetId);
+            var icon = $(this).find('i');
+            if (input.attr('type') === 'password') {
+                input.attr('type', 'text');
+                icon.removeClass('fa-eye').addClass('fa-eye-slash');
+            } else {
+                input.attr('type', 'password');
+                icon.removeClass('fa-eye-slash').addClass('fa-eye');
+            }
+        });
+    });
+</script>
 {% endblock %}
