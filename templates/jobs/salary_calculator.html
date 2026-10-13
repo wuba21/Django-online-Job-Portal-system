@@ -6,32 +6,44 @@
 {% block styles %}
 <style>
   /* ===== Page Layout ===== */
+  .salary-page-wrapper {
+    background: #f1f5f9;
+    padding-bottom: 60px;
+  }
   .salary-hero {
     background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1d4ed8 100%);
-    padding: 60px 0 40px;
+    padding: 50px 0 80px;
     color: #fff;
   }
-  .salary-hero h1 { font-size: 2.2rem; font-weight: 700; }
-  .salary-hero p  { color: rgba(255,255,255,0.8); font-size: 1.05rem; }
+  .salary-hero h1 { font-size: 2rem; font-weight: 700; }
+  .salary-hero p  { color: rgba(255,255,255,0.82); font-size:1rem; }
+
+  /* ===== Main content area pulled up over hero ===== */
+  .salary-content-area {
+    margin-top: -50px;
+    position: relative;
+    z-index: 10;
+  }
 
   /* ===== Card ===== */
   .calc-card {
     background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+    border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
     overflow: hidden;
+    margin-bottom: 24px;
   }
   .calc-header {
     background: linear-gradient(90deg, #1e3a5f, #2563eb);
     color: #fff;
-    padding: 22px 28px;
-    font-size: 1.1rem;
+    padding: 18px 24px;
+    font-size: 1rem;
     font-weight: 600;
   }
-  .calc-body { padding: 28px; }
+  .calc-body { padding: 24px; }
 
   /* ===== Inputs ===== */
-  .form-group label { font-weight: 600; color: #1e3a5f; margin-bottom: 6px; }
+  .form-group label { font-weight: 600; color: #1e3a5f; margin-bottom: 6px; display:block; }
   .form-control, .custom-select {
     border-radius: 8px;
     border: 1.5px solid #d1d5db;
@@ -49,9 +61,9 @@
     border: 1.5px solid #d1d5db;
     border-radius: 8px 0 0 8px;
     color: #475569;
-    font-weight: 600;
+    font-weight: 700;
   }
-  .input-group .form-control { border-radius: 0 8px 8px 0; }
+  .input-group .form-control { border-radius: 0 8px 8px 0 !important; }
 
   /* ===== Calculate button ===== */
   .btn-calculate {
@@ -60,9 +72,8 @@
     border: none;
     border-radius: 10px;
     padding: 13px 32px;
-    font-size: 1.05rem;
+    font-size: 1rem;
     font-weight: 600;
-    letter-spacing: .03em;
     cursor: pointer;
     transition: transform .15s, box-shadow .15s;
     width: 100%;
@@ -73,380 +84,352 @@
   }
 
   /* ===== Result Panel ===== */
-  .result-panel { display: none; margin-top: 28px; }
+  .result-panel { display: none; margin-top: 24px; }
   .result-card {
     background: #f8fafc;
     border-radius: 12px;
     border: 1px solid #e2e8f0;
     overflow: hidden;
+    margin-bottom: 16px;
   }
   .result-header {
-    padding: 14px 20px;
+    padding: 12px 18px;
     font-weight: 700;
-    font-size: .9rem;
+    font-size: .85rem;
     text-transform: uppercase;
     letter-spacing: .06em;
     color: #fff;
   }
-  .rh-gross    { background: #0f766e; }
-  .rh-deduct   { background: #dc2626; }
-  .rh-net      { background: #1d4ed8; }
+  .rh-gross  { background: #0f766e; }
+  .rh-deduct { background: #dc2626; }
+  .rh-net    { background: #1d4ed8; }
 
   .result-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
+    padding: 10px 18px;
     border-bottom: 1px solid #e2e8f0;
-    font-size: .95rem;
+    font-size: .9rem;
   }
   .result-row:last-child { border-bottom: none; }
   .result-row .label { color: #475569; }
   .result-row .value { font-weight: 700; color: #0f172a; }
-  .result-row.total-row {
-    background: #eff6ff;
-    font-size: 1.05rem;
-  }
+  .result-row.total-row { background: #eff6ff; }
   .result-row.total-row .label { color: #1d4ed8; font-weight: 700; }
-  .result-row.total-row .value { color: #1d4ed8; font-size: 1.2rem; }
+  .result-row.total-row .value { color: #1d4ed8; font-size: 1.1rem; }
 
-  /* ===== Tax bracket table ===== */
-  .bracket-table th { background: #1e3a5f; color: #fff; font-size:.85rem; }
-  .bracket-table td { font-size:.88rem; vertical-align:middle; }
-  .bracket-active td { background: #dbeafe !important; font-weight: 700; color: #1d4ed8; }
-
-  /* ===== Info cards ===== */
-  .info-card {
+  /* ===== Info card (sidebar only) ===== */
+  .sc-info-card {
+    background: #fff;
     border-radius: 12px;
     border: 1px solid #e2e8f0;
     padding: 20px;
-    background: #fff;
-    height: 100%;
+    margin-bottom: 20px;
   }
-  .info-card h5 { color: #1e3a5f; font-weight: 700; margin-bottom: 14px; }
+  .sc-info-card h5 { color: #1e3a5f; font-weight: 700; margin-bottom: 14px; }
+
+  /* ===== Tax bracket table ===== */
+  .bracket-table th { background: #1e3a5f; color: #fff; font-size:.8rem; }
+  .bracket-table td { font-size:.82rem; vertical-align:middle; padding:6px 8px !important; }
+  .bracket-active td { background: #dbeafe !important; font-weight: 700; color: #1d4ed8; }
 
   /* ===== Progress bar ===== */
-  .salary-bar { height: 20px; border-radius: 10px; overflow: hidden; background: #e2e8f0; margin-bottom: 6px; }
-  .salary-bar-fill { height: 100%; border-radius: 10px; transition: width .6s ease; }
+  .salary-bar { height:18px; border-radius:9px; overflow:hidden; background:#e2e8f0; margin-bottom:5px; }
+  .salary-bar-fill { height:100%; border-radius:9px; transition:width .6s ease; }
 
-  @media(max-width:576px){
-    .salary-hero h1 { font-size: 1.6rem; }
-    .calc-body { padding: 18px; }
+  /* Breakdown result inside calc (white bg) */
+  .breakdown-card {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    padding: 18px;
+    margin-bottom: 0;
+  }
+  .breakdown-card h5 { color: #1e3a5f; font-weight: 700; margin-bottom: 14px; }
+
+  @media(max-width:768px){
+    .salary-hero h1 { font-size: 1.5rem; }
+    .calc-body { padding: 16px; }
+    .salary-content-area { margin-top: -30px; }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Hero -->
-<section class="salary-hero">
-  <div class="container text-center">
-    <h1><i class="fa fa-calculator mr-2"></i>{% trans "Ethiopia Salary Calculator" %}</h1>
-    <p>{% trans "Calculate your net take-home pay based on Ethiopian income tax and pension laws." %}</p>
-  </div>
-</section>
+<div class="salary-page-wrapper">
 
-<div class="container" style="margin-top:-30px; padding-bottom:60px;">
-  <div class="row justify-content-center">
-    <div class="col-lg-8 col-xl-7">
+  <!-- Hero -->
+  <section class="salary-hero">
+    <div class="container text-center">
+      <h1><i class="fa fa-calculator mr-2"></i>{% trans "Ethiopia Salary Calculator" %}</h1>
+      <p>{% trans "Calculate your net take-home pay based on Ethiopian income tax and pension laws." %}</p>
+    </div>
+  </section>
 
-      <!-- Calculator Card -->
-      <div class="calc-card mb-4">
-        <div class="calc-header">
-          <i class="fa fa-sliders mr-2"></i>{% trans "Enter Your Salary Details" %}
+  <!-- Main Content Area -->
+  <div class="container salary-content-area">
+    <div class="row">
+
+      <!-- ===== LEFT: Calculator ===== -->
+      <div class="col-lg-7 col-xl-8">
+
+        <!-- Input Card -->
+        <div class="calc-card">
+          <div class="calc-header">
+            <i class="fa fa-sliders mr-2"></i>{% trans "Enter Your Salary Details" %}
+          </div>
+          <div class="calc-body">
+            <div class="row">
+              <div class="col-sm-6 mb-3">
+                <div class="form-group mb-0">
+                  <label>{% trans "Gross Monthly Salary (ETB)" %}</label>
+                  <div class="input-group">
+                    <div class="input-group-text">ETB</div>
+                    <input type="number" id="grossSalary" class="form-control" placeholder="e.g. 15000" min="0" step="100">
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 mb-3">
+                <div class="form-group mb-0">
+                  <label>{% trans "Employment Type" %}</label>
+                  <select id="employmentType" class="form-control custom-select">
+                    <option value="permanent">{% trans "Permanent / Regular" %}</option>
+                    <option value="contract">{% trans "Contract (No Pension)" %}</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-sm-6 mb-3">
+                <div class="form-group mb-0">
+                  <label>{% trans "Monthly Allowances (ETB)" %} <small class="text-muted font-weight-normal">({% trans "optional" %})</small></label>
+                  <div class="input-group">
+                    <div class="input-group-text">ETB</div>
+                    <input type="number" id="allowances" class="form-control" placeholder="0" min="0" step="100" value="0">
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 mb-3">
+                <div class="form-group mb-0">
+                  <label>{% trans "Transport Allowance (ETB)" %} <small class="text-muted font-weight-normal">({% trans "optional" %})</small></label>
+                  <div class="input-group">
+                    <div class="input-group-text">ETB</div>
+                    <input type="number" id="transport" class="form-control" placeholder="0" min="0" step="100" value="0">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button class="btn-calculate" onclick="calculateSalary()">
+              <i class="fa fa-calculator mr-2"></i>{% trans "Calculate Net Salary" %}
+            </button>
+          </div>
         </div>
-        <div class="calc-body">
-          <div class="row">
-            <!-- Gross Salary -->
-            <div class="col-md-6 mb-3">
-              <div class="form-group mb-0">
-                <label>{% trans "Gross Monthly Salary (ETB)" %}</label>
-                <div class="input-group">
-                  <div class="input-group-text">ETB</div>
-                  <input type="number" id="grossSalary" class="form-control" placeholder="e.g. 15000" min="0" step="100">
-                </div>
-              </div>
-            </div>
-            <!-- Employment type -->
-            <div class="col-md-6 mb-3">
-              <div class="form-group mb-0">
-                <label>{% trans "Employment Type" %}</label>
-                <select id="employmentType" class="form-control custom-select">
-                  <option value="permanent">{% trans "Permanent / Regular" %}</option>
-                  <option value="contract">{% trans "Contract (No Pension)" %}</option>
-                </select>
-              </div>
-            </div>
-            <!-- Allowances -->
-            <div class="col-md-6 mb-3">
-              <div class="form-group mb-0">
-                <label>{% trans "Monthly Allowances (ETB)" %} <small class="text-muted">({% trans "optional" %})</small></label>
-                <div class="input-group">
-                  <div class="input-group-text">ETB</div>
-                  <input type="number" id="allowances" class="form-control" placeholder="0" min="0" step="100" value="0">
-                </div>
-              </div>
-            </div>
-            <!-- Transport -->
-            <div class="col-md-6 mb-3">
-              <div class="form-group mb-0">
-                <label>{% trans "Transport Allowance (ETB)" %} <small class="text-muted">({% trans "optional" %})</small></label>
-                <div class="input-group">
-                  <div class="input-group-text">ETB</div>
-                  <input type="number" id="transport" class="form-control" placeholder="0" min="0" step="100" value="0">
-                </div>
-              </div>
+
+        <!-- Result Panel -->
+        <div class="result-panel" id="resultPanel">
+
+          <!-- Gross -->
+          <div class="result-card">
+            <div class="result-header rh-gross"><i class="fa fa-plus-circle mr-2"></i>{% trans "Gross Income" %}</div>
+            <div class="result-row"><span class="label">{% trans "Basic Salary" %}</span><span class="value" id="r-basic">—</span></div>
+            <div class="result-row"><span class="label">{% trans "Allowances" %}</span><span class="value" id="r-allow">—</span></div>
+            <div class="result-row"><span class="label">{% trans "Transport Allowance" %}</span><span class="value" id="r-transport">—</span></div>
+            <div class="result-row total-row"><span class="label">{% trans "Total Gross" %}</span><span class="value" id="r-gross">—</span></div>
+          </div>
+
+          <!-- Deductions -->
+          <div class="result-card">
+            <div class="result-header rh-deduct"><i class="fa fa-minus-circle mr-2"></i>{% trans "Deductions" %}</div>
+            <div class="result-row"><span class="label">{% trans "Employee Pension (7%)" %}</span><span class="value" id="r-empPension">—</span></div>
+            <div class="result-row"><span class="label">{% trans "Income Tax" %}</span><span class="value" id="r-tax">—</span></div>
+            <div class="result-row total-row"><span class="label">{% trans "Total Deductions" %}</span><span class="value" id="r-totalDeduct" style="color:#dc2626;">—</span></div>
+          </div>
+
+          <!-- Net Pay -->
+          <div class="result-card">
+            <div class="result-header rh-net"><i class="fa fa-money mr-2"></i>{% trans "Net Take-Home Pay" %}</div>
+            <div class="result-row total-row" style="padding:18px 18px;">
+              <span class="label" style="font-size:1.05rem;">{% trans "Monthly Net Salary" %}</span>
+              <span class="value" id="r-net" style="font-size:1.4rem;">—</span>
             </div>
           </div>
 
-          <button class="btn-calculate mt-2" onclick="calculateSalary()">
-            <i class="fa fa-calculator mr-2"></i>{% trans "Calculate Net Salary" %}
-          </button>
-
-          <!-- Results -->
-          <div class="result-panel" id="resultPanel">
-            <!-- Gross Breakdown -->
-            <div class="result-card mb-3">
-              <div class="result-header rh-gross"><i class="fa fa-plus-circle mr-2"></i>{% trans "Gross Income" %}</div>
-              <div class="result-row">
-                <span class="label">{% trans "Basic Salary" %}</span>
-                <span class="value" id="r-basic">—</span>
-              </div>
-              <div class="result-row">
-                <span class="label">{% trans "Allowances" %}</span>
-                <span class="value" id="r-allow">—</span>
-              </div>
-              <div class="result-row">
-                <span class="label">{% trans "Transport Allowance" %}</span>
-                <span class="value" id="r-transport">—</span>
-              </div>
-              <div class="result-row total-row">
-                <span class="label">{% trans "Total Gross" %}</span>
-                <span class="value" id="r-gross">—</span>
-              </div>
+          <!-- Visual Breakdown -->
+          <div class="calc-card">
+            <div class="calc-header" style="font-size:.9rem;">
+              <i class="fa fa-bar-chart mr-2"></i>{% trans "Salary Breakdown" %}
             </div>
-
-            <!-- Deductions -->
-            <div class="result-card mb-3">
-              <div class="result-header rh-deduct"><i class="fa fa-minus-circle mr-2"></i>{% trans "Deductions" %}</div>
-              <div class="result-row">
-                <span class="label">{% trans "Employee Pension (7%)" %}</span>
-                <span class="value" id="r-empPension">—</span>
-              </div>
-              <div class="result-row">
-                <span class="label">{% trans "Income Tax" %}</span>
-                <span class="value" id="r-tax">—</span>
-              </div>
-              <div class="result-row total-row">
-                <span class="label">{% trans "Total Deductions" %}</span>
-                <span class="value" id="r-totalDeduct" style="color:#dc2626;">—</span>
-              </div>
-            </div>
-
-            <!-- Net Salary -->
-            <div class="result-card mb-3">
-              <div class="result-header rh-net"><i class="fa fa-money mr-2"></i>{% trans "Net Take-Home Pay" %}</div>
-              <div class="result-row total-row" style="padding:20px;">
-                <span class="label" style="font-size:1.1rem;">{% trans "Monthly Net Salary" %}</span>
-                <span class="value" id="r-net" style="font-size:1.5rem;">—</span>
-              </div>
-            </div>
-
-            <!-- Visual Bar -->
-            <div class="info-card mb-3">
-              <h5><i class="fa fa-bar-chart mr-2"></i>{% trans "Salary Breakdown" %}</h5>
-              <div class="mb-2">
+            <div class="calc-body">
+              <div class="mb-3">
                 <div class="d-flex justify-content-between mb-1">
                   <small class="text-success font-weight-bold">{% trans "Net Pay" %}</small>
                   <small id="b-netPct">—</small>
                 </div>
-                <div class="salary-bar"><div class="salary-bar-fill" id="b-netBar" style="background:#16a34a; width:0%;"></div></div>
+                <div class="salary-bar"><div class="salary-bar-fill" id="b-netBar" style="background:#16a34a;width:0%;"></div></div>
               </div>
-              <div class="mb-2">
+              <div class="mb-3">
                 <div class="d-flex justify-content-between mb-1">
                   <small class="text-danger font-weight-bold">{% trans "Income Tax" %}</small>
                   <small id="b-taxPct">—</small>
                 </div>
-                <div class="salary-bar"><div class="salary-bar-fill" id="b-taxBar" style="background:#dc2626; width:0%;"></div></div>
+                <div class="salary-bar"><div class="salary-bar-fill" id="b-taxBar" style="background:#dc2626;width:0%;"></div></div>
               </div>
               <div>
                 <div class="d-flex justify-content-between mb-1">
                   <small class="text-primary font-weight-bold">{% trans "Pension" %}</small>
                   <small id="b-penPct">—</small>
                 </div>
-                <div class="salary-bar"><div class="salary-bar-fill" id="b-penBar" style="background:#2563eb; width:0%;"></div></div>
+                <div class="salary-bar"><div class="salary-bar-fill" id="b-penBar" style="background:#2563eb;width:0%;"></div></div>
               </div>
             </div>
+          </div>
 
-            <!-- Employer contribution note -->
-            <div class="alert alert-info mb-3" style="border-radius:10px; font-size:.9rem;">
-              <i class="fa fa-info-circle mr-2"></i>
-              <strong>{% trans "Employer's Pension Contribution:" %}</strong>
-              <span id="r-emplPension">—</span> (11% {% trans "of basic salary – paid by employer, not deducted from you." %})
-            </div>
+          <!-- Employer note -->
+          <div class="alert alert-info" style="border-radius:10px;font-size:.88rem;">
+            <i class="fa fa-info-circle mr-2"></i>
+            <strong>{% trans "Employer's Pension Contribution:" %}</strong>
+            <span id="r-emplPension">—</span>
+            (11% {% trans "of basic salary – paid by employer, not deducted from you." %})
           </div>
         </div>
+        <!-- /result panel -->
+
       </div>
+      <!-- /left col -->
 
-    </div>
+      <!-- ===== RIGHT: Sidebar ===== -->
+      <div class="col-lg-5 col-xl-4 mt-4 mt-lg-0">
 
-    <!-- Side Info -->
-    <div class="col-lg-4 col-xl-4 mt-4 mt-lg-0" style="margin-top:-30px;">
-
-      <!-- Tax Brackets Card -->
-      <div class="calc-card mb-4">
-        <div class="calc-header" style="font-size:.95rem;">
-          <i class="fa fa-table mr-2"></i>{% trans "Ethiopian Income Tax Brackets" %}
+        <!-- Tax Brackets -->
+        <div class="calc-card">
+          <div class="calc-header" style="font-size:.9rem;">
+            <i class="fa fa-table mr-2"></i>{% trans "Ethiopian Income Tax Brackets" %}
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="table table-sm table-bordered bracket-table mb-0" id="bracketTable">
+              <thead>
+                <tr>
+                  <th>{% trans "Taxable Income (ETB)" %}</th>
+                  <th>{% trans "Rate" %}</th>
+                  <th>{% trans "Deduct" %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>0 – 600</td>        <td>0%</td>  <td>0</td></tr>
+                <tr><td>601 – 1,650</td>    <td>10%</td> <td>60</td></tr>
+                <tr><td>1,651 – 3,200</td>  <td>15%</td> <td>142.50</td></tr>
+                <tr><td>3,201 – 5,250</td>  <td>20%</td> <td>302.50</td></tr>
+                <tr><td>5,251 – 7,800</td>  <td>25%</td> <td>565</td></tr>
+                <tr><td>7,801 – 10,900</td> <td>30%</td> <td>955</td></tr>
+                <tr><td>Above 10,900</td>   <td>35%</td> <td>1,500</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div style="overflow-x:auto;">
-          <table class="table table-sm table-bordered bracket-table mb-0" id="bracketTable">
-            <thead>
-              <tr>
-                <th>{% trans "Taxable Income (ETB)" %}</th>
-                <th>{% trans "Rate" %}</th>
-                <th>{% trans "Deduct" %}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>0 – 600</td>         <td>0%</td>   <td>0</td></tr>
-              <tr><td>601 – 1,650</td>     <td>10%</td>  <td>60</td></tr>
-              <tr><td>1,651 – 3,200</td>   <td>15%</td>  <td>142.50</td></tr>
-              <tr><td>3,201 – 5,250</td>   <td>20%</td>  <td>302.50</td></tr>
-              <tr><td>5,251 – 7,800</td>   <td>25%</td>  <td>565</td></tr>
-              <tr><td>7,801 – 10,900</td>  <td>30%</td>  <td>955</td></tr>
-              <tr><td>Above 10,900</td>    <td>35%</td>  <td>1,500</td></tr>
-            </tbody>
-          </table>
+
+        <!-- Key Facts -->
+        <div class="sc-info-card">
+          <h5><i class="fa fa-info-circle mr-2 text-primary"></i>{% trans "Key Facts" %}</h5>
+          <ul style="list-style:none;padding:0;margin:0;font-size:.88rem;color:#475569;">
+            <li class="mb-2"><i class="fa fa-check-circle text-success mr-2"></i>{% trans "Employee pension: 7% of basic salary" %}</li>
+            <li class="mb-2"><i class="fa fa-check-circle text-success mr-2"></i>{% trans "Employer pension: 11% of basic salary" %}</li>
+            <li class="mb-2"><i class="fa fa-check-circle text-success mr-2"></i>{% trans "Tax applied on basic + allowances minus pension" %}</li>
+            <li class="mb-2"><i class="fa fa-check-circle text-success mr-2"></i>{% trans "Contract workers exempt from pension" %}</li>
+            <li><i class="fa fa-check-circle text-success mr-2"></i>{% trans "Per Ethiopian Proclamation No. 979/2016" %}</li>
+          </ul>
         </div>
-      </div>
 
-      <!-- Quick Facts -->
-      <div class="info-card mb-4">
-        <h5><i class="fa fa-info-circle mr-2 text-primary"></i>{% trans "Key Facts" %}</h5>
-        <ul style="list-style:none; padding:0; margin:0; font-size:.9rem; color:#475569;">
-          <li class="mb-2"><i class="fa fa-check-circle text-success mr-2"></i>{% trans "Employee pension: 7% of basic salary" %}</li>
-          <li class="mb-2"><i class="fa fa-check-circle text-success mr-2"></i>{% trans "Employer pension: 11% of basic salary" %}</li>
-          <li class="mb-2"><i class="fa fa-check-circle text-success mr-2"></i>{% trans "Tax is applied on basic + allowances minus pension" %}</li>
-          <li class="mb-2"><i class="fa fa-check-circle text-success mr-2"></i>{% trans "Contract workers are exempt from pension" %}</li>
-          <li><i class="fa fa-check-circle text-success mr-2"></i>{% trans "Per Ethiopian Income Tax Proclamation No. 979/2016" %}</li>
-        </ul>
-      </div>
-
-      <!-- Browse Jobs shortcut -->
-      <div class="info-card text-center" style="background:linear-gradient(135deg,#1e3a5f,#1d4ed8); color:#fff; border:none;">
-        <h5 style="color:#fff;"><i class="fa fa-search mr-2"></i>{% trans "Browse Jobs" %}</h5>
-        <p style="color:rgba(255,255,255,0.85); font-size:.88rem;">{% trans "Find jobs that match your expected salary" %}</p>
-        <div class="d-flex flex-column gap-2">
-          <a href="{% url 'jobs:search' %}?category=NGO" class="btn btn-sm btn-light mb-2" style="border-radius:8px; font-weight:600;">
+        <!-- Browse Jobs -->
+        <div class="sc-info-card text-center" style="background:linear-gradient(135deg,#1e3a5f,#1d4ed8);border:none;">
+          <h5 style="color:#fff;"><i class="fa fa-search mr-2"></i>{% trans "Browse Jobs" %}</h5>
+          <p style="color:rgba(255,255,255,0.82);font-size:.85rem;margin-bottom:16px;">{% trans "Find jobs that match your expected salary" %}</p>
+          <a href="{% url 'jobs:search' %}?category=NGO" class="btn btn-sm btn-light btn-block mb-2" style="border-radius:8px;font-weight:600;">
             <i class="fa fa-globe mr-1 text-success"></i> NGO Jobs
           </a>
-          <a href="{% url 'jobs:search' %}?category=Banking" class="btn btn-sm btn-light mb-2" style="border-radius:8px; font-weight:600;">
+          <a href="{% url 'jobs:search' %}?category=Banking" class="btn btn-sm btn-light btn-block mb-2" style="border-radius:8px;font-weight:600;">
             <i class="fa fa-bank mr-1 text-info"></i> Banking Jobs
           </a>
-          <a href="{% url 'jobs:search' %}?category=Fresh+Graduate" class="btn btn-sm btn-light" style="border-radius:8px; font-weight:600;">
+          <a href="{% url 'jobs:search' %}?category=Fresh+Graduate" class="btn btn-sm btn-light btn-block" style="border-radius:8px;font-weight:600;">
             <i class="fa fa-graduation-cap mr-1 text-warning"></i> Fresh Graduate
           </a>
         </div>
+
       </div>
+      <!-- /sidebar -->
+
     </div>
+    <!-- /row -->
   </div>
+  <!-- /container -->
+
 </div>
+<!-- /salary-page-wrapper -->
 {% endblock %}
 
 {% block javascripts %}
 <script>
-/**
- * Ethiopian Income Tax Calculation
- * Based on Proclamation No. 979/2016
- *
- * Tax Brackets (on taxable income = gross - employee pension):
- *   0 – 600       : 0%
- *   601 – 1,650   : 10% – 60
- *   1,651 – 3,200 : 15% – 142.50
- *   3,201 – 5,250 : 20% – 302.50
- *   5,251 – 7,800 : 25% – 565
- *   7,801 – 10,900: 30% – 955
- *   > 10,900      : 35% – 1,500
- */
-
 function calcIncomeTax(taxable) {
-  if (taxable <= 600)       return { tax: 0,                              bracket: 0 };
-  if (taxable <= 1650)      return { tax: taxable * 0.10 - 60,            bracket: 1 };
-  if (taxable <= 3200)      return { tax: taxable * 0.15 - 142.50,        bracket: 2 };
-  if (taxable <= 5250)      return { tax: taxable * 0.20 - 302.50,        bracket: 3 };
-  if (taxable <= 7800)      return { tax: taxable * 0.25 - 565,           bracket: 4 };
-  if (taxable <= 10900)     return { tax: taxable * 0.30 - 955,           bracket: 5 };
-  return                           { tax: taxable * 0.35 - 1500,          bracket: 6 };
+  if (taxable <= 600)   return { tax: 0,                       bracket: 0 };
+  if (taxable <= 1650)  return { tax: taxable * 0.10 - 60,     bracket: 1 };
+  if (taxable <= 3200)  return { tax: taxable * 0.15 - 142.50, bracket: 2 };
+  if (taxable <= 5250)  return { tax: taxable * 0.20 - 302.50, bracket: 3 };
+  if (taxable <= 7800)  return { tax: taxable * 0.25 - 565,    bracket: 4 };
+  if (taxable <= 10900) return { tax: taxable * 0.30 - 955,    bracket: 5 };
+  return                       { tax: taxable * 0.35 - 1500,   bracket: 6 };
 }
 
 function fmt(n) {
-  return 'ETB ' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return 'ETB ' + Math.max(0, n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
-
 function pct(part, total) {
-  if (total === 0) return '0.0%';
-  return (part / total * 100).toFixed(1) + '%';
-}
-
-function highlightBracket(bracketIndex) {
-  const rows = document.querySelectorAll('#bracketTable tbody tr');
-  rows.forEach((r, i) => {
-    r.classList.toggle('bracket-active', i === bracketIndex);
-  });
+  if (!total) return '0.0%';
+  return (Math.max(0, part) / total * 100).toFixed(1) + '%';
 }
 
 function calculateSalary() {
-  const gross     = parseFloat(document.getElementById('grossSalary').value)   || 0;
-  const allow     = parseFloat(document.getElementById('allowances').value)     || 0;
-  const transport = parseFloat(document.getElementById('transport').value)      || 0;
-  const empType   = document.getElementById('employmentType').value;
-  const isPermanent = empType === 'permanent';
+  const gross     = parseFloat(document.getElementById('grossSalary').value) || 0;
+  const allow     = parseFloat(document.getElementById('allowances').value)  || 0;
+  const transport = parseFloat(document.getElementById('transport').value)   || 0;
+  const isPermanent = document.getElementById('employmentType').value === 'permanent';
 
-  const totalGross = gross + allow + transport;
-
-  // Employee pension: 7% of basic salary only (not allowances)
-  const empPension    = isPermanent ? gross * 0.07 : 0;
-  const emplPension   = isPermanent ? gross * 0.11 : 0;  // employer contribution (informational)
-
-  // Taxable income = gross + allowances - employee pension
-  const taxable = Math.max(0, gross + allow - empPension);
-
+  const totalGross  = gross + allow + transport;
+  const empPension  = isPermanent ? gross * 0.07 : 0;
+  const emplPension = isPermanent ? gross * 0.11 : 0;
+  const taxable     = Math.max(0, gross + allow - empPension);
   const { tax, bracket } = calcIncomeTax(taxable);
-
-  const totalDeduct = empPension + tax;
+  const taxAmt      = Math.max(0, tax);
+  const totalDeduct = empPension + taxAmt;
   const net         = totalGross - totalDeduct;
 
-  // Populate results
-  document.getElementById('r-basic').textContent     = fmt(gross);
-  document.getElementById('r-allow').textContent     = fmt(allow);
-  document.getElementById('r-transport').textContent = fmt(transport);
-  document.getElementById('r-gross').textContent     = fmt(totalGross);
+  // Fill results
+  document.getElementById('r-basic').textContent      = fmt(gross);
+  document.getElementById('r-allow').textContent      = fmt(allow);
+  document.getElementById('r-transport').textContent  = fmt(transport);
+  document.getElementById('r-gross').textContent      = fmt(totalGross);
   document.getElementById('r-empPension').textContent = isPermanent ? fmt(empPension) : 'ETB 0.00 (Contract)';
-  document.getElementById('r-tax').textContent       = fmt(Math.max(0, tax));
-  document.getElementById('r-totalDeduct').textContent = fmt(totalDeduct);
-  document.getElementById('r-net').textContent       = fmt(net);
-  document.getElementById('r-emplPension').textContent = isPermanent ? fmt(emplPension) : 'ETB 0.00 (Contract)';
+  document.getElementById('r-tax').textContent        = fmt(taxAmt);
+  document.getElementById('r-totalDeduct').textContent= fmt(totalDeduct);
+  document.getElementById('r-net').textContent        = fmt(net);
+  document.getElementById('r-emplPension').textContent= isPermanent ? fmt(emplPension) : 'ETB 0.00 (Contract)';
 
   // Progress bars
-  const taxAmt = Math.max(0, tax);
   document.getElementById('b-netPct').textContent = pct(net, totalGross);
   document.getElementById('b-taxPct').textContent = pct(taxAmt, totalGross);
   document.getElementById('b-penPct').textContent = pct(empPension, totalGross);
-  document.getElementById('b-netBar').style.width  = pct(net, totalGross);
-  document.getElementById('b-taxBar').style.width  = pct(taxAmt, totalGross);
-  document.getElementById('b-penBar').style.width  = pct(empPension, totalGross);
+  document.getElementById('b-netBar').style.width = pct(net, totalGross);
+  document.getElementById('b-taxBar').style.width = pct(taxAmt, totalGross);
+  document.getElementById('b-penBar').style.width = pct(empPension, totalGross);
 
   // Highlight bracket
-  highlightBracket(bracket);
+  document.querySelectorAll('#bracketTable tbody tr').forEach((r, i) => {
+    r.classList.toggle('bracket-active', i === bracket);
+  });
 
-  // Show panel
+  // Show panel with smooth scroll
   const panel = document.getElementById('resultPanel');
   panel.style.display = 'block';
-  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
 }
 
-// Allow Enter key to trigger calculation
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') calculateSalary();
-});
+document.addEventListener('keydown', e => { if (e.key === 'Enter') calculateSalary(); });
 </script>
 {% endblock %}
