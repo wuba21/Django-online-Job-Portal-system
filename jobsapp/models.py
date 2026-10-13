@@ -71,7 +71,7 @@ class Job(models.Model):
     category = models.CharField(max_length=100)
     last_date = models.DateTimeField(default=default_deadline)
     company_name = models.CharField(max_length=100)
-    company_description = models.CharField(max_length=300, blank=True, null=True)
+    company_description = models.TextField(max_length=4000, blank=True, null=True)
     website = models.CharField(max_length=100, default="", blank=True, null=True)
     created_at = models.DateTimeField(default=timezone.now, db_index=True)
     filled = models.BooleanField(default=False, db_index=True)
