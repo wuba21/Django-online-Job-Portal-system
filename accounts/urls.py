@@ -19,4 +19,5 @@ urlpatterns = [
     path("employee/profile/update/", EditProfileView.as_view(), name="employee-profile-update"),
     path("employer/profile/update/", EmployerProfileEditView.as_view(), name="employer-profile-update"),
     path("post-login-redirect/", LoginRedirectRouteView.as_view(), name="post-login-redirect"),
+    path("employer/verify-license/", EmployerLicenseVerifyView.as_view(), name="employer-verify-license"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -7,10 +7,22 @@
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2>{% trans "Employer Dashboard" %}</h2>
-                <p class="text-muted mb-0">{{ company.name }}</p>
+                <h2 class="mb-1">{% trans "Employer Dashboard" %}</h2>
+                <div class="d-flex align-items-center">
+                    <span class="text-muted mr-2">{{ company.name }}</span>
+                    {% if company.is_license_verified %}
+                        <span class="badge badge-success px-2 py-1 shadow-sm" style="font-size: 0.78rem;">
+                            <i class="fa fa-check-circle mr-1"></i> {% trans "ህጋዊ የንግድ ፈቃድ የተረጋገጠ (Verified)" %}
+                        </span>
+                    {% else %}
+                        <a href="{% url 'accounts:employer-verify-license' %}" class="badge badge-warning px-2 py-1 text-dark text-decoration-none">
+                            <i class="fa fa-shield mr-1"></i> {% trans "ፈቃድ አረጋግጥ (Verify License)" %}
+                        </a>
+                    {% endif %}
+                </div>
             </div>
             <div>
+                <a href="{% url 'accounts:employer-verify-license' %}" class="btn btn-outline-success mr-2"><i class="fa fa-shield"></i> {% trans "License Status" %}</a>
                 <a href="{% url 'accounts:employer-profile-update' %}" class="btn btn-outline-secondary mr-2"><i class="fa fa-building"></i> Edit Company Info</a>
                 <a href="{% url 'jobs:employer-jobs-create' %}" class="btn btn-primary"><i class="fa fa-plus"></i> Post New Job</a>
             </div>

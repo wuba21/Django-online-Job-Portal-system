@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}
+    የንግድ ፈቃድ ማረጋገጫ | Ethiopian Business License Verification
+{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light-gray" style="min-height: 85vh; display: flex; align-items: center;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-7">
+                <div class="card border-0 shadow-lg rounded-xl p-4 p-md-5 bg-white position-relative" style="border-radius: 20px;">
+                    
+                    <!-- Header Section -->
+                    <div class="text-center mb-4">
+                        <div class="mx-auto mb-3" style="width: 76px; height: 76px; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 18px rgba(16,185,129,0.2);">
+                            <i class="fa fa-shield text-success" style="font-size: 38px;"></i>
+                        </div>
+                        <h3 class="heading font-weight-bold mb-2 text-dark" style="letter-spacing: -0.5px;">
+                            {% trans "የህጋዊ ንግድ ፈቃድ ማረጋገጫ" %}
+                        </h3>
+                        <p class="text-muted" style="font-size: 0.95rem; line-height: 1.5;">
+                            {% trans "የተቋምዎን ህጋዊ የንግድ ፈቃድ (Trade License) እና የግብር ከፋይ መለያ ቁጥር (TIN) በማስገባት በ AI ወዲያውኑ ያረጋግጡ።" %}
+                        </p>
+                    </div>
+
+                    <!-- Current License Status Banner -->
+                    <div class="alert {% if company.is_license_verified %}alert-success{% elif company.license_status == 'rejected' %}alert-danger{% else %}alert-warning{% endif %} d-flex align-items-center mb-4" role="alert" style="border-radius: 12px;">
+                        <i class="fa {% if company.is_license_verified %}fa-check-circle text-success{% elif company.license_status == 'rejected' %}fa-exclamation-triangle text-danger{% else %}fa-info-circle text-warning{% endif %} mr-3" style="font-size: 26px;"></i>
+                        <div>
+                            <strong>{% trans "የፈቃድ ሁኔታ፦" %}</strong>
+                            {% if company.is_license_verified %}
+                                <span class="badge badge-success px-2 py-1">{% trans "የተረጋገጠ (Approved)" %}</span>
+                            {% elif company.license_status == 'rejected' %}
+                                <span class="badge badge-danger px-2 py-1">{% trans "ተቀባይነት አላገኘም (Invalid)" %}</span>
+                            {% else %}
+                                <span class="badge badge-warning px-2 py-1">{% trans "ፈቃድ ገና አልተሰቀለም (Pending)" %}</span>
+                            {% endif %}
+                            
+                            {% if company.license_rejection_reason %}
+                                <div class="small mt-1 text-danger font-weight-bold">
+                                    {{ company.license_rejection_reason }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Verification Form -->
+                    <form action="" method="post" enctype="multipart/form-data" id="license-form">
+                        {% csrf_token %}
+                        
+                        <!-- Company Name -->
+                        <div class="form-group mb-3">
+                            <label for="company_name" class="font-weight-bold text-secondary">
+                                <i class="fa fa-building-o mr-1 text-primary"></i> {% trans "የድርጅት ስም (Company Name)" %}
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="company_name" name="company_name"
+                                   value="{{ company.name }}" required placeholder="ለምሳሌ፡ አቢሲኒያ ቴክኖሎጂስ ኃ/የተ/የግ/ማ">
+                        </div>
+
+                        <!-- 10-Digit Ethiopian TIN Number -->
+                        <div class="form-group mb-3">
+                            <label for="tin_number" class="font-weight-bold text-secondary">
+                                <i class="fa fa-id-card-o mr-1 text-primary"></i> {% trans "የግብር ከፋይ መለያ ቁጥር (TIN Number - 10 አሃዝ)" %}
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="tin_number" name="tin_number"
+                                   maxlength="10" pattern="[0-9]{10}"
+                                   value="{{ company.tin_number|default:'' }}"
+                                   placeholder="ለምሳሌ፡ 0012345678" required>
+                            <small class="form-text text-muted">
+                                {% trans "በንግድ ፈቃድዎ ላይ የተጠቀሰውን ትክክለኛ ባለ 10 አሃዝ የኢትዮጵያ TIN ቁጥር ያስገቡ።" %}
+                            </small>
+                        </div>
+
+                        <!-- License Document Upload -->
+                        <div class="form-group mb-4">
+                            <label class="font-weight-bold text-secondary">
+                                <i class="fa fa-file-pdf-o mr-1 text-danger"></i> {% trans "የንግድ ፈቃድ ሰነድ (Scan/Photo - PDF, JPG, PNG)" %}
+                            </label>
+                            
+                            <div class="upload-dropzone p-4 text-center" id="dropzone" style="border: 2px dashed #cbd5e1; border-radius: 12px; background: #f8fafc; cursor: pointer; transition: all 0.2s;">
+                                <i class="fa fa-cloud-upload text-primary mb-2" style="font-size: 40px;"></i>
+                                <h6 class="font-weight-bold text-dark mb-1">{% trans "የንግድ ፈቃድዎን እዚህ ይጎትቱ ወይም ይምረጡ" %}</h6>
+                                <p class="text-muted small mb-2">{% trans "የንግድና ቀጠናዊ ትስስር ሚኒስቴር ማህተም እና ፊርማ በግልጽ የሚታይበት ሰነድ ይስቀሉ" %}</p>
+                                <input type="file" name="license_document" id="license_document" accept=".pdf,image/png,image/jpeg,image/jpg" required style="display: none;">
+                                <button type="button" class="btn btn-outline-primary btn-sm px-3" onclick="document.getElementById('license_document').click();">
+                                    <i class="fa fa-folder-open-o mr-1"></i> {% trans "ፋይል ምረጥ (Choose File)" %}
+                                </button>
+                                <div id="file-chosen" class="mt-2 text-success font-weight-bold small"></div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button with Spinner -->
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-success btn-block py-3 font-weight-bold shadow-sm" id="submit-btn" style="border-radius: 10px; font-size: 1.05rem;">
+                                <i class="fa fa-magic mr-2"></i> {% trans "በ AI ፈቃዱን መርምር እና አረጋግጥ (Verify with AI)" %}
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Criteria Guidelines -->
+                    <div class="mt-4 pt-3 border-top text-muted small" style="border-color: #f1f5f9 !important;">
+                        <div class="font-weight-bold text-secondary mb-2">
+                            <i class="fa fa-info-circle text-info mr-1"></i> የ AI ማረጋገጫ መስፈርቶች፦
+                        </div>
+                        <ul class="pl-3 mb-0" style="line-height: 1.8;">
+                            <li>የኢትዮጵያ ፌዴራላዊ ዲሞክራሲያዊ ሪፐብሊክ የንግድ ፈቃድ መሆን አለበት።</li>
+                            <li>ክብ ሰማያዊ ወይም ቀይ የመንግስት ማህተም እና ፊርማ በግልጽ መታየት አለበት።</li>
+                            <li>TIN ቁጥሩ 10 አሃዝ መሆን አለበት። የውሸት/የማይዛመድ ሰነድ በ AI በራስ-ሰር ይሰረዛል።</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.getElementById('license_document').addEventListener('change', function(e) {
+        var fileName = e.target.files[0] ? e.target.files[0].name : '';
+        document.getElementById('file-chosen').innerText = fileName ? "✅ የተመረጠ ፋይል፦ " + fileName : "";
+    });
+
+    document.getElementById('license-form').addEventListener('submit', function() {
+        var btn = document.getElementById('submit-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i> የ AI ምርመራ እየተካሄደ ነው... እባክዎ ይጠብቁ';
+    });
+</script>
+{% endblock %}

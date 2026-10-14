@@ -2,6 +2,7 @@ from django.contrib import auth, messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import CreateView, FormView, RedirectView
 
 from accounts.forms import *
@@ -133,7 +134,8 @@ class LogoutView(RedirectView):
 class LoginRedirectRouteView(RedirectView):
     """
     Intelligent post-login / OAuth redirect:
-    Directs employers to /en/employer/dashboard/ and employees to /en/applicant/dashboard/
+    Directs verified employers to /en/employer/dashboard/, unverified employers to /en/employer/verify-license/,
+    and employees to /en/applicant/dashboard/
     """
     permanent = False
 
@@ -144,5 +146,87 @@ class LoginRedirectRouteView(RedirectView):
         if user.is_superuser or user.is_staff:
             return "/analytics-dashboard/"
         if getattr(user, "role", None) == "employer":
+            company = getattr(user, "company", None)
+            if not company or not company.is_license_verified:
+                return "/en/employer/verify-license/"
             return "/en/employer/dashboard/"
         return "/en/applicant/dashboard/"
+
+
+class EmployerLicenseVerifyView(View):
+    """
+    AI-powered Ethiopian Business License Verification View.
+    Allows employer to upload TIN & Trade License scan.
+    Runs automated AI stamp & TIN validation.
+    """
+    template_name = "accounts/employer/verify_license.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect("accounts:login")
+        if getattr(request.user, "role", None) != "employer" and not request.user.is_superuser:
+            return redirect("jobs:home")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        from accounts.models import Company
+        company, _ = Company.objects.get_or_create(
+            user=request.user,
+            defaults={"name": request.user.get_full_name() or "My Company"}
+        )
+        return render(request, self.template_name, {"company": company})
+
+    def post(self, request, *args, **kwargs):
+        from accounts.models import Company
+        from accounts.license_validator import verify_ethiopian_business_license
+        from django.utils import timezone
+
+        company, _ = Company.objects.get_or_create(
+            user=request.user,
+            defaults={"name": request.user.get_full_name() or "My Company"}
+        )
+
+        company_name = request.POST.get("company_name", "").strip()
+        tin_number = request.POST.get("tin_number", "").strip()
+        uploaded_file = request.FILES.get("license_document")
+
+        if company_name:
+            company.name = company_name
+
+        if not uploaded_file:
+            messages.error(request, "እባክዎ ህጋዊ የንግድ ፈቃድዎን (PDF ወይም ፎቶ) ይስቀሉ።")
+            return render(request, self.template_name, {"company": company})
+
+        # Save the uploaded license document
+        company.license_document = uploaded_file
+        company.tin_number = tin_number
+
+        # Run AI Verification Engine
+        result = verify_ethiopian_business_license(uploaded_file, tin_input=tin_number)
+
+        company.license_ai_confidence = result["confidence"]
+        if result["tin_number"]:
+            company.tin_number = result["tin_number"]
+
+        if result["is_valid"]:
+            company.license_status = "verified"
+            company.license_verified_at = timezone.now()
+            company.license_rejection_reason = ""
+            company.save()
+
+            reasons_summary = "፣ ".join(result["reasons"])
+            messages.success(
+                request,
+                f"🎉 የንግድ ፈቃድዎ በ AI በስኬት ተረጋግጧል! (Confidence: {result['confidence']}%) — {reasons_summary}። አሁን ወደ አሰሪ ዳሽቦርድ ገብተው ስራ መለጠፍ ይችላሉ!"
+            )
+            return redirect("jobs:employer-dashboard")
+        else:
+            company.license_status = "rejected"
+            company.license_rejection_reason = result["error_message"] or "የንግድ ፈቃድ ማህተም ወይም TIN አልተገኘም።"
+            company.save()
+
+            messages.error(
+                request,
+                f"❌ ማረጋገጫው አልተሳካም (Confidence: {result['confidence']}%)፦ {company.license_rejection_reason}። እባክዎ ኦርጅናል ማህተም እና TIN ቁጥር በግልጽ የሚታይበትን ፈቃድ እንደገና ይስቀሉ።"
+            )
+            return render(request, self.template_name, {"company": company, "result": result})

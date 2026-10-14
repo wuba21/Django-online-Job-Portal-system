@@ -11,6 +11,19 @@ def user_is_employer(function):
         if request.user.is_superuser or request.user.is_staff:
             return function(request, *args, **kwargs)
         if request.user.role == "employer":
+            # Check business license verification status
+            company = getattr(request.user, "company", None)
+            if not company or not company.is_license_verified:
+                from django.contrib import messages
+                from django.urls import reverse
+                # Allow access to the license verification page itself
+                if request.path.startswith(reverse("accounts:employer-verify-license")):
+                    return function(request, *args, **kwargs)
+                messages.warning(
+                    request,
+                    "ህጋዊ የንግድ ፈቃድዎን እስኪያረጋግጡ ድረስ ስራ መለጠፍ አይችሉም። እባክዎ ፈቃድዎን እዚህ ያረጋግጡ።"
+                )
+                return redirect("accounts:employer-verify-license")
             return function(request, *args, **kwargs)
         raise PermissionDenied
 

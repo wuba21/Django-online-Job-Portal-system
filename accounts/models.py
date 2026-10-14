@@ -44,6 +44,13 @@ class User(AbstractUser):
 
 
 class Company(models.Model):
+    STATUS_CHOICES = (
+        ("pending", "Pending Upload"),
+        ("review", "Under AI Review"),
+        ("verified", "Verified (Approved)"),
+        ("rejected", "Rejected / Invalid"),
+    )
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="company")
     name = models.CharField(max_length=200)
     logo = models.ImageField(upload_to="company_logos/", blank=True, null=True)
@@ -53,5 +60,17 @@ class Company(models.Model):
     established_date = models.DateField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # Ethiopian Business License & AI Verification Fields
+    license_document = models.FileField(upload_to="company_licenses/", blank=True, null=True)
+    tin_number = models.CharField(max_length=15, blank=True, null=True)
+    license_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending", db_index=True)
+    license_ai_confidence = models.IntegerField(default=0)  # 0 to 100%
+    license_rejection_reason = models.TextField(blank=True, null=True)
+    license_verified_at = models.DateTimeField(blank=True, null=True)
+
     def __str__(self):
         return self.name
+
+    @property
+    def is_license_verified(self):
+        return self.license_status == "verified"
