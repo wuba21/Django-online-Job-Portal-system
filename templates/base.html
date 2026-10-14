@@ -24,7 +24,8 @@
     <!-- Bootstrap CSS (critical — load first) -->
     <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
 
-    <!-- Font Awesome — local only (no duplicate CDN) -->
+    <!-- Font Awesome (CDN + local fallback) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="{% static 'vendor/font-awesome/css/font-awesome.min.css' %}">
 
     <!-- Google Fonts — display=swap for non-blocking -->
@@ -79,18 +80,22 @@
             </a>
             <button type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"
-                    class="navbar-toggler navbar-toggler-right">Menu<i class="fa fa-bars"></i>
+                    class="navbar-toggler">
+                <span class="navbar-toggler-text">Menu</span>
+                <i class="fa fa-bars ml-2"></i>
             </button>
             <div id="navbarSupportedContent" class="collapse navbar-collapse">
                 {% with request.resolver_match.url_name as url_name %}
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item {% if url_name == 'home' %}active{% endif %}">
-                            <a href="{% url 'jobs:home' %}" class="nav-link">{% trans "Home" %} <span class="sr-only">(current)</span></a>
+                            <a href="{% url 'jobs:home' %}" class="nav-link">
+                                <i class="fa fa-home nav-icon"></i><span>{% trans "Home" %}</span>
+                            </a>
                         </li>
                         <!-- Jobs Dropdown -->
                         <li class="nav-item dropdown {% if url_name == 'jobs' or url_name == 'search' %}active{% endif %}">
                             <a href="#" class="nav-link dropdown-toggle" id="jobsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fa fa-briefcase mr-1"></i>{% trans "Jobs" %}
+                                <i class="fa fa-briefcase nav-icon"></i><span>{% trans "Jobs" %}</span>
                             </a>
                             <div class="dropdown-menu" aria-labelledby="jobsDropdown" style="min-width:220px; border-radius:10px; box-shadow:0 8px 30px rgba(0,0,0,0.15); border:none; overflow:hidden; padding:0;">
                                 <div style="background:linear-gradient(135deg,#1e3a5f,#2563eb); padding:12px 16px;">
@@ -127,17 +132,23 @@
                         <!-- Salary Calculator -->
                         <li class="nav-item {% if url_name == 'salary-calculator' %}active{% endif %}">
                             <a href="{% url 'jobs:salary-calculator' %}" class="nav-link">
-                                <i class="fa fa-calculator mr-1"></i>{% trans "Salary Calculator" %}
+                                <i class="fa fa-calculator nav-icon"></i><span>{% trans "Salary Calculator" %}</span>
                             </a>
                         </li>
                         <li class="nav-item {% if url_name == 'templates' %}active{% endif %}">
-                            <a href="{% url 'resume_cv:templates' %}" class="nav-link">{% trans "Create ResumeCV" %}</a>
+                            <a href="{% url 'resume_cv:templates' %}" class="nav-link">
+                                <i class="fa fa-file-text-o nav-icon"></i><span>{% trans "Create Resume / CV" %}</span>
+                            </a>
                         </li>
                         <li class="nav-item">
-                                <a href="/{{ LANGUAGE_CODE }}/about-us/" class="nav-link">{% trans "About Us" %}</a>
+                            <a href="/{{ LANGUAGE_CODE }}/about-us/" class="nav-link">
+                                <i class="fa fa-info-circle nav-icon"></i><span>{% trans "About Us" %}</span>
+                            </a>
                         </li>
                         <li class="nav-item {% if url_name == 'pricing' %}active{% endif %}">
-                            <a href="{% url 'payments:pricing' %}" class="nav-link"><i class="fa fa-diamond text-warning me-1"></i> {% trans "Pricing & VIP" %}</a>
+                            <a href="{% url 'payments:pricing' %}" class="nav-link">
+                                <i class="fa fa-diamond text-warning nav-icon"></i><span>{% trans "Pricing & VIP" %}</span>
+                            </a>
                         </li>
                         {% if request.user.is_authenticated %}
                             <li class="nav-item dropdown">
@@ -220,31 +231,28 @@
                                     </a>
                                 </div>
                             </li>
-                        {% else %}
                             <li class="nav-item dropdown {% if url_name == 'employee-register' or url_name == 'employer-register' %}active{% endif %}">
                                 <a id="pages" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                                   class="nav-link dropdown-toggle "><i class="fa fa-signing"></i>Register
+                                   class="nav-link dropdown-toggle">
+                                    <i class="fa fa-user-plus nav-icon"></i><span>{% trans "Register" %}</span>
                                 </a>
                                 <div aria-labelledby="pages" class="dropdown-menu">
-                                <a href="{% url 'accounts:employee-register' %}"
-                                   class="dropdown-item {% if url_name == 'employee-register' %}active{% endif %}"
-                                >
-                                    {% trans "Employee" %}
-                                </a>
-                                <a href="{% url 'accounts:employer-register' %}"
-                                   class="dropdown-item {% if url_name == 'employer-register' %}active{% endif %}"
-                                >
-                                    {% trans "Employers" %}
-                                </a>
+                                    <a href="{% url 'accounts:employee-register' %}"
+                                       class="dropdown-item {% if url_name == 'employee-register' %}active{% endif %}">
+                                        <i class="fa fa-user mr-2 text-primary"></i>{% trans "Employee" %}
+                                    </a>
+                                    <a href="{% url 'accounts:employer-register' %}"
+                                       class="dropdown-item {% if url_name == 'employer-register' %}active{% endif %}">
+                                        <i class="fa fa-building-o mr-2 text-success"></i>{% trans "Employers" %}
+                                    </a>
                                 </div>
                             </li>
-                            <li class="nav-item" style="color: #fff">
+                            <li class="nav-item nav-item-auth">
                                 <a href="{% url 'accounts:login' %}"
-                                   class="btn navbar-btn btn-outline-light mb-5 mb-lg-0 {% if url_name == 'login' %}active text-primary{% endif %}"
-                                >
-                                    <i class="fa fa-sign-in"></i>
-                                    {% trans "Login" %}
-                                 </a>
+                                   class="nav-link nav-link-login {% if url_name == 'login' %}active{% endif %}">
+                                    <i class="fa fa-sign-in nav-icon"></i>
+                                    <span>{% trans "Login" %}</span>
+                                </a>
                             </li>
                         {% endif %}
                         {% include "lang_selector.html" %}
