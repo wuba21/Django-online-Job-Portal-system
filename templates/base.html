@@ -73,16 +73,20 @@
 {% csrf_token %}
 <header class="header">
     <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid">
-            <a href="{% url 'jobs:home' %}" class="navbar-brand d-inline-flex align-items-center" style="padding: 6px 0;">
-                <img src="{% static 'img/logo.svg' %}" alt="ETHIO JOBS PORTAL" style="height: 42px; width: auto; max-width: 100%; display: block;">
+        <div class="container-fluid d-flex align-items-center justify-content-between flex-wrap">
+            <a href="{% url 'jobs:home' %}" class="navbar-brand d-inline-flex align-items-center" style="padding: 4px 0;">
+                <img src="{% static 'img/logo.svg' %}" alt="ETHIO JOBS PORTAL" style="height: 38px; width: auto; max-width: 100%; display: block;">
                 <span class="sr-only">{% trans "Home" %}</span>
             </a>
             <button type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"
-                    class="navbar-toggler">
-                <span class="navbar-toggler-text">Menu</span>
-                <i class="fa fa-bars ml-2"></i>
+                    class="navbar-toggler collapsed ml-auto" id="mobileNavbarToggler">
+                <span class="nav-toggle-label mr-2">Menu</span>
+                <span class="nav-toggle-icon">
+                    <span class="line line-1"></span>
+                    <span class="line line-2"></span>
+                    <span class="line line-3"></span>
+                </span>
             </button>
             <div id="navbarSupportedContent" class="collapse navbar-collapse">
                 {% with request.resolver_match.url_name as url_name %}

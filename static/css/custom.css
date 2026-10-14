@@ -150,47 +150,126 @@ img, video, iframe, canvas, svg {
     }
 
     .navbar {
-        padding: 10px 16px !important;
+        padding: 10px 14px !important;
         background: #111827 !important;
+    }
+
+    .navbar > .container-fluid {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-wrap: wrap !important;
+        width: 100% !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    .navbar-brand {
+        display: inline-flex !important;
+        align-items: center !important;
+        max-width: calc(100% - 105px) !important;
+        margin-right: 0 !important;
+        padding: 2px 0 !important;
     }
 
     .navbar-brand img {
         display: block !important;
-        max-height: 38px !important;
+        max-height: 36px !important;
         width: auto !important;
+        max-width: 100% !important;
     }
 
+    /* Modern Right-Aligned Toggler Button */
     .navbar-toggler {
-        padding: 7px 14px !important;
-        font-size: 13px !important;
-        font-weight: 600 !important;
-        color: #ffffff !important;
-        background: rgba(255, 255, 255, 0.08) !important;
-        border: 1px solid rgba(255, 255, 255, 0.16) !important;
-        border-radius: 8px !important;
-        box-shadow: none !important;
-        letter-spacing: 0.05em !important;
-        text-transform: uppercase !important;
-        cursor: pointer !important;
+        margin-left: auto !important; /* Forces right edge alignment */
         display: inline-flex !important;
         align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        padding: 6px 12px !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid rgba(255, 255, 255, 0.18) !important;
+        border-radius: 8px !important;
+        color: #ffffff !important;
+        cursor: pointer !important;
         outline: none !important;
-        transition: all 0.2s ease !important;
+        box-shadow: none !important;
+        flex-shrink: 0 !important;
+        transition: all 0.25s ease !important;
     }
 
     .navbar-toggler:hover,
     .navbar-toggler:focus {
         background: rgba(255, 255, 255, 0.14) !important;
-        border-color: rgba(255, 255, 255, 0.28) !important;
+        border-color: rgba(255, 255, 255, 0.3) !important;
         outline: none !important;
     }
 
-    .navbar-toggler i {
+    .navbar-toggler .nav-toggle-label {
+        font-size: 0.8rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.05em !important;
+        text-transform: uppercase !important;
         color: #ffffff !important;
-        font-size: 14px !important;
+        line-height: 1 !important;
+    }
+
+    /* 3-Bar Animated Hamburger Icon */
+    .navbar-toggler .nav-toggle-icon {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        width: 16px !important;
+        height: 12px !important;
+        position: relative !important;
+        flex-shrink: 0 !important;
+    }
+
+    .navbar-toggler .nav-toggle-icon .line {
+        display: block !important;
+        width: 100% !important;
+        height: 2px !important;
+        background-color: #ffffff !important;
+        border-radius: 2px !important;
+        transition: transform 0.25s ease, opacity 0.2s ease, background-color 0.25s ease !important;
+        transform-origin: center !important;
+    }
+
+    /* TRANSFORMATION INTO 'X' WHEN OPEN (EXPANDED) */
+    .navbar-toggler:not(.collapsed) {
+        background: rgba(239, 68, 68, 0.15) !important;
+        border-color: rgba(239, 68, 68, 0.45) !important;
+    }
+
+    .navbar-toggler:not(.collapsed) .nav-toggle-label {
+        font-size: 0 !important;
+    }
+
+    .navbar-toggler:not(.collapsed) .nav-toggle-label::before {
+        content: "Close";
+        font-size: 0.8rem !important;
+        color: #f87171 !important;
+    }
+
+    .navbar-toggler:not(.collapsed) .nav-toggle-icon .line-1 {
+        transform: translateY(5px) rotate(45deg) !important;
+        background-color: #f87171 !important;
+    }
+
+    .navbar-toggler:not(.collapsed) .nav-toggle-icon .line-2 {
+        opacity: 0 !important;
+        transform: scaleX(0) !important;
+    }
+
+    .navbar-toggler:not(.collapsed) .nav-toggle-icon .line-3 {
+        transform: translateY(-5px) rotate(-45deg) !important;
+        background-color: #f87171 !important;
     }
 
     #navbarSupportedContent {
+        flex-basis: 100% !important;
+        width: 100% !important;
         background: #0f172a !important; /* Elegant Slate 900 Drawer */
         padding: 12px !important;
         border-radius: 16px !important;
