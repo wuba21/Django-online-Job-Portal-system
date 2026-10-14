@@ -65,7 +65,7 @@ class ApplicantPerJobView(ListView):
 
     def get_queryset(self):
         job = get_object_or_404(Job, id=self.kwargs["job_id"], user=self.request.user)
-        queryset = Applicant.objects.filter(job=job).order_by("id")
+        queryset = Applicant.objects.select_related("job", "user").filter(job=job).order_by("id")
         status_param = self.request.GET.get("status")
         if status_param and status_param.isdigit():
             queryset = queryset.filter(status=int(status_param))
@@ -152,7 +152,7 @@ class ApplicantsListView(ListView):
         return super().dispatch(self.request, *args, **kwargs)
 
     def get_queryset(self):
-        self.queryset = self.model.objects.filter(job__user_id=self.request.user.id).order_by("-id")
+        self.queryset = self.model.objects.select_related("job", "user").filter(job__user_id=self.request.user.id).order_by("-id")
         status_param = self.request.GET.get("status")
         if status_param and status_param.isdigit():
             self.queryset = self.queryset.filter(status=int(status_param))

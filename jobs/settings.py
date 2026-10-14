@@ -130,12 +130,26 @@ TEMPLATES = [
     }
 ]
 
+if not DEBUG:
+    TEMPLATES[0]["OPTIONS"]["loaders"] = [
+        (
+            "django.template.loaders.cached.Loader",
+            [
+                "django.template.loaders.filesystem.Loader",
+                "django.template.loaders.app_directories.Loader",
+            ],
+        )
+    ]
+    if "APP_DIRS" in TEMPLATES[0]:
+        del TEMPLATES[0]["APP_DIRS"]
+
 WSGI_APPLICATION = "jobs.wsgi.application"
 
 # Database (PostgreSQL / MySQL / SQLite)
 DATABASES = {
     "default": env.db("DATABASE_URL", default=f"sqlite:///{os.path.join(BASE_DIR, 'db.sqlite3')}")
 }
+DATABASES["default"]["CONN_MAX_AGE"] = 60
 
 # Chapa Payment Integration Key
 # Set CHAPA_SECRET_KEY in .env or PythonAnywhere environment variables
@@ -247,6 +261,8 @@ STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")  # for production
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+WHITENOISE_MAX_AGE = 31536000 if not DEBUG else 0
+WHITENOISE_MANIFEST_STRICT = False
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
@@ -415,14 +431,14 @@ GRAPHQL_JWT = {
     "JWT_EXPIRATION_DELTA": timedelta(minutes=60),
 }
 
-ENABLE_PROMETHEUS = 1
+ENABLE_PROMETHEUS = env.bool("ENABLE_PROMETHEUS", default=False)
 
 if ENABLE_PROMETHEUS:
     INSTALLED_APPS += ["django_prometheus"]
     MIDDLEWARE = (
         ["django_prometheus.middleware.PrometheusBeforeMiddleware"]
         + MIDDLEWARE
-        + ["django_prometheus.middleware.PrometheusAfterMiddleware", "jobs.middlewares.CustomMiddleware"]
+        + ["django_prometheus.middleware.PrometheusAfterMiddleware"]
     )
     MIDDLEWARE.append("jobs.middlewares.CustomMiddleware")
     MIDDLEWARE.append("jobs.middlewares.ResponseTimeMiddleware")

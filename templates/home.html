@@ -12,21 +12,21 @@
             <div class="row">
                 <div class="col-lg-8 mx-auto">
                     <div class="job-form-box">
-                        <h2 class="heading">{% trans "Find a job you will love" %}
-                            <span class="accent">love</span>.
+                        <h2 class="heading">{% trans "Find a job you will" %}
+                            <span class="accent">{% trans "love" %}</span>.
                         </h2>
                         <form id="job-main-form" method="get" action="{% url 'jobs:search' %}" class="job-main-form">
                             <div class="controls">
                                 <div class="row align-items-center">
                                     <div class="col-md-5">
-                                        <div class="form-group">
+                                        <div class="form-group mb-2 mb-md-0">
                                             <label for="profession">{% trans 'Position' %}</label>
                                             <input type="text" id="profession" name="position"
                                                    placeholder="Position you are looking for" class="form-control">
                                         </div>
                                     </div>
                                     <div class="col-md-5">
-                                        <div class="form-group">
+                                        <div class="form-group mb-2 mb-md-0">
                                             <label for="location">{% trans "Location" %}</label>
                                             <input type="text" id="location" name="location"
                                                    placeholder="Any particular location?" class="form-control">
@@ -34,8 +34,8 @@
                                     </div>
                                     <div class="col-md-2">
                                         <button type="submit"
-                                                class="btn btn-outline-white-primary job-main-form__button">
-                                            <i class="fa fa-search"></i>
+                                                class="btn btn-outline-white-primary job-main-form__button w-100" aria-label="Search">
+                                            <i class="fa fa-search mr-1"></i><span class="d-inline d-md-none">{% trans "Search" %}</span>
                                         </button>
                                     </div>
                                 </div>
@@ -78,11 +78,12 @@
                                     {% else %}
                                         <span style="color: #ffffff;" class="badge featured-badge badge-warning">{% trans "Internship" %}</span>
                                     {% endif %}
-                                </p>
-                                {% for tag in job.tags.all %}
-                                    <span style="color: #ffffff;"
-                                          class="badge featured-badge badge-secondary">{{ tag.name }}</span>
-                                {% endfor %}
+                                <div class="d-flex flex-wrap align-items-center mb-2" style="gap: 4px;">
+                                    {% for tag in job.tags.all %}
+                                        <span style="color: #ffffff;"
+                                              class="badge featured-badge badge-secondary">{{ tag.name }}</span>
+                                    {% endfor %}
+                                </div>
                                 <p>{{ job.description | truncatewords_html:30 | safe }}</p>
                             </div>
                         </div>

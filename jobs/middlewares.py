@@ -16,10 +16,9 @@ class CustomMiddleware(MiddlewareMixin):
         if "metrics" not in request.path:
             # Increment the Prometheus counter
             requests_total.labels(
-                endpoint=request.get_full_path(),  # call the method to get the path
+                endpoint=request.path,
                 method=request.method,
                 user=request.user.get_username() if request.user.is_authenticated else "Anonymous",
-                # use get_username() for the user label
             ).inc()
 
             # Update the last user activity time

@@ -37,11 +37,18 @@ class ApplicantDashboardView(TemplateView):
         # Favorites
         favorites = Favorite.objects.select_related("job", "job__user").filter(user=user, soft_deleted=False)
 
+        # Pre-fetch user skills, title, and location once to avoid N+1 queries in the recommendation loop
+        user_skills = set(user.skills.values_list("name", flat=True)) if hasattr(user, "skills") else set()
+        user_title = getattr(profile, "title", "") or ""
+        user_location = getattr(profile, "location", "") or ""
+
         # Job Recommendations with match scores
-        all_jobs = Job.objects.filter(filled=False, status="approved")[:10]
+        all_jobs = Job.objects.select_related("user", "company").prefetch_related("tags").filter(filled=False, status="approved")[:10]
         recommended_jobs = []
         for job in all_jobs:
-            score = calculate_job_match_score(user, job)
+            score = calculate_job_match_score(
+                user, job, user_skills=user_skills, user_title=user_title, user_location=user_location
+            )
             recommended_jobs.append({"job": job, "match_score": score})
 
         # Sort recommendations by match score descending

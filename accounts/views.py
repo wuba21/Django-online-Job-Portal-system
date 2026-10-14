@@ -96,6 +96,9 @@ class LoginView(FormView):
             if user.is_superuser or user.is_staff:
                 return "/analytics-dashboard/"
             if getattr(user, "role", None) == "employer":
+                company = getattr(user, "company", None)
+                if not company or not company.is_license_verified:
+                    return "/en/employer/verify-license/"
                 return "/en/employer/dashboard/"
             if getattr(user, "role", None) == "employee":
                 return "/en/applicant/dashboard/"
