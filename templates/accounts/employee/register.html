@@ -22,7 +22,21 @@
                             </div>
                         {% endfor %}
                     {% endif %}
-                    
+
+                    <!-- Google OAuth Instant Registration -->
+                    <div class="mb-4 text-center">
+                        <a href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-block btn-outline-danger py-2 font-weight-bold shadow-sm" style="border-radius: 8px; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <i class="fa fa-google" style="font-size: 1.1rem;"></i>
+                            <span>{% trans "Register with Google (Instant Verification)" %}</span>
+                        </a>
+                        <div class="position-relative my-4">
+                            <hr style="border-top: 1px solid #e2e8f0;">
+                            <span class="bg-white px-3 text-muted font-weight-bold small text-uppercase" style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%);">
+                                {% trans "Or register with email" %}
+                            </span>
+                        </div>
+                    </div>
+
                     <form action="" method="post">
                         {% csrf_token %}
                         {% for field in form %}

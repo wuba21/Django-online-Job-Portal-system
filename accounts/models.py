@@ -20,6 +20,8 @@ class User(AbstractUser):
         unique=True, blank=False, error_messages={"unique": "A user with that email already exists."}
     )
     is_vip = models.BooleanField(default=False, db_index=True)
+    is_verified = models.BooleanField(default=False, db_index=True)
+    email_verified_at = models.DateTimeField(null=True, blank=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
