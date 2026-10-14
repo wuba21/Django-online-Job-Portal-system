@@ -339,7 +339,7 @@ SWAGGER_SETTINGS = {
 }
 
 LOGIN_URL = reverse_lazy("accounts:login")
-LOGIN_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = reverse_lazy("accounts:post-login-redirect")
 LOGOUT_REDIRECT_URL = "/"
 
 AUTHENTICATION_BACKENDS = [
@@ -383,6 +383,7 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
     "openid",
 ]
 SOCIAL_AUTH_GOOGLE_OAUTH2_AUTH_EXTRA_ARGUMENTS = {"prompt": "select_account"}
+SOCIAL_AUTH_FIELDS_STORED_IN_SESSION = ["role"]
 
 SOCIAL_AUTH_PIPELINE = (
     "social_core.pipeline.social_auth.social_details",

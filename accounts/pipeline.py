@@ -36,17 +36,25 @@ def update_user(backend, user, response, *args, **kwargs):
             except Exception:
                 pass
 
-    # 4. Admin & Staff privilege preservation
+    # 4. Determine user role from session (set during registration button click)
+    strategy = kwargs.get("strategy")
+    chosen_role = None
+    if strategy:
+        chosen_role = strategy.session_get("role") or strategy.request_data().get("role")
+
     admin_emails = ["wubantetilahun@gmail.com", "wubante19@gmail.com", "admin@admin.com"]
     if user.email in admin_emails or user.is_superuser:
         user.is_staff = True
         user.is_superuser = True
         user.is_active = True
         if not user.role:
-            user.role = "employer"
+            user.role = chosen_role or "employer"
     elif not user.role:
-        # Default role for standard Google sign-ups
-        user.role = "employee"
+        # Use chosen role from registration page ('employer' or 'employee')
+        user.role = chosen_role if chosen_role in ("employer", "employee") else "employee"
+    elif chosen_role in ("employer", "employee") and user.role != chosen_role:
+        # If user explicitly registered via employer/employee button, update their role
+        user.role = chosen_role
 
     user.is_active = True
     user.save()

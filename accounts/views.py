@@ -128,3 +128,21 @@ class LogoutView(RedirectView):
         auth.logout(request)
         messages.success(request, "You are now logged out")
         return redirect("accounts:login")
+
+
+class LoginRedirectRouteView(RedirectView):
+    """
+    Intelligent post-login / OAuth redirect:
+    Directs employers to /en/employer/dashboard/ and employees to /en/applicant/dashboard/
+    """
+    permanent = False
+
+    def get_redirect_url(self, *args, **kwargs):
+        user = self.request.user
+        if not user.is_authenticated:
+            return "/en/login/"
+        if user.is_superuser or user.is_staff:
+            return "/analytics-dashboard/"
+        if getattr(user, "role", None) == "employer":
+            return "/en/employer/dashboard/"
+        return "/en/applicant/dashboard/"
