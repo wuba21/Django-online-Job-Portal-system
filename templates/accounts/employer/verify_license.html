@@ -98,16 +98,51 @@
                         </div>
                     </form>
 
-                    <!-- Criteria Guidelines -->
+                    <!-- Criteria Guidelines & Government Registry Explorer -->
                     <div class="mt-4 pt-3 border-top text-muted small" style="border-color: #f1f5f9 !important;">
-                        <div class="font-weight-bold text-secondary mb-2">
-                            <i class="fa fa-info-circle text-info mr-1"></i> የ AI ማረጋገጫ መስፈርቶች፦
+                        <div class="font-weight-bold text-dark mb-2 d-flex align-items-center justify-content-between">
+                            <span><i class="fa fa-university text-primary mr-1"></i> የገቢዎች ሚኒስቴር እና የንግድ ሚኒስቴር AI ማረጋገጫ</span>
+                            <span class="badge badge-primary px-2 py-1">MoR & MoTRI Real-Time</span>
                         </div>
-                        <ul class="pl-3 mb-0" style="line-height: 1.8;">
-                            <li>የኢትዮጵያ ፌዴራላዊ ዲሞክራሲያዊ ሪፐብሊክ የንግድ ፈቃድ መሆን አለበት።</li>
-                            <li>ክብ ሰማያዊ ወይም ቀይ የመንግስት ማህተም እና ፊርማ በግልጽ መታየት አለበት።</li>
-                            <li>TIN ቁጥሩ 10 አሃዝ መሆን አለበት። የውሸት/የማይዛመድ ሰነድ በ AI በራስ-ሰር ይሰረዛል።</li>
+                        <ul class="pl-3 mb-3 text-secondary" style="line-height: 1.8;">
+                            <li><strong>የውሸት TIN ቁጥሮች ክልከላ፦</strong> እንደ <code class="text-danger font-weight-bold">11234567890</code> ወይም <code class="text-danger font-weight-bold">1234567890</code> ያሉ የፈጠራ/ያልተመዘገቡ ቁጥሮች በገቢዎች ሚኒስቴር የግብር ከፋዮች መረጃ ቋት ውስጥ ስለሌሉ በ AI ወዲያውኑ ውድቅ ይደረጋሉ።</li>
+                            <li><strong>ይፋዊ ማህተም፦</strong> ሰነዱ ላይ የንግድና ቀጠናዊ ትስስር ሚኒስቴር ክብ ሰማያዊ/ቀይ ማህተም እና ይፋዊ ጽሑፍ በግልጽ መታየት አለበት።</li>
+                            <li><strong>የድርጅት ስም ማዛመድ፦</strong> በገቢዎች ሚኒስቴር የተመዘገበው ስም ከንግድ ፈቃድዎ ጋር ይዛመዳል።</li>
                         </ul>
+
+                        <!-- Sample Verified Businesses Accordion for Testing -->
+                        <div class="card border border-light shadow-none bg-light p-3" style="border-radius: 12px;">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="font-weight-bold text-dark" style="font-size: 0.85rem;">
+                                    <i class="fa fa-check-circle text-success mr-1"></i> ለሙከራ የተመዘገቡ ህጋዊ TIN ቁጥሮች (Verified Sample Businesses)፦
+                                </span>
+                            </div>
+                            <p class="text-muted mb-2" style="font-size: 0.78rem;">
+                                እነዚህ በገቢዎች ሚኒስቴር መረጃ ቋት ውስጥ ያሉ ህጋዊ ድርጅቶች ናቸው። ለመሞከር የፈለጉትን ድርጅት ይጫኑ (Click to auto-fill)፦
+                            </p>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="button" class="btn btn-sm btn-white border mr-2 mb-2 shadow-sm text-left" onclick="autoFillTest('Chapa Financial Technologies S.C.', '0019284756')">
+                                    <strong class="text-primary">Chapa (ቻፓ)</strong> <br>
+                                    <small class="text-muted">TIN: <code>0019284756</code></small>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-white border mr-2 mb-2 shadow-sm text-left" onclick="autoFillTest('Ethio Telecom', '0002847591')">
+                                    <strong class="text-primary">Ethio Telecom</strong> <br>
+                                    <small class="text-muted">TIN: <code>0002847591</code></small>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-white border mr-2 mb-2 shadow-sm text-left" onclick="autoFillTest('Deliver Addis Technologies', '0091827364')">
+                                    <strong class="text-primary">Deliver Addis</strong> <br>
+                                    <small class="text-muted">TIN: <code>0091827364</code></small>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-white border mr-2 mb-2 shadow-sm text-left" onclick="autoFillTest('Abyssinia Tech Solutions', '0011223344')">
+                                    <strong class="text-primary">Abyssinia Tech</strong> <br>
+                                    <small class="text-muted">TIN: <code>0011223344</code></small>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-white border mb-2 shadow-sm text-left" onclick="autoFillTest('Fake Test Company', '11234567890')">
+                                    <strong class="text-danger">የውሸት TIN (Fake Test)</strong> <br>
+                                    <small class="text-muted">TIN: <code>11234567890</code> (ውድቅ ይሆናል)</small>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
@@ -117,6 +152,13 @@
 </section>
 
 <script>
+    function autoFillTest(name, tin) {
+        document.getElementById('company_name').value = name;
+        document.getElementById('tin_number').value = tin;
+        // Scroll to form inputs smoothly
+        document.getElementById('company_name').focus();
+    }
+
     document.getElementById('license_document').addEventListener('change', function(e) {
         var fileName = e.target.files[0] ? e.target.files[0].name : '';
         document.getElementById('file-chosen').innerText = fileName ? "✅ የተመረጠ ፋይል፦ " + fileName : "";

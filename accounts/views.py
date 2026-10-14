@@ -201,8 +201,12 @@ class EmployerLicenseVerifyView(View):
         company.license_document = uploaded_file
         company.tin_number = tin_number
 
-        # Run AI Verification Engine
-        result = verify_ethiopian_business_license(uploaded_file, tin_input=tin_number)
+        # Run AI Verification Engine with Government Registry cross-check
+        result = verify_ethiopian_business_license(
+            uploaded_file,
+            tin_input=tin_number,
+            company_name=company.name
+        )
 
         company.license_ai_confidence = result["confidence"]
         if result["tin_number"]:
