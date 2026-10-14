@@ -52,7 +52,7 @@
                         <!-- Company Name -->
                         <div class="form-group mb-3">
                             <label for="company_name" class="font-weight-bold text-secondary">
-                                <i class="fa fa-building-o mr-1 text-primary"></i> {% trans "የድርጅት ስም (Company Name)" %}
+                                <i class="fa fa-building mr-1 text-primary"></i> {% trans "የድርጅት ስም (Company Name)" %}
                             </label>
                             <input type="text" class="form-control form-control-lg" id="company_name" name="company_name"
                                    value="{{ company.name }}" required placeholder="ለምሳሌ፡ አቢሲኒያ ቴክኖሎጂስ ኃ/የተ/የግ/ማ">
@@ -61,7 +61,7 @@
                         <!-- 10-Digit Ethiopian TIN Number -->
                         <div class="form-group mb-3">
                             <label for="tin_number" class="font-weight-bold text-secondary">
-                                <i class="fa fa-id-card-o mr-1 text-primary"></i> {% trans "የግብር ከፋይ መለያ ቁጥር (TIN Number - 10 አሃዝ)" %}
+                                <i class="fa fa-id-card mr-1 text-primary"></i> {% trans "የግብር ከፋይ መለያ ቁጥር (TIN Number - 10 አሃዝ)" %}
                             </label>
                             <input type="text" class="form-control form-control-lg" id="tin_number" name="tin_number"
                                    maxlength="10" pattern="[0-9]{10}"
@@ -78,15 +78,15 @@
                                 <i class="fa fa-file-pdf-o mr-1 text-danger"></i> {% trans "የንግድ ፈቃድ ሰነድ (Scan/Photo - PDF, JPG, PNG)" %}
                             </label>
                             
-                            <div class="upload-dropzone p-4 text-center" id="dropzone" style="border: 2px dashed #cbd5e1; border-radius: 12px; background: #f8fafc; cursor: pointer; transition: all 0.2s;">
-                                <i class="fa fa-cloud-upload text-primary mb-2" style="font-size: 40px;"></i>
-                                <h6 class="font-weight-bold text-dark mb-1">{% trans "የንግድ ፈቃድዎን እዚህ ይጎትቱ ወይም ይምረጡ" %}</h6>
-                                <p class="text-muted small mb-2">{% trans "የንግድና ቀጠናዊ ትስስር ሚኒስቴር ማህተም እና ፊርማ በግልጽ የሚታይበት ሰነድ ይስቀሉ" %}</p>
+                            <div class="upload-dropzone p-3 p-md-4 text-center" id="dropzone" style="border: 2px dashed #cbd5e1; border-radius: 12px; background: #f8fafc; cursor: pointer; transition: all 0.2s; box-sizing: border-box; width: 100%; max-width: 100%; overflow: hidden;">
+                                <i class="fa fa-cloud-upload text-primary mb-2" style="font-size: 38px;"></i>
+                                <h6 class="font-weight-bold text-dark mb-1" style="font-size: 0.95rem; word-break: break-word;">{% trans "የንግድ ፈቃድዎን እዚህ ይጎትቱ ወይም ይምረጡ" %}</h6>
+                                <p class="text-muted small mb-3" style="font-size: 0.82rem; word-break: break-word;">{% trans "የንግድና ቀጠናዊ ትስስር ሚኒስቴር ማህተም እና ፊርማ በግልጽ የሚታይበት ሰነድ ይስቀሉ" %}</p>
                                 <input type="file" name="license_document" id="license_document" accept=".pdf,image/png,image/jpeg,image/jpg" required style="display: none;">
-                                <button type="button" class="btn btn-outline-primary btn-sm px-3" onclick="document.getElementById('license_document').click();">
-                                    <i class="fa fa-folder-open-o mr-1"></i> {% trans "ፋይል ምረጥ (Choose File)" %}
+                                <button type="button" class="btn btn-outline-primary btn-sm px-3" onclick="document.getElementById('license_document').click();" style="white-space: normal; word-break: break-word; letter-spacing: normal; text-transform: none; max-width: 100%;">
+                                    <i class="fa fa-folder-open mr-1"></i> {% trans "ፋይል ምረጡ (Choose File)" %}
                                 </button>
-                                <div id="file-chosen" class="mt-2 text-success font-weight-bold small"></div>
+                                <div id="file-chosen" class="mt-2 text-success font-weight-bold small" style="word-break: break-word;"></div>
                             </div>
                         </div>
 

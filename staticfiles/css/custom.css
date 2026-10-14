@@ -765,3 +765,130 @@ p, span, a, label, strong, em, td, th {
         padding-right: 14px !important;
     }
 }
+
+/* =================================================================
+   BULLETPROOF LOCAL FONTAWESOME FONT-FACE DECLARATION
+   Eliminates broken [X] boxes by serving from same-origin local files
+   ================================================================= */
+@font-face {
+    font-family: 'FontAwesome';
+    src: url('../vendor/font-awesome/fonts/fontawesome-webfont.woff2?v=4.7.0') format('woff2'),
+         url('../vendor/font-awesome/fonts/fontawesome-webfont.woff?v=4.7.0') format('woff'),
+         url('../vendor/font-awesome/fonts/fontawesome-webfont.ttf?v=4.7.0') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* =================================================================
+   GLOBAL BUTTON & TYPOGRAPHY RESPONSIVENESS (NO OVERFLOW)
+   Eliminates text overflowing buttons on mobile (Social Auth, Pricing, Forms)
+   ================================================================= */
+.btn,
+button,
+input[type="button"],
+input[type="submit"],
+a.btn {
+    letter-spacing: normal !important; /* Eliminates the massive 0.2em letter spacing */
+    text-transform: none !important; /* Prevents text overflow caused by forced uppercase */
+    white-space: normal !important; /* Allows natural text wrapping */
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    line-height: 1.35 !important;
+}
+
+/* Social Login Buttons (Google, GitHub, Facebook, LinkedIn) */
+.social-login-buttons .btn,
+.btn-social,
+.login-page .btn,
+.register-page .btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    padding: 10px 14px !important;
+    width: 100% !important;
+    border-radius: 8px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+}
+
+.social-login-buttons .btn i,
+.btn-social i {
+    font-size: 1.1rem !important;
+    margin-right: 8px !important;
+    flex-shrink: 0 !important;
+}
+
+/* Pricing Page Action Buttons ("Feature a Job", "Subscribe Pro", "Post Free Job") */
+.pricing-card {
+    padding: 24px 18px !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.pricing-card .btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    font-size: 0.88rem !important;
+    font-weight: 700 !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    padding: 12px 14px !important;
+    width: 100% !important;
+    border-radius: 8px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+}
+
+/* File Upload Dropzone in verify_license.html */
+.upload-dropzone {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    word-break: break-word !important;
+    padding: 20px 14px !important;
+}
+
+.upload-dropzone .btn,
+.upload-dropzone button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    max-width: 100% !important;
+    white-space: normal !important;
+    font-size: 0.85rem !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    padding: 8px 14px !important;
+    margin: 8px auto 0 !important;
+    border-radius: 8px !important;
+    box-sizing: border-box !important;
+}
+
+/* Alert status banners */
+.alert {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    word-break: break-word !important;
+}
+
+.alert .badge {
+    white-space: normal !important;
+    display: inline-block !important;
+    line-height: 1.3 !important;
+}
