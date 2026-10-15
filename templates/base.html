@@ -97,7 +97,7 @@
                             </a>
                         </li>
                         <!-- Jobs Dropdown -->
-                        <li class="nav-item dropdown {% if url_name == 'jobs' or url_name == 'search' %}active{% endif %}">
+                        <li class="nav-item dropdown {% if url_name == 'jobs' or url_name == 'search' or url_name == 'salary-calculator' or url_name == 'templates' or url_name == 'pricing' %}active{% endif %}">
                             <a href="#" class="nav-link dropdown-toggle" id="jobsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fa fa-briefcase nav-icon"></i><span>{% trans "Jobs" %}</span>
                             </a>
@@ -131,27 +131,25 @@
                                 <a href="{% url 'jobs:search' %}" class="dropdown-item py-2 text-muted" style="font-size:0.85rem;">
                                     <i class="fa fa-search mr-2"></i>{% trans "Advanced Search" %}
                                 </a>
+
+                                <!-- Career Services & Tools Section -->
+                                <div style="background:rgba(255,255,255,0.04); padding:8px 16px; border-top:1px solid rgba(255,255,255,0.08);">
+                                    <small style="color:rgba(255,255,255,0.55); font-size:0.7rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:600;">{% trans "Career Services & Tools" %}</small>
+                                </div>
+                                <a href="{% url 'resume_cv:templates' %}" class="dropdown-item py-2 {% if url_name == 'templates' %}active{% endif %}">
+                                    <i class="fa fa-file-text-o mr-2 text-info"></i>{% trans "Create Resume / CV" %}
+                                </a>
+                                <a href="{% url 'jobs:salary-calculator' %}" class="dropdown-item py-2 {% if url_name == 'salary-calculator' %}active{% endif %}">
+                                    <i class="fa fa-calculator mr-2 text-success"></i>{% trans "Salary Calculator" %}
+                                </a>
+                                <a href="{% url 'payments:pricing' %}" class="dropdown-item py-2 {% if url_name == 'pricing' %}active{% endif %}">
+                                    <i class="fa fa-diamond mr-2 text-warning"></i>{% trans "Pricing & VIP" %}
+                                </a>
                             </div>
-                        </li>
-                        <!-- Salary Calculator -->
-                        <li class="nav-item {% if url_name == 'salary-calculator' %}active{% endif %}">
-                            <a href="{% url 'jobs:salary-calculator' %}" class="nav-link">
-                                <i class="fa fa-calculator nav-icon"></i><span>{% trans "Salary Calculator" %}</span>
-                            </a>
-                        </li>
-                        <li class="nav-item {% if url_name == 'templates' %}active{% endif %}">
-                            <a href="{% url 'resume_cv:templates' %}" class="nav-link">
-                                <i class="fa fa-file-text-o nav-icon"></i><span>{% trans "Create Resume / CV" %}</span>
-                            </a>
                         </li>
                         <li class="nav-item">
                             <a href="/{{ LANGUAGE_CODE }}/about-us/" class="nav-link">
                                 <i class="fa fa-info-circle nav-icon"></i><span>{% trans "About Us" %}</span>
-                            </a>
-                        </li>
-                        <li class="nav-item {% if url_name == 'pricing' %}active{% endif %}">
-                            <a href="{% url 'payments:pricing' %}" class="nav-link">
-                                <i class="fa fa-diamond text-warning nav-icon"></i><span>{% trans "Pricing & VIP" %}</span>
                             </a>
                         </li>
                         {% if request.user.is_authenticated %}
