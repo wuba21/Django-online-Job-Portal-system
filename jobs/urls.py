@@ -42,6 +42,7 @@ lang_patterns = i18n_patterns(
     path("", include("accounts.urls")),
     path("", include("resume_cv.urls")),
     path("payments/", include("payments.urls")),
+    prefix_default_language=False,
 )
 
 api_patterns = [

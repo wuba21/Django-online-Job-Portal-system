@@ -139,23 +139,24 @@ class LogoutView(RedirectView):
 class LoginRedirectRouteView(RedirectView):
     """
     Intelligent post-login / OAuth redirect:
-    Directs verified employers to /en/employer/dashboard/, unverified employers to /en/employer/verify-license/,
-    and employees to /en/applicant/dashboard/
+    Directs verified employers to employer dashboard, unverified employers to verify-license,
+    platform admins to analytics dashboard, and applicants to applicant dashboard.
     """
     permanent = False
 
     def get_redirect_url(self, *args, **kwargs):
+        from django.urls import reverse
         user = self.request.user
         if not user.is_authenticated:
-            return "/en/login/"
+            return reverse("accounts:login")
         if user.is_superuser or user.is_staff:
-            return "/analytics-dashboard/"
+            return reverse("jobs:admin-analytics-dashboard")
         if getattr(user, "role", None) == "employer":
             company = getattr(user, "company", None)
             if not company or not company.is_license_verified:
-                return "/en/employer/verify-license/"
-            return "/en/employer/dashboard/"
-        return "/en/applicant/dashboard/"
+                return reverse("accounts:employer-verify-license")
+            return reverse("jobs:employer-dashboard")
+        return reverse("jobs:applicant-dashboard")
 
 
 class EmployerLicenseVerifyView(View):
@@ -332,10 +333,17 @@ class GoogleOneTapLoginView(View):
         auth_login(request, user, backend="django.contrib.auth.backends.ModelBackend")
 
         # Determine redirect route
-        if user.is_employer or user.is_superuser:
-            redirect_url = "/employer/dashboard"
+        from django.urls import reverse
+        if user.is_superuser or user.is_staff:
+            redirect_url = reverse("jobs:admin-analytics-dashboard")
+        elif getattr(user, "role", None) == "employer":
+            company = getattr(user, "company", None)
+            if not company or not company.is_license_verified:
+                redirect_url = reverse("accounts:employer-verify-license")
+            else:
+                redirect_url = reverse("jobs:employer-dashboard")
         else:
-            redirect_url = "/"
+            redirect_url = reverse("jobs:applicant-dashboard")
 
         return JsonResponse({
             "status": "success",
