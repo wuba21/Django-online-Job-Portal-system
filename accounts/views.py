@@ -4,6 +4,8 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, FormView, RedirectView
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 
 from accounts.forms import *
 from accounts.models import User
@@ -237,3 +239,109 @@ class EmployerLicenseVerifyView(View):
                 f"❌ ማረጋገጫው አልተሳካም (Confidence: {result['confidence']}%)፦ {company.license_rejection_reason}። እባክዎ ኦርጅናል ማህተም እና TIN ቁጥር በግልጽ የሚታይበትን ፈቃድ እንደገና ይስቀሉ።"
             )
             return render(request, self.template_name, {"company": company, "result": result})
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class GoogleOneTapLoginView(View):
+    """
+    Handles Google One Tap sign-in / signup.
+    Receives signed Google ID Token (credential), verifies it with Google,
+    and signs the user in instantly with their Google account.
+    """
+    def post(self, request, *args, **kwargs):
+        import json
+        import requests
+        from django.contrib.auth import login as auth_login
+        from accounts.models import User
+        from django.utils import timezone
+        from django.conf import settings
+        from django.http import JsonResponse
+
+        credential = request.POST.get("credential")
+        if not credential:
+            try:
+                body_data = json.loads(request.body.decode("utf-8"))
+                credential = body_data.get("credential")
+            except Exception:
+                pass
+
+        if not credential:
+            return JsonResponse({"status": "error", "message": "No credential token provided"}, status=400)
+
+        # Verify Google ID token via Google TokenInfo API
+        try:
+            verify_url = f"https://oauth2.googleapis.com/tokeninfo?id_token={credential}"
+            res = requests.get(verify_url, timeout=10)
+            if res.status_code != 200:
+                return JsonResponse({"status": "error", "message": "Invalid Google token"}, status=400)
+            data = res.json()
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+        # Validate Audience if configured
+        expected_client_id = getattr(settings, "SOCIAL_AUTH_GOOGLE_OAUTH2_KEY", "")
+        token_aud = data.get("aud")
+        if expected_client_id and token_aud and token_aud != expected_client_id:
+            return JsonResponse({"status": "error", "message": "Google Client ID mismatch"}, status=400)
+
+        email = data.get("email")
+        if not email:
+            return JsonResponse({"status": "error", "message": "No email returned by Google"}, status=400)
+
+        email = email.lower().strip()
+        first_name = data.get("given_name") or data.get("name", "")
+        last_name = data.get("family_name") or ""
+
+        admin_emails = ["wubantetilahun@gmail.com", "wubante19@gmail.com", "admin@admin.com"]
+        is_admin = email in admin_emails
+
+        user = User.objects.filter(email=email).first()
+        if not user:
+            user = User.objects.create_user(
+                email=email,
+                role="employer" if is_admin else "employee",
+                first_name=first_name,
+                last_name=last_name,
+                is_verified=True,
+                email_verified_at=timezone.now(),
+            )
+            if is_admin:
+                user.is_staff = True
+                user.is_superuser = True
+                user.save()
+        else:
+            updated = False
+            if not user.first_name and first_name:
+                user.first_name = first_name
+                updated = True
+            if not user.last_name and last_name:
+                user.last_name = last_name
+                updated = True
+            if not user.is_verified:
+                user.is_verified = True
+                user.email_verified_at = timezone.now()
+                updated = True
+            if is_admin and (not user.is_staff or not user.is_superuser):
+                user.is_staff = True
+                user.is_superuser = True
+                updated = True
+            if updated:
+                user.save()
+
+        # Log the user in with default backend
+        auth_login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+
+        # Determine redirect route
+        if user.is_employer or user.is_superuser:
+            redirect_url = "/employer/dashboard"
+        else:
+            redirect_url = "/"
+
+        return JsonResponse({
+            "status": "success",
+            "redirect_url": redirect_url,
+            "user": {
+                "email": user.email,
+                "name": user.get_full_name() or user.email
+            }
+        })
