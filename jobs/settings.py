@@ -379,7 +379,7 @@ if importlib.util.find_spec("social_core") is not None:
 if importlib.util.find_spec("graphql_jwt") is not None:
     AUTHENTICATION_BACKENDS.append("graphql_jwt.backends.JSONWebTokenBackend")
 
-SOCIAL_AUTH_REDIRECT_IS_HTTPS = env.bool("SOCIAL_AUTH_REDIRECT_IS_HTTPS", default=False)
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = env.bool("SOCIAL_AUTH_REDIRECT_IS_HTTPS", default=not DEBUG)
 
 SOCIAL_AUTH_GITHUB_KEY = env("SOCIAL_AUTH_GITHUB_KEY", default="")
 SOCIAL_AUTH_GITHUB_SECRET = env("SOCIAL_AUTH_GITHUB_SECRET", default="")
