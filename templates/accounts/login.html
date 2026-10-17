@@ -71,7 +71,18 @@
                     </div>
 
                     <div class="social-login-buttons">
-                        <a href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-block btn-outline-danger mb-2 font-weight-bold" style="white-space: normal; letter-spacing: normal; text-transform: none; word-break: break-word;">
+                        {% if GOOGLE_CLIENT_ID %}
+                            <div class="g_id_signin mb-2 text-center"
+                                 data-type="standard"
+                                 data-shape="rectangular"
+                                 data-theme="outline"
+                                 data-text="signin_with"
+                                 data-size="large"
+                                 data-logo_alignment="left"
+                                 data-width="340">
+                            </div>
+                        {% endif %}
+                        <a href="{% url 'social:begin' 'google-oauth2' %}" onclick="if(window.google && google.accounts && google.accounts.id){event.preventDefault();google.accounts.id.prompt();}" class="btn btn-block btn-outline-danger mb-2 font-weight-bold" style="white-space: normal; letter-spacing: normal; text-transform: none; word-break: break-word;">
                             <i class="fa fa-google mr-2"></i>{% trans "Login with Google" %}
                         </a>
                         <a href="{% url 'social:begin' 'github' %}" class="btn btn-block btn-outline-dark mb-2 font-weight-bold" style="white-space: normal; letter-spacing: normal; text-transform: none; word-break: break-word;">
