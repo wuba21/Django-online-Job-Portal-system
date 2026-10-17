@@ -95,45 +95,155 @@
             <!-- Users Moderation -->
             <div class="col-lg-5 mb-4">
                 <div class="card border-0 shadow-sm p-3">
-                    <h5 class="card-title text-dark mb-3"><i class="fa fa-users text-info"></i> User Accounts Management</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th>User</th>
-                                    <th>Role</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for u in recent_users %}
-                                <tr>
-                                    <td>
-                                        <span class="font-weight-bold d-block text-dark">{{ u.get_full_name|default:u.email }}</span>
-                                        <small class="text-muted">{{ u.email }}</small>
-                                    </td>
-                                    <td><span class="badge badge-secondary">{{ u.role|capfirst }}</span></td>
-                                    <td>
-                                        {% if u.is_active %}
-                                            <span class="badge badge-success">Active</span>
-                                        {% else %}
-                                            <span class="badge badge-danger">Inactive</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <a href="{% url 'jobs:admin-toggle-user' u.id %}" class="btn btn-xs {% if u.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
-                                            {% if u.is_active %}Deactivate{% else %}Activate{% endif %}
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title text-dark mb-0"><i class="fa fa-users text-info"></i> User Accounts Management</h5>
+                        <span id="selectedCountBadge" class="badge badge-primary" style="display: none; font-size: 0.78rem;">0 selected</span>
                     </div>
+
+                    <!-- Bulk Actions Form -->
+                    <form id="bulkUsersForm" method="post" action="{% url 'jobs:admin-bulk-toggle-users' %}">
+                        {% csrf_token %}
+                        <div class="mb-3 p-2 bg-light rounded d-flex align-items-center justify-content-between border">
+                            <small class="text-muted font-weight-bold"><i class="fa fa-tasks mr-1"></i>Bulk Action:</small>
+                            <div>
+                                <button type="submit" name="action" value="deactivate" class="btn btn-xs btn-danger mr-1" onclick="return confirm('Deactivate all selected user accounts?');">
+                                    <i class="fa fa-ban mr-1"></i>Deactivate Selected
+                                </button>
+                                <button type="submit" name="action" value="activate" class="btn btn-xs btn-success" onclick="return confirm('Activate all selected user accounts?');">
+                                    <i class="fa fa-check mr-1"></i>Activate Selected
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th style="width: 35px; text-align: center;">
+                                            <input type="checkbox" id="selectAllUsers" title="Select All">
+                                        </th>
+                                        <th>User</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for u in recent_users %}
+                                    <tr id="user-row-{{ u.id }}">
+                                        <td style="text-align: center;">
+                                            {% if u.id == request.user.id %}
+                                                <input type="checkbox" disabled title="Current admin cannot be deactivated">
+                                            {% else %}
+                                                <input type="checkbox" name="user_ids" value="{{ u.id }}" class="user-select-check">
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="font-weight-bold d-block text-dark">
+                                                {{ u.get_full_name|default:u.email }}
+                                                {% if u.id == request.user.id %}
+                                                    <span class="badge badge-info ml-1" style="font-size: 0.68rem;">You</span>
+                                                {% endif %}
+                                            </span>
+                                            <small class="text-muted">{{ u.email }}</small>
+                                        </td>
+                                        <td><span class="badge badge-secondary">{{ u.role|capfirst }}</span></td>
+                                        <td>
+                                            {% if u.is_active %}
+                                                <span class="badge badge-success status-badge">Active</span>
+                                            {% else %}
+                                                <span class="badge badge-danger status-badge">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if u.id == request.user.id %}
+                                                <button type="button" class="btn btn-xs btn-outline-secondary" disabled title="You cannot deactivate your current admin account">
+                                                    Active
+                                                </button>
+                                            {% else %}
+                                                <button type="button"
+                                                        class="btn btn-xs {% if u.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %} user-toggle-btn"
+                                                        data-url="{% url 'jobs:admin-toggle-user' u.id %}"
+                                                        data-user-id="{{ u.id }}">
+                                                    {% if u.is_active %}Deactivate{% else %}Activate{% endif %}
+                                                </button>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+$(document).ready(function() {
+    // Select All Checkboxes
+    $('#selectAllUsers').on('change', function() {
+        var isChecked = $(this).prop('checked');
+        $('.user-select-check').prop('checked', isChecked);
+        updateSelectionCount();
+    });
+
+    $(document).on('change', '.user-select-check', function() {
+        updateSelectionCount();
+    });
+
+    function updateSelectionCount() {
+        var count = $('.user-select-check:checked').length;
+        if (count > 0) {
+            $('#selectedCountBadge').text(count + ' selected').show();
+        } else {
+            $('#selectedCountBadge').hide();
+            $('#selectAllUsers').prop('checked', false);
+        }
+    }
+
+    // Instant AJAX Toggle for single button
+    $(document).on('click', '.user-toggle-btn', function(e) {
+        e.preventDefault();
+        var $btn = $(this);
+        var url = $btn.data('url');
+        var userId = $btn.data('user-id');
+        var $row = $('#user-row-' + userId);
+        var $badge = $row.find('.status-badge');
+
+        $btn.prop('disabled', true);
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            headers: {'X-Requested-With': 'XMLHttpRequest'},
+            success: function(res) {
+                $btn.prop('disabled', false);
+                if (res.status === 'success') {
+                    $btn.removeClass('btn-outline-danger btn-outline-success').addClass(res.btn_class);
+                    $btn.text(res.action_text);
+                    $badge.removeClass('badge-success badge-danger').addClass(res.badge_class);
+                    $badge.text(res.status_text);
+                    if (window.toastr) {
+                        toastr.success(res.message);
+                    }
+                }
+            },
+            error: function(xhr) {
+                $btn.prop('disabled', false);
+                var err = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Error updating user status.';
+                if (window.toastr) {
+                    toastr.error(err);
+                } else {
+                    alert(err);
+                }
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

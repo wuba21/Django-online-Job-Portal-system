@@ -83,11 +83,57 @@ def delete_job(request, job_id):
 
 @superuser_required
 def toggle_user_active(request, user_id):
+    from django.http import JsonResponse
     user = get_object_or_404(User, id=user_id)
+    
+    # Self-deactivation protection
+    if user.id == request.user.id and user.is_active:
+        msg = "You cannot deactivate your own active admin account."
+        if request.headers.get("x-requested-with") == "XMLHttpRequest" or request.GET.get("ajax"):
+            return JsonResponse({"status": "error", "message": msg}, status=400)
+        messages.warning(request, msg)
+        return redirect("jobs:admin-dashboard")
+
     user.is_active = not user.is_active
-    user.save()
+    user.save(update_fields=["is_active"])
     status_text = "activated" if user.is_active else "deactivated"
-    messages.success(request, f"User {user.email} {status_text}.")
+    msg = f"User {user.email} {status_text} successfully."
+    
+    if request.headers.get("x-requested-with") == "XMLHttpRequest" or request.GET.get("ajax"):
+        return JsonResponse({
+            "status": "success",
+            "message": msg,
+            "is_active": user.is_active,
+            "status_text": "Active" if user.is_active else "Inactive",
+            "action_text": "Deactivate" if user.is_active else "Activate",
+            "btn_class": "btn-outline-danger" if user.is_active else "btn-outline-success",
+            "badge_class": "badge-success" if user.is_active else "badge-danger",
+            "user_id": user.id
+        })
+        
+    messages.success(request, msg)
+    return redirect("jobs:admin-dashboard")
+
+
+@superuser_required
+def bulk_toggle_users(request):
+    if request.method == "POST":
+        action = request.POST.get("action")  # 'deactivate' or 'activate'
+        user_ids = request.POST.getlist("user_ids")
+        if not user_ids:
+            messages.warning(request, "No users selected. Please select at least one user.")
+            return redirect("jobs:admin-dashboard")
+
+        # Exclude self from bulk deactivation
+        if action == "deactivate" and str(request.user.id) in user_ids:
+            user_ids = [uid for uid in user_ids if uid != str(request.user.id)]
+            messages.info(request, "Your current admin account was excluded from deactivation.")
+
+        new_status = (action == "activate")
+        updated_count = User.objects.filter(id__in=user_ids).update(is_active=new_status)
+        
+        action_word = "activated" if new_status else "deactivated"
+        messages.success(request, f"Successfully {action_word} {updated_count} user account(s).")
     return redirect("jobs:admin-dashboard")
 
 
