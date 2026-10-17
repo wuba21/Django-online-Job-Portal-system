@@ -335,39 +335,46 @@ def _attempt_live_aarb_query(tin: str) -> dict | None:
 # ---------------------------------------------------------------------------
 # 4. Computer Vision Document Structure & Circular Stamp Analysis
 # ---------------------------------------------------------------------------
-ETHIOPIAN_GOVERNMENT_KEYWORDS = [
-    # English keywords
-    "federal democratic republic of ethiopia",
+# Keywords that indicate an authentic Ethiopian Trade License (MoTRI / Regional Trade Bureau)
+ETHIOPIAN_TRADE_LICENSE_KEYWORDS = [
+    # English
+    "trade license",
+    "business license",
+    "commercial business license",
+    "commercial registration and business license",
     "ministry of trade and regional integration",
     "ministry of trade",
-    "trade license",
-    "commercial business license",
-    "business license",
-    "taxpayer identification number",
-    "taxpayer",
-    "registration certificate",
-    "addis ababa",
-    "oromia",
-    "amhara",
-    "dire dawa",
-    # Amharic keywords
-    "የኢትዮጵያ ፌዴራላዊ ዲሞክራሲያዊ ሪፐብሊክ",
-    "የንግድና ቀጠናዊ ትስስር ሚኒስቴር",
+    "trade and industry bureau",
+    # Amharic
+    "የንግድ ሥራ ፈቃድ",
     "የንግድ ስራ ፈቃድ",
-    "የንግድ ምዝገባ",
-    "የግብር ከፋይ መለያ ቁጥር",
     "የንግድ ፈቃድ",
-    "ገቢዎች ሚኒስቴር",
+    "የንግድ ምዝገባና የንግድ ሥራ ፈቃድ",
+    "የንግድና ቀጠናዊ ትስስር ሚኒስቴር",
+    "የንግድና ኢንዱስትሪ ቢሮ",
+    "የንግድ ዘርፍ",
+    "የንግድ ስም",
+]
+
+# Keywords that indicate a Taxpayer Registration (TIN) Certificate or VAT certificate (NOT a Trade License!)
+DISALLOWED_CERTIFICATE_KEYWORDS = [
+    "taxpayer registration certificate",
+    "የግብር ከፋይ ምዝገባ ሰርተፊኬት",
+    "የግብር ከፋይነት ምዝገባ",
+    "taxpayer registration",
+    "sole and only registration as a taxpayer",
+    "የተጨማሪ እሴት ታክስ ምዝገባ ሰርተፊኬት",
+    "vat registration certificate",
+    "የታክስ ክሊራንስ",
+    "tax clearance",
 ]
 
 
 def analyze_document_structure(file_bytes: bytes, filename: str) -> dict:
     """
     Analyzes document dimensions, format, page structure, and extracted text.
-    Rejects:
-    - Files < 15 KB (blank/trivial)
-    - Files with no document characteristics
-    - Random non-document photos
+    Strictly differentiates between a genuine Trade License (የንግድ ሥራ ፈቃድ)
+    and a mere Taxpayer / TIN Registration Certificate (የግብር ከፋይ ምዝገባ ሰርተፊኬት).
     """
     filename_lower = filename.lower()
     extracted_text = ""
@@ -387,11 +394,12 @@ def analyze_document_structure(file_bytes: bytes, filename: str) -> dict:
         except Exception:
             pass
 
-    found_keywords = []
     lower_text = extracted_text.lower()
-    for kw in ETHIOPIAN_GOVERNMENT_KEYWORDS:
-        if kw in lower_text:
-            found_keywords.append(kw)
+    found_keywords = [kw for kw in ETHIOPIAN_TRADE_LICENSE_KEYWORDS if kw in lower_text]
+    found_disallowed = [kw for kw in DISALLOWED_CERTIFICATE_KEYWORDS if kw in lower_text]
+
+    # If it has TIN certificate keywords and NO trade license keywords, it's explicitly a TIN certificate!
+    is_tin_certificate_only = bool(found_disallowed and len(found_keywords) == 0)
 
     return {
         "is_pdf": is_pdf,
@@ -399,6 +407,8 @@ def analyze_document_structure(file_bytes: bytes, filename: str) -> dict:
         "extracted_text": extracted_text,
         "found_keywords": found_keywords,
         "keyword_count": len(found_keywords),
+        "found_disallowed": found_disallowed,
+        "is_tin_certificate_only": is_tin_certificate_only,
     }
 
 
@@ -543,39 +553,44 @@ def verify_license_with_gemini_vision(
     b64_data = base64.b64encode(file_bytes).decode("utf-8")
 
     prompt = (
-        "You are an expert Ethiopian forensic document examiner and regulatory auditor specializing in "
-        "verifying Ethiopian Business Licenses (የንግድ ሥራ ፈቃድ / Business License), Commercial Registration Certificates "
-        "(የንግድ ምዝገባ የምስክር ወረቀት), and Ministry of Revenues Tax Registration certificates issued in Ethiopia.\n\n"
-        f"An employer has uploaded this document to verify their business legitimacy with:\n"
-        f"- Submitted TIN (የግብር ከፋይ መለያ ቁጥር): \"{tin_input}\"\n"
-        f"- Submitted Company Name (የድርጅት ስም): \"{company_name}\"\n\n"
-        "Carefully inspect the visual layout, text, stamps, signatures, and emblems in the uploaded file and evaluate:\n"
-        "1. DOCUMENT CLASSIFICATION: Is this an authentic Ethiopian Trade License (የንግድ ሥራ ፈቃድ), Commercial Registration, "
-        "or Ministry of Revenues certificate? REJECT if it is a random photo, selfie, landscape, receipt, invoice, blank paper, "
-        "CV/resume, computer screenshot of random website, or unrelated file.\n"
-        "2. GOVERNMENT HEADERS: Does it contain official Federal Democratic Republic of Ethiopia (FDRE / የኢትዮጵያ ፌዴራላዊ ዲሞክራሲያዊ ሪፐብሊክ) "
-        "or Regional Trade Bureau headers (e.g. የንግድና ቀጠናዊ ትስስር ሚኒስቴር / Ministry of Trade and Regional Integration, Addis Ababa City Admin Trade Bureau, etc.) "
-        "and the national Coat of Arms / Emblem?\n"
-        "3. TIN EXTRACTION & MATCHING: Locate the 10-digit TIN (የግብር ከፋይ መለያ ቁጥር) printed on the document. "
-        "Does the printed TIN match the submitted TIN exactly? If the submitted TIN is clearly fake (like '11234567890', '1234567890') "
-        "or doesn't match the document, mark is_valid as false.\n"
-        "4. CIRCULAR INK STAMP & SIGNATURE: Does it contain an official circular or oval ink stamp (ክብ ማህተም), usually in purple/blue or red ink, "
-        "and official signatures/date?\n"
-        "5. COMPANY NAME: Does the organization or taxpayer name printed on the document correlate with the submitted company name?\n\n"
+        "You are an expert Ethiopian forensic document examiner and regulatory compliance auditor.\n\n"
+        "CRITICAL REGULATORY REQUIREMENT IN ETHIOPIA:\n"
+        "To operate as a verified employer and post job vacancies, an entity MUST possess a genuine 'Trade License / Commercial Business License' "
+        "(የንግድ ሥራ ፈቃድ / የንግድ ፈቃድ / የንግድ ምዝገባና የንግድ ሥራ ፈቃድ) issued by the Ministry of Trade and Regional Integration "
+        "(MoTRI / የንግድና ቀጠናዊ ትስስር ሚኒስቴር) or City/Regional Trade & Industry Bureau (የንግድና ኢንዱስትሪ ቢሮ).\n\n"
+        "STRICT DOCUMENT DISTINCTION THAT MUST BE ENFORCED:\n"
+        "1. TAXPAYER REGISTRATION CERTIFICATE / የግብር ከፋይ ምዝገባ ሰርተፊኬት (TIN Certificate) or VAT Certificate:\n"
+        "   - Issued by Ministry of Revenues (MoR) or Regional Revenues Authority (ገቢዎች ባለስልጣን).\n"
+        "   - THIS IS ONLY A TAX REGISTRATION NUMBER DOCUMENT. IT IS NOT A TRADE LICENSE!\n"
+        "   - Any individual or non-operating entity can obtain a TIN Certificate, but it DOES NOT legally authorize them to conduct trade, hire, or operate a business.\n"
+        "   - If the uploaded document is a Taxpayer Registration Certificate (የግብር ከፋይ ምዝገባ ሰርተፊኬት) or VAT Certificate, "
+        "YOU MUST SET is_valid = false and confidence >= 95, with rejection_reason_am = "
+        "'የቀረበው ሰነድ የግብር ከፋይ ምዝገባ ሰርተፊኬት (TIN Certificate) እንጂ ህጋዊ የንግድ ሥራ ፈቃድ (Trade License) ስላልሆነ ተቀባይነት የለውም። እባክዎ በንግድና ቀጠናዊ ትስስር ሚኒስቴር ወይም በንግድ ቢሮ የተሰጠውን ህጋዊ የንግድ ሥራ ፈቃድ ይስቀሉ።'\n\n"
+        "2. COMMERCIAL BUSINESS LICENSE / TRADE LICENSE (የንግድ ሥራ ፈቃድ):\n"
+        "   - Features official title 'የንግድ ሥራ ፈቃድ' or 'Commercial Business License / Trade License'.\n"
+        "   - Issued by the Ministry of Trade & Regional Integration or Regional Trade Bureau.\n"
+        "   - Specifies the Business Sector (የንግድ ዘርፍ), License Number (የፈቃድ ቁጥር), and Taxpayer TIN (የግብር ከፋይ መለያ ቁጥር).\n"
+        "   - ONLY THIS DOCUMENT IS VALID FOR EMPLOYER VERIFICATION!\n\n"
+        f"Applicant's Declared TIN: \"{tin_input}\"\n"
+        f"Applicant's Declared Company Name: \"{company_name}\"\n\n"
+        "MATCHING AND FORENSIC VERIFICATION CRITERIA:\n"
+        "- Locate the 10-digit TIN (የግብር ከፋይ መለያ ቁጥር) printed on the Trade License. Compare with declared TIN: \"{tin_input}\". "
+        "If they do not match, set is_valid = false.\n"
+        "- Detect official circular/oval ink stamp (ክብ ማህተም) and authorized signature.\n"
+        "- Verify document authenticity (reject random photos, selfies, CVs, receipts, ID cards, blank/fabricated sheets).\n\n"
         "Respond with ONLY a valid JSON object matching this schema:\n"
         "{\n"
-        '  "is_valid": true,\n'
-        '  "confidence": 95,\n'
-        '  "document_type": "Ethiopian Business License",\n'
-        '  "stamp_detected": true,\n'
-        '  "stamp_description": "Official circular violet/blue government stamp detected",\n'
-        '  "signature_detected": true,\n'
-        '  "detected_tin": "0012345678",\n'
-        '  "tin_matches": true,\n'
-        '  "detected_company_name": "Company Name",\n'
-        '  "company_matches": true,\n'
-        '  "rejection_reason_am": null,\n'
-        '  "verification_points_am": ["የኢትዮጵያ ንግድና ቀጠናዊ ትስስር ሚኒስቴር ይፋዊ ፈቃድ መሆኑ ተረጋግጧል", "ክብ ማህተም እና ፊርማ በሰነዱ ላይ ተገኝቷል", "በሰነዱ ላይ የተገኘው የTIN ቁጥር ከተሰጠው ጋር ይዛመዳል"]\n'
+        '  "is_valid": true or false,\n'
+        '  "confidence": integer between 0 and 100,\n'
+        '  "document_type": "Trade License / Taxpayer Registration Certificate / Other",\n'
+        '  "stamp_detected": true or false,\n'
+        '  "stamp_description": "description of seal found",\n'
+        '  "signature_detected": true or false,\n'
+        '  "detected_tin": "10-digit TIN read from document, or null",\n'
+        '  "tin_matches": true or false,\n'
+        '  "detected_company_name": "company or trade name read from doc, or null",\n'
+        '  "rejection_reason_am": "Clear explanation in Amharic if rejected, or null if approved",\n'
+        '  "verification_points_am": ["list of Amharic bullet points summarizing key findings"]\n'
         "}"
     )
 
@@ -781,7 +796,20 @@ def verify_ethiopian_business_license(uploaded_file, tin_input="", company_name=
             "source": "Computer Vision Document Forensics"
         }
 
-    # 4b. Seal & Keyword verification
+    # 4b. Explicitly reject Taxpayer (TIN) Registration Certificates or VAT certificates
+    if doc_info.get("is_tin_certificate_only"):
+        return {
+            "is_valid": False,
+            "confidence": 95,
+            "tin_number": clean_tin,
+            "taxpayer_profile": None,
+            "stamp_detected": seal_info.get("has_seal", False),
+            "reasons": [],
+            "error_message": "❌ ማረጋገጫው አልተሳካም፦ የቀረበው ሰነድ 'የግብር ከፋይ ምዝገባ ሰርተፊኬት (TIN Certificate)' እንጂ ህጋዊ 'የንግድ ሥራ ፈቃድ (Trade License)' አይደለም። ክፍት የሥራ ቦታዎችን ለመለጠፍ በንግድና ቀጠናዊ ትስስር ሚኒስቴር ወይም በንግድ ቢሮ የተሰጠውን ህጋዊ የንግድ ሥራ ፈቃድ ይስቀሉ።",
+            "source": "Document Regulatory Classifier"
+        }
+
+    # 4c. Seal & Keyword verification
     has_seal = seal_info.get("has_seal", False)
     has_keywords = doc_info["keyword_count"] >= 1
 
