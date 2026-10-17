@@ -155,6 +155,10 @@ DATABASES["default"]["CONN_MAX_AGE"] = 60
 # Set CHAPA_SECRET_KEY in .env or PythonAnywhere environment variables
 CHAPA_SECRET_KEY = env("CHAPA_SECRET_KEY", default="CHASECK_TEST-LpIMynCSj89EOX7AgFurw1o6d7M9sLca")
 
+# Google Gemini 1.5 Flash Vision AI Key for Ethiopian Business License Forensics
+# Set GEMINI_API_KEY in .env or PythonAnywhere environment variables
+GEMINI_API_KEY = env("GEMINI_API_KEY", default="")
+
 # Telegram Bot Vacancy Broadcast Config
 # Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in .env or PythonAnywhere environment variables
 TELEGRAM_BOT_TOKEN = env("TELEGRAM_BOT_TOKEN", default="8487911861:AAEtEz13n_5PcZKiXCP9e8ouHlS0kiSW-b4")
