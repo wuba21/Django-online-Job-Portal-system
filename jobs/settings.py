@@ -241,12 +241,13 @@ if DEBUG:
     CORS_ORIGIN_ALLOW_ALL = True
     ALLOWED_HOSTS = ["127.0.0.1", "localhost", "*.pythonanywhere.com"]
 else:
-    # Restrict to actual production domain in production
+    # Restrict to actual production domains in production
     CORS_ORIGIN_ALLOW_ALL = False
     CORS_ALLOWED_ORIGINS = [
         "https://wubante.pythonanywhere.com",
+        "https://wuba21.pythonanywhere.com",
     ]
-    ALLOWED_HOSTS = ["wubante.pythonanywhere.com"]
+    ALLOWED_HOSTS = ["wubante.pythonanywhere.com", "wuba21.pythonanywhere.com", "*.pythonanywhere.com"]
 
 CORS_ALLOW_METHODS = ("DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT")
 
