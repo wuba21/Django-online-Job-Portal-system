@@ -579,7 +579,7 @@ def verify_license_with_gemini_vision(
         "}"
     )
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    candidate_models = ["gemini-flash-latest", "gemini-2.5-flash", "gemini-1.5-flash"]
     payload = {
         "contents": [
             {
@@ -602,26 +602,38 @@ def verify_license_with_gemini_vision(
         }
     }
 
-    try:
-        response = requests.post(url, json=payload, timeout=14)
-        if response.status_code == 200:
-            res_data = response.json()
-            candidates = res_data.get("candidates", [])
-            if candidates:
-                raw_text = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
-                clean_json_str = raw_text.strip()
-                if clean_json_str.startswith("```json"):
-                    clean_json_str = clean_json_str[7:]
-                if clean_json_str.startswith("```"):
-                    clean_json_str = clean_json_str[3:]
-                if clean_json_str.endswith("```"):
-                    clean_json_str = clean_json_str[:-3]
-                parsed = json.loads(clean_json_str.strip())
-                return {"success": True, "data": parsed}
-        return {"success": False, "error": f"Gemini API returned HTTP {response.status_code}: {response.text[:200]}"}
-    except Exception as e:
-        logger.warning("Gemini Vision AI call failed: %s", e)
-        return {"success": False, "error": str(e)}
+    last_error = ""
+    for model_name in candidate_models:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+        try:
+            response = requests.post(url, json=payload, timeout=25)
+            if response.status_code == 200:
+                res_data = response.json()
+                candidates = res_data.get("candidates", [])
+                if candidates:
+                    raw_text = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+                    clean_json_str = raw_text.strip()
+                    if clean_json_str.startswith("```json"):
+                        clean_json_str = clean_json_str[7:]
+                    if clean_json_str.startswith("```"):
+                        clean_json_str = clean_json_str[3:]
+                    if clean_json_str.endswith("```"):
+                        clean_json_str = clean_json_str[:-3]
+                    parsed = json.loads(clean_json_str.strip())
+                    return {"success": True, "data": parsed, "model": model_name}
+            elif response.status_code in (404, 429, 500, 503):
+                # Try next model candidate if model is busy, unavailable, rate-limited or not found
+                last_error = f"Model {model_name} returned HTTP {response.status_code}"
+                continue
+            else:
+                last_error = f"Gemini API returned HTTP {response.status_code}: {response.text[:200]}"
+                break
+        except Exception as e:
+            last_error = str(e)
+            logger.warning("Gemini Vision AI call failed for %s: %s", model_name, e)
+            continue
+
+    return {"success": False, "error": last_error}
 
 
 # ---------------------------------------------------------------------------
