@@ -176,11 +176,13 @@ class EmployeeProfileUpdateForm(forms.ModelForm):
 class EmployerProfileUpdateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(EmployerProfileUpdateForm, self).__init__(*args, **kwargs)
-        self.fields["first_name"].widget.attrs["placeholder"] = "Company name"
-        self.fields["last_name"].widget.attrs["placeholder"] = "Company address"
-        self.fields["first_name"].label = "Company name"
-        self.fields["last_name"].label = "Company address"
+        self.fields["first_name"].widget.attrs.update({"class": "form-control", "placeholder": "Enter First Name"})
+        self.fields["last_name"].widget.attrs.update({"class": "form-control", "placeholder": "Enter Last Name"})
+        if "phone_number" in self.fields:
+            self.fields["phone_number"].widget.attrs.update({"class": "form-control", "placeholder": "+251 9..."})
+        self.fields["first_name"].label = "Contact Person First Name"
+        self.fields["last_name"].label = "Contact Person Last Name"
 
     class Meta:
         model = User
-        fields = ["first_name", "last_name"]
+        fields = ["first_name", "last_name", "phone_number"]

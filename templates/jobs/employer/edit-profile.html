@@ -1,50 +1,126 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 {% block title %}
-    Edit Profile
+    {% trans "Edit Company Profile" %}
 {% endblock %}
 
 {% block content %}
 <section class="py-5 bg-light-gray">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-12 col-md-8 col-lg-6">
-                <div class="card border-0 shadow-sm rounded-lg p-4 bg-white">
-                    <h3 class="heading text-center mb-4">Edit Company Profile</h3>
-                    {% if form.errors %}
-                        {% for field in form %}
-                            {% for error in field.errors %}
-                                <div class="alert alert-danger alert-dismissible fade show">
-                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">&times;</button>
-                                    <strong>{{ error|escape }}</strong>
-                                </div>
-                            {% endfor %}
-                        {% endfor %}
-                        {% for error in form.non_field_errors %}
-                            <div class="alert alert-danger alert-dismissible fade show">
-                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">&times;</button>
-                                <strong>{{ error|escape }}</strong>
-                            </div>
-                        {% endfor %}
+            <div class="col-12 col-md-10 col-lg-8">
+                <div class="card border-0 shadow-sm rounded-lg p-4 p-md-5 bg-white">
+                    <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
+                        <div>
+                            <h3 class="heading font-weight-bold mb-1 text-dark"><i class="fa fa-building text-primary mr-2"></i>{% trans "Edit Company Profile" %}</h3>
+                            <p class="text-muted mb-0 small">{% trans "Update your organization and representative contact details." %}</p>
+                        </div>
+                        <a href="{% url 'jobs:employer-dashboard' %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="fa fa-arrow-left mr-1"></i> {% trans "Dashboard" %}
+                        </a>
+                    </div>
+
+                    {% if form.errors or company_form.errors %}
+                        <div class="alert alert-danger alert-dismissible fade show">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">&times;</button>
+                            <strong><i class="fa fa-exclamation-triangle mr-2"></i>{% trans "Please correct the following errors:" %}</strong>
+                            <ul class="mb-0 mt-2 pl-3">
+                                {% for field in form %}
+                                    {% for error in field.errors %}
+                                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                                {% for field in company_form %}
+                                    {% for error in field.errors %}
+                                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                                {% for error in form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                                {% for error in company_form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     {% endif %}
                     
-                    <form action="" method="post">
+                    <form action="" method="post" enctype="multipart/form-data">
                         {% csrf_token %}
 
-                        {% for field in form %}
-                            <div class="form-group mb-3">
-                                <label for="id_{{ field.name }}" class="font-weight-bold text-secondary">{{ field.label }}</label>
-                                <input type="{{ field.field.widget.input_type }}"
-                                       class="form-control"
-                                       name="{{ field.name }}"
-                                       id="id_{{ field.name }}"
-                                       value="{{ field.value|default:'' }}"
-                                       placeholder="{{ field.field.widget.attrs.placeholder }}">
+                        <!-- Section 1: Company Profile -->
+                        <h5 class="text-primary font-weight-bold mb-3"><i class="fa fa-briefcase mr-2"></i>{% trans "Company Details" %}</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 form-group mb-3">
+                                <label for="id_company_name" class="font-weight-bold text-secondary">{% trans "Company Name" %} *</label>
+                                <input type="text" name="name" id="id_company_name" class="form-control"
+                                       value="{{ company_form.name.value|default:'' }}" placeholder="e.g. Acme Corporation" required>
                             </div>
-                        {% endfor %}
+                            <div class="col-md-6 form-group mb-3">
+                                <label for="id_location" class="font-weight-bold text-secondary">{% trans "Location / City" %}</label>
+                                <input type="text" name="location" id="id_location" class="form-control"
+                                       value="{{ company_form.location.value|default:'' }}" placeholder="e.g. Addis Ababa, Bole">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 form-group mb-3">
+                                <label for="id_website" class="font-weight-bold text-secondary">{% trans "Website URL" %}</label>
+                                <input type="text" name="website" id="id_website" class="form-control"
+                                       value="{{ company_form.website.value|default:'' }}" placeholder="https://example.com">
+                            </div>
+                            <div class="col-md-6 form-group mb-3">
+                                <label for="id_established_date" class="font-weight-bold text-secondary">{% trans "Established Date" %}</label>
+                                <input type="date" name="established_date" id="id_established_date" class="form-control"
+                                       value="{{ company_form.established_date.value|date:'Y-m-d'|default:company_form.established_date.value|default:'' }}">
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="id_logo" class="font-weight-bold text-secondary">{% trans "Company Logo" %}</label>
+                            {% if request.user.company.logo %}
+                                <div class="mb-2 d-flex align-items-center">
+                                    <img src="{{ request.user.company.logo.url }}" alt="Logo" class="rounded border p-1" style="max-height: 50px; max-width: 120px;">
+                                    <small class="text-muted ml-2">Current logo</small>
+                                </div>
+                            {% endif %}
+                            <input type="file" name="logo" id="id_logo" class="form-control-file border rounded p-2" accept="image/*">
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label for="id_description" class="font-weight-bold text-secondary">{% trans "About the Company" %}</label>
+                            <textarea name="description" id="id_description" rows="4" class="form-control"
+                                      placeholder="{% trans "Write a brief description of your company, mission, and services..." %}">{{ company_form.description.value|default:'' }}</textarea>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Section 2: Contact Person -->
+                        <h5 class="text-primary font-weight-bold mb-3"><i class="fa fa-user mr-2"></i>{% trans "Representative Contact Details" %}</h5>
+
+                        <div class="row">
+                            <div class="col-md-6 form-group mb-3">
+                                <label for="id_first_name" class="font-weight-bold text-secondary">{% trans "First Name" %}</label>
+                                <input type="text" name="first_name" id="id_first_name" class="form-control"
+                                       value="{{ form.first_name.value|default:'' }}" placeholder="First name">
+                            </div>
+                            <div class="col-md-6 form-group mb-3">
+                                <label for="id_last_name" class="font-weight-bold text-secondary">{% trans "Last Name" %}</label>
+                                <input type="text" name="last_name" id="id_last_name" class="form-control"
+                                       value="{{ form.last_name.value|default:'' }}" placeholder="Last name">
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label for="id_phone_number" class="font-weight-bold text-secondary">{% trans "Phone Number" %}</label>
+                            <input type="text" name="phone_number" id="id_phone_number" class="form-control"
+                                   value="{{ form.phone_number.value|default:'' }}" placeholder="+251 9...">
+                        </div>
+
                         <div class="mt-4">
-                            <button type="submit" class="btn btn-primary btn-block py-2 font-weight-bold">
-                                <i class="fa fa-save mr-2"></i> Update Profile
+                            <button type="submit" class="btn btn-primary btn-block py-2 font-weight-bold shadow-sm">
+                                <i class="fa fa-save mr-2"></i> {% trans "Save Company Profile" %}
                             </button>
                         </div>
                     </form>

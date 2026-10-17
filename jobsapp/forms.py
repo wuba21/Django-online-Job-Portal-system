@@ -160,10 +160,28 @@ class ApplicantProfileForm(forms.ModelForm):
             "bio": forms.Textarea(attrs={"rows": 4, "class": "form-control", "placeholder": "Brief summary of your professional background..."}),
             "location": forms.Select(attrs={"class": "form-control"}),
             "cv_file": forms.FileInput(attrs={"class": "form-control-file"}),
-            "github_link": forms.URLInput(attrs={"class": "form-control", "placeholder": "https://github.com/username"}),
-            "linkedin_link": forms.URLInput(attrs={"class": "form-control", "placeholder": "https://linkedin.com/in/username"}),
-            "website": forms.URLInput(attrs={"class": "form-control", "placeholder": "https://yourwebsite.com"}),
+            "github_link": forms.TextInput(attrs={"class": "form-control", "placeholder": "https://github.com/username"}),
+            "linkedin_link": forms.TextInput(attrs={"class": "form-control", "placeholder": "https://linkedin.com/in/username"}),
+            "website": forms.TextInput(attrs={"class": "form-control", "placeholder": "https://yourwebsite.com"}),
         }
+
+    def clean_github_link(self):
+        val = self.cleaned_data.get("github_link")
+        if val and not val.startswith(("http://", "https://")):
+            val = "https://" + val
+        return val
+
+    def clean_linkedin_link(self):
+        val = self.cleaned_data.get("linkedin_link")
+        if val and not val.startswith(("http://", "https://")):
+            val = "https://" + val
+        return val
+
+    def clean_website(self):
+        val = self.cleaned_data.get("website")
+        if val and not val.startswith(("http://", "https://")):
+            val = "https://" + val
+        return val
 
 
 class EducationForm(forms.ModelForm):
@@ -210,10 +228,16 @@ class CompanyForm(forms.ModelForm):
         model = Company
         fields = ("name", "logo", "description", "website", "location", "established_date")
         widgets = {
-            "name": forms.TextInput(attrs={"class": "form-control"}),
+            "name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Company name"}),
             "logo": forms.FileInput(attrs={"class": "form-control-file"}),
-            "description": forms.Textarea(attrs={"rows": 4, "class": "form-control"}),
-            "website": forms.URLInput(attrs={"class": "form-control"}),
-            "location": forms.TextInput(attrs={"class": "form-control"}),
+            "description": forms.Textarea(attrs={"rows": 4, "class": "form-control", "placeholder": "About your company..."}),
+            "website": forms.TextInput(attrs={"class": "form-control", "placeholder": "https://example.com"}),
+            "location": forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. Addis Ababa"}),
             "established_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
         }
+
+    def clean_website(self):
+        val = self.cleaned_data.get("website")
+        if val and not val.startswith(("http://", "https://")):
+            val = "https://" + val
+        return val

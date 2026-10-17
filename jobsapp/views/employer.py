@@ -273,7 +273,9 @@ class EmployerProfileEditView(UpdateView):
             user_form.save()
             company_form.save()
             messages.success(request, "Company and profile updated successfully.")
-            return redirect("jobs:employer-dashboard")
+            return redirect("accounts:employer-profile-update")
+        else:
+            messages.error(request, "Please correct the highlighted errors below.")
 
         context = self.get_context_data()
         context["form"] = user_form
