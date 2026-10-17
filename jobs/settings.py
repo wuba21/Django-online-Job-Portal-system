@@ -34,9 +34,11 @@ CSRF_COOKIE_HTTPONLY = False
 SECURE_REFERRER_POLICY = "same-origin"
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 
+# Reverse proxy SSL header (e.g., PythonAnywhere, Nginx)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 # HTTPS-only settings (automatically enabled in production when DEBUG=False)
 if not DEBUG:
-    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_SSL_REDIRECT = True
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
@@ -380,7 +382,10 @@ if importlib.util.find_spec("social_core") is not None:
 if importlib.util.find_spec("graphql_jwt") is not None:
     AUTHENTICATION_BACKENDS.append("graphql_jwt.backends.JSONWebTokenBackend")
 
-SOCIAL_AUTH_REDIRECT_IS_HTTPS = env.bool("SOCIAL_AUTH_REDIRECT_IS_HTTPS", default=not DEBUG)
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = env.bool(
+    "SOCIAL_AUTH_REDIRECT_IS_HTTPS",
+    default=(not DEBUG or os.environ.get("PYTHONANYWHERE_DOMAIN") is not None)
+)
 
 SOCIAL_AUTH_GITHUB_KEY = env("SOCIAL_AUTH_GITHUB_KEY", default="")
 SOCIAL_AUTH_GITHUB_SECRET = env("SOCIAL_AUTH_GITHUB_SECRET", default="")
