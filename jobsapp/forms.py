@@ -109,13 +109,7 @@ class CreateJobForm(forms.ModelForm):
         return tags
 
     def clean_company_description(self):
-        desc = self.cleaned_data.get("company_description")
-        if desc:
-            words = desc.split()
-            # 800 tokens is approximately 600-800 words / ~4000 characters
-            if len(words) > 800:
-                raise ValidationError("Company description cannot exceed 800 words/tokens.")
-        return desc
+        return self.cleaned_data.get("company_description")
 
     def save(self, commit=True):
         job = super(CreateJobForm, self).save(commit=False)
