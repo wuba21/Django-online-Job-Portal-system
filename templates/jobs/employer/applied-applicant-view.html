@@ -1,146 +1,679 @@
 {% extends 'base.html' %}
 {% load static i18n %}
-{% block title %}Applicant Review - {{ applicant.user.get_full_name }}{% endblock %}
+{% block title %}{% trans "Applicant Review" %} - {{ applicant.user.get_full_name|default:applicant.user.email }}{% endblock %}
+
+{% block styles %}
+<style>
+    .candidate-hero-card {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border-radius: 16px;
+        color: #fff;
+        padding: 2.2rem;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+        margin-bottom: 2rem;
+    }
+    .applicant-avatar-wrap {
+        position: relative;
+        display: inline-block;
+    }
+    .applicant-avatar-img {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    .applicant-avatar-circle {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.4rem;
+        font-weight: 700;
+        border: 4px solid rgba(255, 255, 255, 0.25);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    .verified-badge-icon {
+        position: absolute;
+        bottom: 2px;
+        right: 4px;
+        background: #10b981;
+        color: #fff;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        border: 2px solid #0f172a;
+    }
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        padding: 0.45rem 1rem;
+        border-radius: 50px;
+    }
+    .status-pill-1 { background: #fef3c7; color: #92400e; } /* Pending */
+    .status-pill-2 { background: #e0f2fe; color: #0369a1; } /* Shortlisted */
+    .status-pill-3 { background: #ede9fe; color: #6d28d9; } /* Interview */
+    .status-pill-4 { background: #d1fae5; color: #065f46; } /* Accepted */
+    .status-pill-5 { background: #fee2e2; color: #991b1b; } /* Rejected */
+
+    .gender-badge-male {
+        background-color: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+        font-weight: 600;
+        padding: 0.35rem 0.8rem;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+    }
+    .gender-badge-female {
+        background-color: #fdf2f8;
+        color: #be185d;
+        border: 1px solid #fbcfe8;
+        font-weight: 600;
+        padding: 0.35rem 0.8rem;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+    }
+    .gender-badge-other {
+        background-color: #f3f4f6;
+        color: #4b5563;
+        border: 1px solid #e5e7eb;
+        font-weight: 600;
+        padding: 0.35rem 0.8rem;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .ats-card {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+        margin-bottom: 1.5rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .ats-card-header {
+        background: transparent;
+        border-bottom: 1px solid #f1f5f9;
+        padding: 1.1rem 1.4rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .ats-card-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .ats-card-body {
+        padding: 1.4rem;
+    }
+
+    .info-list-item {
+        display: flex;
+        align-items: flex-start;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f8fafc;
+    }
+    .info-list-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    .info-label {
+        width: 110px;
+        font-weight: 600;
+        color: #64748b;
+        font-size: 0.88rem;
+        flex-shrink: 0;
+    }
+    .info-value {
+        color: #1e293b;
+        font-size: 0.92rem;
+        word-break: break-word;
+        flex-grow: 1;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-left: 28px;
+        padding-bottom: 1.5rem;
+        border-left: 2px solid #e2e8f0;
+    }
+    .timeline-item:last-child {
+        padding-bottom: 0;
+        border-left: 2px solid transparent;
+    }
+    .timeline-dot {
+        position: absolute;
+        left: -7px;
+        top: 4px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #3b82f6;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 2px #bfdbfe;
+    }
+
+    .link-pill-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #1e293b;
+        padding: 0.55rem 0.95rem;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        text-decoration: none !important;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    .link-pill-btn:hover {
+        background: #eff6ff;
+        border-color: #93c5fd;
+        color: #1d4ed8;
+        transform: translateY(-1px);
+    }
+
+    .experience-desc a, .applicant-bio a {
+        color: #2563eb !important;
+        text-decoration: underline !important;
+        font-weight: 600;
+        word-break: break-all;
+    }
+    .experience-desc a:hover, .applicant-bio a:hover {
+        color: #1d4ed8 !important;
+    }
+
+    @media print {
+        .navbar, .footer, .no-print, .btn, .breadcrumb-section {
+            display: none !important;
+        }
+        .candidate-hero-card {
+            background: #fff !important;
+            color: #000 !important;
+            box-shadow: none !important;
+            border: 1px solid #ddd;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<section class="bg-light-gray py-4">
+<!-- Breadcrumb & Navigation -->
+<section class="breadcrumb-section bg-light py-3 border-bottom no-print">
     <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-                <h2>{{ applicant.user.get_full_name|default:applicant.user.email }}</h2>
-                <p class="text-muted mb-0">Applied for: <strong class="text-dark">{{ applicant.job.title }}</strong> on {{ applicant.created_at|date:"M d, Y" }}</p>
-            </div>
-            <div>
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#statusModal">
-                    <i class="fa fa-sliders"></i> Change Application Stage
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 bg-transparent p-0 small">
+                    <li class="breadcrumb-item"><a href="{% url 'jobs:employer-dashboard' %}">{% trans "Employer Dashboard" %}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'jobs:employer-dashboard-applicants' applicant.job.id %}">{% trans "Applicants for" %} {{ applicant.job.title|truncatechars:25 }}</a></li>
+                    <li class="breadcrumb-item active text-dark font-weight-bold" aria-current="page">{{ applicant.user.get_full_name|default:applicant.user.email }}</li>
+                </ol>
+            </nav>
+            <div class="d-flex gap-2 mt-2 mt-sm-0">
+                <a href="{% url 'jobs:employer-dashboard-applicants' applicant.job.id %}" class="btn btn-outline-secondary btn-sm mr-2">
+                    <i class="fa fa-arrow-left mr-1"></i> {% trans "Back to Applicants" %}
+                </a>
+                <button type="button" onclick="window.print()" class="btn btn-outline-dark btn-sm">
+                    <i class="fa fa-print mr-1"></i> {% trans "Print Profile" %}
                 </button>
             </div>
         </div>
     </div>
 </section>
 
-<section class="py-4">
+<section class="py-4 bg-light">
     <div class="container">
-        <div class="row">
-            <!-- Candidate Profile Info -->
-            <div class="col-lg-5 mb-4">
-                <div class="card border-0 shadow-sm p-4 mb-4">
-                    <h5 class="card-title text-primary border-bottom pb-2">Candidate Overview</h5>
-                    <p class="mb-2"><strong>Email:</strong> {{ applicant.user.email }}</p>
-                    <p class="mb-2"><strong>Gender:</strong> {{ applicant.user.gender|capfirst|default:"Not specified" }}</p>
-                    <p class="mb-2">
-                        <strong>Current Status:</strong>
-                        {% if applicant.status == 1 %}<span class="badge badge-warning">Pending</span>
-                        {% elif applicant.status == 2 %}<span class="badge badge-info">Shortlisted</span>
-                        {% elif applicant.status == 3 %}<span class="badge badge-primary">Interview</span>
-                        {% elif applicant.status == 4 %}<span class="badge badge-success">Accepted</span>
-                        {% elif applicant.status == 5 %}<span class="badge badge-danger">Rejected</span>
-                        {% endif %}
-                    </p>
+        <!-- Hero Card -->
+        <div class="candidate-hero-card">
+            <div class="row align-items-center">
+                <div class="col-lg-8 mb-3 mb-lg-0">
+                    <div class="d-flex align-items-center flex-column flex-sm-row text-center text-sm-left">
+                        <div class="applicant-avatar-wrap mr-sm-4 mb-3 mb-sm-0">
+                            {% if applicant.user.avatar %}
+                                <img src="{{ applicant.user.avatar.url }}" alt="{{ applicant.user.get_full_name }}" class="applicant-avatar-img">
+                            {% else %}
+                                <div class="applicant-avatar-circle">
+                                    {{ applicant.user.first_name|first|default:applicant.user.email|first|upper }}
+                                </div>
+                            {% endif %}
+                            {% if applicant.user.is_verified %}
+                                <span class="verified-badge-icon" title="{% trans 'Verified Candidate' %}"><i class="fa fa-check"></i></span>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-sm-start mb-1">
+                                <h2 class="h3 font-weight-bold text-white mb-0 mr-3">
+                                    {{ applicant.user.get_full_name|default:applicant.user.email }}
+                                </h2>
+                                <!-- Current Status Pill -->
+                                {% if applicant.status == 1 %}
+                                    <span class="status-pill status-pill-1"><i class="fa fa-clock-o"></i> {% trans "Pending Review" %}</span>
+                                {% elif applicant.status == 2 %}
+                                    <span class="status-pill status-pill-2"><i class="fa fa-star"></i> {% trans "Shortlisted" %}</span>
+                                {% elif applicant.status == 3 %}
+                                    <span class="status-pill status-pill-3"><i class="fa fa-comments-o"></i> {% trans "Interview Stage" %}</span>
+                                {% elif applicant.status == 4 %}
+                                    <span class="status-pill status-pill-4"><i class="fa fa-check-circle"></i> {% trans "Accepted / Hired" %}</span>
+                                {% elif applicant.status == 5 %}
+                                    <span class="status-pill status-pill-5"><i class="fa fa-times-circle"></i> {% trans "Rejected" %}</span>
+                                {% endif %}
+                            </div>
 
-                    {% if applicant.comment %}
-                        <div class="bg-light p-3 rounded mt-2">
-                            <small class="text-muted d-block">Employer Comment:</small>
-                            <p class="mb-0 small text-dark">{{ applicant.comment }}</p>
-                        </div>
-                    {% endif %}
+                            <p class="text-white-50 mb-2 font-weight-normal">
+                                {{ applicant.user.applicant_profile.title|default:"Job Candidate" }}
+                                {% if applicant.user.applicant_profile.location %}
+                                    &bull; <i class="fa fa-map-marker text-warning"></i> {{ applicant.user.applicant_profile.location }}
+                                {% endif %}
+                            </p>
 
-                    {% if applicant.cv or applicant.user.applicant_profile.cv_file %}
-                        <div class="mt-3">
-                            <a href="{% if applicant.cv %}{{ applicant.cv.url }}{% else %}{{ applicant.user.applicant_profile.cv_file.url }}{% endif %}" target="_blank" class="btn btn-outline-success btn-block btn-sm">
-                                <i class="fa fa-download"></i> Download / View Attached CV
-                            </a>
+                            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-sm-start text-white-50 small">
+                                <span class="mr-3 mb-1">
+                                    <i class="fa fa-briefcase text-info mr-1"></i>
+                                    {% trans "Applied for" %}: <strong class="text-white">{{ applicant.job.title }}</strong>
+                                </span>
+                                <span class="mb-1">
+                                    <i class="fa fa-calendar-check-o text-success mr-1"></i>
+                                    {{ applicant.created_at|date:"M d, Y - h:i A" }}
+                                </span>
+                            </div>
                         </div>
-                    {% else %}
-                        <div class="mt-3">
-                            <span class="text-muted small">No CV document uploaded.</span>
-                        </div>
-                    {% endif %}
+                    </div>
                 </div>
 
-                <!-- Skills -->
-                <div class="card border-0 shadow-sm p-4 mb-4">
-                    <h5 class="card-title text-dark border-bottom pb-2">Candidate Skills</h5>
-                    {% if applicant.user.skills.all %}
-                        <div class="d-flex flex-wrap">
-                            {% for s in applicant.user.skills.all %}
-                                <span class="badge badge-light border p-2 mr-1 mb-1">{{ s.name }} ({{ s.get_level_display }})</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <p class="text-muted small">No structured skills listed.</p>
+                <div class="col-lg-4 text-center text-lg-right">
+                    <button type="button" class="btn btn-primary btn-lg shadow-sm font-weight-bold px-4 mb-2 mb-sm-0" data-toggle="modal" data-target="#statusModal">
+                        <i class="fa fa-sliders mr-1"></i> {% trans "Change Stage" %}
+                    </button>
+                    {% if applicant.cv or applicant.user.applicant_profile.cv_file %}
+                        <a href="{% if applicant.cv %}{{ applicant.cv.url }}{% else %}{{ applicant.user.applicant_profile.cv_file.url }}{% endif %}" target="_blank" class="btn btn-outline-light btn-lg ml-sm-2 mb-2 mb-sm-0">
+                            <i class="fa fa-file-text-o mr-1"></i> {% trans "View CV" %}
+                        </a>
                     {% endif %}
                 </div>
             </div>
+        </div>
 
-            <!-- Candidate Education & Experience -->
-            <div class="col-lg-7">
-                <div class="card border-0 shadow-sm p-4 mb-4">
-                    <h5 class="card-title text-primary border-bottom pb-2">Work Experience</h5>
-                    {% if applicant.user.experiences.all %}
-                        {% for exp in applicant.user.experiences.all %}
-                            <div class="mb-3 pb-2 border-bottom">
-                                <h6 class="mb-0 font-weight-bold">{{ exp.title }} at {{ exp.company }}</h6>
-                                <small class="text-muted">{{ exp.start_date|date:"M Y" }} - {% if exp.is_current %}Present{% else %}{{ exp.end_date|date:"M Y" }}{% endif %}</small>
-                                <p class="small text-secondary mb-0 mt-1">{{ exp.description }}</p>
+        <div class="row">
+            <!-- Left Column: Candidate Overview & Contact -->
+            <div class="col-lg-4 mb-4">
+                <!-- Contact & Personal Details Card -->
+                <div class="ats-card">
+                    <div class="ats-card-header">
+                        <h5 class="ats-card-title"><i class="fa fa-id-card-o text-primary"></i> {% trans "Candidate Details" %}</h5>
+                    </div>
+                    <div class="ats-card-body p-0">
+                        <div class="px-4 py-2">
+                            <!-- Email (Direct Clickable Link) -->
+                            <div class="info-list-item">
+                                <span class="info-label"><i class="fa fa-envelope text-primary mr-1"></i> {% trans "Email" %}:</span>
+                                <span class="info-value">
+                                    <a href="mailto:{{ applicant.user.email }}?subject=Job Application: {{ applicant.job.title|urlencode }} - Online Sra" class="text-primary font-weight-bold" title="{% trans 'Click to send email' %}">
+                                        {{ applicant.user.email }}
+                                    </a>
+                                </span>
                             </div>
-                        {% endfor %}
-                    {% else %}
-                        <p class="text-muted small">No work experience listed.</p>
-                    {% endif %}
+
+                            <!-- Phone (Direct Clickable Link) -->
+                            <div class="info-list-item">
+                                <span class="info-label"><i class="fa fa-phone text-success mr-1"></i> {% trans "Phone" %}:</span>
+                                <span class="info-value">
+                                    {% if applicant.user.phone_number %}
+                                        <a href="tel:{{ applicant.user.phone_number }}" class="text-dark font-weight-bold">
+                                            {{ applicant.user.phone_number }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted font-italic">{% trans "Not provided" %}</span>
+                                    {% endif %}
+                                </span>
+                            </div>
+
+                            <!-- Gender (Styled Badge) -->
+                            <div class="info-list-item">
+                                <span class="info-label"><i class="fa fa-user-circle text-info mr-1"></i> {% trans "Gender" %}:</span>
+                                <span class="info-value">
+                                    {% if applicant.user.gender == 'male' %}
+                                        <span class="gender-badge-male"><i class="fa fa-mars mr-1"></i> {% trans "Male" %}</span>
+                                    {% elif applicant.user.gender == 'female' %}
+                                        <span class="gender-badge-female"><i class="fa fa-venus mr-1"></i> {% trans "Female" %}</span>
+                                    {% else %}
+                                        <span class="gender-badge-other"><i class="fa fa-genderless mr-1"></i> {% trans "Not specified" %}</span>
+                                    {% endif %}
+                                </span>
+                            </div>
+
+                            <!-- Location -->
+                            <div class="info-list-item">
+                                <span class="info-label"><i class="fa fa-map-marker text-danger mr-1"></i> {% trans "Location" %}:</span>
+                                <span class="info-value">
+                                    {{ applicant.user.applicant_profile.location|default:"Addis Ababa, Ethiopia" }}
+                                </span>
+                            </div>
+
+                            <!-- Profile Strength -->
+                            {% if applicant.user.applicant_profile.completion_percentage %}
+                            <div class="info-list-item border-bottom-0 pb-1">
+                                <span class="info-label"><i class="fa fa-tachometer text-secondary mr-1"></i> {% trans "Profile" %}:</span>
+                                <div class="info-value">
+                                    <div class="progress" style="height: 8px; margin-top: 6px;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ applicant.user.applicant_profile.completion_percentage }}%;" aria-valuenow="{{ applicant.user.applicant_profile.completion_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                    <small class="text-muted">{{ applicant.user.applicant_profile.completion_percentage }}% complete</small>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Quick Contact Button Action -->
+                        <div class="p-3 bg-light border-top text-center">
+                            <a href="mailto:{{ applicant.user.email }}?subject=Job Application: {{ applicant.job.title|urlencode }} - Online Sra" class="btn btn-sm btn-outline-primary btn-block mb-2">
+                                <i class="fa fa-envelope mr-1"></i> {% trans "Send Direct Email" %}
+                            </a>
+                            {% if applicant.user.phone_number %}
+                                <a href="tel:{{ applicant.user.phone_number }}" class="btn btn-sm btn-outline-success btn-block">
+                                    <i class="fa fa-phone mr-1"></i> {% trans "Call Phone Number" %}
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
 
-                <div class="card border-0 shadow-sm p-4">
-                    <h5 class="card-title text-primary border-bottom pb-2">Education</h5>
-                    {% if applicant.user.educations.all %}
-                        {% for edu in applicant.user.educations.all %}
-                            <div class="mb-3 pb-2 border-bottom">
-                                <h6 class="mb-0 font-weight-bold">{{ edu.degree }} - {{ edu.field_of_study }}</h6>
-                                <small class="text-muted">{{ edu.institution }} ({{ edu.start_date|date:"Y" }} - {{ edu.end_date|date:"Y" }})</small>
+                <!-- Web Links & Portfolio Card -->
+                {% if applicant.user.applicant_profile.website or applicant.user.applicant_profile.github_link or applicant.user.applicant_profile.linkedin_link %}
+                <div class="ats-card">
+                    <div class="ats-card-header">
+                        <h5 class="ats-card-title"><i class="fa fa-globe text-info"></i> {% trans "Online Portfolios & Links" %}</h5>
+                    </div>
+                    <div class="ats-card-body">
+                        {% if applicant.user.applicant_profile.website %}
+                            <a href="{{ applicant.user.applicant_profile.website }}" target="_blank" rel="noopener noreferrer" class="link-pill-btn d-flex justify-content-between align-items-center">
+                                <span><i class="fa fa-globe text-primary mr-1"></i> {% trans "Personal Website / Portfolio" %}</span>
+                                <i class="fa fa-external-link text-muted small"></i>
+                            </a>
+                        {% endif %}
+
+                        {% if applicant.user.applicant_profile.github_link %}
+                            <a href="{{ applicant.user.applicant_profile.github_link }}" target="_blank" rel="noopener noreferrer" class="link-pill-btn d-flex justify-content-between align-items-center">
+                                <span><i class="fa fa-github mr-1"></i> GitHub Profile</span>
+                                <i class="fa fa-external-link text-muted small"></i>
+                            </a>
+                        {% endif %}
+
+                        {% if applicant.user.applicant_profile.linkedin_link %}
+                            <a href="{{ applicant.user.applicant_profile.linkedin_link }}" target="_blank" rel="noopener noreferrer" class="link-pill-btn d-flex justify-content-between align-items-center">
+                                <span><i class="fa fa-linkedin-square text-info mr-1"></i> LinkedIn Profile</span>
+                                <i class="fa fa-external-link text-muted small"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Attached CV Card -->
+                <div class="ats-card">
+                    <div class="ats-card-header">
+                        <h5 class="ats-card-title"><i class="fa fa-file-pdf-o text-danger"></i> {% trans "Curriculum Vitae (CV)" %}</h5>
+                    </div>
+                    <div class="ats-card-body text-center">
+                        {% if applicant.cv or applicant.user.applicant_profile.cv_file %}
+                            <div class="my-2">
+                                <i class="fa fa-file-text-o fa-3x text-primary mb-2"></i>
+                                <h6 class="font-weight-bold mb-1">{% trans "Attached Resume Document" %}</h6>
+                                <p class="text-muted small mb-3">{% trans "PDF or Word document submitted with application" %}</p>
+                                <a href="{% if applicant.cv %}{{ applicant.cv.url }}{% else %}{{ applicant.user.applicant_profile.cv_file.url }}{% endif %}" target="_blank" class="btn btn-success btn-block shadow-sm">
+                                    <i class="fa fa-download mr-1"></i> {% trans "Download / View Resume" %}
+                                </a>
                             </div>
-                        {% endfor %}
-                    {% else %}
-                        <p class="text-muted small">No education records listed.</p>
-                    {% endif %}
+                        {% else %}
+                            <div class="py-3 text-muted">
+                                <i class="fa fa-file-o fa-2x mb-2 text-secondary"></i>
+                                <p class="small mb-0">{% trans "No external CV document uploaded for this application." %}</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Skills Card -->
+                <div class="ats-card">
+                    <div class="ats-card-header">
+                        <h5 class="ats-card-title"><i class="fa fa-tags text-warning"></i> {% trans "Skills & Competencies" %}</h5>
+                    </div>
+                    <div class="ats-card-body">
+                        {% if applicant.user.skills.all %}
+                            <div class="d-flex flex-wrap">
+                                {% for s in applicant.user.skills.all %}
+                                    <span class="badge border p-2 mr-2 mb-2 {% if s.level == 'expert' %}badge-success{% elif s.level == 'intermediate' %}badge-info{% else %}badge-light text-dark{% endif %}" style="font-size: 0.85rem;">
+                                        {{ s.name }} <small class="opacity-75">({{ s.get_level_display }})</small>
+                                    </span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted small mb-0">{% trans "No structured skills listed by candidate." %}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Status Log, Bio, Work Experience, Education -->
+            <div class="col-lg-8">
+                <!-- Employer Feedback & Status Box -->
+                <div class="ats-card border-primary">
+                    <div class="ats-card-header bg-light">
+                        <h5 class="ats-card-title text-primary">
+                            <i class="fa fa-check-square-o"></i> {% trans "Application Review & Status" %}
+                        </h5>
+                        <button type="button" class="btn btn-outline-primary btn-sm font-weight-bold" data-toggle="modal" data-target="#statusModal">
+                            <i class="fa fa-edit mr-1"></i> {% trans "Update Stage" %}
+                        </button>
+                    </div>
+                    <div class="ats-card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <strong class="mr-2">{% trans "Current Stage" %}:</strong>
+                            {% if applicant.status == 1 %}
+                                <span class="status-pill status-pill-1"><i class="fa fa-clock-o"></i> {% trans "Pending Review" %}</span>
+                            {% elif applicant.status == 2 %}
+                                <span class="status-pill status-pill-2"><i class="fa fa-star"></i> {% trans "Shortlisted" %}</span>
+                            {% elif applicant.status == 3 %}
+                                <span class="status-pill status-pill-3"><i class="fa fa-comments-o"></i> {% trans "Interview Stage" %}</span>
+                            {% elif applicant.status == 4 %}
+                                <span class="status-pill status-pill-4"><i class="fa fa-check-circle"></i> {% trans "Accepted" %}</span>
+                            {% elif applicant.status == 5 %}
+                                <span class="status-pill status-pill-5"><i class="fa fa-times-circle"></i> {% trans "Rejected" %}</span>
+                            {% endif %}
+                        </div>
+
+                        {% if applicant.comment %}
+                            <div class="alert alert-secondary bg-light border p-3 rounded mb-0">
+                                <h6 class="font-weight-bold text-dark mb-1"><i class="fa fa-commenting-o mr-1"></i> {% trans "Feedback / Note Sent to Candidate" %}:</h6>
+                                <p class="mb-0 text-dark small" style="white-space: pre-wrap;">{{ applicant.comment }}</p>
+                            </div>
+                        {% else %}
+                            <p class="text-muted small mb-0"><i class="fa fa-info-circle mr-1"></i> {% trans "No feedback notes have been sent yet. Click 'Update Stage' to add interview details or instructions." %}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Professional Summary / Bio -->
+                {% if applicant.user.bio or applicant.user.applicant_profile.bio %}
+                <div class="ats-card">
+                    <div class="ats-card-header">
+                        <h5 class="ats-card-title"><i class="fa fa-user-o text-primary"></i> {% trans "Professional Summary" %}</h5>
+                    </div>
+                    <div class="ats-card-body">
+                        <div class="applicant-bio text-secondary" style="font-size: 0.95rem; line-height: 1.6;">
+                            {{ applicant.user.applicant_profile.bio|default:applicant.user.bio|urlize|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Work Experience (with Interactive Clickable Links) -->
+                <div class="ats-card">
+                    <div class="ats-card-header">
+                        <h5 class="ats-card-title"><i class="fa fa-briefcase text-primary"></i> {% trans "Work Experience" %}</h5>
+                        <span class="badge badge-secondary">{{ applicant.user.experiences.count }}</span>
+                    </div>
+                    <div class="ats-card-body">
+                        {% if applicant.user.experiences.all %}
+                            <div class="timeline">
+                                {% for exp in applicant.user.experiences.all %}
+                                    <div class="timeline-item">
+                                        <div class="timeline-dot"></div>
+                                        <h5 class="font-weight-bold text-dark mb-1" style="font-size: 1.05rem;">
+                                            {{ exp.title }}
+                                            <span class="font-weight-normal text-muted">@ {{ exp.company }}</span>
+                                        </h5>
+                                        <div class="d-flex flex-wrap align-items-center text-muted small mb-2">
+                                            <span class="mr-3">
+                                                <i class="fa fa-calendar mr-1"></i>
+                                                {{ exp.start_date|date:"M Y" }} &mdash;
+                                                {% if exp.is_current %}
+                                                    <span class="badge badge-success font-weight-normal">{% trans "Present" %}</span>
+                                                {% else %}
+                                                    {{ exp.end_date|date:"M Y" }}
+                                                {% endif %}
+                                            </span>
+                                            {% if exp.location %}
+                                                <span><i class="fa fa-map-marker mr-1"></i> {{ exp.location }}</span>
+                                            {% endif %}
+                                        </div>
+                                        {% if exp.description %}
+                                            <div class="experience-desc text-secondary small" style="line-height: 1.6;">
+                                                {{ exp.description|urlize|linebreaks }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted small mb-0">{% trans "No work experience history recorded." %}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Education -->
+                <div class="ats-card">
+                    <div class="ats-card-header">
+                        <h5 class="ats-card-title"><i class="fa fa-graduation-cap text-success"></i> {% trans "Education & Qualifications" %}</h5>
+                        <span class="badge badge-secondary">{{ applicant.user.educations.count }}</span>
+                    </div>
+                    <div class="ats-card-body">
+                        {% if applicant.user.educations.all %}
+                            <div class="timeline">
+                                {% for edu in applicant.user.educations.all %}
+                                    <div class="timeline-item">
+                                        <div class="timeline-dot" style="background: #10b981; box-shadow: 0 0 0 2px #a7f3d0;"></div>
+                                        <h5 class="font-weight-bold text-dark mb-1" style="font-size: 1.05rem;">
+                                            {{ edu.degree }}
+                                            {% if edu.field_of_study %}
+                                                <span class="font-weight-normal text-muted">in {{ edu.field_of_study }}</span>
+                                            {% endif %}
+                                        </h5>
+                                        <div class="text-muted small mb-1">
+                                            <i class="fa fa-university mr-1"></i> <strong>{{ edu.institution }}</strong>
+                                        </div>
+                                        <div class="text-muted small">
+                                            <i class="fa fa-calendar mr-1"></i>
+                                            {{ edu.start_date|date:"Y" }} &mdash;
+                                            {% if edu.is_current %}
+                                                <span class="badge badge-success font-weight-normal">{% trans "Current" %}</span>
+                                            {% else %}
+                                                {{ edu.end_date|date:"Y" }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted small mb-0">{% trans "No education records listed." %}</p>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Status Update Modal -->
+<!-- Modern Status Update Modal -->
 <div class="modal fade" id="statusModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title text-white">Update Candidate Application Stage</h5>
-                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 14px; overflow: hidden;">
+            <div class="modal-header bg-dark text-white px-4 py-3">
+                <h5 class="modal-title font-weight-bold text-white mb-0">
+                    <i class="fa fa-sliders mr-2 text-warning"></i> {% trans "Update Application Stage" %}
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <form action="{% url 'jobs:applicant-send-response' applicant.id %}" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="job_id" value="{{ applicant.job.id }}">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label>Application Stage</label>
-                        <select name="status" class="form-control">
-                            <option value="1" {% if applicant.status == 1 %}selected{% endif %}>Pending</option>
-                            <option value="2" {% if applicant.status == 2 %}selected{% endif %}>Shortlisted</option>
-                            <option value="3" {% if applicant.status == 3 %}selected{% endif %}>Interview Stage</option>
-                            <option value="4" {% if applicant.status == 4 %}selected{% endif %}>Accepted</option>
-                            <option value="5" {% if applicant.status == 5 %}selected{% endif %}>Rejected</option>
+                <div class="modal-body px-4 py-3">
+                    <div class="form-group mb-3">
+                        <label class="font-weight-bold text-dark small text-uppercase">{% trans "Select Application Stage" %}</label>
+                        <select name="status" class="form-control custom-select" required>
+                            <option value="1" {% if applicant.status == 1 %}selected{% endif %}>⏳ 1. {% trans "Pending Review" %}</option>
+                            <option value="2" {% if applicant.status == 2 %}selected{% endif %}>⭐ 2. {% trans "Shortlisted" %}</option>
+                            <option value="3" {% if applicant.status == 3 %}selected{% endif %}>📅 3. {% trans "Interview Stage" %}</option>
+                            <option value="4" {% if applicant.status == 4 %}selected{% endif %}>🎉 4. {% trans "Accepted / Hired" %}</option>
+                            <option value="5" {% if applicant.status == 5 %}selected{% endif %}>❌ 5. {% trans "Rejected" %}</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>Message / Note to Candidate</label>
-                        <textarea name="comment" rows="4" class="form-control" placeholder="Provide feedback or interview instructions...">{{ applicant.comment|default_if_none:'' }}</textarea>
+
+                    <div class="form-group mb-3">
+                        <label class="font-weight-bold text-dark small text-uppercase">
+                            {% trans "Feedback or Instructions to Candidate" %}
+                        </label>
+                        <textarea name="comment" rows="4" class="form-control" placeholder="{% trans 'Enter interview location, date, or constructive feedback for the candidate...' %}">{{ applicant.comment|default_if_none:'' }}</textarea>
+                        <small class="form-text text-muted">
+                            <i class="fa fa-info-circle mr-1 text-primary"></i>
+                            {% trans "This message will be instantly sent via in-app notification and email to the candidate." %}
+                        </small>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> Save & Send Notification</button>
+                <div class="modal-footer bg-light px-4 py-3">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn btn-success font-weight-bold px-4">
+                        <i class="fa fa-check mr-1"></i> {% trans "Save & Notify Candidate" %}
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Ensure all dynamically parsed urlize links in bio and experiences open safely in a new tab
+        var contentLinks = document.querySelectorAll('.experience-desc a, .applicant-bio a');
+        contentLinks.forEach(function(link) {
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noopener noreferrer');
+        });
+    });
+</script>
 {% endblock %}

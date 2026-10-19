@@ -245,7 +245,12 @@ class AppliedApplicantView(DetailView):
     slug_url_kwarg = "applicant_id"
 
     def get_queryset(self):
-        return Applicant.objects.select_related("job", "user").filter(job__user=self.request.user)
+        qs = Applicant.objects.select_related("job", "user", "user__applicant_profile").prefetch_related(
+            "user__skills", "user__experiences", "user__educations"
+        )
+        if self.request.user.is_superuser or self.request.user.is_staff:
+            return qs.all()
+        return qs.filter(job__user=self.request.user)
 
 
 @method_decorator(login_required(login_url=reverse_lazy("accounts:login")), name="dispatch")
@@ -257,6 +262,8 @@ class SendResponseView(UpdateView):
     fields = ("status", "comment")
 
     def get_queryset(self):
+        if self.request.user.is_superuser or self.request.user.is_staff:
+            return Applicant.objects.all()
         return Applicant.objects.filter(job__user=self.request.user)
 
     def get_success_url(self):

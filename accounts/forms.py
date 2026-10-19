@@ -163,14 +163,27 @@ class UserLoginForm(forms.Form):
 
 
 class EmployeeProfileUpdateForm(forms.ModelForm):
+    GENDER_CHOICES = [
+        ("", "Select Gender"),
+        ("male", "Male"),
+        ("female", "Female"),
+    ]
+    gender = forms.ChoiceField(
+        choices=GENDER_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={"class": "form-control"})
+    )
+
     def __init__(self, *args, **kwargs):
         super(EmployeeProfileUpdateForm, self).__init__(*args, **kwargs)
-        self.fields["first_name"].widget.attrs.update({"placeholder": "Enter First Name"})
-        self.fields["last_name"].widget.attrs.update({"placeholder": "Enter Last Name"})
+        self.fields["first_name"].widget.attrs.update({"class": "form-control", "placeholder": "Enter First Name"})
+        self.fields["last_name"].widget.attrs.update({"class": "form-control", "placeholder": "Enter Last Name"})
+        if "phone_number" in self.fields:
+            self.fields["phone_number"].widget.attrs.update({"class": "form-control", "placeholder": "+251 9..."})
 
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "gender"]
+        fields = ["first_name", "last_name", "gender", "phone_number"]
 
 
 class EmployerProfileUpdateForm(forms.ModelForm):
