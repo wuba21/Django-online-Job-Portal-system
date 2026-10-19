@@ -95,6 +95,67 @@
                 transform: translateY(0);
             }
         }
+
+        /* Mobile Dropdown Fix: Accordion Vertical Flow (Never Float or Overflow) */
+        @media (max-width: 991.98px) {
+            .navbar .navbar-nav {
+                width: 100% !important;
+            }
+            .navbar .nav-item {
+                width: 100% !important;
+                display: block !important;
+            }
+            .navbar .nav-item.dropdown {
+                display: block !important;
+                width: 100% !important;
+            }
+            .navbar .nav-link {
+                display: flex !important;
+                align-items: center !important;
+                width: 100% !important;
+            }
+            .navbar-nav .nav-link.dropdown-toggle::after {
+                margin-left: auto !important;
+            }
+            .navbar-nav .dropdown-menu {
+                position: static !important;
+                float: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-shadow: none !important;
+                margin: 6px 0 10px 0 !important;
+                padding: 6px !important;
+                background: rgba(255, 255, 255, 0.04) !important;
+                border: 1px solid rgba(255, 255, 255, 0.08) !important;
+                border-radius: 10px !important;
+                transform: none !important;
+                right: auto !important;
+                left: auto !important;
+            }
+            .navbar-nav .dropdown-menu.dropdown-menu-right {
+                right: auto !important;
+                left: auto !important;
+            }
+            .navbar-nav .dropdown-menu .dropdown-item {
+                display: flex !important;
+                align-items: center !important;
+                width: 100% !important;
+                padding: 10px 14px !important;
+                border-radius: 6px !important;
+                color: #cbd5e1 !important;
+                font-size: 0.9rem !important;
+                white-space: normal !important;
+            }
+            .navbar-nav .dropdown-menu .dropdown-item:hover,
+            .navbar-nav .dropdown-menu .dropdown-item:focus {
+                background: rgba(255, 255, 255, 0.08) !important;
+                color: #ffffff !important;
+            }
+            .navbar-nav .dropdown-menu .dropdown-item.active {
+                background: #2563eb !important;
+                color: #ffffff !important;
+            }
+        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
@@ -182,11 +243,11 @@
                             </a>
                         </li>
                         {% if request.user.is_authenticated %}
-                            <li class="nav-item dropdown d-flex align-items-center">
+                            <li class="nav-item dropdown">
                                 <a id="clientZone" href="#" data-toggle="dropdown"
                                    aria-haspopup="true" aria-expanded="false"
-                                   class="nav-link dropdown-toggle has-img d-inline-flex align-items-center mb-0 mt-0 py-1">
-                                    <div class="client-menu-image mr-1">
+                                   class="nav-link dropdown-toggle has-img">
+                                    <div class="client-menu-image mr-2">
                                         <div class="inner">
                                             {% if request.user.role == 'employer' %}
                                                 {% if request.user.company.logo %}
@@ -203,7 +264,7 @@
                                             {% endif %}
                                         </div>
                                     </div>
-                                    {{ request.user.first_name|default:request.user.email }}
+                                    <span>{{ request.user.first_name|default:request.user.email }}</span>
                                 </a>
                                 <div aria-labelledby="clientZone" class="dropdown-menu dropdown-menu-right">
                                     {% if request.user.role == 'employer' %}
