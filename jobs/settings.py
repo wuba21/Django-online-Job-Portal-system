@@ -166,7 +166,7 @@ GEMINI_API_KEY = env("GEMINI_API_KEY", default="")
 # Telegram Bot Vacancy Broadcast Config
 # Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in .env or PythonAnywhere environment variables
 TELEGRAM_BOT_TOKEN = env("TELEGRAM_BOT_TOKEN", default="8487911861:AAEtEz13n_5PcZKiXCP9e8ouHlS0kiSW-b4")
-TELEGRAM_CHAT_ID = env("TELEGRAM_CHAT_ID", default="@ethio_jobportal")
+TELEGRAM_CHAT_ID = env("TELEGRAM_CHAT_ID", default="-1003318389514")
 
 # SMTP Real Email Server Config
 # Set EMAIL_HOST_USER and EMAIL_HOST_PASSWORD in .env or PythonAnywhere environment variables

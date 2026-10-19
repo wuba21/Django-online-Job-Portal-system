@@ -14,7 +14,7 @@ def broadcast_job_to_telegram(job, domain="https://wubante.pythonanywhere.com"):
     Reads TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID from settings.
     """
     bot_token = getattr(settings, "TELEGRAM_BOT_TOKEN", "") or env_fallback("TELEGRAM_BOT_TOKEN")
-    chat_id = getattr(settings, "TELEGRAM_CHAT_ID", "") or env_fallback("TELEGRAM_CHAT_ID") or "@ethio_jobportal"
+    chat_id = getattr(settings, "TELEGRAM_CHAT_ID", "") or env_fallback("TELEGRAM_CHAT_ID") or "-1003318389514"
 
     if not bot_token:
         logger.warning("Telegram broadcast skipped: TELEGRAM_BOT_TOKEN is not configured.")
