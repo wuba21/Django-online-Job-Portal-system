@@ -189,9 +189,17 @@
                                     <div class="client-menu-image" style="position: relative; display: inline-block;">
                                         <div class="inner">
                                             {% if request.user.role == 'employer' %}
-                                                <img src="{% static 'img/company-1.png' %}" alt="company avatar" class="img-fluid">
+                                                {% if request.user.company.logo %}
+                                                    <img src="{{ request.user.company.logo.url }}" alt="company logo" class="img-fluid" style="width: 100%; height: 100%; object-fit: cover;">
+                                                {% else %}
+                                                    <img src="{% static 'img/company-1.png' %}" alt="company avatar" class="img-fluid">
+                                                {% endif %}
                                             {% else %}
-                                                <img src="{% static 'img/avatar.png' %}" alt="user avatar" class="img-fluid">
+                                                {% if request.user.avatar %}
+                                                    <img src="{{ request.user.avatar.url }}" alt="user avatar" class="img-fluid" style="width: 100%; height: 100%; object-fit: cover;">
+                                                {% else %}
+                                                    <img src="{% static 'img/avatar.png' %}" alt="user avatar" class="img-fluid">
+                                                {% endif %}
                                             {% endif %}
                                         </div>
                                         {% if request.user.notifications.all %}

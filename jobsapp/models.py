@@ -72,6 +72,7 @@ class Job(models.Model):
     last_date = models.DateTimeField(default=default_deadline)
     company_name = models.CharField(max_length=100)
     company_description = models.TextField(blank=True, null=True)
+    logo = models.ImageField(upload_to="job_logos/", blank=True, null=True, help_text="Company logo or vacancy screenshot")
     website = models.CharField(max_length=100, default="", blank=True, null=True)
     created_at = models.DateTimeField(default=timezone.now, db_index=True)
     filled = models.BooleanField(default=False, db_index=True)
@@ -120,6 +121,30 @@ class Job(models.Model):
     @property
     def total_applicants(self):
         return self.applicants.count()
+
+    @property
+    def get_logo_url(self):
+        if self.logo:
+            try:
+                return self.logo.url
+            except Exception:
+                pass
+        if self.company and self.company.logo:
+            try:
+                return self.company.logo.url
+            except Exception:
+                pass
+        return None
+
+    @property
+    def company_initials(self):
+        name = (self.company_name or "").strip()
+        if not name:
+            return "JO"
+        parts = name.split()
+        if len(parts) >= 2:
+            return (parts[0][0] + parts[1][0]).upper()
+        return name[:2].upper()
 
 
 class Applicant(models.Model):

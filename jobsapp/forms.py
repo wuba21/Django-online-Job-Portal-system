@@ -31,6 +31,7 @@ class CreateJobForm(forms.ModelForm):
             "salary_max": forms.NumberInput(attrs={"class": "form-control"}),
             "currency": forms.TextInput(attrs={"class": "form-control"}),
             "vacancy": forms.NumberInput(attrs={"class": "form-control"}),
+            "logo": forms.FileInput(attrs={"class": "form-control-file", "accept": "image/*", "id": "id_logo"}),
         }
         labels = {
             "last_date": "Application Deadline",
@@ -38,6 +39,7 @@ class CreateJobForm(forms.ModelForm):
             "company_description": "Company Description",
             "salary": "Minimum Salary (ETB)",
             "salary_max": "Maximum Salary (ETB)",
+            "logo": "Company Logo or Job Vacancy Screenshot",
         }
 
     def __init__(self, *args, **kwargs):
@@ -67,6 +69,8 @@ class CreateJobForm(forms.ModelForm):
         self.fields["company_description"].required = False
         self.fields["website"].required = False
         self.fields["vacancy"].required = False
+        if "logo" in self.fields:
+            self.fields["logo"].required = False
 
     def clean_salary(self):
         salary = self.cleaned_data.get("salary")

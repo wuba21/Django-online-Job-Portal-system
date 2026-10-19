@@ -74,9 +74,19 @@
             {% for job in jobs %}
                 <div class="card border-0 shadow-sm mb-3 p-3">
                     <div class="row align-items-center">
-                        <div class="col-md-6 mb-2 mb-md-0">
-                            <h5 class="mb-1"><a href="{% url 'jobs:jobs-detail' job.id %}" class="text-dark font-weight-bold">{{ job.title }}</a></h5>
-                            <p class="text-muted small mb-0">{{ job.company_name }} | <i class="fa fa-map-marker"></i> {{ job.location }}</p>
+                        <div class="col-md-6 mb-2 mb-md-0 d-flex align-items-center">
+                            {% if job.get_logo_url %}
+                                <img src="{{ job.get_logo_url }}"
+                                     alt="{{ job.company_name }}" class="img-fluid mr-3 rounded border" style="width: 44px; height: 44px; min-width: 44px; object-fit: contain; background: #fff; padding: 2px;" loading="lazy">
+                            {% else %}
+                                <div class="mr-3 rounded d-inline-flex align-items-center justify-content-center text-white font-weight-bold shadow-sm" style="width: 44px; height: 44px; min-width: 44px; background: linear-gradient(135deg, #2563eb, #1d4ed8); font-size: 0.95rem;">
+                                    {{ job.company_initials }}
+                                </div>
+                            {% endif %}
+                            <div>
+                                <h5 class="mb-1"><a href="{% url 'jobs:jobs-detail' job.id %}" class="text-dark font-weight-bold">{{ job.title }}</a></h5>
+                                <p class="text-muted small mb-0">{{ job.company_name }} | <i class="fa fa-map-marker"></i> {{ job.location }}</p>
+                            </div>
                         </div>
                         <div class="col-md-3 mb-2 mb-md-0">
                             <span class="badge badge-success px-2 py-1">{{ job.get_work_mode_display|default:job.work_mode }}</span>

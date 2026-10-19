@@ -8,11 +8,24 @@
     <div class="container">
         <div class="row align-items-center">
             <div class="col-md-8">
-                <h1 class="heading mb-2">{{ job.title }}</h1>
-                <p class="text-muted mb-2">
-                    at <strong class="text-dark">{{ job.company_name }}</strong> | 
-                    <i class="fa fa-map-marker text-primary"></i> <strong>{{ job.location }}</strong>
-                </p>
+                <div class="d-flex align-items-center mb-3">
+                    {% if job.get_logo_url %}
+                        <a href="{{ job.get_logo_url }}" target="_blank" title="Click to view full image">
+                            <img src="{{ job.get_logo_url }}" alt="{{ job.company_name }}" class="img-fluid mr-3 rounded border shadow-sm" style="width: 68px; height: 68px; object-fit: contain; background: #fff; padding: 4px;">
+                        </a>
+                    {% else %}
+                        <div class="mr-3 rounded d-inline-flex align-items-center justify-content-center text-white font-weight-bold shadow-sm" style="width: 68px; height: 68px; min-width: 68px; background: linear-gradient(135deg, #2563eb, #1d4ed8); font-size: 1.4rem;">
+                            {{ job.company_initials }}
+                        </div>
+                    {% endif %}
+                    <div>
+                        <h1 class="heading mb-1" style="font-size: 1.85rem;">{{ job.title }}</h1>
+                        <p class="text-muted mb-0">
+                            at <strong class="text-dark">{{ job.company_name }}</strong> | 
+                            <i class="fa fa-map-marker text-primary"></i> <strong>{{ job.location }}</strong>
+                        </p>
+                    </div>
+                </div>
                 <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
                     {% if job.type == '1' %}
                         <span class="badge badge-success px-3 py-2">Full Time</span>
@@ -125,6 +138,14 @@
             <!-- Company Info Column -->
             <div class="col-lg-4">
                 <div class="card border-0 shadow-sm p-4 mb-4">
+                    {% if job.get_logo_url %}
+                        <div class="text-center mb-3 pb-3 border-bottom">
+                            <a href="{{ job.get_logo_url }}" target="_blank" title="Click to view flyer / full image">
+                                <img src="{{ job.get_logo_url }}" alt="{{ job.company_name }}" class="img-fluid rounded border p-2" style="max-height: 140px; max-width: 100%; object-fit: contain; background: #fff;">
+                                <small class="d-block text-primary mt-2 font-weight-bold"><i class="fa fa-search-plus mr-1"></i> View full image / flyer</small>
+                            </a>
+                        </div>
+                    {% endif %}
                     <h4 class="card-title text-dark border-bottom pb-2">About {{ job.company_name }}</h4>
                     {% if "<" in job.company_description and ">" in job.company_description %}
                         <div class="company-desc-content text-muted">

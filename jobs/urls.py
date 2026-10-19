@@ -74,6 +74,12 @@ urlpatterns.append(path("<slug:slug>/", include("jobsapp.slug_urls")))
 if settings.ENABLE_PROMETHEUS:
     urlpatterns.append(path("", include("django_prometheus.urls")))
 
+from django.views.static import serve
+
+urlpatterns += [
+    re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
+]
+
 if bool(settings.DEBUG):
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+

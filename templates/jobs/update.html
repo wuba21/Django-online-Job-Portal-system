@@ -41,7 +41,7 @@
                             {% endfor %}
                         {% endfor %}
                     {% endif %}
-                    <form id="job-main-form" method="post" action="" class="job-add-form">
+                    <form id="job-main-form" method="post" action="" class="job-add-form" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="row">
                             <div class="col-lg-12">
@@ -192,11 +192,43 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-lg-4 form-group">
+                            <div class="col-lg-12 form-group">
                                 <label for="company_website">Website</label>
                                 <input id="company_website" name="website" type="url" class="form-control" value="{{ form.website.value|default_if_none:"" }}">
                             </div>
                         </div>
+
+                        <!-- Company Logo / Vacancy Screenshot Dropzone -->
+                        <div class="row">
+                            <div class="col-lg-12 form-group">
+                                <label class="font-weight-bold"><i class="fa fa-picture-o text-primary mr-1"></i> Company Logo or Job Vacancy Screenshot / Flyer</label>
+                                <p class="text-muted small mb-2">Upload your official company logo, or upload / paste (<strong>Ctrl + V</strong>) a screenshot of your vacancy ad / flyer.</p>
+                                
+                                <div id="logo-dropzone" class="border rounded p-4 text-center position-relative" style="border: 2px dashed #3b82f6 !important; background: #f8fafc; cursor: pointer; transition: all 0.2s;">
+                                    <input type="file" name="logo" id="id_logo" accept="image/*" class="d-none">
+                                    
+                                    <div id="logo-preview-container" class="{% if not job.get_logo_url %}d-none{% endif %} mb-2">
+                                        {% if job.get_logo_url %}
+                                            <img id="logo-preview-img" src="{{ job.get_logo_url }}" alt="Logo" class="img-thumbnail shadow-sm" style="max-height: 120px; max-width: 220px; object-fit: contain;">
+                                            <small class="d-block text-muted mt-1 font-weight-bold">Current Logo / Screenshot (click to replace)</small>
+                                        {% else %}
+                                            <img id="logo-preview-img" src="" alt="Logo" class="img-thumbnail shadow-sm" style="max-height: 120px; max-width: 220px; object-fit: contain;">
+                                        {% endif %}
+                                    </div>
+
+                                    <div id="dropzone-prompt">
+                                        <i class="fa fa-cloud-upload fa-3x text-primary mb-2"></i>
+                                        <div class="font-weight-bold text-dark" style="font-size: 1.05rem;">Click to browse, drag & drop, or press Ctrl + V to paste screenshot</div>
+                                        <small class="text-muted">PNG, JPG, JPEG, WEBP supported (Screenshot / Flyer / Logo)</small>
+                                    </div>
+                                    
+                                    <button type="button" id="btn-remove-logo" class="btn btn-sm btn-outline-danger mt-2 {% if not job.get_logo_url %}d-none{% endif %}" onclick="removeUploadedLogo(event)">
+                                        <i class="fa fa-times mr-1"></i> Remove Image
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="row">
                             <div class="col-lg-12 text-center">
                                 <hr>
@@ -232,6 +264,89 @@
                 toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | outdent indent'
             });
         });
+
+        // Logo Upload & Screenshot Clipboard Paste (Ctrl + V)
+        (function() {
+            var dropzone = document.getElementById('logo-dropzone');
+            var fileInput = document.getElementById('id_logo');
+            var previewContainer = document.getElementById('logo-preview-container');
+            var previewImg = document.getElementById('logo-preview-img');
+            var removeBtn = document.getElementById('btn-remove-logo');
+
+            if (!dropzone || !fileInput) return;
+
+            dropzone.addEventListener('click', function(e) {
+                if (e.target.id === 'btn-remove-logo' || e.target.closest('#btn-remove-logo')) return;
+                fileInput.click();
+            });
+
+            function handleFile(file) {
+                if (!file || !file.type.startsWith('image/')) return;
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewContainer.classList.remove('d-none');
+                    if (removeBtn) removeBtn.classList.remove('d-none');
+                };
+                reader.readAsDataURL(file);
+            }
+
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    handleFile(this.files[0]);
+                }
+            });
+
+            // Drag & Drop
+            dropzone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                dropzone.style.background = '#e0e7ff';
+                dropzone.style.borderColor = '#2563eb';
+            });
+            dropzone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                dropzone.style.background = '#f8fafc';
+                dropzone.style.borderColor = '#3b82f6';
+            });
+            dropzone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                dropzone.style.background = '#f8fafc';
+                dropzone.style.borderColor = '#3b82f6';
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFile(e.dataTransfer.files[0]);
+                }
+            });
+
+            // Global Paste for Screenshots (Ctrl + V)
+            window.addEventListener('paste', function(e) {
+                var clipboardData = e.clipboardData || (e.originalEvent && e.originalEvent.clipboardData);
+                if (!clipboardData || !clipboardData.items) return;
+                var items = clipboardData.items;
+                for (var i = 0; i < items.length; i++) {
+                    var item = items[i];
+                    if (item.type.indexOf('image') !== -1) {
+                        var blob = item.getAsFile();
+                        var dt = new DataTransfer();
+                        dt.items.add(blob);
+                        fileInput.files = dt.files;
+                        handleFile(blob);
+                        if (typeof toastr !== 'undefined') {
+                            toastr.success('Screenshot pasted successfully!');
+                        }
+                        break;
+                    }
+                }
+            });
+
+            window.removeUploadedLogo = function(e) {
+                e.stopPropagation();
+                fileInput.value = '';
+                previewImg.src = '';
+                previewContainer.classList.add('d-none');
+                if (removeBtn) removeBtn.classList.add('d-none');
+            };
+        })();
     </script>
 
 {% endblock %}

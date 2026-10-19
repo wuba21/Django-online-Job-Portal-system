@@ -82,8 +82,19 @@
                             {% for job in jobs %}
                             <tr>
                                 <td>
-                                    <a href="{% url 'jobs:jobs-detail' job.id %}" class="font-weight-bold text-dark">{{ job.title }}</a>
-                                    <small class="d-block text-muted"><i class="fa fa-map-marker text-danger"></i> {{ job.location }} | {{ job.category }}</small>
+                                    <div class="d-flex align-items-center">
+                                        {% if job.get_logo_url %}
+                                            <img src="{{ job.get_logo_url }}" alt="{{ job.company_name }}" class="img-fluid mr-2 rounded border" style="width: 38px; height: 38px; min-width: 38px; object-fit: contain; background: #fff; padding: 2px;">
+                                        {% else %}
+                                            <div class="mr-2 rounded d-inline-flex align-items-center justify-content-center text-white font-weight-bold" style="width: 38px; height: 38px; min-width: 38px; background: linear-gradient(135deg, #2563eb, #1d4ed8); font-size: 0.85rem;">
+                                                {{ job.company_initials }}
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <a href="{% url 'jobs:jobs-detail' job.id %}" class="font-weight-bold text-dark">{{ job.title }}</a>
+                                            <small class="d-block text-muted"><i class="fa fa-map-marker text-danger"></i> {{ job.location }} | {{ job.category }}</small>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td>
                                     <span class="badge badge-info mb-1 d-inline-block">{{ job.get_work_mode_display|default:job.work_mode }}</span>
