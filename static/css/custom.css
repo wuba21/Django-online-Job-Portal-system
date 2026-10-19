@@ -665,6 +665,34 @@ header.header, .navbar {
     border-radius: 8px !important;
 }
 
+/* Desktop Hover-Activated Dropdown */
+@media (min-width: 992px) {
+    .navbar .nav-item.dropdown:hover > .dropdown-menu {
+        display: block !important;
+        margin-top: 0 !important;
+        animation: navDropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .navbar .nav-item.dropdown > .dropdown-menu::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: 0;
+        right: 0;
+        height: 10px;
+        background: transparent;
+    }
+}
+@keyframes navDropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .navbar .dropdown-menu .dropdown-item {
     color: #e5e7eb !important;
     font-size: 0.85rem !important;

@@ -39,7 +39,7 @@
     <link rel="stylesheet" href="{% static 'css/style.default.css' %}" id="theme-stylesheet">
 
     <!-- Custom stylesheet -->
-    <link rel="stylesheet" href="{% static 'css/custom.css' %}?v=10.0">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}?v=10.1">
     <link rel="stylesheet" href="{% static 'css/footer-modern.css' %}">
 
     <!-- Toastr CSS — defer via media trick -->
@@ -66,6 +66,35 @@
         /* Critical above-fold render — prevent layout shift */
         body { margin: 0; }
         .navbar-brand img { height: 42px; width: auto; }
+
+        /* Instant Smooth Dropdown on Hover for Desktop */
+        @media (min-width: 992px) {
+            .navbar .nav-item.dropdown:hover > .dropdown-menu {
+                display: block !important;
+                margin-top: 0 !important;
+                animation: navDropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            }
+            /* Seamless bridge between toggle and menu to prevent flicker */
+            .navbar .nav-item.dropdown > .dropdown-menu::before {
+                content: "";
+                position: absolute;
+                top: -10px;
+                left: 0;
+                right: 0;
+                height: 10px;
+                background: transparent;
+            }
+        }
+        @keyframes navDropdownFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
@@ -392,7 +421,29 @@
 {% block javascripts %}{% endblock %}
 
 <script type="text/javascript">
-    // Language switcher now uses forms in dropdown
+    // Instant Hover Activation for Navbar Dropdowns on Desktop
+    $(function() {
+        function setupNavbarHover() {
+            if (window.innerWidth >= 992) {
+                $('.navbar .nav-item.dropdown').off('mouseenter mouseleave').hover(
+                    function() {
+                        $(this).addClass('show');
+                        $(this).children('.dropdown-menu').addClass('show');
+                        $(this).children('.dropdown-toggle').attr('aria-expanded', 'true');
+                    },
+                    function() {
+                        $(this).removeClass('show');
+                        $(this).children('.dropdown-menu').removeClass('show');
+                        $(this).children('.dropdown-toggle').attr('aria-expanded', 'false');
+                    }
+                );
+            } else {
+                $('.navbar .nav-item.dropdown').off('mouseenter mouseleave');
+            }
+        }
+        setupNavbarHover();
+        $(window).on('resize', setupNavbarHover);
+    });
 </script>
 
 {% if not request.user.is_authenticated and GOOGLE_CLIENT_ID %}
