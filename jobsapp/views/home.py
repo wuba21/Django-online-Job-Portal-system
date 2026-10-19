@@ -227,16 +227,26 @@ class ApplyJobView(CreateView):
                         message=f"{request.user.get_full_name() or request.user.email} applied for {job.title}.",
                         link=reverse_lazy("jobs:employer-dashboard-applicants", kwargs={"job_id": job.id})
                     )
+                    if job.user.email:
+                        send_event_email(
+                            user_email=job.user.email,
+                            subject=f"📩 New Applicant for '{job.title}' - {request.user.get_full_name() or request.user.email}",
+                            message=f"Hello,\n\nA new candidate, {request.user.get_full_name() or request.user.email}, has just applied for your vacancy '{job.title}'.\n\nYou can review their CV, experience, qualifications, and respond directly through your employer dashboard.",
+                            action_url=request.build_absolute_uri(reverse_lazy("jobs:employer-dashboard-applicants", kwargs={"job_id": job.id})),
+                            action_text="View Applicant & Resume"
+                        )
             except Exception:
                 pass
 
-            # Send Email Alerts safely
+            # Send Email Alerts to Candidate safely
             try:
                 if request.user.email:
                     send_event_email(
                         user_email=request.user.email,
-                        subject=f"Application Confirmation - {job.title}",
-                        message=f"Hello {request.user.get_full_name() or 'Candidate'},\n\nYour application for '{job.title}' at {job.company_name} has been received. You can track your status in your dashboard."
+                        subject=f"🎉 Application Received - {job.title}",
+                        message=f"Hello {request.user.get_full_name() or 'Candidate'},\n\nYour application for '{job.title}' at {job.company_name} has been received successfully.\n\nThe employer has been notified and will review your qualifications. You can track your progress and interview updates from your candidate dashboard.",
+                        action_url=request.build_absolute_uri(reverse_lazy("jobs:employee-my-applications")),
+                        action_text="Track My Applications"
                     )
             except Exception:
                 pass

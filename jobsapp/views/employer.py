@@ -286,17 +286,20 @@ class SendResponseView(UpdateView):
         messages.success(self.request, f"Applicant status updated to '{status_name}'.")
 
         # Notify Candidate
+        comment_note = f" Note: {self.object.comment}" if self.object.comment else ""
         create_notification(
             user=self.object.user,
-            title=f"Application Update: {self.object.job.title}",
-            message=f"Your application status for '{self.object.job.title}' has been updated to '{status_name}'.",
+            title=f"Application Update: {self.object.job.title} ({status_name})",
+            message=f"Your application status for '{self.object.job.title}' at {self.object.job.company_name} was updated to '{status_name}'.{comment_note}",
             link=reverse_lazy("jobs:employee-my-applications")
         )
 
         send_event_email(
             user_email=self.object.user.email,
-            subject=f"Job Application Update - {self.object.job.title}",
-            message=f"Hello {self.object.user.get_full_name() or 'Candidate'},\n\nYour application status for the position '{self.object.job.title}' at {self.object.job.company_name} has been updated to: {status_name}.\n\nComment from employer: {self.object.comment or 'None'}\n\nLog in to your dashboard to view details."
+            subject=f"📋 Job Application Update - {self.object.job.title} ({status_name})",
+            message=f"Hello {self.object.user.get_full_name() or 'Candidate'},\n\nYour application for the position '{self.object.job.title}' at {self.object.job.company_name} has been updated to: {status_name}.\n\nEmployer's Comment / Feedback:\n{self.object.comment or 'No specific comment provided.'}\n\nYou can log in to your dashboard to review next steps or interview arrangements.",
+            action_url=request.build_absolute_uri(reverse_lazy("jobs:employee-my-applications")),
+            action_text="View Application & Feedback"
         )
 
         return HttpResponseRedirect(self.get_success_url())

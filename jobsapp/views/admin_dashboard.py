@@ -9,6 +9,7 @@ from datetime import timedelta
 
 from accounts.models import User, Company
 from jobsapp.models import Job, Applicant, APPLICANT_STATUS_CHOICES
+from jobsapp.utils.notifications import create_notification, send_event_email
 
 
 def superuser_required(view_func):
@@ -68,6 +69,23 @@ def approve_job(request, job_id):
     except Exception:
         pass
 
+    # Notify Job Owner
+    if getattr(job, "user", None):
+        create_notification(
+            user=job.user,
+            title=f"Job Approved: {job.title}",
+            message=f"Congratulations! Your job listing '{job.title}' for {job.company_name} was approved by administrators and is now publicly live on the portal.",
+            link=f"/jobs/{job.id}/"
+        )
+        if job.user.email:
+            send_event_email(
+                user_email=job.user.email,
+                subject=f"✅ Job Approved: '{job.title}' is Now Live!",
+                message=f"Hello,\n\nGreat news! Your job posting for '{job.title}' at {job.company_name} has been approved by administrators and is now publicly live on the portal. Candidates can now view and submit applications.\n\nBest regards,\nEthio Job Portal Team",
+                action_url=request.build_absolute_uri(f"/jobs/{job.id}/"),
+                action_text="View Live Job Listing"
+            )
+
     messages.success(request, f"Job '{job.title}' approved successfully.")
     referer = request.META.get("HTTP_REFERER")
     if referer and ("jobs/" in referer or "platform-admin" in referer):
@@ -86,6 +104,37 @@ def set_job_status(request, job_id, status):
                 broadcast_job_to_telegram(job, request=request)
             except Exception:
                 pass
+            if getattr(job, "user", None):
+                create_notification(
+                    user=job.user,
+                    title=f"Job Approved: {job.title}",
+                    message=f"Congratulations! Your job listing '{job.title}' for {job.company_name} has been approved and is now live on the portal.",
+                    link=f"/jobs/{job.id}/"
+                )
+                if job.user.email:
+                    send_event_email(
+                        user_email=job.user.email,
+                        subject=f"✅ Job Approved: '{job.title}' is Now Live!",
+                        message=f"Hello,\n\nYour job listing '{job.title}' for {job.company_name} has been approved by administrators and is now active on the portal.\n\nBest regards,\nEthio Job Portal Team",
+                        action_url=request.build_absolute_uri(f"/jobs/{job.id}/"),
+                        action_text="View Live Job Listing"
+                    )
+        elif status == "rejected":
+            if getattr(job, "user", None):
+                create_notification(
+                    user=job.user,
+                    title=f"Job Listing Rejected: {job.title}",
+                    message=f"Your job listing '{job.title}' for {job.company_name} was reviewed and rejected by administrators. Please update your post or contact support.",
+                    link="/employer/dashboard/"
+                )
+                if job.user.email:
+                    send_event_email(
+                        user_email=job.user.email,
+                        subject=f"Notice Regarding Your Job Listing '{job.title}'",
+                        message=f"Hello,\n\nYour job listing '{job.title}' for {job.company_name} was reviewed by administrators and could not be approved at this time. Please check your employer dashboard and ensure all details follow our guidelines.\n\nBest regards,\nEthio Job Portal Team",
+                        action_url=request.build_absolute_uri("/employer/dashboard/"),
+                        action_text="Go to Employer Dashboard"
+                    )
         job.save()
         messages.success(request, f"Job status changed to {status.upper()}.")
     elif status == "filled":
@@ -108,6 +157,21 @@ def toggle_job_featured(request, job_id):
     if job.is_featured:
         job.featured_until = timezone.now() + timedelta(days=30)
         messages.success(request, f"Job '{job.title}' is now VIP FEATURED on homepage.")
+        if getattr(job, "user", None):
+            create_notification(
+                user=job.user,
+                title=f"⭐ VIP Featured: {job.title}",
+                message=f"Great news! Your job listing '{job.title}' is now VIP Featured on the homepage for the next 30 days.",
+                link=f"/jobs/{job.id}/"
+            )
+            if job.user.email:
+                send_event_email(
+                    user_email=job.user.email,
+                    subject=f"⭐ Your Job '{job.title}' is now VIP Featured!",
+                    message=f"Hello,\n\nYour job listing '{job.title}' has been upgraded to VIP Featured status on the Ethio Job Portal homepage for the next 30 days.\n\nBest regards,\nEthio Job Portal Team",
+                    action_url=request.build_absolute_uri(f"/jobs/{job.id}/"),
+                    action_text="View on Homepage"
+                )
     else:
         job.featured_until = None
         messages.info(request, f"Job '{job.title}' is no longer featured.")
@@ -117,6 +181,7 @@ def toggle_job_featured(request, job_id):
     if referer:
         return redirect(referer)
     return redirect("jobs:admin-dashboard")
+
 
 
 @superuser_required

@@ -182,6 +182,46 @@
                             </a>
                         </li>
                         {% if request.user.is_authenticated %}
+                            <!-- Dedicated Notifications Dropdown Bell -->
+                            <li class="nav-item dropdown mr-lg-2 d-flex align-items-center">
+                                <a id="notificationsDropdown" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                   class="nav-link position-relative px-2 py-1 text-white" title="Notifications" style="line-height: 1;">
+                                    <i class="fa fa-bell" style="font-size: 1.25rem;"></i>
+                                    {% if unread_notifications_count > 0 %}
+                                        <span class="badge badge-pill badge-danger position-absolute" style="top: -2px; right: -4px; font-size: 10px; padding: 2px 5px; box-shadow: 0 0 4px rgba(0,0,0,0.4);">
+                                            {{ unread_notifications_count }}
+                                        </span>
+                                    {% endif %}
+                                </a>
+                                <div aria-labelledby="notificationsDropdown" class="dropdown-menu dropdown-menu-right shadow p-0" style="min-width: 320px; max-width: 360px; border-radius: 8px;">
+                                    <div class="d-flex justify-content-between align-items-center p-2 bg-light border-bottom">
+                                        <strong class="text-dark small"><i class="fa fa-bell text-primary mr-1"></i> Notifications</strong>
+                                        {% if unread_notifications_count > 0 %}
+                                            <a href="{% url 'jobs:mark-all-notifications-read' %}" class="small text-muted font-weight-bold" style="font-size: 0.75rem;">Mark all as read</a>
+                                        {% endif %}
+                                    </div>
+                                    <div class="list-group list-group-flush" style="max-height: 280px; overflow-y: auto;">
+                                        {% for notif in recent_unread_notifications %}
+                                            <a href="{% url 'jobs:mark-notification-read' notif.id %}" class="list-group-item list-group-item-action p-2 border-bottom">
+                                                <div class="d-flex w-100 justify-content-between">
+                                                    <h6 class="mb-1 text-dark font-weight-bold text-truncate" style="font-size: 0.85rem; max-width: 220px;">{{ notif.title }}</h6>
+                                                    <small class="text-muted" style="font-size: 0.7rem;">{{ notif.created_at|timesince }}</small>
+                                                </div>
+                                                <p class="mb-0 text-muted small text-truncate" style="font-size: 0.78rem;">{{ notif.message }}</p>
+                                            </a>
+                                        {% empty %}
+                                            <div class="p-3 text-center text-muted small">
+                                                <i class="fa fa-check-circle text-success d-block mb-1" style="font-size: 1.5rem;"></i>
+                                                You have no unread notifications.
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="p-2 text-center bg-light border-top">
+                                        <a href="{% url 'jobs:notifications' %}" class="btn btn-sm btn-link p-0 text-primary font-weight-bold" style="font-size: 0.82rem;">View All Notifications &rarr;</a>
+                                    </div>
+                                </div>
+                            </li>
+
                             <li class="nav-item dropdown">
                                 <a id="clientZone" href="#" data-toggle="dropdown"
                                    aria-haspopup="true" aria-expanded="false"
@@ -202,8 +242,8 @@
                                                 {% endif %}
                                             {% endif %}
                                         </div>
-                                        {% if request.user.notifications.all %}
-                                            <span class="badge badge-pill badge-danger" style="position: absolute; top: -4px; right: -4px; font-size: 9px; padding: 2px 4px;">{{ request.user.notifications.all.count }}</span>
+                                        {% if unread_notifications_count > 0 %}
+                                            <span class="badge badge-pill badge-danger" style="position: absolute; top: -4px; right: -4px; font-size: 9px; padding: 2px 4px;">{{ unread_notifications_count }}</span>
                                         {% endif %}
                                     </div>
                                     {{ request.user.first_name|default:request.user.email }}
@@ -215,8 +255,8 @@
                                         </a>
                                         <a href="{% url 'jobs:notifications' %}" class="dropdown-item {% if url_name == 'notifications' %}active{% endif %}">
                                             <i class="fa fa-bell mr-2"></i> {% trans "Notifications" %}
-                                            {% if request.user.notifications.all %}
-                                                <span class="badge badge-danger ml-2">{{ request.user.notifications.all.count }}</span>
+                                            {% if unread_notifications_count > 0 %}
+                                                <span class="badge badge-danger ml-2">{{ unread_notifications_count }}</span>
                                             {% endif %}
                                         </a>
                                         <a href="{% url 'jobs:employer-all-applicants' %}" class="dropdown-item {% if url_name == 'employer-all-applicants' %}active{% endif %}">
@@ -234,8 +274,8 @@
                                         </a>
                                         <a href="{% url 'jobs:notifications' %}" class="dropdown-item {% if url_name == 'notifications' %}active{% endif %}">
                                             <i class="fa fa-bell mr-2"></i> {% trans "Notifications" %}
-                                            {% if request.user.notifications.all %}
-                                                <span class="badge badge-danger ml-2">{{ request.user.notifications.all.count }}</span>
+                                            {% if unread_notifications_count > 0 %}
+                                                <span class="badge badge-danger ml-2">{{ unread_notifications_count }}</span>
                                             {% endif %}
                                         </a>
                                         <a href="{% url 'jobs:employee-favorites' %}" class="dropdown-item {% if url_name == 'employee-favorites' %}active{% endif %}">

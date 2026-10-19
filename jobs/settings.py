@@ -121,6 +121,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "accounts.context_processors.google_auth_settings",
+                "jobsapp.context_processors.notifications_context",
             ]
             + (
                 [
@@ -170,12 +171,15 @@ TELEGRAM_CHAT_ID = env("TELEGRAM_CHAT_ID", default="-1003318389514")
 
 # SMTP Real Email Server Config
 # Set EMAIL_HOST_USER and EMAIL_HOST_PASSWORD in .env or PythonAnywhere environment variables
-EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
 EMAIL_HOST = env("EMAIL_HOST", default="smtp.gmail.com")
 EMAIL_PORT = env.int("EMAIL_PORT", default=587)
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
+    EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
+else:
+    EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="EthioJobPortal <noreply@ethiojobportal.com>")
 
 # Cloudinary Cloud Storage Config (For CV PDFs & Company Logos)
