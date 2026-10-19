@@ -5,9 +5,14 @@
 {% block content %}
 <section class="bg-light-gray py-4">
     <div class="container-fluid px-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap" style="gap: 10px;">
             <h2><i class="fa fa-shield text-warning"></i> Platform Admin Dashboard</h2>
-            <a href="/admin/" class="btn btn-outline-dark"><i class="fa fa-cogs"></i> Django Native Admin</a>
+            <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                <a href="{% url 'jobs:employer-jobs-create' %}" class="btn btn-primary font-weight-bold shadow-sm">
+                    <i class="fa fa-plus-circle mr-1"></i> Post Job as Admin
+                </a>
+                <a href="/admin/" class="btn btn-outline-dark"><i class="fa fa-cogs"></i> Django Native Admin</a>
+            </div>
         </div>
 
         <!-- Metric Stat Cards -->
@@ -50,39 +55,116 @@
             <!-- Jobs Moderation -->
             <div class="col-lg-7 mb-4">
                 <div class="card border-0 shadow-sm p-3">
-                    <h5 class="card-title text-dark mb-3"><i class="fa fa-briefcase text-primary"></i> Job Listings Moderation</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap" style="gap: 8px;">
+                        <h5 class="card-title text-dark mb-0"><i class="fa fa-briefcase text-primary mr-1"></i> Job Listings Moderation</h5>
+                        <a href="{% url 'jobs:employer-jobs-create' %}" class="btn btn-sm btn-outline-primary font-weight-bold">
+                            <i class="fa fa-plus mr-1"></i> Post New Job
+                        </a>
+                    </div>
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle">
+                        <table class="table table-hover align-middle mb-0" style="min-width: 580px;">
                             <thead class="thead-light">
                                 <tr>
                                     <th>Job Title</th>
                                     <th>Employer</th>
                                     <th>Status</th>
-                                    <th>Actions</th>
+                                    <th style="min-width: 170px;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for job in recent_jobs %}
                                 <tr>
                                     <td>
-                                        <a href="{% url 'jobs:jobs-detail' job.id %}" class="font-weight-bold text-dark">{{ job.title }}</a>
-                                        <small class="d-block text-muted">{{ job.location }} | {{ job.created_at|date:"M d, Y" }}</small>
+                                        <div class="d-flex align-items-center">
+                                            {% if job.logo %}
+                                                <img src="{{ job.logo.url }}" alt="{{ job.company_name }}" class="rounded mr-2 border bg-white" style="width: 32px; height: 32px; object-fit: contain; flex-shrink: 0;">
+                                            {% endif %}
+                                            <div>
+                                                <a href="{% url 'jobs:jobs-detail' job.id %}" class="font-weight-bold text-dark text-truncate d-inline-block" style="max-width: 180px;" title="{{ job.title }}">{{ job.title }}</a>
+                                                <div class="d-flex align-items-center flex-wrap" style="gap: 4px;">
+                                                    <small class="text-muted">{{ job.location|default:"Ethiopia" }} | {{ job.created_at|date:"M d" }}</small>
+                                                    {% if job.is_featured %}
+                                                        <span class="badge badge-warning text-dark px-1" style="font-size: 0.68rem;"><i class="fa fa-star"></i> VIP</span>
+                                                    {% endif %}
+                                                    {% if job.filled %}
+                                                        <span class="badge badge-secondary px-1" style="font-size: 0.68rem;">Filled</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </td>
-                                    <td>{{ job.company_name }}</td>
+                                    <td>
+                                        <span class="text-truncate d-inline-block" style="max-width: 120px;" title="{{ job.company_name|default:job.user.email }}">
+                                            {{ job.company_name|default:job.user.email }}
+                                        </span>
+                                    </td>
                                     <td>
                                         {% if job.status == 'approved' %}
                                             <span class="badge badge-success">Approved</span>
                                         {% elif job.status == 'pending' %}
-                                            <span class="badge badge-warning">Pending Approval</span>
+                                            <span class="badge badge-warning">Pending</span>
                                         {% else %}
                                             <span class="badge badge-danger">Rejected</span>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if job.status != 'approved' %}
-                                            <a href="{% url 'jobs:admin-approve-job' job.id %}" class="btn btn-xs btn-success mr-1">Approve</a>
-                                        {% endif %}
-                                        <a href="{% url 'jobs:admin-delete-job' job.id %}" class="btn btn-xs btn-danger" onclick="return confirm('Delete this job listing?');">Delete</a>
+                                        <div class="d-flex align-items-center flex-wrap" style="gap: 4px;">
+                                            <!-- Edit Job -->
+                                            <a href="{% url 'jobs:employer-jobs-edit' job.id %}" class="btn btn-xs btn-outline-primary" title="Edit this job">
+                                                <i class="fa fa-edit"></i>
+                                            </a>
+
+                                            <!-- Status Changer Dropdown -->
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-xs btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Change Status">
+                                                    <i class="fa fa-cog"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right shadow-sm p-1" style="font-size: 0.82rem; min-width: 150px;">
+                                                    {% if job.status != 'approved' %}
+                                                        <a class="dropdown-item text-success py-1" href="{% url 'jobs:admin-set-job-status' job.id 'approved' %}">
+                                                            <i class="fa fa-check-circle mr-1"></i> Approve
+                                                        </a>
+                                                    {% endif %}
+                                                    {% if job.status != 'pending' %}
+                                                        <a class="dropdown-item text-warning py-1" href="{% url 'jobs:admin-set-job-status' job.id 'pending' %}">
+                                                            <i class="fa fa-clock-o mr-1"></i> Set Pending
+                                                        </a>
+                                                    {% endif %}
+                                                    {% if job.status != 'rejected' %}
+                                                        <a class="dropdown-item text-danger py-1" href="{% url 'jobs:admin-set-job-status' job.id 'rejected' %}">
+                                                            <i class="fa fa-times-circle mr-1"></i> Reject
+                                                        </a>
+                                                    {% endif %}
+                                                    <div class="dropdown-divider my-1"></div>
+                                                    <a class="dropdown-item text-secondary py-1" href="{% url 'jobs:admin-set-job-status' job.id 'filled' %}">
+                                                        <i class="fa fa-flag mr-1"></i> {% if job.filled %}Mark Active{% else %}Mark Filled{% endif %}
+                                                    </a>
+                                                </div>
+                                            </div>
+
+                                            <!-- Toggle VIP Featured -->
+                                            <a href="{% url 'jobs:admin-toggle-featured' job.id %}" 
+                                               class="btn btn-xs {% if job.is_featured %}btn-warning text-dark font-weight-bold{% else %}btn-outline-warning text-dark{% endif %}" 
+                                               title="{% if job.is_featured %}Remove VIP Featured{% else %}Make VIP Featured (30 Days){% endif %}">
+                                                <i class="fa fa-star"></i>
+                                            </a>
+
+                                            <!-- Telegram Broadcast -->
+                                            <a href="{% url 'jobs:admin-broadcast-telegram' job.id %}" 
+                                               class="btn btn-xs btn-outline-info" 
+                                               title="Broadcast to Telegram Channel"
+                                               onclick="return confirm('Broadcast job to Telegram Channel right now?');">
+                                                <i class="fa fa-paper-plane"></i>
+                                            </a>
+
+                                            <!-- Delete Job -->
+                                            <a href="{% url 'jobs:admin-delete-job' job.id %}" 
+                                               class="btn btn-xs btn-outline-danger" 
+                                               onclick="return confirm('Permanently delete this job listing?');"
+                                               title="Delete Job">
+                                                <i class="fa fa-trash"></i>
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% endfor %}

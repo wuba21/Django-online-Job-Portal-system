@@ -2,7 +2,7 @@ from django.urls import include, path
 
 from jobsapp.views.admin_dashboard import (
     AdminDashboardView, admin_analytics_dashboard, approve_job, delete_job, toggle_user_active,
-    bulk_toggle_users
+    bulk_toggle_users, set_job_status, toggle_job_featured, broadcast_job_telegram
 )
 from jobsapp.views.employee import (
     ApplicantDashboardView, EditProfileView, EmployeeMyJobsListView, FavoriteListView,
@@ -86,6 +86,9 @@ urlpatterns = [
     path("platform-admin/toggle-user/<int:user_id>/", toggle_user_active, name="admin-toggle-user"),
     path("platform-admin/bulk-toggle-users/", bulk_toggle_users, name="admin-bulk-toggle-users"),
     path("platform-admin/approve-job/<int:job_id>/", approve_job, name="admin-approve-job"),
+    path("platform-admin/set-status/<int:job_id>/<str:status>/", set_job_status, name="admin-set-job-status"),
+    path("platform-admin/toggle-featured/<int:job_id>/", toggle_job_featured, name="admin-toggle-featured"),
+    path("platform-admin/broadcast-telegram/<int:job_id>/", broadcast_job_telegram, name="admin-broadcast-telegram"),
     path("platform-admin/delete-job/<int:job_id>/", delete_job, name="admin-delete-job"),
 
     # Public Job Pages

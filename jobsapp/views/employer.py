@@ -125,6 +125,11 @@ class JobCreateView(CreateView):
         messages.success(self.request, "Job posted successfully.")
         return response
 
+    def get_success_url(self):
+        if self.request.user.is_superuser or self.request.user.is_staff:
+            return reverse_lazy("jobs:admin-dashboard")
+        return reverse_lazy("jobs:employer-dashboard")
+
 
 @method_decorator(login_required(login_url=reverse_lazy("accounts:login")), name="dispatch")
 @method_decorator(user_is_employer, name="dispatch")
@@ -134,11 +139,17 @@ class JobUpdateView(UpdateView):
     extra_context = {"title": "Edit Job"}
     slug_field = "id"
     slug_url_kwarg = "id"
-    success_url = reverse_lazy("jobs:employer-dashboard")
     context_object_name = "job"
 
     def get_queryset(self):
+        if self.request.user.is_superuser or self.request.user.is_staff:
+            return Job.objects.all()
         return Job.objects.filter(user_id=self.request.user.id)
+
+    def get_success_url(self):
+        if self.request.user.is_superuser or self.request.user.is_staff:
+            return reverse_lazy("jobs:admin-dashboard")
+        return reverse_lazy("jobs:employer-dashboard")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -148,11 +159,16 @@ class JobUpdateView(UpdateView):
         return context
 
     def form_valid(self, form):
-        form.instance.user = self.request.user
+        if not (self.request.user.is_superuser or self.request.user.is_staff):
+            form.instance.user = self.request.user
+        elif not form.instance.user_id:
+            form.instance.user = self.request.user
+
         if not form.instance.company:
+            company_name = form.cleaned_data.get("company_name", "Company")
             company, _ = Company.objects.get_or_create(
-                user=self.request.user,
-                defaults={"name": form.cleaned_data.get("company_name", "Company")}
+                name=company_name,
+                defaults={"user": form.instance.user}
             )
             form.instance.company = company
         uploaded_logo = form.cleaned_data.get("logo")
@@ -186,10 +202,18 @@ class JobUpdateView(UpdateView):
 @login_required(login_url=reverse_lazy("accounts:login"))
 @user_is_employer
 def delete_employer_job(request, job_id):
-    job = get_object_or_404(Job, id=job_id, user=request.user)
+    if request.user.is_superuser or request.user.is_staff:
+        job = get_object_or_404(Job, id=job_id)
+    else:
+        job = get_object_or_404(Job, id=job_id, user=request.user)
     title = job.title
     job.delete()
     messages.success(request, f"Job '{title}' deleted successfully.")
+    referer = request.META.get("HTTP_REFERER")
+    if referer and "jobs/" not in referer:
+        return redirect(referer)
+    if request.user.is_superuser or request.user.is_staff:
+        return redirect("jobs:admin-dashboard")
     return redirect("jobs:employer-dashboard")
 
 

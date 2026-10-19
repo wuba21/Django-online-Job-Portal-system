@@ -69,6 +69,69 @@ def approve_job(request, job_id):
         pass
 
     messages.success(request, f"Job '{job.title}' approved successfully.")
+    referer = request.META.get("HTTP_REFERER")
+    if referer and ("jobs/" in referer or "platform-admin" in referer):
+        return redirect(referer)
+    return redirect("jobs:admin-dashboard")
+
+
+@superuser_required
+def set_job_status(request, job_id, status):
+    job = get_object_or_404(Job, id=job_id)
+    if status in ["approved", "pending", "rejected"]:
+        job.status = status
+        if status == "approved":
+            try:
+                from jobsapp.utils.telegram import broadcast_job_to_telegram
+                broadcast_job_to_telegram(job)
+            except Exception:
+                pass
+        job.save()
+        messages.success(request, f"Job status changed to {status.upper()}.")
+    elif status == "filled":
+        job.filled = not job.filled
+        job.save()
+        messages.success(request, f"Job marked as {'FILLED' if job.filled else 'ACTIVE'}.")
+    else:
+        messages.warning(request, "Invalid job status.")
+    
+    referer = request.META.get("HTTP_REFERER")
+    if referer:
+        return redirect(referer)
+    return redirect("jobs:admin-dashboard")
+
+
+@superuser_required
+def toggle_job_featured(request, job_id):
+    job = get_object_or_404(Job, id=job_id)
+    job.is_featured = not job.is_featured
+    if job.is_featured:
+        job.featured_until = timezone.now() + timedelta(days=30)
+        messages.success(request, f"Job '{job.title}' is now VIP FEATURED on homepage.")
+    else:
+        job.featured_until = None
+        messages.info(request, f"Job '{job.title}' is no longer featured.")
+    job.save()
+    
+    referer = request.META.get("HTTP_REFERER")
+    if referer:
+        return redirect(referer)
+    return redirect("jobs:admin-dashboard")
+
+
+@superuser_required
+def broadcast_job_telegram(request, job_id):
+    job = get_object_or_404(Job, id=job_id)
+    try:
+        from jobsapp.utils.telegram import broadcast_job_to_telegram
+        broadcast_job_to_telegram(job)
+        messages.success(request, f"Job '{job.title}' successfully broadcast to Telegram Channel!")
+    except Exception as e:
+        messages.error(request, f"Failed to broadcast to Telegram: {e}")
+    
+    referer = request.META.get("HTTP_REFERER")
+    if referer:
+        return redirect(referer)
     return redirect("jobs:admin-dashboard")
 
 
@@ -78,6 +141,9 @@ def delete_job(request, job_id):
     title = job.title
     job.delete()
     messages.success(request, f"Job '{title}' deleted.")
+    referer = request.META.get("HTTP_REFERER")
+    if referer and "jobs/" not in referer:
+        return redirect(referer)
     return redirect("jobs:admin-dashboard")
 
 
