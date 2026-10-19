@@ -8,7 +8,7 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 
-def broadcast_job_to_telegram(job, domain="https://wubante.pythonanywhere.com"):
+def broadcast_job_to_telegram(job, domain=None, request=None, return_detail=False):
     """
     Broadcasts a newly posted or approved job vacancy to Telegram Channel / Bot.
     Reads TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID from settings.
@@ -16,14 +16,25 @@ def broadcast_job_to_telegram(job, domain="https://wubante.pythonanywhere.com"):
     bot_token = getattr(settings, "TELEGRAM_BOT_TOKEN", "") or env_fallback("TELEGRAM_BOT_TOKEN")
     chat_id = getattr(settings, "TELEGRAM_CHAT_ID", "") or env_fallback("TELEGRAM_CHAT_ID") or "-1003318389514"
 
-    if not bot_token:
-        logger.warning("Telegram broadcast skipped: TELEGRAM_BOT_TOKEN is not configured.")
-        return False
+    # Always ensure valid target channel ID even if cache/old settings had @ethio_jobportal
+    if str(chat_id).strip() in ["@ethio_jobportal", ""]:
+        chat_id = "-1003318389514"
 
-    if getattr(job, "slug", None):
-        job_url = f"{domain}/en/jobs/{job.slug}/"
-    else:
-        job_url = f"{domain}/en/jobs/{job.id}/"
+    if not bot_token:
+        err = "TELEGRAM_BOT_TOKEN is not configured in settings or .env."
+        logger.warning(f"Telegram broadcast skipped: {err}")
+        return (False, err) if return_detail else False
+
+    # Resolve target portal domain dynamically
+    if not domain:
+        if request is not None:
+            domain = request.build_absolute_uri('/')[:-1]
+        else:
+            domain = getattr(settings, "SITE_URL", "") or "https://wubante.pythonanywhere.com"
+    domain = domain.rstrip("/")
+
+    # Use /jobs/<id>/ which redirects directly and reliably in all environments
+    job_url = f"{domain}/jobs/{job.id}/"
 
     salary_val = getattr(job, "salary", 0) or 0
     salary_text = f"{salary_val:,} {getattr(job, 'currency', 'ETB')}" if salary_val > 0 else "Negotiable"
@@ -56,23 +67,28 @@ def broadcast_job_to_telegram(job, domain="https://wubante.pythonanywhere.com"):
     )
 
     try:
-        with urllib.request.urlopen(req, timeout=10) as response:
+        with urllib.request.urlopen(req, timeout=25) as response:
             res = json.loads(response.read().decode("utf-8"))
             ok = res.get("ok", False)
             if ok:
                 logger.info(f"Telegram broadcast successful for job '{job.title}' to {chat_id}")
+                return (True, "Delivered to Telegram") if return_detail else True
             else:
+                desc = res.get("description", "Unknown Telegram API response")
                 logger.warning(f"Telegram API response not OK: {res}")
-            return ok
+                return (False, desc) if return_detail else False
     except urllib.error.HTTPError as e:
         err_body = e.read().decode("utf-8")
-        logger.error(f"Telegram API HTTP Error {e.code}: {err_body}")
-        print(f"Telegram API HTTP Error {e.code}: {err_body}")
-        return False
+        try:
+            err_json = json.loads(err_body)
+            err_desc = err_json.get("description", err_body)
+        except Exception:
+            err_desc = err_body
+        logger.error(f"Telegram API HTTP Error {e.code}: {err_desc}")
+        return (False, f"HTTP {e.code}: {err_desc}") if return_detail else False
     except Exception as e:
         logger.error(f"Telegram broadcast network error: {e}")
-        print(f"Telegram broadcast network error: {e}")
-        return False
+        return (False, str(e)) if return_detail else False
 
 
 def env_fallback(key):

@@ -64,7 +64,7 @@ def approve_job(request, job_id):
     # Broadcast vacancy alert to Telegram Channel/Bot
     try:
         from jobsapp.utils.telegram import broadcast_job_to_telegram
-        broadcast_job_to_telegram(job)
+        broadcast_job_to_telegram(job, request=request)
     except Exception:
         pass
 
@@ -83,7 +83,7 @@ def set_job_status(request, job_id, status):
         if status == "approved":
             try:
                 from jobsapp.utils.telegram import broadcast_job_to_telegram
-                broadcast_job_to_telegram(job)
+                broadcast_job_to_telegram(job, request=request)
             except Exception:
                 pass
         job.save()
@@ -124,8 +124,11 @@ def broadcast_job_telegram(request, job_id):
     job = get_object_or_404(Job, id=job_id)
     try:
         from jobsapp.utils.telegram import broadcast_job_to_telegram
-        broadcast_job_to_telegram(job)
-        messages.success(request, f"Job '{job.title}' successfully broadcast to Telegram Channel!")
+        ok, detail = broadcast_job_to_telegram(job, request=request, return_detail=True)
+        if ok:
+            messages.success(request, f"Job '{job.title}' successfully broadcast to Telegram Channel!")
+        else:
+            messages.error(request, f"Telegram Broadcast Failed: {detail}")
     except Exception as e:
         messages.error(request, f"Failed to broadcast to Telegram: {e}")
     
