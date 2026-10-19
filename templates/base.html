@@ -95,47 +95,6 @@
                 transform: translateY(0);
             }
         }
-
-        /* Sleek Modern Centered Notification Bell */
-        .notif-bell-btn {
-            position: relative !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            width: 38px !important;
-            height: 38px !important;
-            border-radius: 50% !important;
-            background: rgba(255, 255, 255, 0.08) !important;
-            transition: all 0.2s ease !important;
-            padding: 0 !important;
-            margin: 0 4px !important;
-            text-decoration: none !important;
-        }
-        .notif-bell-btn:hover {
-            background: rgba(255, 255, 255, 0.18) !important;
-            transform: scale(1.05);
-            color: #fff !important;
-        }
-        .notif-badge-count {
-            position: absolute !important;
-            top: -2px !important;
-            right: -2px !important;
-            min-width: 18px !important;
-            height: 18px !important;
-            line-height: 14px !important;
-            padding: 0 4px !important;
-            background: #ef4444 !important;
-            color: #ffffff !important;
-            font-size: 10px !important;
-            font-weight: 700 !important;
-            text-align: center !important;
-            border-radius: 9px !important;
-            border: 2px solid #111827 !important;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35) !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
@@ -223,46 +182,6 @@
                             </a>
                         </li>
                         {% if request.user.is_authenticated %}
-                            <!-- Dedicated Notifications Dropdown Bell -->
-                            <li class="nav-item dropdown mr-lg-2 d-flex align-items-center">
-                                <a id="notificationsDropdown" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                                   class="nav-link notif-bell-btn text-white" title="{% trans 'Notifications' %}">
-                                    <i class="fa fa-bell" style="font-size: 1.15rem; color: #f8fafc;"></i>
-                                    {% if unread_notifications_count > 0 %}
-                                        <span class="notif-badge-count">
-                                            {{ unread_notifications_count }}
-                                        </span>
-                                    {% endif %}
-                                </a>
-                                <div aria-labelledby="notificationsDropdown" class="dropdown-menu dropdown-menu-right shadow-lg p-0" style="min-width: 320px; max-width: 360px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; margin-top: 8px;">
-                                    <div class="d-flex justify-content-between align-items-center p-2 bg-light border-bottom">
-                                        <strong class="text-dark small"><i class="fa fa-bell text-primary mr-1"></i> {% trans "Notifications" %}</strong>
-                                        {% if unread_notifications_count > 0 %}
-                                            <a href="{% url 'jobs:mark-all-notifications-read' %}" class="small text-primary font-weight-bold" style="font-size: 0.75rem;">{% trans "Mark all as read" %}</a>
-                                        {% endif %}
-                                    </div>
-                                    <div class="list-group list-group-flush" style="max-height: 280px; overflow-y: auto;">
-                                        {% for notif in recent_unread_notifications %}
-                                            <a href="{% url 'jobs:mark-notification-read' notif.id %}" class="list-group-item list-group-item-action p-2 border-bottom">
-                                                <div class="d-flex w-100 justify-content-between">
-                                                    <h6 class="mb-1 text-dark font-weight-bold text-truncate" style="font-size: 0.85rem; max-width: 220px;">{{ notif.title }}</h6>
-                                                    <small class="text-muted" style="font-size: 0.7rem;">{{ notif.created_at|timesince }}</small>
-                                                </div>
-                                                <p class="mb-0 text-muted small text-truncate" style="font-size: 0.78rem;">{{ notif.message }}</p>
-                                            </a>
-                                        {% empty %}
-                                            <div class="p-3 text-center text-muted small">
-                                                <i class="fa fa-check-circle text-success d-block mb-1" style="font-size: 1.5rem;"></i>
-                                                {% trans "You have no unread notifications." %}
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                    <div class="p-2 text-center bg-light border-top">
-                                        <a href="{% url 'jobs:notifications' %}" class="btn btn-sm btn-link p-0 text-primary font-weight-bold" style="font-size: 0.82rem;">{% trans "View All Notifications" %} &rarr;</a>
-                                    </div>
-                                </div>
-                            </li>
-
                             <li class="nav-item dropdown d-flex align-items-center">
                                 <a id="clientZone" href="#" data-toggle="dropdown"
                                    aria-haspopup="true" aria-expanded="false"
