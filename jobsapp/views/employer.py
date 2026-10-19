@@ -101,10 +101,6 @@ class JobCreateView(CreateView):
             defaults={"name": form.cleaned_data.get("company_name", "Company")}
         )
         form.instance.company = company
-        uploaded_logo = form.cleaned_data.get("logo")
-        if uploaded_logo and not company.logo:
-            company.logo = uploaded_logo
-            company.save(update_fields=["logo"])
 
         response = super(JobCreateView, self).form_valid(form)
         job = self.object
@@ -118,9 +114,6 @@ class JobCreateView(CreateView):
         if not job.logo and images:
             job.logo = images[0]
             job.save(update_fields=["logo"])
-            if not company.logo:
-                company.logo = images[0]
-                company.save(update_fields=["logo"])
 
         messages.success(self.request, "Job posted successfully.")
         return response
@@ -171,10 +164,6 @@ class JobUpdateView(UpdateView):
                 defaults={"user": form.instance.user}
             )
             form.instance.company = company
-        uploaded_logo = form.cleaned_data.get("logo")
-        if uploaded_logo and form.instance.company and not form.instance.company.logo:
-            form.instance.company.logo = uploaded_logo
-            form.instance.company.save(update_fields=["logo"])
 
         response = super(JobUpdateView, self).form_valid(form)
         job = self.object

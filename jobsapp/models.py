@@ -135,11 +135,6 @@ class Job(models.Model):
                 return first_img.image.url
             except Exception:
                 pass
-        if self.company and self.company.logo:
-            try:
-                return self.company.logo.url
-            except Exception:
-                pass
         return None
 
     @property
