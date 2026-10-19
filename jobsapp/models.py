@@ -129,6 +129,12 @@ class Job(models.Model):
                 return self.logo.url
             except Exception:
                 pass
+        first_img = self.images.first()
+        if first_img and first_img.image:
+            try:
+                return first_img.image.url
+            except Exception:
+                pass
         if self.company and self.company.logo:
             try:
                 return self.company.logo.url
@@ -145,6 +151,19 @@ class Job(models.Model):
         if len(parts) >= 2:
             return (parts[0][0] + parts[1][0]).upper()
         return name[:2].upper()
+
+
+class JobImage(models.Model):
+    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="images")
+    image = models.ImageField(upload_to="job_screenshots/")
+    caption = models.CharField(max_length=200, blank=True, null=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["id"]
+
+    def __str__(self):
+        return f"Image for {self.job.title} (#{self.id})"
 
 
 class Applicant(models.Model):

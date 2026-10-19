@@ -122,6 +122,36 @@
                     </div>
                 </div>
 
+                {% if job.images.all %}
+                <!-- Vacancy Screenshots & Announcement Flyers Gallery -->
+                <div class="card border-0 shadow-sm p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3 flex-wrap">
+                        <h4 class="card-title text-primary mb-1">
+                            <i class="fa fa-file-image-o mr-2"></i> Vacancy Announcement Flyers & Screenshots ({{ job.images.all.count }})
+                        </h4>
+                        <small class="text-muted"><i class="fa fa-search-plus mr-1"></i> Click any page to view / download full size</small>
+                    </div>
+
+                    <div class="row">
+                        {% for img_item in job.images.all %}
+                            <div class="{% if job.images.all.count == 1 %}col-12{% elif job.images.all.count == 2 %}col-md-6{% else %}col-md-6 col-lg-4{% endif %} mb-3">
+                                <div class="border rounded p-2 bg-light text-center shadow-sm h-100 d-flex flex-column justify-content-between">
+                                    <a href="{{ img_item.image.url }}" target="_blank" class="d-block" title="Click to view full image">
+                                        <img src="{{ img_item.image.url }}" alt="Flyer Page {{ forloop.counter }}" class="img-fluid rounded border" style="max-height: 340px; width: 100%; object-fit: contain; background: #fff;">
+                                    </a>
+                                    <div class="mt-2 pt-2 border-top d-flex justify-content-between align-items-center">
+                                        <span class="badge badge-primary px-2 py-1">Page {{ forloop.counter }}</span>
+                                        <a href="{{ img_item.image.url }}" target="_blank" class="btn btn-sm btn-outline-primary py-1 px-2 font-weight-bold" style="font-size: 0.8rem;">
+                                            <i class="fa fa-expand mr-1"></i> Full View
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
                 <!-- Action Bar -->
                 <div class="d-flex flex-wrap justify-content-between align-items-center mb-4" style="gap: 10px;">
                     <button type="button" class="btn btn-outline-info" onclick="navigator.clipboard.writeText(window.location.href); alert('Job link copied to clipboard!');">

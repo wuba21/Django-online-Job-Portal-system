@@ -13,7 +13,7 @@ from accounts.models import Company
 from categories.models import Category
 from jobsapp.decorators import user_is_employer
 from jobsapp.forms import CompanyForm, CreateJobForm
-from jobsapp.models import Applicant, Job
+from jobsapp.models import Applicant, Job, JobImage
 from jobsapp.utils.notifications import create_notification, send_event_email
 from tags.models import Tag
 
@@ -105,8 +105,25 @@ class JobCreateView(CreateView):
         if uploaded_logo and not company.logo:
             company.logo = uploaded_logo
             company.save(update_fields=["logo"])
+
+        response = super(JobCreateView, self).form_valid(form)
+        job = self.object
+
+        # Handle multiple screenshot / flyer photo uploads
+        images = self.request.FILES.getlist("job_images")
+        for img in images:
+            JobImage.objects.create(job=job, image=img)
+
+        # If logo was not uploaded separately, adopt the first screenshot as job logo
+        if not job.logo and images:
+            job.logo = images[0]
+            job.save(update_fields=["logo"])
+            if not company.logo:
+                company.logo = images[0]
+                company.save(update_fields=["logo"])
+
         messages.success(self.request, "Job posted successfully.")
-        return super(JobCreateView, self).form_valid(form)
+        return response
 
 
 @method_decorator(login_required(login_url=reverse_lazy("accounts:login")), name="dispatch")
@@ -127,6 +144,7 @@ class JobUpdateView(UpdateView):
         context = super().get_context_data(**kwargs)
         context["tags"] = Tag.objects.all()
         context["categories"] = Category.objects.all()
+        context["existing_images"] = self.object.images.all() if self.object else []
         return context
 
     def form_valid(self, form):
@@ -141,8 +159,28 @@ class JobUpdateView(UpdateView):
         if uploaded_logo and form.instance.company and not form.instance.company.logo:
             form.instance.company.logo = uploaded_logo
             form.instance.company.save(update_fields=["logo"])
+
+        response = super(JobUpdateView, self).form_valid(form)
+        job = self.object
+
+        # Handle deleted existing images
+        delete_ids = self.request.POST.getlist("delete_job_images")
+        if delete_ids:
+            JobImage.objects.filter(job=job, id__in=delete_ids).delete()
+
+        # Handle new multiple screenshots / photos
+        new_images = self.request.FILES.getlist("job_images")
+        for img in new_images:
+            JobImage.objects.create(job=job, image=img)
+
+        if not job.logo and job.images.exists():
+            first_img = job.images.first()
+            if first_img:
+                job.logo = first_img.image
+                job.save(update_fields=["logo"])
+
         messages.success(self.request, "Job updated successfully.")
-        return super(JobUpdateView, self).form_valid(form)
+        return response
 
 
 @login_required(login_url=reverse_lazy("accounts:login"))
