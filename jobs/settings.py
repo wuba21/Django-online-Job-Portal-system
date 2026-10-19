@@ -246,7 +246,7 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 # cors config
 if DEBUG:
     CORS_ORIGIN_ALLOW_ALL = True
-    ALLOWED_HOSTS = ["127.0.0.1", "localhost", "*.pythonanywhere.com"]
+    ALLOWED_HOSTS = ["127.0.0.1", "localhost", "testserver", "*.pythonanywhere.com"]
 else:
     # Restrict to actual production domains in production
     CORS_ORIGIN_ALLOW_ALL = False
@@ -254,7 +254,7 @@ else:
         "https://wubante.pythonanywhere.com",
         "https://wuba21.pythonanywhere.com",
     ]
-    ALLOWED_HOSTS = ["wubante.pythonanywhere.com", "wuba21.pythonanywhere.com", "*.pythonanywhere.com"]
+    ALLOWED_HOSTS = ["wubante.pythonanywhere.com", "wuba21.pythonanywhere.com", "*.pythonanywhere.com", "testserver"]
 
 CORS_ALLOW_METHODS = ("DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT")
 
