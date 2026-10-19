@@ -224,7 +224,7 @@
     }
     if ($(window).width() <= 768) {
         $('#loadingMessage').css('display', 'none');
-        $('#mobileAlert').css('display', 'block');
+        $('#mobileAlert').css('display', 'flex');
     }
     // End Change template
 
