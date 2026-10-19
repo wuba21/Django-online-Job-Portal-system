@@ -46,7 +46,7 @@ class TemplateListView(ListView):
         return data
 
 
-class ResumeCVCreateView(LoginRequiredMixin, EmployeeRequiredMixin, View):
+class ResumeCVCreateView(LoginRequiredMixin, View):
     """
     Create resume/cv
     """
@@ -155,7 +155,6 @@ class UserResumeListView(ListView):
 
 
 @login_required
-@user_is_employee
 def download_resume(request, id):
     resume = ResumeCv.objects.get(id=id)
     if resume:
@@ -201,7 +200,6 @@ def download_resume(request, id):
 
 
 @login_required
-@user_is_employee
 def auto_cv_builder(request):
     user = request.user
     profile = getattr(user, "applicant_profile", None)
