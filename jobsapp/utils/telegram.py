@@ -21,7 +21,7 @@ def broadcast_job_to_telegram(job, domain="https://wubante.pythonanywhere.com"):
         return False
 
     if getattr(job, "slug", None):
-        job_url = f"{domain}/jobs/{job.slug}/"
+        job_url = f"{domain}/en/jobs/{job.slug}/"
     else:
         job_url = f"{domain}/en/jobs/{job.id}/"
 
