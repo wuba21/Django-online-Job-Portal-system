@@ -95,6 +95,47 @@
                 transform: translateY(0);
             }
         }
+
+        /* Sleek Modern Centered Notification Bell */
+        .notif-bell-btn {
+            position: relative !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 38px !important;
+            height: 38px !important;
+            border-radius: 50% !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+            transition: all 0.2s ease !important;
+            padding: 0 !important;
+            margin: 0 4px !important;
+            text-decoration: none !important;
+        }
+        .notif-bell-btn:hover {
+            background: rgba(255, 255, 255, 0.18) !important;
+            transform: scale(1.05);
+            color: #fff !important;
+        }
+        .notif-badge-count {
+            position: absolute !important;
+            top: -2px !important;
+            right: -2px !important;
+            min-width: 18px !important;
+            height: 18px !important;
+            line-height: 14px !important;
+            padding: 0 4px !important;
+            background: #ef4444 !important;
+            color: #ffffff !important;
+            font-size: 10px !important;
+            font-weight: 700 !important;
+            text-align: center !important;
+            border-radius: 9px !important;
+            border: 2px solid #111827 !important;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35) !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
@@ -185,19 +226,19 @@
                             <!-- Dedicated Notifications Dropdown Bell -->
                             <li class="nav-item dropdown mr-lg-2 d-flex align-items-center">
                                 <a id="notificationsDropdown" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                                   class="nav-link position-relative px-2 py-1 text-white" title="Notifications" style="line-height: 1;">
-                                    <i class="fa fa-bell" style="font-size: 1.25rem;"></i>
+                                   class="nav-link notif-bell-btn text-white" title="{% trans 'Notifications' %}">
+                                    <i class="fa fa-bell" style="font-size: 1.15rem; color: #f8fafc;"></i>
                                     {% if unread_notifications_count > 0 %}
-                                        <span class="badge badge-pill badge-danger position-absolute" style="top: -2px; right: -4px; font-size: 10px; padding: 2px 5px; box-shadow: 0 0 4px rgba(0,0,0,0.4);">
+                                        <span class="notif-badge-count">
                                             {{ unread_notifications_count }}
                                         </span>
                                     {% endif %}
                                 </a>
-                                <div aria-labelledby="notificationsDropdown" class="dropdown-menu dropdown-menu-right shadow p-0" style="min-width: 320px; max-width: 360px; border-radius: 8px;">
+                                <div aria-labelledby="notificationsDropdown" class="dropdown-menu dropdown-menu-right shadow-lg p-0" style="min-width: 320px; max-width: 360px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; margin-top: 8px;">
                                     <div class="d-flex justify-content-between align-items-center p-2 bg-light border-bottom">
-                                        <strong class="text-dark small"><i class="fa fa-bell text-primary mr-1"></i> Notifications</strong>
+                                        <strong class="text-dark small"><i class="fa fa-bell text-primary mr-1"></i> {% trans "Notifications" %}</strong>
                                         {% if unread_notifications_count > 0 %}
-                                            <a href="{% url 'jobs:mark-all-notifications-read' %}" class="small text-muted font-weight-bold" style="font-size: 0.75rem;">Mark all as read</a>
+                                            <a href="{% url 'jobs:mark-all-notifications-read' %}" class="small text-primary font-weight-bold" style="font-size: 0.75rem;">{% trans "Mark all as read" %}</a>
                                         {% endif %}
                                     </div>
                                     <div class="list-group list-group-flush" style="max-height: 280px; overflow-y: auto;">
@@ -212,21 +253,21 @@
                                         {% empty %}
                                             <div class="p-3 text-center text-muted small">
                                                 <i class="fa fa-check-circle text-success d-block mb-1" style="font-size: 1.5rem;"></i>
-                                                You have no unread notifications.
+                                                {% trans "You have no unread notifications." %}
                                             </div>
                                         {% endfor %}
                                     </div>
                                     <div class="p-2 text-center bg-light border-top">
-                                        <a href="{% url 'jobs:notifications' %}" class="btn btn-sm btn-link p-0 text-primary font-weight-bold" style="font-size: 0.82rem;">View All Notifications &rarr;</a>
+                                        <a href="{% url 'jobs:notifications' %}" class="btn btn-sm btn-link p-0 text-primary font-weight-bold" style="font-size: 0.82rem;">{% trans "View All Notifications" %} &rarr;</a>
                                     </div>
                                 </div>
                             </li>
 
-                            <li class="nav-item dropdown">
+                            <li class="nav-item dropdown d-flex align-items-center">
                                 <a id="clientZone" href="#" data-toggle="dropdown"
                                    aria-haspopup="true" aria-expanded="false"
-                                   class="nav-link dropdown-toggle has-img mb-3 mb-lg-0 mt-3 mt-lg-0">
-                                    <div class="client-menu-image" style="position: relative; display: inline-block;">
+                                   class="nav-link dropdown-toggle has-img d-inline-flex align-items-center mb-0 mt-0 py-1">
+                                    <div class="client-menu-image mr-1">
                                         <div class="inner">
                                             {% if request.user.role == 'employer' %}
                                                 {% if request.user.company.logo %}
@@ -242,9 +283,6 @@
                                                 {% endif %}
                                             {% endif %}
                                         </div>
-                                        {% if unread_notifications_count > 0 %}
-                                            <span class="badge badge-pill badge-danger" style="position: absolute; top: -4px; right: -4px; font-size: 9px; padding: 2px 4px;">{{ unread_notifications_count }}</span>
-                                        {% endif %}
                                     </div>
                                     {{ request.user.first_name|default:request.user.email }}
                                 </a>
@@ -304,6 +342,13 @@
                                             <i class="fa fa-shield mr-2"></i> Admin Panel
                                         </a>
                                     {% endif %}
+                                    <div class="dropdown-divider"></div>
+                                    <a href="{% url 'accounts:employee-register' %}" class="dropdown-item">
+                                        <i class="fa fa-user-plus mr-2 text-primary"></i> {% trans "Register Employee" %}
+                                    </a>
+                                    <a href="{% url 'accounts:employer-register' %}" class="dropdown-item">
+                                        <i class="fa fa-building-o mr-2 text-success"></i> {% trans "Register Employer" %}
+                                    </a>
                                     <div class="dropdown-divider"></div>
                                     <a href="{% url 'accounts:logout' %}" class="dropdown-item text-danger">
                                         <i class="fa fa-sign-out mr-2"></i> {% trans "Logout" %}
