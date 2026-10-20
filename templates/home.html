@@ -135,6 +135,55 @@
             </div>
         </section>
     {% endif %}
+
+    <!-- Free Job Alerts Email Subscription Section -->
+    <section class="py-5 bg-white border-top border-bottom">
+        <div class="container">
+            <div class="card border-0 shadow-sm p-4 p-md-5" style="border-radius: 16px; background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); color: #fff;">
+                <div class="row align-items-center">
+                    <div class="col-lg-7 mb-3 mb-lg-0">
+                        <span class="badge badge-warning text-dark font-weight-bold px-3 py-1 mb-2" style="font-size: 0.82rem;">
+                            <i class="fa fa-bell-o mr-1"></i> FREE INSTANT JOB ALERTS
+                        </span>
+                        <h3 class="font-weight-bold text-white mb-2">Be the First to Apply for New Vacancies</h3>
+                        <p class="text-white-50 mb-0" style="font-size: 1rem;">
+                            Get immediate email notifications when top companies and NGOs post jobs matching your skills and location.
+                        </p>
+                    </div>
+                    <div class="col-lg-5">
+                        <form method="post" action="{% url 'jobs:create-job-alert' %}" class="bg-white p-2 rounded shadow-sm">
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <input type="email" name="email" class="form-control border-0" placeholder="Enter your email address..." required value="{% if request.user.is_authenticated %}{{ request.user.email }}{% endif %}">
+                                <div class="input-group-append">
+                                    <button class="btn btn-primary font-weight-bold px-4" type="submit">
+                                        <i class="fa fa-paper-plane mr-1"></i> Subscribe
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        <small class="text-white-50 d-block mt-2 text-center text-lg-left">
+                            <i class="fa fa-shield mr-1"></i> 100% Free &bull; No spam &bull; Unsubscribe anytime
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Top Employers Teaser Section -->
+    <section class="py-5 bg-light-gray">
+        <div class="container text-center">
+            <h3 class="heading mb-2">Explore Verified Employers</h3>
+            <p class="text-muted mb-4">Discover leading Ethiopian and international companies actively hiring on our platform.</p>
+            <div>
+                <a href="{% url 'jobs:companies-list' %}" class="btn btn-outline-primary font-weight-bold px-4 py-2">
+                    <i class="fa fa-building-o mr-1"></i> Browse All Companies Directory <i class="fa fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
     <section class="section-divider">
         <div class="overlay"></div>
         <div class="container">

@@ -1,0 +1,18 @@
+{
+  "name": "Ethiopian Online Job Portal - የስራ ማስታወቂያዎች",
+  "short_name": "Job Portal",
+  "description": "Ethiopia's leading online job portal for verified jobs, companies, and professional CV builder.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/static/img/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

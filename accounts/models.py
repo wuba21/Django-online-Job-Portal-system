@@ -58,6 +58,9 @@ class Company(models.Model):
     website = models.URLField(max_length=200, blank=True, null=True)
     location = models.CharField(max_length=150, blank=True, null=True)
     established_date = models.DateField(blank=True, null=True)
+    industry = models.CharField(max_length=100, blank=True, null=True, help_text="e.g. Banking, Tech, NGO, Construction")
+    team_size = models.CharField(max_length=50, blank=True, null=True, help_text="e.g. 1-10, 11-50, 50-200, 500+")
+    cover_image = models.ImageField(upload_to="company_covers/", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     # Ethiopian Business License & AI Verification Fields

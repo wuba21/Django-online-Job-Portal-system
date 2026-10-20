@@ -48,6 +48,13 @@
 
     {% block styles %}{% endblock %}
 
+    <!-- PWA Web App Manifest & Mobile Meta -->
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#111827">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="JobPortal">
+
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
     <link rel="shortcut icon" href="{% static 'img/favicon.svg' %}">
@@ -236,6 +243,11 @@
                                     <i class="fa fa-diamond mr-2 text-warning"></i>{% trans "Pricing & VIP" %}
                                 </a>
                             </div>
+                        </li>
+                        <li class="nav-item {% if url_name == 'companies-list' or url_name == 'company-detail' %}active{% endif %}">
+                            <a href="{% url 'jobs:companies-list' %}" class="nav-link">
+                                <i class="fa fa-building-o nav-icon"></i><span>{% trans "Companies" %}</span>
+                            </a>
                         </li>
                         <li class="nav-item">
                             <a href="/{{ LANGUAGE_CODE }}/about-us/" class="nav-link">
@@ -604,6 +616,64 @@
         });
     </script>
 {% endif %}
+
+<!-- Mobile PWA App Install Banner -->
+<div id="pwaInstallBanner" style="display: none; position: fixed; bottom: 15px; left: 15px; right: 15px; z-index: 99999; background: #0f172a; color: #fff; padding: 12px 18px; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15);">
+    <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap: 10px;">
+        <div class="d-flex align-items-center">
+            <img src="{% static 'img/favicon.svg' %}" alt="App Icon" style="width: 36px; height: 36px; margin-right: 12px;">
+            <div>
+                <strong style="font-size: 0.92rem; display: block;">Install Job Portal App</strong>
+                <small style="color: rgba(255,255,255,0.7); font-size: 0.78rem;">Add to Home Screen for fast access & alerts</small>
+            </div>
+        </div>
+        <div class="d-flex align-items-center" style="gap: 8px;">
+            <button id="pwaInstallBtn" class="btn btn-sm btn-primary font-weight-bold px-3 py-1" style="border-radius: 8px;">Install</button>
+            <button onclick="dismissPwaBanner()" class="btn btn-sm btn-outline-light py-1 px-2" style="border-radius: 8px;"><i class="fa fa-times"></i></button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // PWA Service Worker Registration
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/static/sw.js').catch(function(err) {
+                console.log('SW registration error:', err);
+            });
+        });
+    }
+
+    // PWA Install Prompt Handler
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        const dismissed = localStorage.getItem('pwa_banner_dismissed');
+        if (!dismissed) {
+            const banner = document.getElementById('pwaInstallBanner');
+            if (banner) banner.style.display = 'block';
+        }
+    });
+
+    const installBtn = document.getElementById('pwaInstallBtn');
+    if (installBtn) {
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                dismissPwaBanner();
+            }
+        });
+    }
+
+    function dismissPwaBanner() {
+        const banner = document.getElementById('pwaInstallBanner');
+        if (banner) banner.style.display = 'none';
+        localStorage.setItem('pwa_banner_dismissed', 'true');
+    }
+</script>
 
 </body>
 

@@ -87,7 +87,10 @@
                     <div>
                         <h1 class="heading mb-1" style="font-size: 1.85rem;">{{ job.title }}</h1>
                         <p class="text-muted mb-0">
-                            at <strong class="text-dark">{{ job.company_name }}</strong> | 
+                            at {% if job.company %}<a href="{% url 'jobs:company-detail' job.company.id %}" class="font-weight-bold text-dark text-decoration-none hover-primary">{{ job.company_name }}</a>{% else %}<strong class="text-dark">{{ job.company_name }}</strong>{% endif %}
+                            {% if job.company.is_license_verified %}
+                                <span class="badge badge-success px-2 py-1 ml-1" style="font-size: 0.72rem;"><i class="fa fa-check-circle"></i> Verified</span>
+                            {% endif %} | 
                             <i class="fa fa-map-marker text-primary"></i> <strong>{{ job.location }}</strong>
                         </p>
                     </div>
@@ -117,10 +120,10 @@
                     {% elif job.filled %}
                         <button class="btn btn-secondary btn-lg shadow-sm px-4 py-3 fw-bold w-100 w-md-auto" disabled><i class="fa fa-ban me-1"></i> Position Filled</button>
                     {% else %}
-                        <form action="{% url 'jobs:apply-job' job.id %}" method="post" class="d-inline-block w-100 w-md-auto">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-primary btn-lg shadow-sm px-4 py-3 fw-bold w-100"><i class="fa fa-paper-plane me-1"></i> APPLY NOW</button>
-                        </form>
+                        <!-- 1-Click Easy Apply Modal Trigger -->
+                        <button type="button" class="btn btn-primary btn-lg shadow-sm px-4 py-3 fw-bold w-100 w-md-auto" data-toggle="modal" data-target="#easyApplyModal">
+                            <i class="fa fa-paper-plane mr-1"></i> 1-CLICK EASY APPLY
+                        </button>
                     {% endif %}
                 {% elif not request.user.is_authenticated %}
                     <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary btn-lg shadow-sm px-4 py-3 fw-bold d-block d-md-inline-block"><i class="fa fa-paper-plane me-1"></i> APPLY NOW</a>
@@ -218,22 +221,45 @@
                 </div>
                 {% endif %}
 
-                <!-- Action Bar -->
-                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4" style="gap: 10px;">
-                    <button type="button" class="btn btn-outline-info" onclick="navigator.clipboard.writeText(window.location.href); alert('Job link copied to clipboard!');">
-                        <i class="fa fa-share-alt"></i> Share Job
-                    </button>
-                    {% if request.user.is_authenticated and request.user.role == 'employee' %}
-                        <button type="button" class="btn btn-outline-danger make-favorite" data-id="{{ job.id }}">
-                            <i class="fa fa-heart"></i> {% if is_favorited %}Unsave Job{% else %}Save Job{% endif %}
-                        </button>
-                    {% endif %}
+                <!-- Social Sharing & Actions Toolbar -->
+                <div class="card border-0 shadow-sm p-3 mb-4" style="border-radius: 12px; background: #fff;">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap: 10px;">
+                        <!-- Social Share Links -->
+                        <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
+                            <span class="small font-weight-bold text-dark mr-1"><i class="fa fa-share-alt text-primary mr-1"></i>Share:</span>
+                            <!-- Telegram -->
+                            <a href="https://t.me/share/url?url={{ request.build_absolute_uri|urlencode }}&text=📢%20Vacancy:%20{{ job.title|urlencode }}%20at%20{{ job.company_name|urlencode }}%20({{ job.location|urlencode }})" target="_blank" class="btn btn-xs btn-outline-info font-weight-bold" style="border-radius: 20px;">
+                                <i class="fa fa-paper-plane mr-1"></i> Telegram
+                            </a>
+                            <!-- WhatsApp -->
+                            <a href="https://api.whatsapp.com/send?text=📢%20Vacancy:%20{{ job.title|urlencode }}%20at%20{{ job.company_name|urlencode }}%20-%20Apply:%20{{ request.build_absolute_uri|urlencode }}" target="_blank" class="btn btn-xs btn-outline-success font-weight-bold" style="border-radius: 20px;">
+                                <i class="fa fa-whatsapp mr-1"></i> WhatsApp
+                            </a>
+                            <!-- LinkedIn -->
+                            <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri|urlencode }}" target="_blank" class="btn btn-xs btn-outline-primary font-weight-bold" style="border-radius: 20px;">
+                                <i class="fa fa-linkedin mr-1"></i> LinkedIn
+                            </a>
+                            <!-- Copy Telegram Formatted Post -->
+                            <button type="button" class="btn btn-xs btn-dark font-weight-bold" style="border-radius: 20px;" onclick="copyTelegramPost()">
+                                <i class="fa fa-copy mr-1"></i> Copy Telegram Post
+                            </button>
+                        </div>
+
+                        <!-- Favorite Bookmark -->
+                        <div>
+                            {% if request.user.is_authenticated and request.user.role == 'employee' %}
+                                <button type="button" class="btn btn-sm btn-outline-danger make-favorite" data-id="{{ job.id }}">
+                                    <i class="fa fa-heart"></i> {% if is_favorited %}Saved{% else %}Save Job{% endif %}
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Company Info Column -->
             <div class="col-lg-4">
-                <div class="card border-0 shadow-sm p-4 mb-4">
+                <div class="card border-0 shadow-sm p-4 mb-4" style="border-radius: 12px;">
                     {% if job.get_logo_url %}
                         <div class="text-center mb-3 pb-3 border-bottom">
                             <a href="{{ job.get_logo_url }}" target="_blank" title="Click to view flyer / full image">
@@ -251,14 +277,131 @@
                         <p class="text-muted">{{ job.company_description|default:"No company description provided."|linebreaks }}</p>
                     {% endif %}
 
-                    {% if job.website %}
-                        <a href="{{ job.website }}" target="_blank" class="btn btn-outline-primary btn-block btn-sm">
-                            <i class="fa fa-external-link"></i> Visit Website
+                    {% if job.company %}
+                        <a href="{% url 'jobs:company-detail' job.company.id %}" class="btn btn-primary btn-block btn-sm mb-2 font-weight-bold">
+                            <i class="fa fa-building-o mr-1"></i> View Full Company Profile & Jobs
                         </a>
                     {% endif %}
+
+                    {% if job.website %}
+                        <a href="{{ job.website }}" target="_blank" class="btn btn-outline-primary btn-block btn-sm">
+                            <i class="fa fa-external-link mr-1"></i> Visit Website
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- Job Alert Widget -->
+                <div class="card border-0 shadow-sm p-4 bg-white" style="border-radius: 12px; border-left: 4px solid #2563eb !important;">
+                    <h5 class="font-weight-bold text-dark mb-1"><i class="fa fa-bell-o text-primary mr-1"></i> Get Job Alerts</h5>
+                    <p class="text-muted small mb-3">Get email notifications when new {{ job.category }} jobs in {{ job.location }} are published.</p>
+                    <form method="post" action="{% url 'jobs:create-job-alert' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="category" value="{{ job.category }}">
+                        <input type="hidden" name="location" value="{{ job.location }}">
+                        <div class="input-group input-group-sm mb-2">
+                            <input type="email" name="email" class="form-control" placeholder="Enter your email..." required value="{% if request.user.is_authenticated %}{{ request.user.email }}{% endif %}">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary font-weight-bold" type="submit">Alert Me</button>
+                            </div>
+                        </div>
+                        <small class="text-muted" style="font-size: 0.74rem;"><i class="fa fa-lock mr-1"></i> No spam. Unsubscribe anytime.</small>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<!-- 1-Click Easy Apply Modal -->
+{% if request.user.is_authenticated and request.user.role == 'employee' and not already_applied %}
+<div class="modal fade" id="easyApplyModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title font-weight-bold">
+                    <i class="fa fa-paper-plane text-warning mr-2"></i> Easy Apply: {{ job.title }}
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{% url 'jobs:apply-job' job.id %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                        {% if request.user.avatar %}
+                            <img src="{{ request.user.avatar.url }}" class="rounded-circle mr-3 border" style="width: 48px; height: 48px; object-fit: cover;">
+                        {% else %}
+                            <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center text-primary font-weight-bold mr-3" style="width: 48px; height: 48px; font-size: 1.2rem;">
+                                {{ request.user.first_name|first|default:request.user.email|first|upper }}
+                            </div>
+                        {% endif %}
+                        <div>
+                            <strong class="text-dark d-block">{{ request.user.get_full_name|default:request.user.email }}</strong>
+                            <small class="text-muted">{{ request.user.email }} {% if request.user.phone_number %}&bull; {{ request.user.phone_number }}{% endif %}</small>
+                        </div>
+                    </div>
+
+                    <!-- CV Selection -->
+                    <div class="form-group mb-3">
+                        <label class="small font-weight-bold text-dark d-block mb-2">Resume / CV Document:</label>
+                        {% if request.user.applicant_profile.cv_file %}
+                            <div class="p-2 mb-2 bg-light rounded border d-flex align-items-center justify-content-between">
+                                <div class="small">
+                                    <i class="fa fa-check-circle text-success mr-1"></i>
+                                    <strong>Saved Profile CV (Ready)</strong>
+                                </div>
+                                <a href="{{ request.user.applicant_profile.cv_file.url }}" target="_blank" class="btn btn-xs btn-outline-danger">Preview</a>
+                            </div>
+                        {% elif request.user.resume_cvs.exists %}
+                            <div class="p-2 mb-2 bg-light rounded border d-flex align-items-center justify-content-between">
+                                <div class="small">
+                                    <i class="fa fa-id-card text-primary mr-1"></i>
+                                    <strong>Built-in CV Builder Resume</strong>
+                                </div>
+                                <span class="badge badge-info">Auto-Attached</span>
+                            </div>
+                        {% endif %}
+
+                        <label class="small text-muted mt-2 d-block">Or upload a new custom CV for this job (PDF/DOCX):</label>
+                        <input type="file" name="cv" class="form-control-file border p-2 rounded" accept=".pdf,.doc,.docx">
+                    </div>
+
+                    <!-- Optional Note to Hiring Manager -->
+                    <div class="form-group mb-0">
+                        <label class="small font-weight-bold text-dark">Short Cover Note / Message to {{ job.company_name }} (Optional):</label>
+                        <textarea name="comment" class="form-control" rows="3" placeholder="Briefly state why you're a great fit for this role..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary font-weight-bold px-4">
+                        <i class="fa fa-paper-plane mr-1"></i> Submit Application Now
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+function copyTelegramPost() {
+    const text = `📢 VACANCY ANNOUNCEMENT
+💼 Position: {{ job.title|escapejs }}
+🏢 Company: {{ job.company_name|escapejs }}
+📍 Location: {{ job.location|escapejs }}
+💰 Salary: {% if job.salary > 0 %}{{ job.salary|intcomma }} {{ job.currency }}{% else %}Negotiable{% endif %}
+📅 Deadline: {{ job.last_date|date:"M d, Y" }}
+👉 Apply Online Here:
+${window.location.href}`;
+
+    navigator.clipboard.writeText(text).then(() => {
+        alert("✅ Formatted Telegram announcement copied to clipboard! You can now paste it directly into your Telegram channel or group.");
+    }).catch(err => {
+        prompt("Copy this Telegram announcement text:", text);
+    });
+}
+</script>
 {% endblock %}
+

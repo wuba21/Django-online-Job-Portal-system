@@ -11,10 +11,12 @@ from django.views.generic import CreateView, DetailView, ListView, UpdateView
 from accounts.forms import EmployerProfileUpdateForm
 from accounts.models import Company
 from categories.models import Category
+from django.db.models import Q
 from jobsapp.decorators import user_is_employer
 from jobsapp.forms import CompanyForm, CreateJobForm
 from jobsapp.models import Applicant, Job, JobImage
 from jobsapp.utils.notifications import create_notification, send_event_email
+from jobsapp.utils.recommendation import calculate_job_match_score
 from tags.models import Tag
 
 
@@ -56,7 +58,7 @@ class ApplicantPerJobView(ListView):
     model = Applicant
     template_name = "jobs/employer/applicants.html"
     context_object_name = "applicants"
-    paginate_by = 6
+    paginate_by = 12
 
     @method_decorator(login_required(login_url=reverse_lazy("accounts:login")))
     @method_decorator(user_is_employer)
@@ -64,16 +66,59 @@ class ApplicantPerJobView(ListView):
         return super().dispatch(self.request, *args, **kwargs)
 
     def get_queryset(self):
-        job = get_object_or_404(Job, id=self.kwargs["job_id"], user=self.request.user)
-        queryset = Applicant.objects.select_related("job", "user").filter(job=job).order_by("id")
+        if self.request.user.is_superuser or self.request.user.is_staff:
+            self.job = get_object_or_404(Job, id=self.kwargs["job_id"])
+        else:
+            self.job = get_object_or_404(Job, id=self.kwargs["job_id"], user=self.request.user)
+
+        queryset = Applicant.objects.select_related(
+            "job", "user", "user__applicant_profile"
+        ).prefetch_related(
+            "user__skills", "user__educations", "user__experiences", "user__resume_cvs"
+        ).filter(job=self.job)
+
         status_param = self.request.GET.get("status")
         if status_param and status_param.isdigit():
             queryset = queryset.filter(status=int(status_param))
-        return queryset
+
+        q = self.request.GET.get("q", "").strip()
+        if q:
+            queryset = queryset.filter(
+                Q(user__first_name__icontains=q) |
+                Q(user__last_name__icontains=q) |
+                Q(user__email__icontains=q) |
+                Q(user__applicant_profile__title__icontains=q)
+            )
+
+        applicants_list = list(queryset)
+        for app in applicants_list:
+            app.match_score = calculate_job_match_score(app.user, self.job)
+
+        sort_param = self.request.GET.get("sort", "recent")
+        if sort_param == "match":
+            applicants_list.sort(key=lambda a: a.match_score, reverse=True)
+        elif sort_param == "name":
+            applicants_list.sort(key=lambda a: (a.user.get_full_name() or a.user.email).lower())
+        else:
+            applicants_list.sort(key=lambda a: a.id, reverse=True)
+
+        return applicants_list
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["job"] = get_object_or_404(Job, id=self.kwargs["job_id"], user=self.request.user)
+        job = getattr(self, "job", None) or get_object_or_404(Job, id=self.kwargs["job_id"])
+        context["job"] = job
+
+        all_apps = Applicant.objects.filter(job=job)
+        context["total_count"] = all_apps.count()
+        context["pending_count"] = all_apps.filter(status=1).count()
+        context["shortlisted_count"] = all_apps.filter(status=2).count()
+        context["interview_count"] = all_apps.filter(status=3).count()
+        context["accepted_count"] = all_apps.filter(status=4).count()
+        context["rejected_count"] = all_apps.filter(status=5).count()
+        context["current_status"] = self.request.GET.get("status", "all")
+        context["current_sort"] = self.request.GET.get("sort", "recent")
+        context["query"] = self.request.GET.get("q", "")
         return context
 
 
@@ -114,6 +159,13 @@ class JobCreateView(CreateView):
         if not job.logo and images:
             job.logo = images[0]
             job.save(update_fields=["logo"])
+
+        if job.status == "approved":
+            try:
+                from jobsapp.views.home import send_job_alert_notifications
+                send_job_alert_notifications(job, request=self.request)
+            except Exception:
+                pass
 
         messages.success(self.request, "Job posted successfully.")
         return response
@@ -210,6 +262,7 @@ class ApplicantsListView(ListView):
     model = Applicant
     template_name = "jobs/employer/all-applicants.html"
     context_object_name = "applicants"
+    paginate_by = 12
 
     @method_decorator(login_required(login_url=reverse_lazy("accounts:login")))
     @method_decorator(user_is_employer)
@@ -217,11 +270,71 @@ class ApplicantsListView(ListView):
         return super().dispatch(self.request, *args, **kwargs)
 
     def get_queryset(self):
-        self.queryset = self.model.objects.select_related("job", "user").filter(job__user_id=self.request.user.id).order_by("-id")
+        if self.request.user.is_superuser or self.request.user.is_staff:
+            qs = self.model.objects.select_related(
+                "job", "user", "user__applicant_profile"
+            ).prefetch_related(
+                "user__skills", "user__educations", "user__experiences", "user__resume_cvs"
+            )
+        else:
+            qs = self.model.objects.select_related(
+                "job", "user", "user__applicant_profile"
+            ).prefetch_related(
+                "user__skills", "user__educations", "user__experiences", "user__resume_cvs"
+            ).filter(job__user=self.request.user)
+
         status_param = self.request.GET.get("status")
         if status_param and status_param.isdigit():
-            self.queryset = self.queryset.filter(status=int(status_param))
-        return self.queryset
+            qs = qs.filter(status=int(status_param))
+
+        job_param = self.request.GET.get("job_id")
+        if job_param and job_param.isdigit():
+            qs = qs.filter(job_id=int(job_param))
+
+        q = self.request.GET.get("q", "").strip()
+        if q:
+            qs = qs.filter(
+                Q(user__first_name__icontains=q) |
+                Q(user__last_name__icontains=q) |
+                Q(user__email__icontains=q) |
+                Q(job__title__icontains=q)
+            )
+
+        applicants_list = list(qs)
+        for app in applicants_list:
+            app.match_score = calculate_job_match_score(app.user, app.job)
+
+        sort_param = self.request.GET.get("sort", "recent")
+        if sort_param == "match":
+            applicants_list.sort(key=lambda a: a.match_score, reverse=True)
+        elif sort_param == "name":
+            applicants_list.sort(key=lambda a: (a.user.get_full_name() or a.user.email).lower())
+        else:
+            applicants_list.sort(key=lambda a: a.id, reverse=True)
+
+        return applicants_list
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_superuser or self.request.user.is_staff:
+            base_qs = Applicant.objects.all()
+            jobs_list = Job.objects.filter(filled=False).order_by("-created_at")
+        else:
+            base_qs = Applicant.objects.filter(job__user=self.request.user)
+            jobs_list = Job.objects.filter(user=self.request.user, filled=False).order_by("-created_at")
+
+        context["employer_jobs"] = jobs_list
+        context["total_count"] = base_qs.count()
+        context["pending_count"] = base_qs.filter(status=1).count()
+        context["shortlisted_count"] = base_qs.filter(status=2).count()
+        context["interview_count"] = base_qs.filter(status=3).count()
+        context["accepted_count"] = base_qs.filter(status=4).count()
+        context["rejected_count"] = base_qs.filter(status=5).count()
+        context["current_status"] = self.request.GET.get("status", "all")
+        context["current_job_id"] = self.request.GET.get("job_id", "")
+        context["current_sort"] = self.request.GET.get("sort", "recent")
+        context["query"] = self.request.GET.get("q", "")
+        return context
 
 
 @login_required(login_url=reverse_lazy("accounts:login"))
@@ -387,3 +500,109 @@ def export_applicants_csv(request, job_id):
         ])
 
     return response
+
+
+@login_required(login_url=reverse_lazy("accounts:login"))
+@user_is_employer
+def schedule_interview(request, applicant_id):
+    """
+    Schedules an interview date, time, and venue/meeting link for an applicant.
+    Notifies the candidate via email and in-app alert.
+    """
+    if request.method == "POST":
+        if request.user.is_superuser or request.user.is_staff:
+            applicant = get_object_or_404(Applicant, id=applicant_id)
+        else:
+            applicant = get_object_or_404(Applicant, id=applicant_id, job__user=request.user)
+
+        interview_date_str = request.POST.get("interview_date")
+        interview_location = request.POST.get("interview_location", "").strip()
+        interview_notes = request.POST.get("interview_notes", "").strip()
+
+        applicant.status = 3  # Interview Stage
+        if interview_date_str:
+            try:
+                applicant.interview_date = interview_date_str
+            except Exception:
+                pass
+        applicant.interview_location = interview_location
+        applicant.interview_notes = interview_notes
+        applicant.save()
+
+        date_display = applicant.interview_date.strftime("%B %d, %Y at %I:%M %p") if applicant.interview_date else "To be announced"
+        messages.success(request, f"🎉 Interview successfully scheduled with {applicant.user.get_full_name() or applicant.user.email}!")
+
+        # Send Notifications safely
+        try:
+            create_notification(
+                user=applicant.user,
+                title=f"📅 Interview Invitation: {applicant.job.title}",
+                message=f"You have been invited to an interview for '{applicant.job.title}' by {applicant.job.company_name}. Scheduled: {date_display}. Mode/Location: {interview_location}.",
+                link=reverse_lazy("jobs:employee-my-applications")
+            )
+            if applicant.user.email:
+                send_event_email(
+                    user_email=applicant.user.email,
+                    subject=f"📅 Interview Scheduled - '{applicant.job.title}' at {applicant.job.company_name}",
+                    message=f"Congratulations {applicant.user.get_full_name() or 'Candidate'}!\n\nYou have been selected for an interview for the vacancy '{applicant.job.title}' at {applicant.job.company_name}.\n\n📅 Interview Schedule Details:\n• Date & Time: {date_display}\n• Venue / Meeting Link: {interview_location or 'Online / Office'}\n• Additional Notes: {interview_notes or 'Please be ready and on time.'}\n\nPlease check your candidate dashboard for further updates.",
+                    action_url=request.build_absolute_uri(reverse_lazy("jobs:employee-my-applications")),
+                    action_text="View Interview Details"
+                )
+        except Exception:
+            pass
+
+    referer = request.META.get("HTTP_REFERER")
+    if referer:
+        return redirect(referer)
+    return redirect("jobs:applied-applicant-view", job_id=applicant.job.id, applicant_id=applicant.id)
+
+
+@login_required(login_url=reverse_lazy("accounts:login"))
+@user_is_employer
+def quick_update_applicant_status(request, applicant_id, status_id):
+    """
+    1-Click recruitment status changer (Shortlist, Accept, Reject).
+    """
+    if request.user.is_superuser or request.user.is_staff:
+        applicant = get_object_or_404(Applicant, id=applicant_id)
+    else:
+        applicant = get_object_or_404(Applicant, id=applicant_id, job__user=request.user)
+
+    status_id = int(status_id)
+    if status_id in [1, 2, 3, 4, 5]:
+        applicant.status = status_id
+        applicant.save()
+
+        status_names = {
+            1: "Pending",
+            2: "Shortlisted",
+            3: "Interview Stage",
+            4: "Accepted",
+            5: "Rejected",
+        }
+        status_name = status_names.get(status_id, "Updated")
+        messages.success(request, f"Status for '{applicant.user.get_full_name() or applicant.user.email}' updated to {status_name}.")
+
+        try:
+            create_notification(
+                user=applicant.user,
+                title=f"Application Update: {applicant.job.title}",
+                message=f"Your application status for '{applicant.job.title}' was updated to '{status_name}'.",
+                link=reverse_lazy("jobs:employee-my-applications")
+            )
+            if applicant.user.email:
+                send_event_email(
+                    user_email=applicant.user.email,
+                    subject=f"Application Update: {applicant.job.title} ({status_name})",
+                    message=f"Hello {applicant.user.get_full_name() or 'Candidate'},\n\nYour application for '{applicant.job.title}' at {applicant.job.company_name} was updated to: {status_name}.",
+                    action_url=request.build_absolute_uri(reverse_lazy("jobs:employee-my-applications")),
+                    action_text="Track My Application"
+                )
+        except Exception:
+            pass
+
+    referer = request.META.get("HTTP_REFERER")
+    if referer:
+        return redirect(referer)
+    return redirect("jobs:employer-dashboard-applicants", job_id=applicant.job.id)
+

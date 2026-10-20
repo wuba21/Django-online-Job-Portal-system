@@ -151,6 +151,12 @@ def set_job_status(request, job_id, status):
                         action_url=request.build_absolute_uri(f"/jobs/{job.id}/"),
                         action_text="View Live Job Listing"
                     )
+            # Notify matching Job Alert subscribers
+            try:
+                from jobsapp.views.home import send_job_alert_notifications
+                send_job_alert_notifications(job, request=request)
+            except Exception:
+                pass
         elif status == "rejected":
             if getattr(job, "user", None):
                 create_notification(

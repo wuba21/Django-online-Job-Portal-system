@@ -16,10 +16,12 @@ from jobsapp.views.employee import (
 from jobsapp.views.employer import (
     ApplicantPerJobView, ApplicantsListView, AppliedApplicantView, DashboardView,
     EmployerProfileEditView, JobCreateView, JobUpdateView, SendResponseView, delete_employer_job, filled,
-    export_applicants_csv
+    export_applicants_csv, schedule_interview, quick_update_applicant_status
 )
+from jobsapp.views.company import CompanyDetailView, CompanyListView
 from jobsapp.views.home import (
-    AboutUsView, ApplyJobView, HomeView, JobDetailsView, JobListView, SearchView, SalaryCalculatorView, favorite
+    AboutUsView, ApplyJobView, HomeView, JobDetailsView, JobListView, SearchView, SalaryCalculatorView,
+    create_job_alert, favorite
 )
 
 app_name = "jobs"
@@ -29,6 +31,11 @@ urlpatterns = [
     path("favorite/", favorite, name="favorite"),
     path("search/", SearchView.as_view(), name="search"),
     path("salary-calculator/", SalaryCalculatorView.as_view(), name="salary-calculator"),
+    path("job-alert/subscribe/", create_job_alert, name="create-job-alert"),
+
+    # Public Company Directory & Branding
+    path("companies/", CompanyListView.as_view(), name="companies-list"),
+    path("companies/<int:id>/", CompanyDetailView.as_view(), name="company-detail"),
 
     # Notifications
     path("notifications/", notifications_view, name="notifications"),
@@ -52,6 +59,8 @@ urlpatterns = [
                 path("mark-filled/<int:job_id>/", filled, name="job-mark-filled"),
                 path("delete-job/<int:job_id>/", delete_employer_job, name="employer-job-delete"),
                 path("send-response/<int:applicant_id>", SendResponseView.as_view(), name="applicant-send-response"),
+                path("schedule-interview/<int:applicant_id>/", schedule_interview, name="schedule-interview"),
+                path("update-status/<int:applicant_id>/<int:status_id>/", quick_update_applicant_status, name="quick-update-status"),
                 path("jobs/create/", JobCreateView.as_view(), name="employer-jobs-create"),
                 path("jobs/<int:id>/edit/", JobUpdateView.as_view(), name="employer-jobs-edit"),
             ]

@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static i18n humanize %}
+{% block title %}{{ company.name }} - Overview & Job Vacancies{% endblock %}
+
+{% block content %}
+<section class="bg-light-gray py-4">
+    <div class="container">
+        <!-- Company Hero Banner Card -->
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; overflow: hidden;">
+            <!-- Cover Photo -->
+            <div style="height: 180px; background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); position: relative;">
+                {% if company.cover_image %}
+                    <img src="{{ company.cover_image.url }}" alt="{{ company.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                {% endif %}
+            </div>
+
+            <!-- Profile Info Header -->
+            <div class="card-body p-4 pt-0">
+                <div class="d-flex justify-content-between align-items-end flex-wrap" style="gap: 15px; margin-top: -50px;">
+                    <div class="d-flex align-items-end flex-wrap" style="gap: 15px;">
+                        {% if company.logo %}
+                            <img src="{{ company.logo.url }}" alt="{{ company.name }}" class="rounded border shadow bg-white p-2" style="width: 100px; height: 100px; object-fit: contain;">
+                        {% else %}
+                            <div class="rounded border shadow bg-white d-flex align-items-center justify-content-center text-primary font-weight-bold" style="width: 100px; height: 100px; font-size: 2.5rem;">
+                                {{ company.name|first|upper }}
+                            </div>
+                        {% endif %}
+
+                        <div>
+                            <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                                <h2 class="font-weight-bold text-dark mb-0">{{ company.name }}</h2>
+                                {% if company.is_license_verified %}
+                                    <span class="badge badge-success px-2 py-1 font-weight-bold shadow-sm" style="font-size: 0.8rem;" title="Ethiopian Ministry of Trade Business License & TIN Verified">
+                                        <i class="fa fa-check-circle mr-1"></i> Verified Employer
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-light border text-muted px-2 py-1" style="font-size: 0.78rem;">
+                                        Registered Employer
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <p class="text-muted mb-0 small mt-1">
+                                <span class="text-primary font-weight-bold mr-2"><i class="fa fa-briefcase mr-1"></i>{{ company.industry|default:"Business & Technology" }}</span>
+                                <span class="mr-2">&bull;</span>
+                                <span class="mr-2"><i class="fa fa-map-marker text-danger mr-1"></i>{{ company.location|default:"Addis Ababa, Ethiopia" }}</span>
+                                {% if company.team_size %}
+                                    <span class="mr-2">&bull;</span>
+                                    <span><i class="fa fa-users text-info mr-1"></i>{{ company.team_size }} Employees</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                        {% if company.website %}
+                            <a href="{{ company.website }}" target="_blank" class="btn btn-outline-primary font-weight-bold">
+                                <i class="fa fa-globe mr-1"></i> Visit Website
+                            </a>
+                        {% endif %}
+                        <a href="#vacancies" class="btn btn-primary font-weight-bold shadow-sm">
+                            <i class="fa fa-briefcase mr-1"></i> View Jobs ({{ total_active_jobs }})
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Left Column: Company Overview & Culture -->
+            <div class="col-lg-8 mb-4">
+                <div class="card border-0 shadow-sm p-4 mb-4" style="border-radius: 12px;">
+                    <h4 class="font-weight-bold text-dark border-bottom pb-2 mb-3">
+                        <i class="fa fa-info-circle text-primary mr-1"></i> About {{ company.name }}
+                    </h4>
+                    <div class="text-muted" style="line-height: 1.8; font-size: 0.98rem;">
+                        {% if "<" in company.description and ">" in company.description %}
+                            {{ company.description|safe }}
+                        {% else %}
+                            {{ company.description|default:"No company description provided yet."|linebreaks }}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Active Job Openings Section -->
+                <div class="card border-0 shadow-sm p-4" id="vacancies" style="border-radius: 12px;">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3 flex-wrap" style="gap: 10px;">
+                        <h4 class="font-weight-bold text-dark mb-0">
+                            <i class="fa fa-briefcase text-primary mr-1"></i> Open Job Vacancies ({{ total_active_jobs }})
+                        </h4>
+                        <small class="text-muted">Applications go directly to the company HR team</small>
+                    </div>
+
+                    {% for job in active_jobs %}
+                    <div class="card border p-3 mb-3 bg-light" style="border-radius: 10px; transition: all 0.2s ease;">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap: 12px;">
+                            <div>
+                                <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
+                                    <h5 class="font-weight-bold mb-0">
+                                        <a href="{% url 'jobs:jobs-detail' job.id %}" class="text-dark text-decoration-none">
+                                            {{ job.title }}
+                                        </a>
+                                    </h5>
+                                    {% if job.is_featured %}
+                                        <span class="badge badge-warning text-dark font-weight-bold px-1" style="font-size: 0.68rem;"><i class="fa fa-star"></i> VIP</span>
+                                    {% endif %}
+                                </div>
+                                <div class="text-muted small mt-1">
+                                    <span class="mr-2"><i class="fa fa-map-marker text-danger mr-1"></i>{{ job.location }}</span>
+                                    <span class="badge badge-info mr-1">{{ job.get_work_mode_display|default:job.work_mode }}</span>
+                                    <span class="badge badge-secondary mr-1">{{ job.get_experience_level_display|default:job.experience_level }}</span>
+                                    {% if job.salary %}
+                                        <span class="badge badge-success">{{ job.salary|intcomma }} {{ job.currency }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div>
+                                <a href="{% url 'jobs:jobs-detail' job.id %}" class="btn btn-sm btn-primary font-weight-bold px-3">
+                                    Apply Now <i class="fa fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="fa fa-folder-open-o mb-2" style="font-size: 2.5rem;"></i>
+                        <p class="mb-0">There are currently no active job vacancies posted by {{ company.name }}.</p>
+                        <small>Check back later or explore other companies in the directory.</small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Right Column: Company Quick Facts -->
+            <div class="col-lg-4 mb-4">
+                <div class="card border-0 shadow-sm p-4 mb-4" style="border-radius: 12px;">
+                    <h5 class="font-weight-bold text-dark border-bottom pb-2 mb-3">Company Quick Facts</h5>
+                    <ul class="list-unstyled mb-0" style="line-height: 2;">
+                        <li class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small"><i class="fa fa-briefcase mr-1 text-primary"></i> Industry:</span>
+                            <strong class="text-dark small">{{ company.industry|default:"Business / Tech" }}</strong>
+                        </li>
+                        <li class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small"><i class="fa fa-map-marker mr-1 text-danger"></i> Headquarters:</span>
+                            <strong class="text-dark small">{{ company.location|default:"Addis Ababa" }}</strong>
+                        </li>
+                        {% if company.team_size %}
+                        <li class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small"><i class="fa fa-users mr-1 text-info"></i> Company Size:</span>
+                            <strong class="text-dark small">{{ company.team_size }} Employees</strong>
+                        </li>
+                        {% endif %}
+                        {% if company.established_date %}
+                        <li class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small"><i class="fa fa-calendar mr-1 text-warning"></i> Founded:</span>
+                            <strong class="text-dark small">{{ company.established_date|date:"Y" }}</strong>
+                        </li>
+                        {% endif %}
+                        <li class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small"><i class="fa fa-shield mr-1 text-success"></i> Verification:</span>
+                            {% if company.is_license_verified %}
+                                <span class="badge badge-success px-2 py-1"><i class="fa fa-check"></i> Verified TIN</span>
+                            {% else %}
+                                <span class="badge badge-light border text-muted">Registered</span>
+                            {% endif %}
+                        </li>
+                        <li class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small"><i class="fa fa-clock-o mr-1 text-secondary"></i> Member Since:</span>
+                            <strong class="text-dark small">{{ company.created_at|date:"M Y" }}</strong>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Back to Companies Directory -->
+                <div class="text-center">
+                    <a href="{% url 'jobs:companies-list' %}" class="btn btn-outline-secondary btn-block">
+                        <i class="fa fa-arrow-left mr-1"></i> Back to Companies Directory
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

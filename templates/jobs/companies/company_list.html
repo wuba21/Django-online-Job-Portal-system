@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% load static i18n humanize %}
+{% block title %}Top Companies & Employers in Ethiopia - Company Directory{% endblock %}
+
+{% block content %}
+<!-- Directory Hero Header -->
+<section class="py-5" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff;">
+    <div class="container text-center py-3">
+        <span class="badge badge-primary px-3 py-1 font-weight-bold mb-3" style="font-size: 0.85rem;">
+            <i class="fa fa-building-o mr-1"></i> Verified Employer Directory
+        </span>
+        <h1 class="font-weight-bold text-white mb-2" style="font-size: 2.3rem;">Explore Leading Companies in Ethiopia</h1>
+        <p class="text-white-50 mx-auto" style="max-width: 650px; font-size: 1.05rem;">
+            Discover top verified employers, banks, tech innovators, and international NGOs actively recruiting in Ethiopia.
+        </p>
+
+        <div class="d-flex justify-content-center align-items-center flex-wrap mt-3" style="gap: 15px;">
+            <span class="text-white-50 small"><i class="fa fa-check-circle text-success mr-1"></i> <strong>{{ verified_companies_count }}</strong> Verified Licenses</span>
+            <span class="text-white-50 small">&bull;</span>
+            <span class="text-white-50 small"><i class="fa fa-briefcase text-info mr-1"></i> Direct Application to Hiring Managers</span>
+        </div>
+    </div>
+</section>
+
+<!-- Filter & Search Section -->
+<section class="bg-light py-4 border-bottom">
+    <div class="container">
+        <form method="get" class="card border-0 shadow-sm p-3" style="border-radius: 12px;">
+            <div class="row align-items-center" style="gap: 10px 0;">
+                <div class="col-lg-4 col-md-6">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-white border-right-0"><i class="fa fa-search text-muted"></i></span>
+                        </div>
+                        <input type="text" name="q" value="{{ selected_q }}" class="form-control border-left-0" placeholder="Search company name, industry, keyword...">
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <select name="industry" class="form-control" onchange="this.form.submit()">
+                        <option value="all">All Industries</option>
+                        {% for ind in industries %}
+                            <option value="{{ ind }}" {% if selected_industry == ind %}selected{% endif %}>{{ ind }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <select name="location" class="form-control" onchange="this.form.submit()">
+                        <option value="all">All Locations (Ethiopia)</option>
+                        {% for loc in locations %}
+                            <option value="{{ loc }}" {% if selected_location == loc %}selected{% endif %}>{{ loc }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-lg-2 col-md-6 d-flex align-items-center justify-content-between">
+                    <div class="custom-control custom-checkbox mr-2">
+                        <input type="checkbox" class="custom-control-input" id="checkVerified" name="verified" value="1" {% if selected_verified == '1' %}checked{% endif %} onchange="this.form.submit()">
+                        <label class="custom-control-label small font-weight-bold text-dark" for="checkVerified">Verified Only</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm px-3 font-weight-bold">Filter</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Companies Listing Section -->
+<section class="bg-light-gray py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap" style="gap: 10px;">
+            <h4 class="font-weight-bold text-dark mb-0">
+                <i class="fa fa-building text-primary mr-2"></i> Companies ({{ paginator.count|default:companies.count }} Found)
+            </h4>
+            {% if selected_q or selected_industry != 'all' or selected_location != 'all' or selected_verified %}
+                <a href="{% url 'jobs:companies-list' %}" class="btn btn-sm btn-outline-danger">
+                    <i class="fa fa-times mr-1"></i> Reset Filters
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="row">
+            {% for c in companies %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 14px; overflow: hidden; transition: transform 0.2s ease;">
+                    <!-- Company Card Top Banner / Pattern -->
+                    <div style="height: 70px; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); position: relative;">
+                        {% if c.cover_image %}
+                            <img src="{{ c.cover_image.url }}" alt="{{ c.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% endif %}
+                    </div>
+
+                    <div class="card-body p-4 pt-0 d-flex flex-column justify-content-between">
+                        <div>
+                            <!-- Company Logo & Verified Badge -->
+                            <div class="d-flex justify-content-between align-items-end mb-3" style="margin-top: -35px;">
+                                {% if c.logo %}
+                                    <img src="{{ c.logo.url }}" alt="{{ c.name }}" class="rounded border shadow-sm bg-white p-1" style="width: 70px; height: 70px; object-fit: contain;">
+                                {% else %}
+                                    <div class="rounded border shadow-sm bg-white d-flex align-items-center justify-content-center text-primary font-weight-bold" style="width: 70px; height: 70px; font-size: 1.6rem;">
+                                        {{ c.name|first|upper }}
+                                    </div>
+                                {% endif %}
+
+                                {% if c.is_license_verified %}
+                                    <span class="badge badge-success px-2 py-1 font-weight-bold shadow-sm" style="font-size: 0.76rem;" title="Ethiopian Ministry of Trade Business License & TIN Verified">
+                                        <i class="fa fa-check-circle mr-1"></i> Verified Employer
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-light border text-muted px-2 py-1" style="font-size: 0.74rem;">
+                                        Registered Employer
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Name & Industry -->
+                            <h5 class="font-weight-bold mb-1">
+                                <a href="{% url 'jobs:company-detail' c.id %}" class="text-dark text-decoration-none">
+                                    {{ c.name }}
+                                </a>
+                            </h5>
+                            <small class="text-primary font-weight-bold d-block mb-2">
+                                <i class="fa fa-briefcase mr-1"></i> {{ c.industry|default:"Business & Enterprise" }}
+                            </small>
+
+                            <!-- Location & Team Size -->
+                            <div class="text-muted small mb-3">
+                                <i class="fa fa-map-marker text-danger mr-1"></i> {{ c.location|default:"Addis Ababa, Ethiopia" }}
+                                {% if c.team_size %}
+                                    &bull; <i class="fa fa-users text-info mr-1"></i> {{ c.team_size }} Employees
+                                {% endif %}
+                            </div>
+
+                            <!-- Overview Snippet -->
+                            <p class="text-muted small mb-3" style="line-height: 1.5; min-height: 40px;">
+                                {{ c.description|default:"Leading organization in Ethiopia offering excellent career progression opportunities."|striptags|truncatechars:95 }}
+                            </p>
+                        </div>
+
+                        <!-- Card Footer -->
+                        <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                            <span class="badge badge-primary px-2 py-1" style="font-size: 0.8rem;">
+                                <i class="fa fa-briefcase mr-1"></i> {{ c.active_jobs_count|default:c.jobs.count }} Vacancies
+                            </span>
+                            <a href="{% url 'jobs:company-detail' c.id %}" class="btn btn-sm btn-outline-primary font-weight-bold">
+                                View Profile <i class="fa fa-arrow-right ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="card border-0 shadow-sm p-5 text-center" style="border-radius: 14px;">
+                    <i class="fa fa-building-o text-muted mb-3" style="font-size: 3.5rem;"></i>
+                    <h4 class="font-weight-bold text-dark">No Companies Found</h4>
+                    <p class="text-muted small">No employers match your search or filter criteria. Try adjusting your query.</p>
+                    <div>
+                        <a href="{% url 'jobs:companies-list' %}" class="btn btn-sm btn-primary">
+                            <i class="fa fa-refresh mr-1"></i> View All Companies
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <nav class="d-flex justify-content-center mt-4 mb-4">
+            <ul class="pagination shadow-sm">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a href="?page={{ page_obj.previous_page_number }}{% if selected_q %}&q={{ selected_q }}{% endif %}{% if selected_industry != 'all' %}&industry={{ selected_industry }}{% endif %}{% if selected_location != 'all' %}&location={{ selected_location }}{% endif %}{% if selected_verified %}&verified={{ selected_verified }}{% endif %}" class="page-link">&laquo;</a>
+                    </li>
+                {% endif %}
+                {% for i in paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == i %}active{% endif %}">
+                        <a href="?page={{ i }}{% if selected_q %}&q={{ selected_q }}{% endif %}{% if selected_industry != 'all' %}&industry={{ selected_industry }}{% endif %}{% if selected_location != 'all' %}&location={{ selected_location }}{% endif %}{% if selected_verified %}&verified={{ selected_verified }}{% endif %}" class="page-link">{{ i }}</a>
+                    </li>
+                {% endfor %}
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a href="?page={{ page_obj.next_page_number }}{% if selected_q %}&q={{ selected_q }}{% endif %}{% if selected_industry != 'all' %}&industry={{ selected_industry }}{% endif %}{% if selected_location != 'all' %}&location={{ selected_location }}{% endif %}{% if selected_verified %}&verified={{ selected_verified }}{% endif %}" class="page-link">&raquo;</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -11,7 +11,7 @@ from django.views.generic import CreateView, DetailView, ListView, TemplateView
 from categories.models import Category
 from jobsapp.decorators import user_is_employee
 from jobsapp.forms import ApplyJobForm
-from jobsapp.models import Applicant, ETHIOPIAN_LOCATIONS, EXPERIENCE_LEVEL_CHOICES, Favorite, Job, WORK_MODE_CHOICES
+from jobsapp.models import Applicant, ETHIOPIAN_LOCATIONS, EXPERIENCE_LEVEL_CHOICES, Favorite, Job, JobAlert, WORK_MODE_CHOICES
 from jobsapp.utils.notifications import create_notification, send_event_email
 from jobsapp.utils.recommendation import calculate_job_match_score
 
@@ -196,14 +196,23 @@ class ApplyJobView(CreateView):
                 return HttpResponseRedirect(reverse_lazy("jobs:jobs-detail", kwargs={"id": job.id}))
 
             # Create application safely
+            comment_text = request.POST.get("comment", "").strip()
             applicant, created = Applicant.objects.get_or_create(
                 user=request.user,
                 job=job,
-                defaults={"comment": request.POST.get("comment", "")}
+                defaults={"comment": comment_text}
             )
+            if not created and comment_text:
+                applicant.comment = comment_text
+
             if "cv" in request.FILES:
                 applicant.cv = request.FILES["cv"]
-                applicant.save()
+            elif not applicant.cv:
+                # Auto-link candidate's existing uploaded profile CV
+                if hasattr(request.user, "applicant_profile") and request.user.applicant_profile.cv_file:
+                    applicant.cv = request.user.applicant_profile.cv_file
+
+            applicant.save()
 
             messages.success(request, f"🎉 Successfully applied for '{job.title}'!")
 
@@ -273,3 +282,69 @@ def favorite(request):
     except Favorite.DoesNotExist:
         Favorite.objects.create(job_id=job_id, user_id=user_id, soft_deleted=False)
         return JsonResponse(data={"auth": True, "status": "added", "message": "Job saved successfully"})
+
+
+def create_job_alert(request):
+    """
+    Subscribes a job seeker or guest email to instant alerts for a category or location.
+    """
+    if request.method == "POST":
+        email = request.POST.get("email", "").strip()
+        category = request.POST.get("category", "").strip()
+        location = request.POST.get("location", "").strip()
+        keywords = request.POST.get("keywords", "").strip()
+
+        if not email and request.user.is_authenticated:
+            email = request.user.email
+
+        if not email:
+            messages.error(request, "Please provide a valid email address to receive job alerts.")
+            return redirect(request.META.get("HTTP_REFERER", "/"))
+
+        user = request.user if request.user.is_authenticated else None
+        alert, created = JobAlert.objects.get_or_create(
+            email=email,
+            category=category or "All",
+            location=location or "All",
+            defaults={"user": user, "keywords": keywords, "is_active": True}
+        )
+
+        messages.success(request, f"🎉 Job alert activated for {email}! You will receive notifications when matching vacancies are published.")
+
+        try:
+            send_event_email(
+                user_email=email,
+                subject="🔔 Job Alert Activated - Ethiopian Job Portal",
+                message=f"Hello!\n\nYou have successfully subscribed to job alerts for:\n• Category: {category or 'All Categories'}\n• Location: {location or 'All Locations'}\n\nWe will notify you as soon as new matching vacancies are published by verified employers.",
+                action_url=request.build_absolute_uri("/"),
+                action_text="Explore Latest Vacancies"
+            )
+        except Exception:
+            pass
+
+    return redirect(request.META.get("HTTP_REFERER", "/"))
+
+
+def send_job_alert_notifications(job, request=None):
+    """
+    Finds matching JobAlert subscribers and notifies them of a newly published job.
+    """
+    try:
+        matching_alerts = JobAlert.objects.filter(is_active=True).filter(
+            Q(category__iexact=job.category) | Q(category="All") | Q(category="") |
+            Q(location__icontains=job.location) | Q(location="All") | Q(location="")
+        ).distinct()
+
+        base_url = request.build_absolute_uri(job.get_absolute_url()) if request else f"/jobs/{job.id}/"
+
+        for alert in matching_alerts[:25]:
+            send_event_email(
+                user_email=alert.email,
+                subject=f"🔔 New Vacancy Alert: {job.title} at {job.company_name}",
+                message=f"Hello,\n\nA new vacancy matching your job alert criteria has just been published:\n\n• Job: {job.title}\n• Employer: {job.company_name}\n• Location: {job.location}\n• Mode: {job.get_work_mode_display()}\n\nClick below to view the requirements and apply before the deadline.",
+                action_url=base_url,
+                action_text="View Job & Apply"
+            )
+    except Exception:
+        pass
+

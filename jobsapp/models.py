@@ -168,6 +168,9 @@ class Applicant(models.Model):
     comment = models.TextField(blank=True, null=True)
     status = models.SmallIntegerField(choices=APPLICANT_STATUS_CHOICES, default=1)
     cv = models.FileField(upload_to="applications/", blank=True, null=True)
+    interview_date = models.DateTimeField(blank=True, null=True)
+    interview_location = models.CharField(max_length=255, blank=True, null=True)
+    interview_notes = models.TextField(blank=True, null=True)
 
     class Meta:
         ordering = ["-id"]
@@ -310,4 +313,20 @@ class AdminAuditLog(models.Model):
     def __str__(self):
         admin_email = self.admin_user.email if self.admin_user else "System"
         return f"[{self.created_at:%Y-%m-%d %H:%M}] {admin_email}: {self.action} -> {self.target_repr}"
+
+
+class JobAlert(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="job_alerts", null=True, blank=True)
+    email = models.EmailField()
+    category = models.CharField(max_length=100, blank=True, null=True)
+    location = models.CharField(max_length=150, blank=True, null=True)
+    keywords = models.CharField(max_length=200, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Job Alert for {self.email} ({self.category or 'All'} in {self.location or 'All'})"
 

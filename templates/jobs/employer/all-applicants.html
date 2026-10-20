@@ -1,139 +1,363 @@
 {% extends 'base.html' %}
-{% block title %}
-    Applicants
-{% endblock %}
-{% load static %}
+{% load static i18n humanize %}
+{% block title %}All Candidate Applications (ATS) - Employer Portal{% endblock %}
 
 {% block content %}
-
-    <section class="bg-light-gray">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-8 mx-auto">
-                    <h1 class="heading">All applicants who applied for your positions</h1>
+<section class="bg-light-gray py-4">
+    <div class="container-fluid px-4">
+        <!-- ATS All Applicants Header -->
+        <div class="card border-0 shadow-sm p-4 mb-4" style="border-radius: 14px; background: linear-gradient(135deg, #1e293b, #0f172a); color: #fff;">
+            <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap: 15px;">
+                <div>
+                    <div class="d-flex align-items-center mb-1 flex-wrap" style="gap: 8px;">
+                        <a href="{% url 'jobs:employer-dashboard' %}" class="text-white-50 small text-decoration-none">
+                            <i class="fa fa-arrow-left mr-1"></i> Dashboard
+                        </a>
+                        <span class="text-white-50 small">/</span>
+                        <span class="badge badge-primary px-2 py-1 font-weight-bold" style="font-size: 0.76rem;">All Job Positions</span>
+                    </div>
+                    <h3 class="font-weight-bold text-white mb-1">Company Master Applicant Pipeline</h3>
+                    <p class="text-white-50 mb-0 small">
+                        Cross-vacancy applicant tracker with AI Candidate Match scoring and fast hiring stages
+                    </p>
+                </div>
+                <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                    <a href="{% url 'jobs:employer-jobs-create' %}" class="btn btn-sm btn-primary font-weight-bold shadow-sm">
+                        <i class="fa fa-plus mr-1"></i> Post New Vacancy
+                    </a>
                 </div>
             </div>
         </div>
-    </section>
-    <section>
-        <div class="container">
-            <form id="job-main-form" method="get" action="" class="job-main-form">
-                <div class="controls">
-                    <div class="row align-items-center">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <select id="status" name="status" class="form-control">
-                                    <option value="" selected>Select status</option>
-                                    <option value="1" {% if request.GET.status == "1" %} selected {% endif %}>Pending</option>
-                                    <option value="2" {% if request.GET.status == "2" %} selected {% endif %}>Accepted</option>
-                                    <option value="3" {% if request.GET.status == "3" %} selected {% endif %}>Rejected</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-group">
-                                <button type="submit" class="btn btn-outline-white-primary"><i class="fa fa-magic"></i>
-                                    Filter
-                                </button>
-                            </div>
+
+        <!-- Metric Pipeline Cards -->
+        <div class="row mb-4">
+            <div class="col-6 col-md-2 mb-3">
+                <a href="?status=all{% if current_job_id %}&job_id={{ current_job_id }}{% endif %}{% if query %}&q={{ query }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm p-3 text-center border-left border-primary" style="border-left-width: 4px !important; border-radius: 10px;">
+                        <h3 class="font-weight-bold text-primary mb-0">{{ total_count }}</h3>
+                        <small class="text-muted text-uppercase font-weight-bold">Total Received</small>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-2 mb-3">
+                <a href="?status=1{% if current_job_id %}&job_id={{ current_job_id }}{% endif %}{% if query %}&q={{ query }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm p-3 text-center border-left border-warning" style="border-left-width: 4px !important; border-radius: 10px;">
+                        <h3 class="font-weight-bold text-warning mb-0">{{ pending_count }}</h3>
+                        <small class="text-muted text-uppercase font-weight-bold">Pending Review</small>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-2 mb-3">
+                <a href="?status=2{% if current_job_id %}&job_id={{ current_job_id }}{% endif %}{% if query %}&q={{ query }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm p-3 text-center border-left border-info" style="border-left-width: 4px !important; border-radius: 10px;">
+                        <h3 class="font-weight-bold text-info mb-0">{{ shortlisted_count }}</h3>
+                        <small class="text-muted text-uppercase font-weight-bold">Shortlisted</small>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-2 mb-3">
+                <a href="?status=3{% if current_job_id %}&job_id={{ current_job_id }}{% endif %}{% if query %}&q={{ query }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm p-3 text-center border-left border-purple" style="border-left: 4px solid #8b5cf6 !important; border-radius: 10px;">
+                        <h3 class="font-weight-bold mb-0" style="color: #8b5cf6;">{{ interview_count }}</h3>
+                        <small class="text-muted text-uppercase font-weight-bold">Interviewing</small>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-2 mb-3">
+                <a href="?status=4{% if current_job_id %}&job_id={{ current_job_id }}{% endif %}{% if query %}&q={{ query }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm p-3 text-center border-left border-success" style="border-left-width: 4px !important; border-radius: 10px;">
+                        <h3 class="font-weight-bold text-success mb-0">{{ accepted_count }}</h3>
+                        <small class="text-muted text-uppercase font-weight-bold">Accepted / Hired</small>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-2 mb-3">
+                <a href="?status=5{% if current_job_id %}&job_id={{ current_job_id }}{% endif %}{% if query %}&q={{ query }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm p-3 text-center border-left border-danger" style="border-left-width: 4px !important; border-radius: 10px;">
+                        <h3 class="font-weight-bold text-danger mb-0">{{ rejected_count }}</h3>
+                        <small class="text-muted text-uppercase font-weight-bold">Rejected</small>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="card border-0 shadow-sm p-3 mb-4" style="border-radius: 12px;">
+            <form method="get" class="row align-items-center" style="gap: 10px 0;">
+                <div class="col-lg-4 col-md-6">
+                    <div class="input-group input-group-sm">
+                        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search applicant, email, job title...">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="submit"><i class="fa fa-search"></i></button>
                         </div>
                     </div>
                 </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <select name="job_id" class="form-control form-control-sm" onchange="this.form.submit()">
+                        <option value="">All Job Openings ({{ employer_jobs.count }})</option>
+                        {% for j in employer_jobs %}
+                            <option value="{{ j.id }}" {% if current_job_id == j.id|stringformat:"s" %}selected{% endif %}>
+                                {{ j.title|truncatechars:35 }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <select name="sort" class="form-control form-control-sm" onchange="this.form.submit()">
+                        <option value="recent" {% if current_sort == 'recent' %}selected{% endif %}>Most Recent Application</option>
+                        <option value="match" {% if current_sort == 'match' %}selected{% endif %}>Highest AI Match Score (%)</option>
+                        <option value="name" {% if current_sort == 'name' %}selected{% endif %}>Applicant Name (A - Z)</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-2 col-md-6 text-md-right">
+                    {% if query or current_job_id or current_status != 'all' or current_sort != 'recent' %}
+                        <a href="{% url 'jobs:employer-all-applicants' %}" class="btn btn-xs btn-outline-danger" title="Reset all filters">
+                            <i class="fa fa-times mr-1"></i> Reset
+                        </a>
+                    {% endif %}
+                </div>
+
+                {% if current_status and current_status != 'all' %}
+                    <input type="hidden" name="status" value="{{ current_status }}">
+                {% endif %}
             </form>
-            <div class="row">
-                {% for applicant in applicants %}
-                    <div class="col-lg-6">
-                        <div class="box applicant">
-                            <div class="row">
-                                <div class="col-md-3 mr-4">
-                                    <p class="intro"></p>
-                                    <div class="image">
-                                        <img src="{% static 'img/avatar.png' %}" alt=""
-                                             class="img-fluid rounded-circle">
+        </div>
+
+        <!-- Master Applicants Grid -->
+        <div class="row">
+            {% for app in applicants %}
+            <div class="col-xl-6 col-lg-12 mb-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                    <div class="card-body p-4 d-flex flex-column justify-content-between">
+                        <div>
+                            <!-- Header Row: Candidate & Target Job & Badges -->
+                            <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap" style="gap: 10px;">
+                                <div class="d-flex align-items-center">
+                                    {% if app.user.avatar %}
+                                        <img src="{{ app.user.avatar.url }}" alt="{{ app.user.get_full_name }}" class="rounded-circle mr-3 border bg-white" style="width: 52px; height: 52px; object-fit: cover; flex-shrink: 0;">
+                                    {% else %}
+                                        <div class="rounded-circle mr-3 bg-light border d-flex align-items-center justify-content-center text-primary font-weight-bold" style="width: 52px; height: 52px; flex-shrink: 0; font-size: 1.25rem;">
+                                            {{ app.user.first_name|first|default:app.user.email|first|upper }}
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="d-flex align-items-center flex-wrap" style="gap: 5px;">
+                                            <a href="{% url 'jobs:applied-applicant-view' app.job.id app.id %}" class="font-weight-bold text-dark text-decoration-none" style="font-size: 1.05rem;">
+                                                {{ app.user.get_full_name|default:app.user.email }}
+                                            </a>
+                                            {% if app.user.is_vip %}
+                                                <span class="badge badge-warning text-dark font-weight-bold px-1" style="font-size: 0.65rem;"><i class="fa fa-star"></i> VIP</span>
+                                            {% endif %}
+                                        </div>
+                                        <small class="text-muted d-block">
+                                            <i class="fa fa-envelope-o mr-1"></i>{{ app.user.email }}
+                                            {% if app.user.phone_number %} &bull; {{ app.user.phone_number }}{% endif %}
+                                        </small>
+                                        <span class="badge badge-primary px-2 py-1 mt-1 font-weight-normal" style="font-size: 0.72rem;">
+                                            <i class="fa fa-briefcase mr-1"></i> Applied for: <strong>{{ app.job.title|truncatechars:30 }}</strong>
+                                        </span>
                                     </div>
                                 </div>
-                                <div class="col-md-8">
-                                    <h4><a href="{% url 'jobs:applied-applicant-view' applicant.job.id applicant.id %}">{{ applicant.user.get_full_name }}</a><small>({{ applicant.get_status }})</small></h4>
-                                    <h6>Skills:
-                                        {% for tag in applicant.user.profile.tags.all %}
-                                            <span style="color: #ffffff;" class="badge featured-badge badge-secondary">{{ tag.name }}</span>
-                                        {% endfor %}
-                                    </h6>
-                                    <a href="mailto:{{ applicant.user.email }}?Subject=Interested"
-                                       class="btn btn-outline-white-secondary btn-sm">
-                                        <i class="fa fa-envelope"></i>Contact
-                                    </a>
-                                    <p>
-                                        <span class="badge badge-info">Applied {{ applicant.created_at.astimezone }}</span>
-                                    </p>
+
+                                <div class="text-right d-flex flex-column align-items-end" style="gap: 4px;">
+                                    <!-- AI Match Score -->
+                                    {% if app.match_score >= 80 %}
+                                        <span class="badge badge-success px-2 py-1 font-weight-bold shadow-sm" style="font-size: 0.76rem;">
+                                            <i class="fa fa-magic mr-1"></i> {{ app.match_score }}% Match (Top Fit)
+                                        </span>
+                                    {% elif app.match_score >= 60 %}
+                                        <span class="badge badge-info px-2 py-1 font-weight-bold shadow-sm" style="font-size: 0.76rem;">
+                                            <i class="fa fa-magic mr-1"></i> {{ app.match_score }}% Match
+                                        </span>
+                                    {% else %}
+                                        <span class="badge badge-light border text-muted px-2 py-1" style="font-size: 0.72rem;">
+                                            <i class="fa fa-magic mr-1"></i> {{ app.match_score }}% Match
+                                        </span>
+                                    {% endif %}
+
+                                    <!-- Status Pill -->
+                                    {% if app.status == 1 %}
+                                        <span class="badge badge-warning text-dark font-weight-bold">Pending Review</span>
+                                    {% elif app.status == 2 %}
+                                        <span class="badge badge-info font-weight-bold">Shortlisted</span>
+                                    {% elif app.status == 3 %}
+                                        <span class="badge font-weight-bold text-white" style="background: #8b5cf6;">Interview Stage</span>
+                                    {% elif app.status == 4 %}
+                                        <span class="badge badge-success font-weight-bold">Accepted</span>
+                                    {% else %}
+                                        <span class="badge badge-danger font-weight-bold">Rejected</span>
+                                    {% endif %}
                                 </div>
+                            </div>
+
+                            <!-- Skills Pill Strip -->
+                            <div class="mb-3 p-2 bg-light rounded border">
+                                <div class="d-flex align-items-center flex-wrap" style="gap: 4px;">
+                                    <small class="text-muted font-weight-bold mr-1">Skills:</small>
+                                    {% for s in app.user.skills.all|slice:":4" %}
+                                        <span class="badge badge-white border text-dark" style="font-size: 0.72rem; background: #fff;">{{ s.name }}</span>
+                                    {% empty %}
+                                        <small class="text-muted">No skills listed</small>
+                                    {% endfor %}
+                                    {% if app.user.skills.count > 4 %}
+                                        <span class="badge badge-secondary px-1" style="font-size: 0.68rem;">+{{ app.user.skills.count|add:"-4" }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Interview Schedule info if exists -->
+                            {% if app.status == 3 and app.interview_date %}
+                            <div class="p-2 mb-3 rounded" style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3);">
+                                <small class="font-weight-bold d-block" style="color: #6d28d9;">
+                                    <i class="fa fa-calendar-check-o mr-1"></i> Interview: {{ app.interview_date|date:"M d, Y @ h:i A" }}
+                                </small>
+                                {% if app.interview_location %}
+                                    <small class="text-muted d-block mt-1">
+                                        <i class="fa fa-map-marker mr-1 text-danger"></i> {{ app.interview_location }}
+                                    </small>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Action Toolbar -->
+                        <div class="pt-3 border-top d-flex justify-content-between align-items-center flex-wrap" style="gap: 8px;">
+                            <!-- CV Link -->
+                            <div>
+                                {% if app.cv %}
+                                    <a href="{{ app.cv.url }}" target="_blank" class="btn btn-xs btn-outline-danger font-weight-bold">
+                                        <i class="fa fa-file-pdf-o mr-1"></i> CV PDF
+                                    </a>
+                                {% elif app.user.applicant_profile.cv_file %}
+                                    <a href="{{ app.user.applicant_profile.cv_file.url }}" target="_blank" class="btn btn-xs btn-outline-danger font-weight-bold">
+                                        <i class="fa fa-file-pdf-o mr-1"></i> Profile CV
+                                    </a>
+                                {% elif app.user.resume_cvs.exists %}
+                                    {% with r=app.user.resume_cvs.first %}
+                                        <a href="{% url 'resume_cv:builder' r.code %}" target="_blank" class="btn btn-xs btn-outline-primary font-weight-bold">
+                                            <i class="fa fa-id-card mr-1"></i> Builder CV
+                                        </a>
+                                    {% endwith %}
+                                {% else %}
+                                    <span class="text-muted small">No CV attached</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Fast Hiring Stage Actions -->
+                            <div class="d-flex align-items-center flex-wrap" style="gap: 4px;">
+                                <a href="{% url 'jobs:applied-applicant-view' app.job.id app.id %}" class="btn btn-xs btn-light border text-dark font-weight-bold">
+                                    <i class="fa fa-user mr-1"></i> Dossier
+                                </a>
+
+                                {% if app.status != 2 %}
+                                    <a href="{% url 'jobs:quick-update-status' app.id 2 %}" class="btn btn-xs btn-outline-info font-weight-bold" title="Shortlist candidate">
+                                        Shortlist
+                                    </a>
+                                {% endif %}
+
+                                <button type="button" class="btn btn-xs btn-outline-purple text-white font-weight-bold" style="background: #8b5cf6;" data-toggle="modal" data-target="#allInterviewModal{{ app.id }}">
+                                    <i class="fa fa-calendar mr-1"></i> Interview
+                                </button>
+
+                                {% if app.status != 4 %}
+                                    <a href="{% url 'jobs:quick-update-status' app.id 4 %}" class="btn btn-xs btn-outline-success font-weight-bold" onclick="return confirm('Accept this candidate?');">
+                                        Accept
+                                    </a>
+                                {% endif %}
+
+                                {% if app.status != 5 %}
+                                    <a href="{% url 'jobs:quick-update-status' app.id 5 %}" class="btn btn-xs btn-outline-danger" onclick="return confirm('Reject this application?');">
+                                        <i class="fa fa-times"></i>
+                                    </a>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
-                    {#                    <div class="col-lg-6">#}
-                    {#                        <div class="box applicant">#}
-                    {#                            <h4>{{ applicant.user.get_full_name }}</h4>#}
-                    {#                            <p><strong>Applied position: {{ applicant.job.title }}</strong></p>#}
-                    {#                            <a href="#" data-toggle="modal" data-target="#contact-modal"#}
-                    {#                               class="btn btn-outline-white-secondary btn-sm">#}
-                    {#                                <i class="fa fa-envelope"></i>Contact#}
-                    {#                            </a>#}
-                    {#                            <p>#}
-                    {#                                <span class="badge badge-info">Applied {{ applicant.created_at.astimezone }}</span>#}
-                    {#                            </p>#}
-                    {#                            <div class="d-flex justify-content-between">#}
-                    {#                                <p class="intro"></p>#}
-                    {#                                <div class="image">#}
-                    {#                                    <img src="{% static 'img/avatar.png' %}" alt=""#}
-                    {#                                         class="img-fluid rounded-circle">#}
-                    {#                                </div>#}
-                    {#                            </div>#}
-                    {#                        </div>#}
-                    {#                    </div>#}
-                {% endfor %}
-                {% if is_paginated %}
-                    <div class="row">
-                        <div class="col-md-12">
-                            <nav aria-label="Page navigation example" class="d-flex justify-content-center mt-4 mb-4">
-                                <ul class="pagination">
-                                    {% if page_obj.has_previous %}
-                                        <li class="page-item">
-                                            <a href="?page={{ page_obj.previous_page_number }}"
-                                               class="page-link">&laquo;</a>
-                                        </li>
-                                    {% else %}
-                                        <li class="page-item disabled">
-                                            <a class="page-link">&laquo;</a>
-                                        </li>
-                                    {% endif %}
-                                    {% for i in page_obj.paginator.page_range %}
-                                        {% if page_obj.number == i %}
-                                            <li class="page-item active">
-                                                <a class="page-link">{{ i }}</a>
-                                            </li>
-                                        {% else %}
-                                            <li class="page-item">
-                                                <a href="?page={{ i }}" class="page-link">{{ i }}</a>
-                                            </li>
-                                        {% endif %}
-                                    {% endfor %}
-                                    {% if page_obj.has_next %}
-                                        <li class="page-item">
-                                            <a href="?page={{ page_obj.next_page_number }}"
-                                               class="page-link">&raquo;</a>
-                                        </li>
-                                    {% else %}
-                                        <li class="page-item disabled">
-                                            <a class="page-link">&raquo;</a>
-                                        </li>
-                                    {% endif %}
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                {% endif %}
+                </div>
             </div>
-        </div>
-    </section>
 
+            <!-- Schedule Interview Modal -->
+            <div class="modal fade" id="allInterviewModal{{ app.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-dark text-white">
+                            <h5 class="modal-title font-weight-bold">
+                                <i class="fa fa-calendar-check-o text-warning mr-2"></i> Schedule Interview
+                            </h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <form method="post" action="{% url 'jobs:schedule-interview' app.id %}">
+                            {% csrf_token %}
+                            <div class="modal-body p-4">
+                                <div class="form-group mb-3">
+                                    <label class="small font-weight-bold text-dark">Job Vacancy:</label>
+                                    <input type="text" class="form-control form-control-sm" value="{{ app.job.title }}" readonly>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label class="small font-weight-bold text-dark">Candidate:</label>
+                                    <input type="text" class="form-control form-control-sm" value="{{ app.user.get_full_name|default:app.user.email }} ({{ app.user.email }})" readonly>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label class="small font-weight-bold text-dark">Interview Date & Time:</label>
+                                    <input type="datetime-local" name="interview_date" class="form-control" required value="{% if app.interview_date %}{{ app.interview_date|date:'Y-m-d\TH:i' }}{% endif %}">
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label class="small font-weight-bold text-dark">Venue / Meeting Link:</label>
+                                    <input type="text" name="interview_location" class="form-control" placeholder="e.g. Office Address or Google Meet / Telegram link" value="{{ app.interview_location|default:'' }}" required>
+                                </div>
+                                <div class="form-group mb-0">
+                                    <label class="small font-weight-bold text-dark">Instructions / Preparation Notes for Candidate:</label>
+                                    <textarea name="interview_notes" class="form-control" rows="3" placeholder="Additional details...">{{ app.interview_notes|default:'' }}</textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer bg-light">
+                                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-sm btn-primary font-weight-bold">
+                                    <i class="fa fa-paper-plane mr-1"></i> Send Interview Invitation
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="card border-0 shadow-sm p-5 text-center" style="border-radius: 12px;">
+                    <i class="fa fa-users text-muted mb-3" style="font-size: 3.5rem;"></i>
+                    <h4 class="font-weight-bold text-dark">No Candidate Applications Found</h4>
+                    <p class="text-muted small">No applications match your selected filters.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <nav class="d-flex justify-content-center mt-4 mb-4">
+            <ul class="pagination shadow-sm">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a href="?page={{ page_obj.previous_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_job_id %}&job_id={{ current_job_id }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if query %}&q={{ query }}{% endif %}" class="page-link">&laquo;</a>
+                    </li>
+                {% endif %}
+                {% for i in paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == i %}active{% endif %}">
+                        <a href="?page={{ i }}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_job_id %}&job_id={{ current_job_id }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if query %}&q={{ query }}{% endif %}" class="page-link">{{ i }}</a>
+                    </li>
+                {% endfor %}
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a href="?page={{ page_obj.next_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_job_id %}&job_id={{ current_job_id }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if query %}&q={{ query }}{% endif %}" class="page-link">&raquo;</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</section>
 {% endblock %}
