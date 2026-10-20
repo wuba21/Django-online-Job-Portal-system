@@ -77,3 +77,33 @@ class Company(models.Model):
     @property
     def is_license_verified(self):
         return self.license_status == "verified"
+
+    @property
+    def average_rating(self):
+        from django.db.models import Avg
+        avg = self.reviews.filter(is_approved=True).aggregate(Avg("rating"))["rating__avg"]
+        return round(float(avg), 1) if avg is not None else 0.0
+
+    @property
+    def reviews_count(self):
+        return self.reviews.filter(is_approved=True).count()
+
+
+class CompanyReview(models.Model):
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="reviews")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="company_reviews")
+    rating = models.PositiveSmallIntegerField(default=5)  # 1 to 5 stars
+    title = models.CharField(max_length=200)
+    review_text = models.TextField()
+    pros = models.TextField(blank=True, default="")
+    cons = models.TextField(blank=True, default="")
+    is_approved = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        unique_together = ("company", "user")
+
+    def __str__(self):
+        name = self.user.get_full_name() or self.user.email
+        return f"{name} on {self.company.name} ({self.rating}★)"

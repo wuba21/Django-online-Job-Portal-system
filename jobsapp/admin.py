@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.flatpages.admin import FlatPageAdmin
 from django.contrib.flatpages.models import FlatPage
 
-from jobsapp.models import Job, Applicant, JobImage, JobAlert, AdminAuditLog
+from jobsapp.models import Job, Applicant, JobImage, JobAlert, AdminAuditLog, Conversation, ChatMessage
 
 
 class JobImageInline(admin.TabularInline):
@@ -61,4 +61,26 @@ class AdminAuditLogAdmin(admin.ModelAdmin):
     list_filter = ["action", "created_at"]
     search_fields = ["action", "target_repr", "details", "ip_address", "admin_user__email"]
     date_hierarchy = "created_at"
+
+
+class ChatMessageInline(admin.TabularInline):
+    model = ChatMessage
+    extra = 0
+    readonly_fields = ["sender", "message", "is_read", "created_at"]
+
+
+@admin.register(Conversation)
+class ConversationAdmin(admin.ModelAdmin):
+    list_display = ["id", "employer", "candidate", "job", "updated_at", "created_at"]
+    list_filter = ["updated_at", "created_at"]
+    search_fields = ["employer__email", "candidate__email", "job__title"]
+    inlines = [ChatMessageInline]
+
+
+@admin.register(ChatMessage)
+class ChatMessageAdmin(admin.ModelAdmin):
+    list_display = ["id", "conversation", "sender", "is_read", "created_at"]
+    list_filter = ["is_read", "created_at"]
+    search_fields = ["sender__email", "message"]
+
 

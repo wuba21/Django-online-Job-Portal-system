@@ -12,14 +12,17 @@ from jobsapp.views.admin_dashboard import (
 from jobsapp.views.employee import (
     ApplicantDashboardView, EditProfileView, EmployeeMyJobsListView, FavoriteListView,
     add_education, add_experience, add_skill, delete_education, delete_experience, delete_skill,
-    mark_all_notifications_as_read, mark_notification_as_read, notifications_view, withdraw_application
+    mark_all_notifications_as_read, mark_notification_as_read, notifications_view, withdraw_application,
+    ai_parse_resume
 )
 from jobsapp.views.employer import (
     ApplicantPerJobView, ApplicantsListView, AppliedApplicantView, DashboardView,
     EmployerProfileEditView, JobCreateView, JobUpdateView, SendResponseView, delete_employer_job, filled,
     export_applicants_csv, schedule_interview, quick_update_applicant_status
 )
-from jobsapp.views.company import CompanyDetailView, CompanyListView
+from jobsapp.views.company import CompanyDetailView, CompanyListView, add_company_review
+from jobsapp.views.messages import inbox_view, start_conversation
+from jobsapp.views.telegram_webapp import telegram_webapp_view
 from jobsapp.views.home import (
     AboutUsView, ApplyJobView, HomeView, JobDetailsView, JobListView, SearchView, SalaryCalculatorView,
     create_job_alert, favorite
@@ -34,9 +37,20 @@ urlpatterns = [
     path("salary-calculator/", SalaryCalculatorView.as_view(), name="salary-calculator"),
     path("job-alert/subscribe/", create_job_alert, name="create-job-alert"),
 
-    # Public Company Directory & Branding
+    # Public Company Directory & Reviews
     path("companies/", CompanyListView.as_view(), name="companies-list"),
     path("companies/<int:id>/", CompanyDetailView.as_view(), name="company-detail"),
+    path("companies/<int:company_id>/review/", add_company_review, name="add-company-review"),
+
+    # Direct 2-Way Candidate <-> Employer Messaging
+    path("messages/", inbox_view, name="inbox"),
+    path("messages/start/<int:candidate_id>/", start_conversation, name="start-conversation"),
+
+    # AI Resume Auto-Profile Extractor
+    path("profile/ai-parse-resume/", ai_parse_resume, name="ai-parse-resume"),
+
+    # Telegram Mini-App (TMA) Portal
+    path("telegram/app/", telegram_webapp_view, name="telegram-webapp"),
 
     # Notifications
     path("notifications/", notifications_view, name="notifications"),

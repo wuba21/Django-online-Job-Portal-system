@@ -140,9 +140,16 @@
 
                         <!-- Card Footer -->
                         <div class="pt-3 border-top d-flex justify-content-between align-items-center">
-                            <span class="badge badge-primary px-2 py-1" style="font-size: 0.8rem;">
-                                <i class="fa fa-briefcase mr-1"></i> {{ c.active_jobs_count|default:c.jobs.count }} Vacancies
-                            </span>
+                            <div>
+                                <span class="badge badge-primary px-2 py-1 mr-1" style="font-size: 0.78rem;">
+                                    <i class="fa fa-briefcase mr-1"></i> {{ c.active_jobs_count|default:c.jobs.count }} Jobs
+                                </span>
+                                {% if c.reviews_count > 0 %}
+                                    <span class="badge badge-warning text-dark font-weight-bold px-2 py-1" style="font-size: 0.78rem;">
+                                        ⭐ {{ c.average_rating }} ({{ c.reviews_count }})
+                                    </span>
+                                {% endif %}
+                            </div>
                             <a href="{% url 'jobs:company-detail' c.id %}" class="btn btn-sm btn-outline-primary font-weight-bold">
                                 View Profile <i class="fa fa-arrow-right ml-1"></i>
                             </a>

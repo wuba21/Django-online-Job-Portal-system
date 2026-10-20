@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ethio Job Portal - Telegram Mini App</title>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #f8fafc);
+            --text-color: var(--tg-theme-text-color, #0f172a);
+            --hint-color: var(--tg-theme-hint-color, #64748b);
+            --button-color: var(--tg-theme-button-color, #2563eb);
+            --button-text-color: var(--tg-theme-button-text-color, #ffffff);
+            --card-bg: var(--tg-theme-secondary-bg-color, #ffffff);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); padding-bottom: 70px; }
+        .header { padding: 16px; background: var(--card-bg); border-bottom: 1px solid rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 100; }
+        .title { font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between; }
+        .search-box { margin-top: 10px; display: flex; gap: 8px; }
+        .search-input { flex: 1; padding: 10px 14px; border: 1px solid rgba(0,0,0,0.12); border-radius: 10px; background: var(--bg-color); color: var(--text-color); font-size: 0.9rem; outline: none; }
+        .btn-search { padding: 10px 16px; background: var(--button-color); color: var(--button-text-color); border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
+        .job-list { padding: 12px 16px; display: flex; flex-direction: column; gap: 12px; }
+        .job-card { background: var(--card-bg); border-radius: 12px; padding: 14px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 1px 3px rgba(0,0,0,0.04); text-decoration: none; color: inherit; display: block; }
+        .job-title { font-size: 1rem; font-weight: 700; margin-bottom: 4px; color: var(--text-color); display: flex; align-items: center; justify-content: space-between; }
+        .company-name { font-size: 0.82rem; color: var(--button-color); font-weight: 600; margin-bottom: 8px; }
+        .meta-tags { display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.75rem; margin-top: 8px; }
+        .tag { background: rgba(0,0,0,0.05); padding: 3px 8px; border-radius: 6px; color: var(--hint-color); }
+        .tag.featured { background: #fef3c7; color: #b45309; font-weight: 700; }
+        .salary { color: #16a34a; font-weight: 700; }
+        .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); padding: 12px 16px; border-top: 1px solid rgba(0,0,0,0.08); display: flex; justify-content: space-around; }
+        .nav-item { color: var(--hint-color); text-decoration: none; font-size: 0.78rem; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .nav-item.active { color: var(--button-color); font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">
+            <span>🇪🇹 Ethio Job Portal</span>
+            <span style="font-size: 0.8rem; font-weight: normal; color: var(--hint-color);">{{ total_count }} Jobs</span>
+        </div>
+        <form method="get" class="search-box">
+            <input type="text" name="q" value="{{ selected_q }}" placeholder="Search position, tech, bank..." class="search-input">
+            <button type="submit" class="btn-search"><i class="fa fa-search"></i></button>
+        </form>
+    </div>
+
+    <div class="job-list">
+        {% for job in jobs %}
+        <a href="{% url 'jobs:jobs-detail' job.id %}" target="_blank" class="job-card">
+            <div class="job-title">
+                <span>{{ job.title }}</span>
+                {% if job.is_featured %}
+                    <span class="tag featured"><i class="fa fa-star"></i> VIP</span>
+                {% endif %}
+            </div>
+            <div class="company-name"><i class="fa fa-building-o"></i> {{ job.company_name }}</div>
+            <div class="meta-tags">
+                <span class="tag"><i class="fa fa-map-marker"></i> {{ job.location }}</span>
+                <span class="tag">{{ job.get_work_mode_display|default:job.work_mode }}</span>
+                <span class="tag">{{ job.get_experience_level_display|default:job.experience_level }}</span>
+                {% if job.salary %}
+                    <span class="tag salary">{{ job.salary }} {{ job.currency }}</span>
+                {% endif %}
+            </div>
+        </a>
+        {% empty %}
+        <div style="text-align: center; padding: 40px 20px; color: var(--hint-color);">
+            <i class="fa fa-search" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+            <p>No job vacancies found matching your search.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="bottom-bar">
+        <a href="{% url 'jobs:telegram-webapp' %}" class="nav-item active">
+            <i class="fa fa-briefcase" style="font-size: 1.2rem;"></i>
+            <span>Jobs</span>
+        </a>
+        <a href="{% url 'jobs:companies-list' %}" target="_blank" class="nav-item">
+            <i class="fa fa-building" style="font-size: 1.2rem;"></i>
+            <span>Companies</span>
+        </a>
+        <a href="{% url 'jobs:salary-calculator' %}" target="_blank" class="nav-item">
+            <i class="fa fa-calculator" style="font-size: 1.2rem;"></i>
+            <span>Tax Calc</span>
+        </a>
+        <a href="{% url 'jobs:home' %}" target="_blank" class="nav-item">
+            <i class="fa fa-external-link" style="font-size: 1.2rem;"></i>
+            <span>Portal</span>
+        </a>
+    </div>
+
+    <script>
+        // Initialize Telegram WebApp
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+        }
+    </script>
+</body>
+</html>

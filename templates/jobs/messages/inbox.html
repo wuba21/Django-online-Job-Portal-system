@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load static i18n humanize %}
+{% block title %}Direct Messages - Ethio Job Portal{% endblock %}
+
+{% block content %}
+<section class="bg-light-gray py-4">
+    <div class="container-fluid px-lg-5">
+        <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: hidden; min-height: 650px;">
+            <div class="row no-gutters" style="min-height: 650px;">
+                <!-- Left Pane: Conversations List -->
+                <div class="col-md-4 col-lg-3 border-right bg-white" style="max-height: 680px; overflow-y: auto;">
+                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
+                        <h5 class="font-weight-bold text-dark mb-0">
+                            <i class="fa fa-comments text-primary mr-1"></i> Messages
+                        </h5>
+                        <span class="badge badge-primary px-2 py-1">{{ conversations|length }}</span>
+                    </div>
+
+                    <div class="list-group list-group-flush">
+                        {% for item in conversations %}
+                        <a href="{% url 'jobs:inbox' %}?c={{ item.obj.id }}"
+                           class="list-group-item list-group-item-action p-3 border-bottom {% if active_conversation and active_conversation.id == item.obj.id %}bg-light border-left border-primary{% endif %}"
+                           style="{% if active_conversation and active_conversation.id == item.obj.id %}border-left-width: 4px !important;{% endif %}">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <strong class="text-dark small d-flex align-items-center">
+                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mr-2 font-weight-bold" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                                        {{ item.other_user.first_name|first|default:item.other_user.email|first|upper }}
+                                    </div>
+                                    <span>{{ item.other_user.get_full_name|default:item.other_user.email }}</span>
+                                </strong>
+                                {% if item.unread_count > 0 %}
+                                    <span class="badge badge-danger badge-pill">{{ item.unread_count }}</span>
+                                {% endif %}
+                            </div>
+
+                            {% if item.obj.job %}
+                                <small class="text-primary d-block font-weight-bold mb-1" style="font-size: 0.76rem;">
+                                    <i class="fa fa-briefcase mr-1"></i>{{ item.obj.job.title|truncatechars:26 }}
+                                </small>
+                            {% endif %}
+
+                            <p class="text-muted small mb-0 text-truncate" style="font-size: 0.8rem;">
+                                {% if item.last_message %}
+                                    {% if item.last_message.sender == request.user %}You: {% endif %}{{ item.last_message.message }}
+                                {% else %}
+                                    <em>Conversation started</em>
+                                {% endif %}
+                            </p>
+                            <small class="text-muted d-block text-right mt-1" style="font-size: 0.72rem;">
+                                {{ item.obj.updated_at|naturaltime }}
+                            </small>
+                        </a>
+                        {% empty %}
+                        <div class="text-center py-5 text-muted p-3">
+                            <i class="fa fa-envelope-open-o text-muted mb-2" style="font-size: 2.2rem;"></i>
+                            <h6 class="font-weight-bold text-dark">No Messages Yet</h6>
+                            <small>When you or an employer starts a conversation, it will appear here.</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Right Pane: Active Chat Conversation -->
+                <div class="col-md-8 col-lg-9 bg-light d-flex flex-column justify-content-between" style="min-height: 650px;">
+                    {% if active_conversation %}
+                        <!-- Active Header -->
+                        <div class="p-3 bg-white border-bottom d-flex justify-content-between align-items-center shadow-sm">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mr-3 font-weight-bold shadow-sm" style="width: 44px; height: 44px; font-size: 1.1rem;">
+                                    {{ active_other_user.first_name|first|default:active_other_user.email|first|upper }}
+                                </div>
+                                <div>
+                                    <h6 class="font-weight-bold text-dark mb-0">{{ active_other_user.get_full_name|default:active_other_user.email }}</h6>
+                                    <div class="small text-muted">
+                                        <span class="badge badge-light border text-capitalize mr-2">{{ active_other_user.role }}</span>
+                                        {% if active_conversation.job %}
+                                            <a href="{% url 'jobs:jobs-detail' active_conversation.job.id %}" target="_blank" class="text-primary font-weight-bold">
+                                                <i class="fa fa-link mr-1"></i>Job: {{ active_conversation.job.title }}
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                {% if request.user.role == 'employer' and active_conversation.candidate %}
+                                    <a href="{% url 'accounts:candidate-profile-view' active_conversation.candidate.id %}" target="_blank" class="btn btn-sm btn-outline-primary font-weight-bold">
+                                        <i class="fa fa-user mr-1"></i> View Candidate Profile
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Chat Messages Thread -->
+                        <div class="p-4 flex-grow-1" id="chatThread" style="max-height: 500px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;">
+                            {% for msg in active_messages %}
+                                {% if msg.sender == request.user %}
+                                    <!-- Sent by me -->
+                                    <div class="align-self-end text-right" style="max-width: 75%;">
+                                        <div class="p-3 text-white rounded shadow-sm text-left" style="background: #2563eb; border-radius: 14px 14px 2px 14px !important; font-size: 0.92rem; line-height: 1.5;">
+                                            {{ msg.message|linebreaksbr }}
+                                        </div>
+                                        <small class="text-muted d-block mt-1 pr-1" style="font-size: 0.72rem;">
+                                            {{ msg.created_at|date:"M d, H:i" }} <i class="fa fa-check text-primary"></i>
+                                        </small>
+                                    </div>
+                                {% else %}
+                                    <!-- Received from other party -->
+                                    <div class="align-self-start text-left" style="max-width: 75%;">
+                                        <div class="p-3 bg-white text-dark rounded shadow-sm border" style="border-radius: 14px 14px 14px 2px !important; font-size: 0.92rem; line-height: 1.5;">
+                                            {{ msg.message|linebreaksbr }}
+                                        </div>
+                                        <small class="text-muted d-block mt-1 pl-1" style="font-size: 0.72rem;">
+                                            {{ msg.sender.first_name|default:msg.sender.email }} &bull; {{ msg.created_at|date:"M d, H:i" }}
+                                        </small>
+                                    </div>
+                                {% endif %}
+                            {% empty %}
+                                <div class="text-center py-5 text-muted my-auto">
+                                    <i class="fa fa-comments-o text-muted mb-2" style="font-size: 2.5rem;"></i>
+                                    <p class="mb-0">No messages in this conversation yet. Send the first message below!</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Message Input Composer -->
+                        <div class="p-3 bg-white border-top">
+                            <form method="post" action="{% url 'jobs:inbox' %}" id="chatForm">
+                                {% csrf_token %}
+                                <input type="hidden" name="conversation_id" value="{{ active_conversation.id }}">
+                                <div class="input-group">
+                                    <textarea name="message" class="form-control" rows="2" required placeholder="Type your message to {{ active_other_user.first_name|default:'recipient' }}... (Press Shift+Enter for new line)" style="resize: none; border-radius: 10px 0 0 10px;"></textarea>
+                                    <div class="input-group-append">
+                                        <button type="submit" class="btn btn-primary font-weight-bold px-4" style="border-radius: 0 10px 10px 0;">
+                                            <i class="fa fa-paper-plane mr-1"></i> Send
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    {% else %}
+                        <!-- No Conversation Selected -->
+                        <div class="d-flex flex-column align-items-center justify-content-center h-100 py-5 text-muted">
+                            <i class="fa fa-comments text-muted mb-3" style="font-size: 3.5rem;"></i>
+                            <h4 class="font-weight-bold text-dark">Your Direct Messages</h4>
+                            <p class="text-muted small">Select a conversation from the left to start messaging, or contact candidates directly from the ATS.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Auto-scroll chat thread to bottom on page load
+    document.addEventListener("DOMContentLoaded", function() {
+        var thread = document.getElementById("chatThread");
+        if (thread) {
+            thread.scrollTop = thread.scrollHeight;
+        }
+    });
+</script>
+{% endblock %}

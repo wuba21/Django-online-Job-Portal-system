@@ -87,6 +87,86 @@ class CompanyDetailView(DetailView):
             status="approved"
         ).order_by("-is_featured", "-created_at")
 
+        # Fetch verified company reviews
+        reviews = company.reviews.filter(is_approved=True).select_related("user")
+        total_rev = reviews.count()
+
+        rating_breakdown = {}
+        for star in range(5, 0, -1):
+            count = reviews.filter(rating=star).count()
+            pct = int((count / total_rev * 100)) if total_rev > 0 else 0
+            rating_breakdown[star] = {"count": count, "percentage": pct}
+
+        user_review = None
+        if self.request.user.is_authenticated:
+            user_review = company.reviews.filter(user=self.request.user).first()
+
         context["active_jobs"] = active_jobs
         context["total_active_jobs"] = active_jobs.count()
+        context["reviews"] = reviews
+        context["total_reviews"] = total_rev
+        context["rating_breakdown"] = rating_breakdown
+        context["user_review"] = user_review
         return context
+
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+from accounts.models import CompanyReview
+from jobsapp.models import create_notification
+
+
+@login_required
+def add_company_review(request, company_id):
+    """
+    Submits or updates a Glassdoor-style employee / candidate company review and rating.
+    """
+    company = get_object_or_404(Company, id=company_id)
+
+    if request.user == company.user:
+        messages.error(request, "Company owners cannot review their own company.")
+        return redirect("jobs:company-detail", id=company.id)
+
+    if request.method == "POST":
+        try:
+            rating = int(request.POST.get("rating", 5))
+            rating = max(1, min(5, rating))
+        except (ValueError, TypeError):
+            rating = 5
+
+        title = request.POST.get("title", "").strip()
+        review_text = request.POST.get("review_text", "").strip()
+        pros = request.POST.get("pros", "").strip()
+        cons = request.POST.get("cons", "").strip()
+
+        if not title or not review_text:
+            messages.error(request, "Please provide a review headline and detailed comments.")
+            return redirect("jobs:company-detail", id=company.id)
+
+        review, created = CompanyReview.objects.update_or_create(
+            company=company,
+            user=request.user,
+            defaults={
+                "rating": rating,
+                "title": title,
+                "review_text": review_text,
+                "pros": pros,
+                "cons": cons,
+                "is_approved": True,
+            }
+        )
+
+        # Notify company owner
+        if company.user:
+            create_notification(
+                user=company.user,
+                title="⭐ New Company Review Received",
+                message=f"{request.user.get_full_name() or 'A user'} gave your company a {rating}-star review: '{title}'",
+                link=f"/companies/{company.id}/"
+            )
+
+        action_msg = "submitted" if created else "updated"
+        messages.success(request, f"🎉 Thank you! Your review has been {action_msg} successfully.")
+
+    return redirect("jobs:company-detail", id=company.id)

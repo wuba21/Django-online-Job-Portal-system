@@ -278,6 +278,10 @@
 
                             <!-- Fast Hiring Stage Stepper Actions -->
                             <div class="d-flex align-items-center flex-wrap" style="gap: 5px;">
+                                <a href="{% url 'jobs:start-conversation' app.user.id %}?job_id={{ app.job.id }}" class="btn btn-xs btn-outline-primary font-weight-bold" title="Direct Message Candidate">
+                                    <i class="fa fa-comment-o mr-1"></i> Message
+                                </a>
+
                                 <a href="{% url 'jobs:applied-applicant-view' app.job.id app.id %}" class="btn btn-xs btn-light border text-dark font-weight-bold" title="View Full Candidate Dossier">
                                     <i class="fa fa-user-circle mr-1"></i> Dossier
                                 </a>

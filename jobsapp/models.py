@@ -299,6 +299,21 @@ class Notification(models.Model):
         return f"Notification for {self.user.email}: {self.title}"
 
 
+def create_notification(user, title, message, link=None):
+    if user:
+        try:
+            return Notification.objects.create(
+                user=user,
+                title=title,
+                message=message,
+                link=link
+            )
+        except Exception:
+            pass
+    return None
+
+
+
 class AdminAuditLog(models.Model):
     admin_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="admin_audit_logs")
     action = models.CharField(max_length=100, db_index=True)
@@ -329,4 +344,43 @@ class JobAlert(models.Model):
 
     def __str__(self):
         return f"Job Alert for {self.email} ({self.category or 'All'} in {self.location or 'All'})"
+
+
+class Conversation(models.Model):
+    employer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="employer_conversations")
+    candidate = models.ForeignKey(User, on_delete=models.CASCADE, related_name="candidate_conversations")
+    job = models.ForeignKey(Job, on_delete=models.SET_NULL, null=True, blank=True, related_name="conversations")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-updated_at"]
+        unique_together = ("employer", "candidate", "job")
+
+    def __str__(self):
+        job_title = f" ({self.job.title})" if self.job else ""
+        emp_name = self.employer.get_full_name() or self.employer.email
+        cand_name = self.candidate.get_full_name() or self.candidate.email
+        return f"{emp_name} <-> {cand_name}{job_title}"
+
+    def unread_count(self, user):
+        return self.messages.filter(is_read=False).exclude(sender=user).count()
+
+    def get_other_user(self, user):
+        return self.candidate if user == self.employer else self.employer
+
+
+class ChatMessage(models.Model):
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="messages")
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_chat_messages")
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"Msg from {self.sender.email} at {self.created_at:%H:%M}"
+
 

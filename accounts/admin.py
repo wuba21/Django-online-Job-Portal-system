@@ -46,6 +46,25 @@ class UserAdmin(BaseUserAdmin):
 
 @admin.register(Company)
 class CompanyAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "user", "location", "website", "created_at")
-    search_fields = ("name", "location", "user__email")
-    list_filter = ("created_at",)
+    list_display = ("id", "name", "user", "location", "license_status", "created_at")
+    search_fields = ("name", "location", "user__email", "tin_number")
+    list_filter = ("license_status", "created_at")
+
+
+from .models import CompanyReview
+
+
+@admin.register(CompanyReview)
+class CompanyReviewAdmin(admin.ModelAdmin):
+    list_display = ("id", "company", "user", "rating", "title", "is_approved", "created_at")
+    list_filter = ("rating", "is_approved", "created_at")
+    search_fields = ("company__name", "user__email", "title", "review_text")
+    actions = ["approve_reviews", "unapprove_reviews"]
+
+    def approve_reviews(self, request, queryset):
+        queryset.update(is_approved=True)
+    approve_reviews.short_description = "Approve selected company reviews"
+
+    def unapprove_reviews(self, request, queryset):
+        queryset.update(is_approved=False)
+    unapprove_reviews.short_description = "Hide/Unapprove selected company reviews"

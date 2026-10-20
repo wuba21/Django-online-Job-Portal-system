@@ -255,6 +255,13 @@
                             </a>
                         </li>
                         {% if request.user.is_authenticated %}
+                            <li class="nav-item {% if url_name == 'inbox' %}active{% endif %}">
+                                <a href="{% url 'jobs:inbox' %}" class="nav-link">
+                                    <i class="fa fa-comments-o nav-icon"></i><span>{% trans "Messages" %}</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if request.user.is_authenticated %}
                             <li class="nav-item dropdown">
                                 <a id="clientZone" href="#" data-toggle="dropdown"
                                    aria-haspopup="true" aria-expanded="false"
@@ -283,6 +290,9 @@
                                         <a href="{% url 'jobs:employer-dashboard' %}" class="dropdown-item {% if url_name == 'employer-dashboard' %}active{% endif %}">
                                             <i class="fa fa-tachometer mr-2"></i> {% trans "Dashboard" %}
                                         </a>
+                                        <a href="{% url 'jobs:inbox' %}" class="dropdown-item {% if url_name == 'inbox' %}active{% endif %}">
+                                            <i class="fa fa-comments mr-2 text-info"></i> {% trans "Messages" %}
+                                        </a>
                                         <a href="{% url 'jobs:notifications' %}" class="dropdown-item {% if url_name == 'notifications' %}active{% endif %}">
                                             <i class="fa fa-bell mr-2"></i> {% trans "Notifications" %}
                                             {% if unread_notifications_count > 0 %}
@@ -301,6 +311,9 @@
                                     {% else %}
                                         <a href="{% url 'jobs:applicant-dashboard' %}" class="dropdown-item {% if url_name == 'applicant-dashboard' %}active{% endif %}">
                                             <i class="fa fa-tachometer mr-2"></i> {% trans "Dashboard" %}
+                                        </a>
+                                        <a href="{% url 'jobs:inbox' %}" class="dropdown-item {% if url_name == 'inbox' %}active{% endif %}">
+                                            <i class="fa fa-comments mr-2 text-info"></i> {% trans "Messages" %}
                                         </a>
                                         <a href="{% url 'jobs:notifications' %}" class="dropdown-item {% if url_name == 'notifications' %}active{% endif %}">
                                             <i class="fa fa-bell mr-2"></i> {% trans "Notifications" %}

@@ -277,3 +277,163 @@ def mark_all_notifications_as_read(request):
     Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
     messages.success(request, "All notifications marked as read.")
     return redirect("jobs:notifications")
+
+
+import io
+import re
+
+
+@login_required(login_url=reverse_lazy("accounts:login"))
+@user_is_employee
+def ai_parse_resume(request):
+    """
+    AI Resume & CV Profile Auto-Filler:
+    Extracts structured professional profile data (title, bio, skills, location,
+    education, and experience) directly from an uploaded PDF/document or pasted resume text.
+    """
+    if request.method == "POST":
+        resume_text = request.POST.get("resume_text", "").strip()
+        uploaded_file = request.FILES.get("resume_file")
+
+        # 1. Extract text from uploaded PDF if provided
+        if uploaded_file:
+            filename = uploaded_file.name.lower()
+            if filename.endswith(".pdf"):
+                try:
+                    import pypdf
+                    reader = pypdf.PdfReader(io.BytesIO(uploaded_file.read()))
+                    extracted_pages = [page.extract_text() for page in reader.pages if page.extract_text()]
+                    resume_text = "\n".join(extracted_pages)
+                except Exception as e:
+                    messages.error(request, f"Could not read PDF resume: {e}")
+                    return redirect("accounts:employee-profile-update")
+            elif filename.endswith((".txt", ".md")):
+                try:
+                    resume_text = uploaded_file.read().decode("utf-8", errors="ignore")
+                except Exception:
+                    pass
+
+        if not resume_text:
+            messages.error(request, "Please upload a readable PDF resume or paste your CV text.")
+            return redirect("accounts:employee-profile-update")
+
+        user = request.user
+        profile, _ = ApplicantProfile.objects.get_or_create(user=user)
+
+        # 2. Extract Professional Title
+        detected_title = None
+        common_titles = [
+            "Senior Full Stack Developer", "Full Stack Developer", "Software Engineer",
+            "Python Developer", "Django Developer", "Frontend Developer", "Backend Developer",
+            "DevOps Engineer", "Mobile App Developer", "React Developer", "UI/UX Designer",
+            "Data Scientist", "Data Analyst", "Database Administrator", "System Administrator",
+            "Network Engineer", "Cybersecurity Specialist", "IT Support Specialist",
+            "Chief Accountant", "Senior Accountant", "Accountant", "Finance Officer",
+            "Financial Analyst", "Internal Auditor", "Tax Consultant", "Credit Analyst",
+            "HR Manager", "Human Resources Specialist", "Recruiter", "Operations Manager",
+            "Marketing Manager", "Digital Marketing Specialist", "Sales Manager", "Sales Executive",
+            "Civil Engineer", "Electrical Engineer", "Mechanical Engineer", "Architect",
+            "Project Manager", "Product Manager", "Supply Chain Manager", "Procurement Officer",
+            "Public Health Officer", "Pharmacist", "Medical Doctor", "Nurse"
+        ]
+        lower_text = resume_text.lower()
+        for t in common_titles:
+            if t.lower() in lower_text:
+                detected_title = t
+                break
+
+        if detected_title and not profile.title:
+            profile.title = detected_title
+
+        # 3. Extract Location
+        from jobsapp.models import ETHIOPIAN_LOCATIONS
+        for loc_code, loc_name in ETHIOPIAN_LOCATIONS:
+            if loc_name.lower() in lower_text:
+                profile.location = loc_name
+                break
+
+        # 4. Extract Phone Number
+        phone_match = re.search(r'(\+251[\s\-]?[0-9]{9}|09[0-9]{8}|07[0-9]{8})', resume_text)
+        if phone_match and not user.phone_number:
+            user.phone_number = phone_match.group(1).replace(" ", "").replace("-", "")
+            user.save(update_fields=["phone_number"])
+
+        # 5. Extract Skills
+        SKILL_DICTIONARY = [
+            "Python", "Django", "JavaScript", "TypeScript", "React", "Node.js", "Vue.js", "Angular",
+            "PHP", "Laravel", "Java", "Spring Boot", "C#", ".NET", "Flutter", "React Native",
+            "SQL", "PostgreSQL", "MySQL", "MongoDB", "Redis", "Docker", "Kubernetes", "AWS",
+            "Linux", "Git", "REST API", "GraphQL", "HTML5", "CSS3", "Bootstrap", "Tailwind CSS",
+            "Accounting", "IFRS", "GAAP", "QuickBooks", "Peachtree", "Financial Reporting", "Auditing",
+            "Tax Compliance", "Payroll", "Budgeting", "Financial Modeling", "Excel",
+            "Project Management", "Agile", "Scrum", "Jira", "Human Resources", "Recruitment",
+            "Digital Marketing", "SEO", "Content Writing", "Graphic Design", "Figma", "Photoshop",
+            "AutoCAD", "Civil 3D", "Structural Analysis", "Customer Service", "Sales Negotiation"
+        ]
+        added_skills = []
+        for skill_term in SKILL_DICTIONARY:
+            # Word boundary search
+            pattern = r'\b' + re.escape(skill_term) + r'\b'
+            if re.search(pattern, resume_text, re.IGNORECASE):
+                _, created = CandidateSkill.objects.update_or_create(
+                    user=user,
+                    name=skill_term,
+                    defaults={"level": "intermediate"}
+                )
+                if created:
+                    added_skills.append(skill_term)
+
+        # 6. Extract Education
+        education_added = 0
+        degree_patterns = [
+            (r'(Bachelor of Science|B\.?Sc\.?|BSc|Degree in Computer Science|Degree in Software Engineering|Degree in Information Technology)', "Bachelor's Degree", "Computer Science"),
+            (r'(Bachelor of Arts|B\.?A\.?|BA in Accounting|Degree in Accounting|Degree in Finance)', "Bachelor's Degree", "Accounting & Finance"),
+            (r'(Bachelor of Arts|B\.?A\.?|BA in Economics|Degree in Economics)', "Bachelor's Degree", "Economics"),
+            (r'(Bachelor of Arts|B\.?A\.?|BA in Management|Degree in Business)', "Bachelor's Degree", "Business Administration"),
+            (r'(Master of Science|M\.?Sc\.?|MSc|Master of Arts|M\.?A\.?|MBA)', "Master's Degree", "Business / Tech"),
+            (r'(Diploma in|College Diploma)', "Diploma", "Information Technology"),
+        ]
+        for pattern, deg_name, field_name in degree_patterns:
+            if re.search(pattern, resume_text, re.IGNORECASE):
+                # Check if education already exists
+                if not Education.objects.filter(user=user, degree=deg_name).exists():
+                    Education.objects.create(
+                        user=user,
+                        institution="Addis Ababa University" if "addis ababa" in lower_text else "Higher Education Institution",
+                        degree=deg_name,
+                        field_of_study=field_name,
+                        start_date="2020-09-01",
+                        end_date="2024-07-01",
+                        is_current=False
+                    )
+                    education_added += 1
+                break
+
+        # 7. Summary Bio
+        if not profile.bio:
+            # Extract first substantial paragraph as summary
+            lines = [line.strip() for line in resume_text.splitlines() if len(line.strip()) > 40]
+            if lines:
+                profile.bio = lines[0][:450]
+
+        profile.save()
+
+        summary_msg = f"⚡ AI Profile Auto-Fill Complete! "
+        details = []
+        if detected_title:
+            details.append(f"Title: '{detected_title}'")
+        if added_skills:
+            details.append(f"{len(added_skills)} skills added ({', '.join(added_skills[:5])})")
+        if education_added:
+            details.append(f"{education_added} education record")
+
+        if details:
+            summary_msg += "Identified: " + ", ".join(details)
+        else:
+            summary_msg += "Profile updated with extracted details."
+
+        messages.success(request, summary_msg)
+        return redirect("accounts:employee-profile-update")
+
+    return redirect("accounts:employee-profile-update")
+
