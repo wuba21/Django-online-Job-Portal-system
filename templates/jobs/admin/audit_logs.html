@@ -52,21 +52,21 @@
         <!-- Audit Table Card -->
         <div class="card border-0 shadow-sm p-3 p-md-4" style="border-radius: 12px;">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" style="min-width: 800px;">
+                <table class="table table-hover align-middle mb-0" style="min-width: 900px;">
                     <thead class="thead-light">
                         <tr>
-                            <th style="width: 18%;">Action Type</th>
-                            <th style="width: 25%;">Target Entity</th>
-                            <th style="width: 20%;">Moderator Admin</th>
-                            <th style="width: 22%;">Audit Details</th>
-                            <th style="width: 15%;">Timestamp / IP</th>
+                            <th class="text-nowrap" style="min-width: 140px;">Action Type</th>
+                            <th class="text-nowrap" style="min-width: 200px;">Target Entity</th>
+                            <th class="text-nowrap" style="min-width: 180px;">Moderator Admin</th>
+                            <th class="text-nowrap" style="min-width: 240px;">Audit Details</th>
+                            <th class="text-nowrap" style="min-width: 140px;">Timestamp / IP</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for log in logs %}
                         <tr>
                             <!-- Action Badge -->
-                            <td>
+                            <td class="text-nowrap">
                                 {% if "APPROVED" in log.action or "VERIFIED" in log.action or "SUCCESS" in log.action %}
                                     <span class="badge badge-success px-2 py-1 font-weight-bold" style="font-size: 0.74rem;">
                                         <i class="fa fa-check-circle mr-1"></i>{{ log.action }}
@@ -117,7 +117,7 @@
                             </td>
 
                             <!-- Timestamp & IP -->
-                            <td>
+                            <td class="text-nowrap">
                                 <small class="text-dark font-weight-bold d-block">{{ log.created_at|date:"M d, Y" }}</small>
                                 <small class="text-muted d-block">{{ log.created_at|date:"H:i:s" }}</small>
                                 {% if log.ip_address %}

@@ -742,9 +742,47 @@ html, body {
 /* Universal text-wrapping protection to prevent text jumble */
 h1, h2, h3, h4, h5, h6, .heading, .card-title,
 .job__title, .job__company, .job-listing,
-p, span, a, label, strong, em, td, th {
-    overflow-wrap: break-word !important;
-    word-break: break-word !important;
+p, label {
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
+/* Professional Enterprise Admin Tables Styling */
+.table, table {
+    width: 100% !important;
+}
+
+.table th, .table td,
+table th, table td {
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    vertical-align: middle !important;
+}
+
+.table th, table th {
+    white-space: nowrap !important;
+    font-size: 0.74rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    font-weight: 700 !important;
+    color: #475569 !important;
+    background-color: #f8fafc !important;
+    border-top: none !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    padding: 12px 14px !important;
+}
+
+.table td, table td {
+    padding: 12px 14px !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    color: #1e293b;
+}
+
+/* Explicit No-Wrap helper for table columns like Amount, Dates, Badges, Actions */
+.text-nowrap, .td-nowrap,
+th.nowrap, td.nowrap,
+.badge, .btn-xs, .btn-sm {
+    white-space: nowrap !important;
 }
 
 /* Fluid responsive typography & mobile container protection */

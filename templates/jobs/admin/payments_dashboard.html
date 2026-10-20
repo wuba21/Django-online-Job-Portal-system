@@ -75,332 +75,335 @@
             </div>
         </div>
 
-        <div class="row">
-            <!-- Transactions Ledger -->
-            <div class="col-lg-8 mb-4">
-                <div class="card border-0 shadow-sm p-3 p-md-4" style="border-radius: 12px;">
-                    <!-- Filter and Search Header -->
-                    <div class="d-flex justify-content-between align-items-center flex-wrap mb-3" style="gap: 12px;">
-                        <div>
-                            <h5 class="card-title text-dark mb-0 font-weight-bold">
-                                <i class="fa fa-list-alt text-primary mr-1"></i> Transaction Ledger (Chapa / Telebirr / CBE Birr)
-                            </h5>
-                            <small class="text-muted">Direct log of customer payments and status verification</small>
-                        </div>
-                        <span class="badge badge-secondary px-2 py-1 font-weight-bold">
-                            {{ total_tx_count }} Total Records
-                        </span>
-                    </div>
-
-                    <!-- Filter Pills -->
-                    <div class="d-flex align-items-center flex-wrap mb-3" style="gap: 6px;">
-                        <span class="text-muted font-weight-bold small mr-1"><i class="fa fa-filter mr-1"></i>Status:</span>
-                        <a href="{% url 'jobs:admin-payments-dashboard' %}?status=all{% if method_filter != 'all' %}&method={{ method_filter }}{% endif %}{% if purpose_filter != 'all' %}&purpose={{ purpose_filter }}{% endif %}{% if query %}&q={{ query }}{% endif %}" 
-                           class="btn btn-xs {% if status_filter == 'all' %}btn-dark font-weight-bold{% else %}btn-outline-secondary{% endif %}" style="border-radius: 15px;">
-                            All
-                        </a>
-                        <a href="{% url 'jobs:admin-payments-dashboard' %}?status=success{% if method_filter != 'all' %}&method={{ method_filter }}{% endif %}{% if purpose_filter != 'all' %}&purpose={{ purpose_filter }}{% endif %}{% if query %}&q={{ query }}{% endif %}" 
-                           class="btn btn-xs {% if status_filter == 'success' %}btn-success font-weight-bold{% else %}btn-outline-success{% endif %}" style="border-radius: 15px;">
-                            <i class="fa fa-check-circle mr-1"></i>Success ({{ success_count }})
-                        </a>
-                        <a href="{% url 'jobs:admin-payments-dashboard' %}?status=pending{% if method_filter != 'all' %}&method={{ method_filter }}{% endif %}{% if purpose_filter != 'all' %}&purpose={{ purpose_filter }}{% endif %}{% if query %}&q={{ query }}{% endif %}" 
-                           class="btn btn-xs {% if status_filter == 'pending' %}btn-warning text-dark font-weight-bold{% else %}btn-outline-warning text-dark{% endif %}" style="border-radius: 15px;">
-                            <i class="fa fa-clock-o mr-1"></i>Pending ({{ pending_payments_count }})
-                        </a>
-                        <a href="{% url 'jobs:admin-payments-dashboard' %}?status=failed{% if method_filter != 'all' %}&method={{ method_filter }}{% endif %}{% if purpose_filter != 'all' %}&purpose={{ purpose_filter }}{% endif %}{% if query %}&q={{ query }}{% endif %}" 
-                           class="btn btn-xs {% if status_filter == 'failed' %}btn-danger font-weight-bold{% else %}btn-outline-danger{% endif %}" style="border-radius: 15px;">
-                            <i class="fa fa-times-circle mr-1"></i>Failed ({{ failed_count }})
-                        </a>
-                    </div>
-
-                    <!-- Search Input -->
-                    <form method="get" class="mb-3">
-                        {% if status_filter != 'all' %}<input type="hidden" name="status" value="{{ status_filter }}">{% endif %}
-                        {% if method_filter != 'all' %}<input type="hidden" name="method" value="{{ method_filter }}">{% endif %}
-                        {% if purpose_filter != 'all' %}<input type="hidden" name="purpose" value="{{ purpose_filter }}">{% endif %}
-                        <div class="input-group input-group-sm">
-                            <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search reference, customer email, Chapa ID..." aria-label="Search">
-                            <div class="input-group-append">
-                                <button class="btn btn-primary" type="submit"><i class="fa fa-search mr-1"></i>Filter</button>
-                                {% if query %}
-                                    <a href="{% url 'jobs:admin-payments-dashboard' %}?status={{ status_filter }}" class="btn btn-outline-secondary" title="Clear search"><i class="fa fa-times"></i></a>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </form>
-
-                    <!-- Table -->
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0" style="min-width: 680px;">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th>Ref / Customer</th>
-                                    <th>Purpose</th>
-                                    <th>Method</th>
-                                    <th>Amount</th>
-                                    <th>Status</th>
-                                    <th>Date</th>
-                                    <th style="text-align: right;">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for tx in transactions %}
-                                <tr>
-                                    <!-- Ref & Customer -->
-                                    <td>
-                                        <div class="font-weight-bold text-dark text-truncate" style="max-width: 170px;" title="{{ tx.tx_ref }}">
-                                            <code>{{ tx.tx_ref|truncatechars:18 }}</code>
-                                        </div>
-                                        <small class="text-muted d-block text-truncate" style="max-width: 170px;" title="{{ tx.user.email }}">
-                                            <i class="fa fa-user-o mr-1"></i>{{ tx.user.email }}
-                                        </small>
-                                        {% if tx.chapa_reference %}
-                                            <small class="text-primary d-block text-truncate" style="max-width: 170px;" title="Chapa Ref: {{ tx.chapa_reference }}">
-                                                Chapa: {{ tx.chapa_reference }}
-                                            </small>
-                                        {% endif %}
-                                    </td>
-
-                                    <!-- Purpose -->
-                                    <td>
-                                        {% if tx.purpose == 'featured_job' %}
-                                            <span class="badge badge-warning text-dark px-2 py-1" style="font-size: 0.74rem;">
-                                                <i class="fa fa-star mr-1"></i>VIP Job Listing
-                                            </span>
-                                            {% if tx.job %}
-                                                <small class="d-block text-muted text-truncate mt-1" style="max-width: 130px;" title="{{ tx.job.title }}">
-                                                    {{ tx.job.title }}
-                                                </small>
-                                            {% endif %}
-                                        {% elif tx.purpose == 'candidate_vip' or tx.purpose == 'vip_candidate' %}
-                                            <span class="badge badge-info px-2 py-1" style="font-size: 0.74rem;">
-                                                <i class="fa fa-diamond mr-1"></i>Candidate VIP
-                                            </span>
-                                        {% elif tx.purpose == 'employer_subscription' %}
-                                            <span class="badge badge-primary px-2 py-1" style="font-size: 0.74rem;">
-                                                <i class="fa fa-briefcase mr-1"></i>Employer Pro
-                                            </span>
-                                        {% else %}
-                                            <span class="badge badge-secondary px-2 py-1" style="font-size: 0.74rem;">
-                                                {{ tx.purpose }}
-                                            </span>
-                                        {% endif %}
-                                    </td>
-
-                                    <!-- Method -->
-                                    <td>
-                                        {% if tx.payment_method == 'telebirr' %}
-                                            <span class="badge badge-light border text-primary font-weight-bold px-2 py-1">
-                                                Telebirr
-                                            </span>
-                                        {% elif tx.payment_method == 'cbe_birr' %}
-                                            <span class="badge badge-light border text-purple font-weight-bold px-2 py-1" style="color: #6b21a8;">
-                                                CBE Birr
-                                            </span>
-                                        {% else %}
-                                            <span class="badge badge-light border text-success font-weight-bold px-2 py-1">
-                                                Chapa Gateway
-                                            </span>
-                                        {% endif %}
-                                    </td>
-
-                                    <!-- Amount -->
-                                    <td>
-                                        <span class="font-weight-bold text-dark" style="font-size: 0.95rem;">
-                                            {{ tx.amount|floatformat:2 }}
-                                        </span>
-                                        <small class="text-muted font-weight-bold">ETB</small>
-                                    </td>
-
-                                    <!-- Status -->
-                                    <td>
-                                        {% if tx.status == 'success' %}
-                                            <span class="badge badge-success px-2 py-1" style="font-size: 0.76rem;">
-                                                <i class="fa fa-check mr-1"></i>Success
-                                            </span>
-                                        {% elif tx.status == 'failed' %}
-                                            <span class="badge badge-danger px-2 py-1" style="font-size: 0.76rem;">
-                                                <i class="fa fa-times mr-1"></i>Failed
-                                            </span>
-                                        {% else %}
-                                            <span class="badge badge-warning text-dark px-2 py-1" style="font-size: 0.76rem;">
-                                                <i class="fa fa-clock-o mr-1"></i>Pending
-                                            </span>
-                                        {% endif %}
-                                    </td>
-
-                                    <!-- Date -->
-                                    <td>
-                                        <small class="text-muted d-block">{{ tx.created_at|date:"M d, Y" }}</small>
-                                        <small class="text-muted">{{ tx.created_at|date:"H:i" }}</small>
-                                    </td>
-
-                                    <!-- Actions -->
-                                    <td class="text-right">
-                                        <div class="d-inline-flex align-items-center" style="gap: 4px;">
-                                            {% if tx.status != 'success' %}
-                                                <!-- Mark Success & Apply Benefits -->
-                                                <a href="{% url 'jobs:admin-update-payment-status' tx.id %}?status=success" 
-                                                   class="btn btn-xs btn-success font-weight-bold" 
-                                                   title="Confirm payment & apply benefits automatically"
-                                                   onclick="return confirm('Mark transaction as SUCCESS and activate all platform benefits for {{ tx.user.email }}?');">
-                                                    <i class="fa fa-check mr-1"></i>Approve
-                                                </a>
-                                            {% endif %}
-
-                                            {% if tx.status != 'failed' and tx.status != 'success' %}
-                                                <!-- Mark Failed -->
-                                                <a href="{% url 'jobs:admin-update-payment-status' tx.id %}?status=failed" 
-                                                   class="btn btn-xs btn-outline-danger" 
-                                                   title="Mark payment as failed"
-                                                   onclick="return confirm('Mark this transaction as FAILED?');">
-                                                    <i class="fa fa-times"></i>
-                                                </a>
-                                            {% endif %}
-
-                                            <!-- Details Modal Trigger -->
-                                            <button type="button" class="btn btn-xs btn-outline-secondary" data-toggle="modal" data-target="#txModal{{ tx.id }}" title="View Full Payment Metadata">
-                                                <i class="fa fa-info-circle"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <!-- Transaction Detail Modal -->
-                                <div class="modal fade" id="txModal{{ tx.id }}" tabindex="-1" role="dialog" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered" role="document">
-                                        <div class="modal-content border-0 shadow">
-                                            <div class="modal-header bg-dark text-white">
-                                                <h5 class="modal-title font-weight-bold">
-                                                    <i class="fa fa-receipt mr-2 text-warning"></i>Transaction #{{ tx.id }} Details
-                                                </h5>
-                                                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                            <div class="modal-body p-4">
-                                                <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
-                                                    <div>
-                                                        <span class="text-muted small">Total Paid Amount:</span>
-                                                        <h3 class="font-weight-bold text-success mb-0">{{ tx.amount|floatformat:2 }} ETB</h3>
-                                                    </div>
-                                                    <div>
-                                                        {% if tx.status == 'success' %}
-                                                            <span class="badge badge-success px-3 py-2 font-weight-bold" style="font-size: 0.85rem;"><i class="fa fa-check-circle mr-1"></i>SUCCESS</span>
-                                                        {% elif tx.status == 'failed' %}
-                                                            <span class="badge badge-danger px-3 py-2 font-weight-bold" style="font-size: 0.85rem;"><i class="fa fa-times-circle mr-1"></i>FAILED</span>
-                                                        {% else %}
-                                                            <span class="badge badge-warning text-dark px-3 py-2 font-weight-bold" style="font-size: 0.85rem;"><i class="fa fa-clock-o mr-1"></i>PENDING</span>
-                                                        {% endif %}
-                                                    </div>
-                                                </div>
-
-                                                <ul class="list-group list-group-flush small">
-                                                    <li class="list-group-item d-flex justify-content-between px-0">
-                                                        <span class="text-muted">Transaction Reference (Internal):</span>
-                                                        <code class="font-weight-bold">{{ tx.tx_ref }}</code>
-                                                    </li>
-                                                    <li class="list-group-item d-flex justify-content-between px-0">
-                                                        <span class="text-muted">Gateway Reference (Chapa):</span>
-                                                        <span class="font-weight-bold">{{ tx.chapa_reference|default:"None / Direct Manual" }}</span>
-                                                    </li>
-                                                    <li class="list-group-item d-flex justify-content-between px-0">
-                                                        <span class="text-muted">Customer Name:</span>
-                                                        <span class="font-weight-bold text-dark">{{ tx.user.get_full_name|default:"Not specified" }}</span>
-                                                    </li>
-                                                    <li class="list-group-item d-flex justify-content-between px-0">
-                                                        <span class="text-muted">Customer Email:</span>
-                                                        <span class="font-weight-bold text-dark">{{ tx.user.email }}</span>
-                                                    </li>
-                                                    <li class="list-group-item d-flex justify-content-between px-0">
-                                                        <span class="text-muted">Customer Role:</span>
-                                                        <span class="badge badge-light border text-uppercase">{{ tx.user.role }}</span>
-                                                    </li>
-                                                    <li class="list-group-item d-flex justify-content-between px-0">
-                                                        <span class="text-muted">Payment Purpose:</span>
-                                                        <span class="font-weight-bold text-uppercase">{{ tx.purpose }}</span>
-                                                    </li>
-                                                    {% if tx.job %}
-                                                    <li class="list-group-item d-flex justify-content-between px-0">
-                                                        <span class="text-muted">Associated Job:</span>
-                                                        <a href="{% url 'jobs:jobs-detail' tx.job.id %}" target="_blank" class="font-weight-bold">{{ tx.job.title }}</a>
-                                                    </li>
-                                                    {% endif %}
-                                                    <li class="list-group-item d-flex justify-content-between px-0">
-                                                        <span class="text-muted">Created Timestamp:</span>
-                                                        <span>{{ tx.created_at|date:"Y-m-d H:i:s" }}</span>
-                                                    </li>
-                                                    <li class="list-group-item d-flex justify-content-between px-0">
-                                                        <span class="text-muted">Last Updated:</span>
-                                                        <span>{{ tx.updated_at|date:"Y-m-d H:i:s" }}</span>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
-                                                {% if tx.status != 'success' %}
-                                                    <a href="{% url 'jobs:admin-update-payment-status' tx.id %}?status=success" class="btn btn-success btn-sm font-weight-bold">
-                                                        <i class="fa fa-check mr-1"></i>Confirm & Apply Benefits
-                                                    </a>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {% empty %}
-                                <tr>
-                                    <td colspan="7" class="text-center py-5">
-                                        <i class="fa fa-credit-card text-muted mb-3" style="font-size: 3rem;"></i>
-                                        <h5 class="text-dark font-weight-bold">No Transactions Found</h5>
-                                        <p class="text-muted small">No payment transactions match the selected filter or search query.</p>
-                                        <a href="{% url 'jobs:admin-payments-dashboard' %}" class="btn btn-sm btn-outline-primary">
-                                            <i class="fa fa-refresh mr-1"></i>Reset Filter
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Pagination -->
-                    {% if transactions.has_other_pages %}
-                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top flex-wrap" style="gap: 10px;">
-                        <small class="text-muted">
-                            Showing page {{ transactions.number }} of {{ transactions.paginator.num_pages }} ({{ total_tx_count }} records)
-                        </small>
-                        <ul class="pagination pagination-sm mb-0">
-                            {% if transactions.has_previous %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ transactions.previous_page_number }}&status={{ status_filter }}{% if query %}&q={{ query }}{% endif %}">&laquo;</a>
-                                </li>
-                            {% endif %}
-                            {% for i in transactions.paginator.page_range %}
-                                {% if transactions.number == i %}
-                                    <li class="page-item active"><span class="page-link">{{ i }}</span></li>
-                                {% else %}
-                                    <li class="page-item"><a class="page-link" href="?page={{ i }}&status={{ status_filter }}{% if query %}&q={{ query }}{% endif %}">{{ i }}</a></li>
-                                {% endif %}
-                            {% endfor %}
-                            {% if transactions.has_next %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ transactions.next_page_number }}&status={{ status_filter }}{% if query %}&q={{ query }}{% endif %}">&raquo;</a>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </div>
-                    {% endif %}
+        <!-- Full-Width Executive Transactions Ledger -->
+        <div class="card border-0 shadow-sm p-3 p-md-4 mb-4" style="border-radius: 12px; background: #fff;">
+            <!-- Filter and Search Header -->
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-3" style="gap: 12px;">
+                <div>
+                    <h5 class="card-title text-dark mb-0 font-weight-bold">
+                        <i class="fa fa-list-alt text-primary mr-1"></i> Transaction Ledger (Chapa / Telebirr / CBE Birr)
+                    </h5>
+                    <small class="text-muted">Direct financial log of customer payments and status verification</small>
+                </div>
+                <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                    <span class="badge badge-secondary px-3 py-2 font-weight-bold" style="font-size: 0.8rem;">
+                        {{ total_tx_count }} Total Records
+                    </span>
+                    <a href="{% url 'jobs:admin-export-payments-csv' %}" class="btn btn-sm btn-outline-success font-weight-bold shadow-sm">
+                        <i class="fa fa-file-excel-o mr-1"></i> Export to Excel (CSV)
+                    </a>
                 </div>
             </div>
 
-            <!-- Side Column: Active Subscriptions & Pricing Plans -->
-            <div class="col-lg-4 mb-4">
-                <!-- Active Subscriptions Card -->
-                <div class="card border-0 shadow-sm p-3 mb-4" style="border-radius: 12px;">
+            <!-- Filter Pills -->
+            <div class="d-flex align-items-center flex-wrap mb-3" style="gap: 6px;">
+                <span class="text-muted font-weight-bold small mr-1"><i class="fa fa-filter mr-1"></i>Status:</span>
+                <a href="{% url 'jobs:admin-payments-dashboard' %}?status=all{% if method_filter != 'all' %}&method={{ method_filter }}{% endif %}{% if purpose_filter != 'all' %}&purpose={{ purpose_filter }}{% endif %}{% if query %}&q={{ query }}{% endif %}" 
+                   class="btn btn-xs {% if status_filter == 'all' %}btn-dark font-weight-bold{% else %}btn-outline-secondary{% endif %}" style="border-radius: 15px;">
+                    All ({{ total_tx_count }})
+                </a>
+                <a href="{% url 'jobs:admin-payments-dashboard' %}?status=success{% if method_filter != 'all' %}&method={{ method_filter }}{% endif %}{% if purpose_filter != 'all' %}&purpose={{ purpose_filter }}{% endif %}{% if query %}&q={{ query }}{% endif %}" 
+                   class="btn btn-xs {% if status_filter == 'success' %}btn-success font-weight-bold{% else %}btn-outline-success{% endif %}" style="border-radius: 15px;">
+                    <i class="fa fa-check-circle mr-1"></i>Success ({{ success_count }})
+                </a>
+                <a href="{% url 'jobs:admin-payments-dashboard' %}?status=pending{% if method_filter != 'all' %}&method={{ method_filter }}{% endif %}{% if purpose_filter != 'all' %}&purpose={{ purpose_filter }}{% endif %}{% if query %}&q={{ query }}{% endif %}" 
+                   class="btn btn-xs {% if status_filter == 'pending' %}btn-warning text-dark font-weight-bold{% else %}btn-outline-warning text-dark{% endif %}" style="border-radius: 15px;">
+                    <i class="fa fa-clock-o mr-1"></i>Pending ({{ pending_payments_count }})
+                </a>
+                <a href="{% url 'jobs:admin-payments-dashboard' %}?status=failed{% if method_filter != 'all' %}&method={{ method_filter }}{% endif %}{% if purpose_filter != 'all' %}&purpose={{ purpose_filter }}{% endif %}{% if query %}&q={{ query }}{% endif %}" 
+                   class="btn btn-xs {% if status_filter == 'failed' %}btn-danger font-weight-bold{% else %}btn-outline-danger{% endif %}" style="border-radius: 15px;">
+                    <i class="fa fa-times-circle mr-1"></i>Failed ({{ failed_count }})
+                </a>
+            </div>
+
+            <!-- Search Input -->
+            <form method="get" class="mb-3">
+                {% if status_filter != 'all' %}<input type="hidden" name="status" value="{{ status_filter }}">{% endif %}
+                {% if method_filter != 'all' %}<input type="hidden" name="method" value="{{ method_filter }}">{% endif %}
+                {% if purpose_filter != 'all' %}<input type="hidden" name="purpose" value="{{ purpose_filter }}">{% endif %}
+                <div class="input-group input-group-sm" style="max-width: 450px;">
+                    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search reference, customer email, Chapa ID..." aria-label="Search">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="submit"><i class="fa fa-search mr-1"></i>Filter</button>
+                        {% if query %}
+                            <a href="{% url 'jobs:admin-payments-dashboard' %}?status={{ status_filter }}" class="btn btn-outline-secondary" title="Clear search"><i class="fa fa-times"></i></a>
+                        {% endif %}
+                    </div>
+                </div>
+            </form>
+
+            <!-- Table -->
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="min-width: 950px;">
+                    <thead class="thead-light">
+                        <tr>
+                            <th class="text-nowrap" style="width: 25%;">Ref / Customer</th>
+                            <th class="text-nowrap" style="width: 20%;">Purpose</th>
+                            <th class="text-nowrap" style="width: 14%;">Method</th>
+                            <th class="text-nowrap" style="width: 13%;">Amount (ETB)</th>
+                            <th class="text-nowrap" style="width: 10%;">Status</th>
+                            <th class="text-nowrap" style="width: 10%;">Date & Time</th>
+                            <th class="text-nowrap" style="width: 8%; text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tx in transactions %}
+                        <tr>
+                            <!-- Ref & Customer -->
+                            <td>
+                                <div class="font-weight-bold text-dark text-truncate" style="max-width: 240px;" title="{{ tx.tx_ref }}">
+                                    <code class="text-dark font-weight-bold" style="font-size: 0.85rem;">{{ tx.tx_ref }}</code>
+                                </div>
+                                <small class="text-muted d-block text-truncate" style="max-width: 240px;" title="{{ tx.user.email }}">
+                                    <i class="fa fa-user-o mr-1"></i>{{ tx.user.email }}
+                                </small>
+                                {% if tx.chapa_reference %}
+                                    <small class="text-primary d-block text-truncate" style="max-width: 240px;" title="Chapa Ref: {{ tx.chapa_reference }}">
+                                        Chapa: {{ tx.chapa_reference }}
+                                    </small>
+                                {% endif %}
+                            </td>
+
+                            <!-- Purpose -->
+                            <td>
+                                {% if tx.purpose == 'featured_job' %}
+                                    <span class="badge badge-warning text-dark px-2 py-1 font-weight-bold text-nowrap" style="font-size: 0.74rem;">
+                                        <i class="fa fa-star mr-1"></i>VIP Job Listing
+                                    </span>
+                                    {% if tx.job %}
+                                        <small class="d-block text-muted text-truncate mt-1" style="max-width: 190px;" title="{{ tx.job.title }}">
+                                            {{ tx.job.title }}
+                                        </small>
+                                    {% endif %}
+                                {% elif tx.purpose == 'candidate_vip' or tx.purpose == 'vip_candidate' %}
+                                    <span class="badge badge-info px-2 py-1 font-weight-bold text-nowrap" style="font-size: 0.74rem;">
+                                        <i class="fa fa-diamond mr-1"></i>Candidate VIP
+                                    </span>
+                                {% elif tx.purpose == 'employer_subscription' %}
+                                    <span class="badge badge-primary px-2 py-1 font-weight-bold text-nowrap" style="font-size: 0.74rem;">
+                                        <i class="fa fa-briefcase mr-1"></i>Employer Pro
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-secondary px-2 py-1 font-weight-bold text-nowrap" style="font-size: 0.74rem;">
+                                        {{ tx.purpose }}
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Method -->
+                            <td class="text-nowrap">
+                                {% if tx.payment_method == 'telebirr' %}
+                                    <span class="badge badge-light border text-primary font-weight-bold px-2 py-1">
+                                        Telebirr
+                                    </span>
+                                {% elif tx.payment_method == 'cbe_birr' %}
+                                    <span class="badge badge-light border text-purple font-weight-bold px-2 py-1" style="color: #6b21a8;">
+                                        CBE Birr
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-light border text-success font-weight-bold px-2 py-1">
+                                        Chapa Gateway
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Amount -->
+                            <td class="text-nowrap">
+                                <span class="font-weight-bold text-dark" style="font-size: 1rem;">
+                                    {{ tx.amount|floatformat:2 }}
+                                </span>
+                                <span class="badge badge-light border text-muted ml-1 font-weight-bold" style="font-size: 0.7rem;">ETB</span>
+                            </td>
+
+                            <!-- Status -->
+                            <td class="text-nowrap">
+                                {% if tx.status == 'success' %}
+                                    <span class="badge badge-success px-2 py-1 font-weight-bold" style="font-size: 0.76rem;">
+                                        <i class="fa fa-check mr-1"></i>Success
+                                    </span>
+                                {% elif tx.status == 'failed' %}
+                                    <span class="badge badge-danger px-2 py-1 font-weight-bold" style="font-size: 0.76rem;">
+                                        <i class="fa fa-times mr-1"></i>Failed
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-warning text-dark px-2 py-1 font-weight-bold" style="font-size: 0.76rem;">
+                                        <i class="fa fa-clock-o mr-1"></i>Pending
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Date -->
+                            <td class="text-nowrap">
+                                <div class="font-weight-bold text-dark small">{{ tx.created_at|date:"M d, Y" }}</div>
+                                <small class="text-muted">{{ tx.created_at|date:"h:i A" }}</small>
+                            </td>
+
+                            <!-- Actions -->
+                            <td class="text-nowrap text-right">
+                                <div class="d-inline-flex align-items-center" style="gap: 4px;">
+                                    {% if tx.status != 'success' %}
+                                        <!-- Mark Success & Apply Benefits -->
+                                        <a href="{% url 'jobs:admin-update-payment-status' tx.id %}?status=success" 
+                                           class="btn btn-xs btn-success font-weight-bold" 
+                                           title="Confirm payment & apply benefits automatically"
+                                           onclick="return confirm('Mark transaction as SUCCESS and activate all platform benefits for {{ tx.user.email }}?');">
+                                            <i class="fa fa-check mr-1"></i>Approve
+                                        </a>
+                                    {% endif %}
+
+                                    {% if tx.status != 'failed' and tx.status != 'success' %}
+                                        <!-- Mark Failed -->
+                                        <a href="{% url 'jobs:admin-update-payment-status' tx.id %}?status=failed" 
+                                           class="btn btn-xs btn-outline-danger" 
+                                           title="Mark payment as failed"
+                                           onclick="return confirm('Mark this transaction as FAILED?');">
+                                            <i class="fa fa-times"></i>
+                                        </a>
+                                    {% endif %}
+
+                                    <!-- Details Modal Trigger -->
+                                    <button type="button" class="btn btn-xs btn-outline-secondary" data-toggle="modal" data-target="#txModal{{ tx.id }}" title="View Full Payment Metadata">
+                                        <i class="fa fa-info-circle"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Transaction Detail Modal -->
+                        <div class="modal fade" id="txModal{{ tx.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content border-0 shadow">
+                                    <div class="modal-header bg-dark text-white">
+                                        <h5 class="modal-title font-weight-bold">
+                                            <i class="fa fa-receipt mr-2 text-warning"></i>Transaction #{{ tx.id }} Details
+                                        </h5>
+                                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body p-4">
+                                        <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                                            <div>
+                                                <span class="text-muted small">Total Paid Amount:</span>
+                                                <h3 class="font-weight-bold text-success mb-0">{{ tx.amount|floatformat:2 }} ETB</h3>
+                                            </div>
+                                            <div>
+                                                {% if tx.status == 'success' %}
+                                                    <span class="badge badge-success px-3 py-2 font-weight-bold" style="font-size: 0.85rem;"><i class="fa fa-check-circle mr-1"></i>SUCCESS</span>
+                                                {% elif tx.status == 'failed' %}
+                                                    <span class="badge badge-danger px-3 py-2 font-weight-bold" style="font-size: 0.85rem;"><i class="fa fa-times-circle mr-1"></i>FAILED</span>
+                                                {% else %}
+                                                    <span class="badge badge-warning text-dark px-3 py-2 font-weight-bold" style="font-size: 0.85rem;"><i class="fa fa-clock-o mr-1"></i>PENDING</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        <ul class="list-group list-group-flush small">
+                                            <li class="list-group-item d-flex justify-content-between px-0">
+                                                <span class="text-muted">Transaction Reference (Internal):</span>
+                                                <code class="font-weight-bold">{{ tx.tx_ref }}</code>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between px-0">
+                                                <span class="text-muted">Gateway Reference (Chapa):</span>
+                                                <span class="font-weight-bold">{{ tx.chapa_reference|default:"None / Direct Manual" }}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between px-0">
+                                                <span class="text-muted">Customer Name:</span>
+                                                <span class="font-weight-bold text-dark">{{ tx.user.get_full_name|default:"Not specified" }}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between px-0">
+                                                <span class="text-muted">Customer Email:</span>
+                                                <span class="font-weight-bold text-dark">{{ tx.user.email }}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between px-0">
+                                                <span class="text-muted">Customer Role:</span>
+                                                <span class="badge badge-light border text-uppercase">{{ tx.user.role }}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between px-0">
+                                                <span class="text-muted">Payment Purpose:</span>
+                                                <span class="font-weight-bold text-uppercase">{{ tx.purpose }}</span>
+                                            </li>
+                                            {% if tx.job %}
+                                            <li class="list-group-item d-flex justify-content-between px-0">
+                                                <span class="text-muted">Associated Job:</span>
+                                                <a href="{% url 'jobs:jobs-detail' tx.job.id %}" target="_blank" class="font-weight-bold">{{ tx.job.title }}</a>
+                                            </li>
+                                            {% endif %}
+                                            <li class="list-group-item d-flex justify-content-between px-0">
+                                                <span class="text-muted">Created Timestamp:</span>
+                                                <span>{{ tx.created_at|date:"Y-m-d H:i:s" }}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between px-0">
+                                                <span class="text-muted">Last Updated:</span>
+                                                <span>{{ tx.updated_at|date:"Y-m-d H:i:s" }}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                                        {% if tx.status != 'success' %}
+                                            <a href="{% url 'jobs:admin-update-payment-status' tx.id %}?status=success" class="btn btn-success btn-sm font-weight-bold">
+                                                <i class="fa fa-check mr-1"></i>Confirm & Apply Benefits
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <i class="fa fa-credit-card text-muted mb-3" style="font-size: 3rem;"></i>
+                                <h5 class="text-dark font-weight-bold">No Transactions Found</h5>
+                                <p class="text-muted small">No payment transactions match the selected filter or search query.</p>
+                                <a href="{% url 'jobs:admin-payments-dashboard' %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fa fa-refresh mr-1"></i>Reset Filter
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if transactions.has_other_pages %}
+            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top flex-wrap" style="gap: 10px;">
+                <small class="text-muted">
+                    Showing page {{ transactions.number }} of {{ transactions.paginator.num_pages }} ({{ total_tx_count }} records)
+                </small>
+                <ul class="pagination pagination-sm mb-0">
+                    {% if transactions.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ transactions.previous_page_number }}&status={{ status_filter }}{% if query %}&q={{ query }}{% endif %}">&laquo;</a>
+                        </li>
+                    {% endif %}
+                    {% for i in transactions.paginator.page_range %}
+                        {% if transactions.number == i %}
+                            <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="?page={{ i }}&status={{ status_filter }}{% if query %}&q={{ query }}{% endif %}">{{ i }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if transactions.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ transactions.next_page_number }}&status={{ status_filter }}{% if query %}&q={{ query }}{% endif %}">&raquo;</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Secondary Row: Active Subscriptions & Pricing Plans -->
+        <div class="row">
+            <!-- Active Subscriptions Card -->
+            <div class="col-lg-6 mb-4">
+                <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 12px; background: #fff;">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="font-weight-bold text-dark mb-0"><i class="fa fa-id-badge text-info mr-1"></i> Active Subscriptions</h6>
-                        <span class="badge badge-info">{{ active_subscriptions_count }} Active</span>
+                        <h6 class="font-weight-bold text-dark mb-0"><i class="fa fa-id-badge text-info mr-1"></i> Active Member Subscriptions</h6>
+                        <span class="badge badge-info px-2 py-1">{{ active_subscriptions_count }} Active</span>
                     </div>
 
                     <div class="list-group list-group-flush">
@@ -424,18 +427,21 @@
                             </div>
                         </div>
                         {% empty %}
-                        <div class="text-center py-3 text-muted small">
-                            No active subscriptions yet.
+                        <div class="text-center py-4 text-muted small">
+                            <i class="fa fa-id-badge text-muted mb-2" style="font-size: 2rem;"></i>
+                            <p class="mb-0">No active subscriptions yet.</p>
                         </div>
                         {% endfor %}
                     </div>
                 </div>
+            </div>
 
-                <!-- Pricing Packages Card -->
-                <div class="card border-0 shadow-sm p-3" style="border-radius: 12px;">
+            <!-- Pricing Packages Card -->
+            <div class="col-lg-6 mb-4">
+                <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 12px; background: #fff;">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="font-weight-bold text-dark mb-0"><i class="fa fa-tags text-primary mr-1"></i> Platform Pricing Tiers</h6>
-                        <a href="{% url 'payments:pricing' %}" target="_blank" class="small text-primary font-weight-bold">Public Page &raquo;</a>
+                        <h6 class="font-weight-bold text-dark mb-0"><i class="fa fa-tags text-primary mr-1"></i> Platform Pricing Packages (ETB)</h6>
+                        <a href="{% url 'payments:pricing' %}" target="_blank" class="small text-primary font-weight-bold">View Public Pricing &raquo;</a>
                     </div>
 
                     <div class="list-group list-group-flush">

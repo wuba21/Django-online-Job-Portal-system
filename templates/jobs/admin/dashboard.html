@@ -55,13 +55,13 @@
                         </a>
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0" style="min-width: 580px;">
+                        <table class="table table-hover align-middle mb-0" style="min-width: 600px;">
                             <thead class="thead-light">
                                 <tr>
-                                    <th>Job Title</th>
-                                    <th>Employer</th>
-                                    <th>Status</th>
-                                    <th style="min-width: 170px;">Actions</th>
+                                    <th class="text-nowrap">Job Title</th>
+                                    <th class="text-nowrap">Employer</th>
+                                    <th class="text-nowrap text-center">Status</th>
+                                    <th class="text-nowrap text-right" style="min-width: 170px;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -91,17 +91,17 @@
                                             {{ job.company_name|default:job.user.email }}
                                         </span>
                                     </td>
-                                    <td>
+                                    <td class="text-center text-nowrap">
                                         {% if job.status == 'approved' %}
-                                            <span class="badge badge-success">Approved</span>
+                                            <span class="badge badge-success font-weight-bold">Approved</span>
                                         {% elif job.status == 'pending' %}
-                                            <span class="badge badge-warning">Pending</span>
+                                            <span class="badge badge-warning font-weight-bold">Pending</span>
                                         {% else %}
-                                            <span class="badge badge-danger">Rejected</span>
+                                            <span class="badge badge-danger font-weight-bold">Rejected</span>
                                         {% endif %}
                                     </td>
-                                    <td>
-                                        <div class="d-flex align-items-center flex-wrap" style="gap: 4px;">
+                                    <td class="text-right text-nowrap">
+                                        <div class="d-flex align-items-center justify-content-end flex-wrap" style="gap: 4px;">
                                             <!-- Edit Job -->
                                             <a href="{% url 'jobs:employer-jobs-edit' job.id %}" class="btn btn-xs btn-outline-primary" title="Edit this job">
                                                 <i class="fa fa-edit"></i>
@@ -191,16 +191,16 @@
                         </div>
 
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
+                            <table class="table table-hover align-middle mb-0" style="min-width: 480px;">
                                 <thead class="thead-light">
                                     <tr>
                                         <th style="width: 35px; text-align: center;">
                                             <input type="checkbox" id="selectAllUsers" title="Select All">
                                         </th>
-                                        <th>User</th>
-                                        <th>Role</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
+                                        <th class="text-nowrap">User</th>
+                                        <th class="text-nowrap text-center">Role</th>
+                                        <th class="text-nowrap text-center">Status</th>
+                                        <th class="text-nowrap text-right">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -215,22 +215,22 @@
                                         </td>
                                         <td>
                                             <span class="font-weight-bold d-block text-dark">
-                                                {{ u.get_full_name|default:u.email }}
+                                                 {{ u.get_full_name|default:u.email }}
                                                 {% if u.id == request.user.id %}
                                                     <span class="badge badge-info ml-1" style="font-size: 0.68rem;">You</span>
                                                 {% endif %}
                                             </span>
                                             <small class="text-muted">{{ u.email }}</small>
                                         </td>
-                                        <td><span class="badge badge-secondary">{{ u.role|capfirst }}</span></td>
-                                        <td>
+                                        <td class="text-center text-nowrap"><span class="badge badge-secondary">{{ u.role|capfirst }}</span></td>
+                                        <td class="text-center text-nowrap">
                                             {% if u.is_active %}
                                                 <span class="badge badge-success status-badge">Active</span>
                                             {% else %}
                                                 <span class="badge badge-danger status-badge">Inactive</span>
                                             {% endif %}
                                         </td>
-                                        <td>
+                                        <td class="text-right text-nowrap">
                                             {% if u.id == request.user.id %}
                                                 <button type="button" class="btn btn-xs btn-outline-secondary" disabled title="You cannot deactivate your current admin account">
                                                     Active

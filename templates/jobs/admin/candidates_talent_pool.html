@@ -127,15 +127,15 @@
             </div>
 
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" style="min-width: 880px;">
+                <table class="table table-hover align-middle mb-0" style="min-width: 950px;">
                     <thead class="thead-light">
                         <tr>
-                            <th style="width: 25%;">Candidate</th>
-                            <th style="width: 20%;">Professional Title & Location</th>
-                            <th style="width: 22%;">Skills</th>
-                            <th style="width: 15%;">Highest Education</th>
-                            <th style="width: 8%;">CV / Resume</th>
-                            <th style="width: 10%; text-align: right;">Action</th>
+                            <th class="text-nowrap" style="min-width: 220px;">Candidate</th>
+                            <th class="text-nowrap" style="min-width: 180px;">Professional Title & Location</th>
+                            <th class="text-nowrap" style="min-width: 200px;">Skills</th>
+                            <th class="text-nowrap" style="min-width: 160px;">Highest Education</th>
+                            <th class="text-nowrap text-center" style="min-width: 100px;">CV / Resume</th>
+                            <th class="text-nowrap text-right" style="min-width: 100px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -224,14 +224,14 @@
                             </td>
 
                             <!-- CV / Resume Status -->
-                            <td>
+                            <td class="text-center text-nowrap">
                                 {% if c.applicant_profile.cv_file %}
-                                    <a href="{{ c.applicant_profile.cv_file.url }}" target="_blank" class="btn btn-xs btn-outline-danger" title="Download Uploaded CV File">
+                                    <a href="{{ c.applicant_profile.cv_file.url }}" target="_blank" class="btn btn-xs btn-outline-danger font-weight-bold" title="Download Uploaded CV File">
                                         <i class="fa fa-file-pdf-o mr-1"></i>PDF
                                     </a>
                                 {% elif c.resume_cvs.exists %}
                                     {% with r=c.resume_cvs.first %}
-                                        <a href="{% url 'resume_cv:builder' r.code %}" target="_blank" class="btn btn-xs btn-outline-primary" title="View CV Builder Resume">
+                                        <a href="{% url 'resume_cv:builder' r.code %}" target="_blank" class="btn btn-xs btn-outline-primary font-weight-bold" title="View CV Builder Resume">
                                             <i class="fa fa-id-card mr-1"></i>CV
                                         </a>
                                     {% endwith %}
@@ -241,7 +241,7 @@
                             </td>
 
                             <!-- Actions -->
-                            <td class="text-right">
+                            <td class="text-right text-nowrap">
                                 <button type="button" class="btn btn-xs btn-primary font-weight-bold" data-toggle="modal" data-target="#candidateModal{{ c.id }}">
                                     <i class="fa fa-user mr-1"></i>Dossier
                                 </button>
