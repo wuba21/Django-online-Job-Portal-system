@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+{% block title %}Administrative Audit Logs - Platform Admin{% endblock %}
+
+{% block content %}
+<section class="bg-light-gray py-4">
+    <div class="container-fluid px-4">
+        <!-- Shared Admin Header & Navigation -->
+        {% include 'jobs/admin/_admin_nav.html' %}
+
+        <!-- Filter & Search Card -->
+        <div class="card border-0 shadow-sm p-3 p-md-4 mb-4" style="border-radius: 12px;">
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-3" style="gap: 15px;">
+                <div>
+                    <h5 class="card-title text-dark mb-0 font-weight-bold">
+                        <i class="fa fa-shield text-primary mr-1"></i> Security & Moderator Audit Trail
+                    </h5>
+                    <small class="text-muted">Chronological record of all administrative decisions, verifications, and status changes</small>
+                </div>
+                <span class="badge badge-dark px-3 py-2 font-weight-bold" style="font-size: 0.85rem;">
+                    {{ total_logs_count }} Total Audit Events
+                </span>
+            </div>
+
+            <!-- Filters -->
+            <form method="get" class="row align-items-center" style="gap: 10px 0;">
+                <div class="col-lg-4 col-md-6">
+                    <label class="small text-muted font-weight-bold mb-1"><i class="fa fa-filter mr-1"></i>Filter by Action:</label>
+                    <select name="action" class="form-control form-control-sm" onchange="this.form.submit()">
+                        <option value="all">All Administrative Actions</option>
+                        {% for act in distinct_actions %}
+                            <option value="{{ act }}" {% if action_filter == act %}selected{% endif %}>{{ act }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-lg-5 col-md-6">
+                    <label class="small text-muted font-weight-bold mb-1"><i class="fa fa-search mr-1"></i>Search Details, Admin, or Target:</label>
+                    <div class="input-group input-group-sm">
+                        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search keyword...">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="submit"><i class="fa fa-search"></i></button>
+                            {% if query or action_filter != 'all' %}
+                                <a href="{% url 'jobs:admin-audit-logs' %}" class="btn btn-outline-secondary" title="Reset filter"><i class="fa fa-times"></i></a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Audit Table Card -->
+        <div class="card border-0 shadow-sm p-3 p-md-4" style="border-radius: 12px;">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="min-width: 800px;">
+                    <thead class="thead-light">
+                        <tr>
+                            <th style="width: 18%;">Action Type</th>
+                            <th style="width: 25%;">Target Entity</th>
+                            <th style="width: 20%;">Moderator Admin</th>
+                            <th style="width: 22%;">Audit Details</th>
+                            <th style="width: 15%;">Timestamp / IP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                        <tr>
+                            <!-- Action Badge -->
+                            <td>
+                                {% if "APPROVED" in log.action or "VERIFIED" in log.action or "SUCCESS" in log.action %}
+                                    <span class="badge badge-success px-2 py-1 font-weight-bold" style="font-size: 0.74rem;">
+                                        <i class="fa fa-check-circle mr-1"></i>{{ log.action }}
+                                    </span>
+                                {% elif "REJECTED" in log.action or "DELETED" in log.action or "FAILED" in log.action %}
+                                    <span class="badge badge-danger px-2 py-1 font-weight-bold" style="font-size: 0.74rem;">
+                                        <i class="fa fa-ban mr-1"></i>{{ log.action }}
+                                    </span>
+                                {% elif "BROADCAST" in log.action %}
+                                    <span class="badge badge-primary px-2 py-1 font-weight-bold" style="font-size: 0.74rem;">
+                                        <i class="fa fa-bullhorn mr-1"></i>{{ log.action }}
+                                    </span>
+                                {% elif "EXPORT" in log.action %}
+                                    <span class="badge badge-info px-2 py-1 font-weight-bold" style="font-size: 0.74rem;">
+                                        <i class="fa fa-download mr-1"></i>{{ log.action }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-secondary px-2 py-1 font-weight-bold" style="font-size: 0.74rem;">
+                                        {{ log.action }}
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Target Entity -->
+                            <td>
+                                <strong class="text-dark d-block text-truncate" style="max-width: 240px;" title="{{ log.target_repr }}">
+                                    {{ log.target_repr }}
+                                </strong>
+                            </td>
+
+                            <!-- Moderator Admin -->
+                            <td>
+                                <div class="small">
+                                    <span class="font-weight-bold text-dark d-block text-truncate" title="{{ log.admin_user.email|default:'System Task' }}">
+                                        {{ log.admin_user.get_full_name|default:log.admin_user.email|default:"Automated System" }}
+                                    </span>
+                                    {% if log.admin_user %}
+                                        <small class="text-muted"><i class="fa fa-envelope-o mr-1"></i>{{ log.admin_user.email }}</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+
+                            <!-- Details -->
+                            <td>
+                                <small class="text-muted d-block" style="line-height: 1.4; max-width: 250px;">
+                                    {{ log.details|default:"No additional metadata recorded"|truncatechars:150 }}
+                                </small>
+                            </td>
+
+                            <!-- Timestamp & IP -->
+                            <td>
+                                <small class="text-dark font-weight-bold d-block">{{ log.created_at|date:"M d, Y" }}</small>
+                                <small class="text-muted d-block">{{ log.created_at|date:"H:i:s" }}</small>
+                                {% if log.ip_address %}
+                                    <small class="badge badge-light border text-muted mt-1" style="font-size: 0.68rem;">IP: {{ log.ip_address }}</small>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <i class="fa fa-history text-muted mb-3" style="font-size: 3rem;"></i>
+                                <h5 class="text-dark font-weight-bold">No Audit Logs Found</h5>
+                                <p class="text-muted small">No audit log records match the selected action filter or search query.</p>
+                                <a href="{% url 'jobs:admin-audit-logs' %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fa fa-refresh mr-1"></i>Reset Filter
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if logs.has_other_pages %}
+            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top flex-wrap" style="gap: 10px;">
+                <small class="text-muted">
+                    Showing page {{ logs.number }} of {{ logs.paginator.num_pages }} ({{ logs.paginator.count }} audit events)
+                </small>
+                <ul class="pagination pagination-sm mb-0">
+                    {% if logs.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ logs.previous_page_number }}&action={{ action_filter }}{% if query %}&q={{ query }}{% endif %}">&laquo;</a></li>
+                    {% endif %}
+                    {% for i in logs.paginator.page_range %}
+                        {% if logs.number == i %}
+                            <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="?page={{ i }}&action={{ action_filter }}{% if query %}&q={{ query }}{% endif %}">{{ i }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if logs.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ logs.next_page_number }}&action={{ action_filter }}{% if query %}&q={{ query }}{% endif %}">&raquo;</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

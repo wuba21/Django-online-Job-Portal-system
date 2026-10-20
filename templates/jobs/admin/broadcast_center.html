@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+{% block title %}Mass Broadcast & Announcements Center - Platform Admin{% endblock %}
+
+{% block content %}
+<section class="bg-light-gray py-4">
+    <div class="container-fluid px-4">
+        <!-- Shared Admin Header & Navigation -->
+        {% include 'jobs/admin/_admin_nav.html' %}
+
+        <!-- Metric Audience Stats -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 shadow-sm p-3 text-center border-left border-primary" style="border-left-width: 4px !important; border-radius: 10px;">
+                    <h3 class="font-weight-bold text-primary mb-0">{{ total_users }}</h3>
+                    <small class="text-muted text-uppercase font-weight-bold">Total Platform Users</small>
+                    <div class="mt-2 text-muted small">
+                        <span>Combined Potential Reach</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 shadow-sm p-3 text-center border-left border-info" style="border-left-width: 4px !important; border-radius: 10px;">
+                    <h3 class="font-weight-bold text-info mb-0">{{ total_candidates }}</h3>
+                    <small class="text-muted text-uppercase font-weight-bold">All Job Seekers</small>
+                    <div class="mt-2 text-muted small">
+                        <span>Active Candidates</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 shadow-sm p-3 text-center border-left border-success" style="border-left-width: 4px !important; border-radius: 10px;">
+                    <h3 class="font-weight-bold text-success mb-0">{{ total_employers }}</h3>
+                    <small class="text-muted text-uppercase font-weight-bold">All Employers / Companies</small>
+                    <div class="mt-2 text-muted small">
+                        <span>Recruiting Partners</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Broadcast Composer -->
+            <div class="col-lg-7 mb-4">
+                <div class="card border-0 shadow-sm p-4" style="border-radius: 12px;">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center text-primary mr-2" style="width: 36px; height: 36px; background: rgba(59, 130, 246, 0.15);">
+                            <i class="fa fa-bullhorn font-weight-bold"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title text-dark mb-0 font-weight-bold">Compose Mass System Announcement</h5>
+                            <small class="text-muted">Broadcast important news, job fairs, updates, or maintenance alerts</small>
+                        </div>
+                    </div>
+
+                    <form method="post" action="{% url 'jobs:admin-broadcast' %}" onsubmit="return confirm('Are you sure you want to send this broadcast announcement?');">
+                        {% csrf_token %}
+
+                        <!-- Target Audience -->
+                        <div class="form-group mb-3">
+                            <label class="font-weight-bold small text-dark"><i class="fa fa-users mr-1 text-primary"></i>Target Audience:</label>
+                            <div class="d-flex flex-wrap" style="gap: 12px;">
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="targetCandidates" name="target" value="candidates" class="custom-control-input" checked>
+                                    <label class="custom-control-label font-weight-bold small text-dark" for="targetCandidates">
+                                        All Job Seekers ({{ total_candidates }})
+                                    </label>
+                                </div>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="targetEmployers" name="target" value="employers" class="custom-control-input">
+                                    <label class="custom-control-label font-weight-bold small text-dark" for="targetEmployers">
+                                        All Employers ({{ total_employers }})
+                                    </label>
+                                </div>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="targetAll" name="target" value="all" class="custom-control-input">
+                                    <label class="custom-control-label font-weight-bold small text-dark" for="targetAll">
+                                        Everyone ({{ total_users }})
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Delivery Channels -->
+                        <div class="form-group mb-3 p-3 bg-light rounded border">
+                            <label class="font-weight-bold small text-dark d-block mb-2"><i class="fa fa-paper-plane mr-1 text-info"></i>Delivery Channels:</label>
+                            <div class="d-flex flex-wrap" style="gap: 15px;">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="channelInApp" name="channels" value="in_app" checked>
+                                    <label class="custom-control-label small font-weight-bold text-dark" for="channelInApp">
+                                        <i class="fa fa-bell-o text-warning mr-1"></i>In-App Notification
+                                    </label>
+                                </div>
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="channelEmail" name="channels" value="email" checked>
+                                    <label class="custom-control-label small font-weight-bold text-dark" for="channelEmail">
+                                        <i class="fa fa-envelope-o text-primary mr-1"></i>HTML Email Announcement
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Announcement Subject -->
+                        <div class="form-group mb-3">
+                            <label class="font-weight-bold small text-dark">Announcement Subject / Headline:</label>
+                            <input type="text" name="subject" class="form-control" required placeholder="e.g. 📢 Addis Ababa Tech & Finance Job Fair 2026 - Register Now!">
+                        </div>
+
+                        <!-- Announcement Message -->
+                        <div class="form-group mb-3">
+                            <label class="font-weight-bold small text-dark">Message Content:</label>
+                            <textarea name="message" class="form-control" rows="6" required placeholder="Type your announcement message here. Write clearly in English or Amharic..."></textarea>
+                        </div>
+
+                        <!-- Optional Action URL -->
+                        <div class="row mb-4">
+                            <div class="col-md-7">
+                                <label class="small text-muted font-weight-bold">Call-to-Action Link (Optional URL):</label>
+                                <input type="text" name="action_url" class="form-control form-control-sm" placeholder="https://... or /jobs/">
+                            </div>
+                            <div class="col-md-5">
+                                <label class="small text-muted font-weight-bold">Button Text:</label>
+                                <input type="text" name="action_text" class="form-control form-control-sm" placeholder="e.g. View Opportunities">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary font-weight-bold shadow-sm px-4">
+                            <i class="fa fa-paper-plane mr-1"></i> Send Mass Broadcast
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Broadcast Log & Tips Side Panel -->
+            <div class="col-lg-5 mb-4">
+                <!-- Recent Broadcast History Card -->
+                <div class="card border-0 shadow-sm p-4 mb-4" style="border-radius: 12px;">
+                    <h6 class="font-weight-bold text-dark mb-3"><i class="fa fa-history text-secondary mr-1"></i> Recent Broadcast History</h6>
+                    <div class="list-group list-group-flush small">
+                        {% for b in recent_broadcasts %}
+                        <div class="list-group-item px-0 py-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong class="text-dark">{{ b.target_repr }}</strong>
+                                <span class="badge badge-light border">{{ b.created_at|date:"M d, H:i" }}</span>
+                            </div>
+                            <small class="text-muted d-block">{{ b.details }}</small>
+                            <small class="text-primary mt-1 d-block"><i class="fa fa-user-circle-o mr-1"></i>Sent by: {{ b.admin_user.email|default:"Administrator" }}</small>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-4 text-muted small">
+                            <i class="fa fa-bullhorn text-muted mb-2" style="font-size: 2rem;"></i>
+                            <p class="mb-0">No mass broadcasts sent yet.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Best Practice Tips Card -->
+                <div class="card border-0 shadow-sm p-4 bg-white" style="border-radius: 12px; border-left: 4px solid #3b82f6 !important;">
+                    <h6 class="font-weight-bold text-primary mb-2"><i class="fa fa-lightbulb-o mr-1"></i> Broadcast Best Practices</h6>
+                    <ul class="text-muted small pl-3 mb-0" style="line-height: 1.7;">
+                        <li><strong>Relevance:</strong> Ensure your message addresses career opportunities, platform improvements, or vital recruitment notices.</li>
+                        <li><strong>Multilingual:</strong> For Ethiopian audiences, bilingual messages in Amharic & English generate maximum engagement.</li>
+                        <li><strong>Actionable:</strong> Always provide a direct link button (e.g. link to featured vacancies or CV Builder).</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

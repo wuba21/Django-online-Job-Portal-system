@@ -294,3 +294,20 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.user.email}: {self.title}"
+
+
+class AdminAuditLog(models.Model):
+    admin_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="admin_audit_logs")
+    action = models.CharField(max_length=100, db_index=True)
+    target_repr = models.CharField(max_length=255)
+    details = models.TextField(blank=True, null=True)
+    ip_address = models.CharField(max_length=50, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        admin_email = self.admin_user.email if self.admin_user else "System"
+        return f"[{self.created_at:%Y-%m-%d %H:%M}] {admin_email}: {self.action} -> {self.target_repr}"
+

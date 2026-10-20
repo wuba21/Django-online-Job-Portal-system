@@ -1,0 +1,417 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+{% block title %}Talent CV Bank & Headhunting Portal - Platform Admin{% endblock %}
+
+{% block content %}
+<section class="bg-light-gray py-4">
+    <div class="container-fluid px-4">
+        <!-- Shared Admin Header & Navigation -->
+        {% include 'jobs/admin/_admin_nav.html' %}
+
+        <!-- Metric KPI Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card border-0 shadow-sm p-3 text-center border-left border-primary" style="border-left-width: 4px !important; border-radius: 10px;">
+                    <h3 class="font-weight-bold text-primary mb-0">{{ total_candidates }}</h3>
+                    <small class="text-muted text-uppercase font-weight-bold">Total Candidates in Bank</small>
+                    <div class="mt-2 text-muted small">
+                        <span>Active Job Seekers</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card border-0 shadow-sm p-3 text-center border-left border-success" style="border-left-width: 4px !important; border-radius: 10px;">
+                    <h3 class="font-weight-bold text-success mb-0">{{ candidates_with_cv }}</h3>
+                    <small class="text-muted text-uppercase font-weight-bold">Candidates with CV / Resume</small>
+                    <div class="mt-2 text-muted small">
+                        <span>Uploaded File or CV Builder</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card border-0 shadow-sm p-3 text-center border-left border-warning" style="border-left-width: 4px !important; border-radius: 10px;">
+                    <h3 class="font-weight-bold text-warning mb-0">{{ vip_candidates_count }}</h3>
+                    <small class="text-muted text-uppercase font-weight-bold">VIP Candidates</small>
+                    <div class="mt-2 text-muted small">
+                        <span>Priority Headhunting Candidates</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card border-0 shadow-sm p-3 text-center border-left border-info" style="border-left-width: 4px !important; border-radius: 10px;">
+                    <h3 class="font-weight-bold text-info mb-0">{{ verified_candidates_count }}</h3>
+                    <small class="text-muted text-uppercase font-weight-bold">Verified Profiles</small>
+                    <div class="mt-2 text-muted small">
+                        <span>Credentials Checked</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Search & Filter Card -->
+        <div class="card border-0 shadow-sm p-3 p-md-4 mb-4" style="border-radius: 12px;">
+            <form method="get" class="row align-items-center" style="gap: 10px 0;">
+                <div class="col-lg-4 col-md-6">
+                    <label class="small text-muted font-weight-bold mb-1"><i class="fa fa-search mr-1"></i>Search Keywords:</label>
+                    <div class="input-group input-group-sm">
+                        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search skill, title, name, degree...">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="submit"><i class="fa fa-search"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <label class="small text-muted font-weight-bold mb-1"><i class="fa fa-map-marker text-danger mr-1"></i>Location / City:</label>
+                    <select name="location" class="form-control form-control-sm" onchange="this.form.submit()">
+                        <option value="all">All Locations (Ethiopia)</option>
+                        {% for loc in ethiopian_locations %}
+                            <option value="{{ loc }}" {% if location_filter == loc %}selected{% endif %}>{{ loc }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-lg-5 col-md-12">
+                    <label class="small text-muted font-weight-bold mb-1"><i class="fa fa-filter mr-1"></i>Profile Filter:</label>
+                    <div class="d-flex align-items-center flex-wrap" style="gap: 5px;">
+                        <a href="{% url 'jobs:admin-candidates-pool' %}?filter_type=all{% if query %}&q={{ query }}{% endif %}{% if location_filter %}&location={{ location_filter }}{% endif %}" 
+                           class="btn btn-xs {% if filter_type == 'all' %}btn-dark font-weight-bold{% else %}btn-outline-secondary{% endif %}" style="border-radius: 15px;">
+                            All
+                        </a>
+                        <a href="{% url 'jobs:admin-candidates-pool' %}?filter_type=has_cv{% if query %}&q={{ query }}{% endif %}{% if location_filter %}&location={{ location_filter }}{% endif %}" 
+                           class="btn btn-xs {% if filter_type == 'has_cv' %}btn-success font-weight-bold{% else %}btn-outline-success{% endif %}" style="border-radius: 15px;">
+                            <i class="fa fa-file-pdf-o mr-1"></i>Has CV ({{ candidates_with_cv }})
+                        </a>
+                        <a href="{% url 'jobs:admin-candidates-pool' %}?filter_type=vip{% if query %}&q={{ query }}{% endif %}{% if location_filter %}&location={{ location_filter }}{% endif %}" 
+                           class="btn btn-xs {% if filter_type == 'vip' %}btn-warning text-dark font-weight-bold{% else %}btn-outline-warning text-dark{% endif %}" style="border-radius: 15px;">
+                            <i class="fa fa-star mr-1"></i>VIP ({{ vip_candidates_count }})
+                        </a>
+                        <a href="{% url 'jobs:admin-candidates-pool' %}?filter_type=verified{% if query %}&q={{ query }}{% endif %}{% if location_filter %}&location={{ location_filter }}{% endif %}" 
+                           class="btn btn-xs {% if filter_type == 'verified' %}btn-info font-weight-bold{% else %}btn-outline-info{% endif %}" style="border-radius: 15px;">
+                            <i class="fa fa-check-circle mr-1"></i>Verified ({{ verified_candidates_count }})
+                        </a>
+                        {% if query or location_filter != 'all' or filter_type != 'all' or skill_filter %}
+                            <a href="{% url 'jobs:admin-candidates-pool' %}" class="btn btn-xs btn-outline-danger" style="border-radius: 15px;" title="Reset all filters">
+                                <i class="fa fa-times mr-1"></i>Reset
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Top Skills Clickable Tags -->
+                {% if top_skills %}
+                <div class="col-12 mt-2 pt-2 border-top">
+                    <small class="text-muted font-weight-bold mr-2"><i class="fa fa-tags mr-1"></i>Popular Skills:</small>
+                    <div class="d-inline-flex flex-wrap" style="gap: 4px;">
+                        {% for s in top_skills %}
+                            <a href="{% url 'jobs:admin-candidates-pool' %}?skill={{ s.name }}{% if location_filter %}&location={{ location_filter }}{% endif %}" 
+                               class="badge {% if skill_filter == s.name %}badge-primary{% else %}badge-light border text-dark{% endif %} px-2 py-1" style="font-size: 0.76rem;">
+                                {{ s.name }} ({{ s.count }})
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Candidates Grid / Table -->
+        <div class="card border-0 shadow-sm p-3 p-md-4" style="border-radius: 12px;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="card-title text-dark mb-0 font-weight-bold">
+                    <i class="fa fa-address-book-o text-primary mr-1"></i> Candidate Profiles ({{ candidates.paginator.count }} Found)
+                </h5>
+                <a href="{% url 'jobs:admin-export-candidates-csv' %}" class="btn btn-xs btn-outline-success font-weight-bold">
+                    <i class="fa fa-file-excel-o mr-1"></i> Export to Excel (CSV)
+                </a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="min-width: 880px;">
+                    <thead class="thead-light">
+                        <tr>
+                            <th style="width: 25%;">Candidate</th>
+                            <th style="width: 20%;">Professional Title & Location</th>
+                            <th style="width: 22%;">Skills</th>
+                            <th style="width: 15%;">Highest Education</th>
+                            <th style="width: 8%;">CV / Resume</th>
+                            <th style="width: 10%; text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in candidates %}
+                        <tr>
+                            <!-- Candidate Identity -->
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if c.avatar %}
+                                        <img src="{{ c.avatar.url }}" alt="{{ c.get_full_name }}" class="rounded-circle mr-2 border bg-white" style="width: 42px; height: 42px; object-fit: cover; flex-shrink: 0;">
+                                    {% else %}
+                                        <div class="rounded-circle mr-2 bg-light border d-flex align-items-center justify-content-center text-primary font-weight-bold" style="width: 42px; height: 42px; flex-shrink: 0; font-size: 1rem;">
+                                            {{ c.first_name|first|default:c.email|first|upper }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="overflow-hidden">
+                                        <div class="d-flex align-items-center flex-wrap" style="gap: 4px;">
+                                            <span class="font-weight-bold text-dark text-truncate" title="{{ c.get_full_name|default:c.email }}">
+                                                {{ c.get_full_name|default:c.email }}
+                                            </span>
+                                            {% if c.is_vip %}
+                                                <span class="badge badge-warning text-dark font-weight-bold px-1" style="font-size: 0.65rem;" title="VIP Candidate"><i class="fa fa-star"></i> VIP</span>
+                                            {% endif %}
+                                            {% if c.is_verified %}
+                                                <span class="badge badge-info px-1" style="font-size: 0.65rem;" title="Verified Profile"><i class="fa fa-check"></i></span>
+                                            {% endif %}
+                                        </div>
+                                        <small class="text-muted d-block text-truncate" title="{{ c.email }}">
+                                            <i class="fa fa-envelope-o mr-1"></i>{{ c.email }}
+                                        </small>
+                                        {% if c.phone_number %}
+                                            <small class="text-muted"><i class="fa fa-phone mr-1"></i>{{ c.phone_number }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Title & Location -->
+                            <td>
+                                <span class="font-weight-bold text-dark d-block text-truncate" style="max-width: 190px;" title="{{ c.applicant_profile.title|default:'Candidate' }}">
+                                    {{ c.applicant_profile.title|default:"Job Seeker" }}
+                                </span>
+                                <small class="text-muted d-block">
+                                    <i class="fa fa-map-marker text-danger mr-1"></i>{{ c.applicant_profile.location|default:"Ethiopia" }}
+                                </small>
+                                {% if c.applicant_profile.completion_percentage %}
+                                    <div class="d-flex align-items-center mt-1" style="gap: 5px;">
+                                        <div class="progress flex-grow-1" style="height: 5px; max-width: 80px;">
+                                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ c.applicant_profile.completion_percentage }}%;"></div>
+                                        </div>
+                                        <small class="text-muted" style="font-size: 0.7rem;">{{ c.applicant_profile.completion_percentage }}%</small>
+                                    </div>
+                                {% endif %}
+                            </td>
+
+                            <!-- Skills -->
+                            <td>
+                                <div class="d-flex flex-wrap" style="gap: 3px; max-width: 220px;">
+                                    {% for s in c.skills.all|slice:":4" %}
+                                        <span class="badge badge-light border text-dark px-2 py-1" style="font-size: 0.72rem;">
+                                            {{ s.name }}
+                                        </span>
+                                    {% empty %}
+                                        <span class="text-muted small">No skills added</span>
+                                    {% endfor %}
+                                    {% if c.skills.count > 4 %}
+                                        <span class="badge badge-secondary px-1 text-white" style="font-size: 0.68rem;">+{{ c.skills.count|add:"-4" }}</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+
+                            <!-- Education -->
+                            <td>
+                                {% with edu=c.educations.first %}
+                                    {% if edu %}
+                                        <span class="font-weight-bold text-dark d-block text-truncate" style="max-width: 150px;" title="{{ edu.degree }}">
+                                            {{ edu.degree }}
+                                        </span>
+                                        <small class="text-muted d-block text-truncate" style="max-width: 150px;" title="{{ edu.institution }}">
+                                            {{ edu.institution }}
+                                        </small>
+                                    {% else %}
+                                        <span class="text-muted small">Not specified</span>
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+
+                            <!-- CV / Resume Status -->
+                            <td>
+                                {% if c.applicant_profile.cv_file %}
+                                    <a href="{{ c.applicant_profile.cv_file.url }}" target="_blank" class="btn btn-xs btn-outline-danger" title="Download Uploaded CV File">
+                                        <i class="fa fa-file-pdf-o mr-1"></i>PDF
+                                    </a>
+                                {% elif c.resume_cvs.exists %}
+                                    {% with r=c.resume_cvs.first %}
+                                        <a href="{% url 'resume_cv:builder' r.code %}" target="_blank" class="btn btn-xs btn-outline-primary" title="View CV Builder Resume">
+                                            <i class="fa fa-id-card mr-1"></i>CV
+                                        </a>
+                                    {% endwith %}
+                                {% else %}
+                                    <span class="text-muted small">None</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Actions -->
+                            <td class="text-right">
+                                <button type="button" class="btn btn-xs btn-primary font-weight-bold" data-toggle="modal" data-target="#candidateModal{{ c.id }}">
+                                    <i class="fa fa-user mr-1"></i>Dossier
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Candidate Full Dossier Modal -->
+                        <div class="modal fade" id="candidateModal{{ c.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                                <div class="modal-content border-0 shadow">
+                                    <div class="modal-header bg-dark text-white">
+                                        <h5 class="modal-title font-weight-bold">
+                                            <i class="fa fa-user-circle mr-2 text-warning"></i>Candidate Profile: {{ c.get_full_name|default:c.email }}
+                                        </h5>
+                                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body p-4">
+                                        <div class="d-flex align-items-center mb-4 pb-3 border-bottom flex-wrap" style="gap: 15px;">
+                                            {% if c.avatar %}
+                                                <img src="{{ c.avatar.url }}" class="rounded-circle border" style="width: 64px; height: 64px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center text-primary font-weight-bold" style="width: 64px; height: 64px; font-size: 1.5rem;">
+                                                    {{ c.first_name|first|default:c.email|first|upper }}
+                                                </div>
+                                            {% endif %}
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex align-items-center" style="gap: 8px;">
+                                                    <h4 class="font-weight-bold mb-0 text-dark">{{ c.get_full_name|default:c.email }}</h4>
+                                                    {% if c.is_vip %}<span class="badge badge-warning text-dark font-weight-bold"><i class="fa fa-star"></i> VIP Candidate</span>{% endif %}
+                                                    {% if c.is_verified %}<span class="badge badge-info"><i class="fa fa-check"></i> Verified</span>{% endif %}
+                                                </div>
+                                                <div class="text-muted mt-1">
+                                                    <strong>{{ c.applicant_profile.title|default:"Job Seeker" }}</strong> &bull; 
+                                                    <span>{{ c.applicant_profile.location|default:"Addis Ababa, Ethiopia" }}</span>
+                                                </div>
+                                                <div class="small text-muted mt-1">
+                                                    <span><i class="fa fa-envelope-o mr-1"></i>{{ c.email }}</span>
+                                                    {% if c.phone_number %}&bull; <span><i class="fa fa-phone mr-1"></i>{{ c.phone_number }}</span>{% endif %}
+                                                </div>
+                                            </div>
+                                            <!-- CV Action Links -->
+                                            <div class="d-flex flex-column" style="gap: 5px;">
+                                                {% if c.applicant_profile.cv_file %}
+                                                    <a href="{{ c.applicant_profile.cv_file.url }}" target="_blank" class="btn btn-sm btn-outline-danger font-weight-bold">
+                                                        <i class="fa fa-download mr-1"></i>Download Uploaded CV
+                                                    </a>
+                                                {% endif %}
+                                                {% for r in c.resume_cvs.all %}
+                                                    <a href="{% url 'resume_cv:builder' r.code %}" target="_blank" class="btn btn-sm btn-outline-primary font-weight-bold">
+                                                        <i class="fa fa-external-link mr-1"></i>View CV Builder Resume
+                                                    </a>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+
+                                        <!-- Bio -->
+                                        {% if c.applicant_profile.bio %}
+                                        <div class="mb-4">
+                                            <h6 class="font-weight-bold text-dark"><i class="fa fa-quote-left text-muted mr-1"></i>Professional Summary:</h6>
+                                            <div class="p-3 bg-light rounded border text-muted small">
+                                                {{ c.applicant_profile.bio|linebreaksbr }}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+
+                                        <!-- Skills -->
+                                        <div class="mb-4">
+                                            <h6 class="font-weight-bold text-dark"><i class="fa fa-wrench text-muted mr-1"></i>Skills & Proficiencies:</h6>
+                                            <div class="d-flex flex-wrap" style="gap: 6px;">
+                                                {% for s in c.skills.all %}
+                                                    <span class="badge badge-light border text-dark px-2 py-1" style="font-size: 0.82rem;">
+                                                        {{ s.name }} <small class="text-muted">({{ s.get_level_display|default:s.level }})</small>
+                                                    </span>
+                                                {% empty %}
+                                                    <small class="text-muted">No skills recorded.</small>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+
+                                        <!-- Experience & Education 2-column layout -->
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <h6 class="font-weight-bold text-dark"><i class="fa fa-briefcase text-muted mr-1"></i>Work Experience:</h6>
+                                                <div class="list-group list-group-flush small">
+                                                    {% for exp in c.experiences.all %}
+                                                    <div class="list-group-item px-0 py-2">
+                                                        <strong class="text-dark">{{ exp.title }}</strong> at <span class="text-primary">{{ exp.company }}</span>
+                                                        <div class="text-muted" style="font-size: 0.75rem;">
+                                                            {{ exp.start_date|date:"M Y" }} &ndash; {% if exp.is_current %}Present{% else %}{{ exp.end_date|date:"M Y"|default:"N/A" }}{% endif %}
+                                                        </div>
+                                                        {% if exp.description %}
+                                                            <small class="text-muted d-block mt-1">{{ exp.description|truncatechars:120 }}</small>
+                                                        {% endif %}
+                                                    </div>
+                                                    {% empty %}
+                                                    <small class="text-muted">No experience entries recorded.</small>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6 mb-3">
+                                                <h6 class="font-weight-bold text-dark"><i class="fa fa-graduation-cap text-muted mr-1"></i>Education:</h6>
+                                                <div class="list-group list-group-flush small">
+                                                    {% for edu in c.educations.all %}
+                                                    <div class="list-group-item px-0 py-2">
+                                                        <strong class="text-dark">{{ edu.degree }}</strong>
+                                                        <div class="text-primary">{{ edu.institution }}</div>
+                                                        <div class="text-muted" style="font-size: 0.75rem;">
+                                                            {{ edu.field_of_study|default:"" }} &bull; {{ edu.start_date|date:"Y" }} &ndash; {% if edu.is_current %}Present{% else %}{{ edu.end_date|date:"Y"|default:"N/A" }}{% endif %}
+                                                        </div>
+                                                    </div>
+                                                    {% empty %}
+                                                    <small class="text-muted">No education entries recorded.</small>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <a href="mailto:{{ c.email }}?subject=Career%20Opportunity%20via%20Ethio%20Job%20Portal" class="btn btn-primary btn-sm font-weight-bold">
+                                            <i class="fa fa-envelope mr-1"></i>Email Candidate
+                                        </a>
+                                        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <i class="fa fa-users text-muted mb-3" style="font-size: 3rem;"></i>
+                                <h5 class="text-dark font-weight-bold">No Candidates Found</h5>
+                                <p class="text-muted small">Try broadening your search query, selecting another location, or resetting filters.</p>
+                                <a href="{% url 'jobs:admin-candidates-pool' %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fa fa-refresh mr-1"></i>Reset All Filters
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if candidates.has_other_pages %}
+            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top flex-wrap" style="gap: 10px;">
+                <small class="text-muted">
+                    Showing page {{ candidates.number }} of {{ candidates.paginator.num_pages }} ({{ candidates.paginator.count }} candidates)
+                </small>
+                <ul class="pagination pagination-sm mb-0">
+                    {% if candidates.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ candidates.previous_page_number }}&filter_type={{ filter_type }}{% if query %}&q={{ query }}{% endif %}{% if location_filter %}&location={{ location_filter }}{% endif %}{% if skill_filter %}&skill={{ skill_filter }}{% endif %}">&laquo;</a></li>
+                    {% endif %}
+                    {% for i in candidates.paginator.page_range %}
+                        {% if candidates.number == i %}
+                            <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="?page={{ i }}&filter_type={{ filter_type }}{% if query %}&q={{ query }}{% endif %}{% if location_filter %}&location={{ location_filter }}{% endif %}{% if skill_filter %}&skill={{ skill_filter }}{% endif %}">{{ i }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if candidates.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ candidates.next_page_number }}&filter_type={{ filter_type }}{% if query %}&q={{ query }}{% endif %}{% if location_filter %}&location={{ location_filter }}{% endif %}{% if skill_filter %}&skill={{ skill_filter }}{% endif %}">&raquo;</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

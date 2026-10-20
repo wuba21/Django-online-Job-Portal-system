@@ -4,7 +4,9 @@ from jobsapp.views.admin_dashboard import (
     AdminDashboardView, admin_analytics_dashboard, approve_job, delete_job, toggle_user_active,
     bulk_toggle_users, set_job_status, toggle_job_featured, broadcast_job_telegram,
     admin_companies_verification, admin_verify_company, admin_reject_company, admin_rerun_ai_verification,
-    admin_payments_dashboard, admin_update_payment_status
+    admin_payments_dashboard, admin_update_payment_status,
+    admin_candidates_talent_pool, admin_broadcast_announcements, admin_audit_logs_view,
+    admin_export_candidates_csv, admin_export_jobs_csv, admin_export_companies_csv, admin_export_payments_csv
 )
 from jobsapp.views.employee import (
     ApplicantDashboardView, EditProfileView, EmployeeMyJobsListView, FavoriteListView,
@@ -102,6 +104,21 @@ urlpatterns = [
     # Admin: Payments & Revenue Management
     path("platform-admin/payments/", admin_payments_dashboard, name="admin-payments-dashboard"),
     path("platform-admin/payments/<int:tx_id>/status/", admin_update_payment_status, name="admin-update-payment-status"),
+
+    # Admin: Talent Search / Headhunting CV Bank
+    path("platform-admin/candidates/", admin_candidates_talent_pool, name="admin-candidates-pool"),
+
+    # Admin: Mass Broadcast & Announcements Center
+    path("platform-admin/broadcast/", admin_broadcast_announcements, name="admin-broadcast"),
+
+    # Admin: Security & Compliance Audit Logs
+    path("platform-admin/audit-logs/", admin_audit_logs_view, name="admin-audit-logs"),
+
+    # Admin: Excel/CSV Data Exports
+    path("platform-admin/export/candidates/", admin_export_candidates_csv, name="admin-export-candidates-csv"),
+    path("platform-admin/export/jobs/", admin_export_jobs_csv, name="admin-export-jobs-csv"),
+    path("platform-admin/export/companies/", admin_export_companies_csv, name="admin-export-companies-csv"),
+    path("platform-admin/export/payments/", admin_export_payments_csv, name="admin-export-payments-csv"),
 
     # Public Job Pages
     path("apply-job/<int:job_id>/", ApplyJobView.as_view(), name="apply-job"),

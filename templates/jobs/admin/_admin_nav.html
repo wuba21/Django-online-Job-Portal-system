@@ -8,10 +8,31 @@
                 </div>
                 <div>
                     <h3 class="font-weight-bold mb-0 text-white" style="letter-spacing: -0.5px;">Platform Super Admin</h3>
-                    <small class="text-white-50">Enterprise Administration, Verification & Revenue Operations</small>
+                    <small class="text-white-50">Enterprise Administration, Verification, Headhunting & Revenue Operations</small>
                 </div>
             </div>
             <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                <!-- Export Dropdown -->
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-light dropdown-toggle font-weight-bold" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-download mr-1"></i> Export Data (CSV)
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right shadow border-0" style="font-size: 0.85rem;">
+                        <a class="dropdown-item py-2" href="{% url 'jobs:admin-export-candidates-csv' %}">
+                            <i class="fa fa-users text-primary mr-2"></i> Export Candidates Database
+                        </a>
+                        <a class="dropdown-item py-2" href="{% url 'jobs:admin-export-jobs-csv' %}">
+                            <i class="fa fa-briefcase text-success mr-2"></i> Export All Jobs
+                        </a>
+                        <a class="dropdown-item py-2" href="{% url 'jobs:admin-export-companies-csv' %}">
+                            <i class="fa fa-building text-warning mr-2"></i> Export Companies & Licenses
+                        </a>
+                        <a class="dropdown-item py-2" href="{% url 'jobs:admin-export-payments-csv' %}">
+                            <i class="fa fa-credit-card text-info mr-2"></i> Export Financial Ledger
+                        </a>
+                    </div>
+                </div>
+
                 <a href="{% url 'jobs:employer-jobs-create' %}" class="btn btn-sm btn-primary font-weight-bold shadow-sm">
                     <i class="fa fa-plus-circle mr-1"></i> Post Job as Admin
                 </a>
@@ -22,27 +43,36 @@
         </div>
 
         <!-- Navigation Tabs -->
-        <div class="d-flex align-items-center flex-wrap mt-3 pt-3 border-top border-secondary" style="gap: 8px;">
-            <a href="{% url 'jobs:admin-dashboard' %}" class="btn btn-sm {% if active_tab == 'jobs' %}btn-primary text-white font-weight-bold shadow{% else %}btn-outline-light text-white-50{% endif %}" style="border-radius: 20px; padding: 6px 16px;">
+        <div class="d-flex align-items-center flex-wrap mt-3 pt-3 border-top border-secondary" style="gap: 6px;">
+            <a href="{% url 'jobs:admin-dashboard' %}" class="btn btn-sm {% if active_tab == 'jobs' %}btn-primary text-white font-weight-bold shadow{% else %}btn-outline-light text-white-50{% endif %}" style="border-radius: 20px; padding: 5px 14px;">
                 <i class="fa fa-briefcase mr-1"></i> Jobs Moderation
             </a>
-            <a href="{% url 'jobs:admin-companies-verification' %}" class="btn btn-sm {% if active_tab == 'companies' %}btn-primary text-white font-weight-bold shadow{% else %}btn-outline-light text-white-50{% endif %}" style="border-radius: 20px; padding: 6px 16px;">
-                <i class="fa fa-building mr-1"></i> Company License Verification
+            <a href="{% url 'jobs:admin-companies-verification' %}" class="btn btn-sm {% if active_tab == 'companies' %}btn-primary text-white font-weight-bold shadow{% else %}btn-outline-light text-white-50{% endif %}" style="border-radius: 20px; padding: 5px 14px;">
+                <i class="fa fa-building mr-1"></i> Company Verification
                 {% if pending_companies_count > 0 %}
                     <span class="badge badge-warning text-dark ml-1 font-weight-bold">{{ pending_companies_count }}</span>
                 {% endif %}
             </a>
-            <a href="{% url 'jobs:admin-payments-dashboard' %}" class="btn btn-sm {% if active_tab == 'payments' %}btn-primary text-white font-weight-bold shadow{% else %}btn-outline-light text-white-50{% endif %}" style="border-radius: 20px; padding: 6px 16px;">
+            <a href="{% url 'jobs:admin-payments-dashboard' %}" class="btn btn-sm {% if active_tab == 'payments' %}btn-primary text-white font-weight-bold shadow{% else %}btn-outline-light text-white-50{% endif %}" style="border-radius: 20px; padding: 5px 14px;">
                 <i class="fa fa-credit-card mr-1"></i> Payments & Revenue
                 {% if pending_payments_count > 0 %}
                     <span class="badge badge-info ml-1 font-weight-bold">{{ pending_payments_count }}</span>
                 {% endif %}
             </a>
-            <a href="{% url 'jobs:admin-dashboard' %}#users-section" class="btn btn-sm {% if active_tab == 'users' %}btn-primary text-white font-weight-bold shadow{% else %}btn-outline-light text-white-50{% endif %}" style="border-radius: 20px; padding: 6px 16px;">
-                <i class="fa fa-users mr-1"></i> User Accounts
+            <a href="{% url 'jobs:admin-candidates-pool' %}" class="btn btn-sm {% if active_tab == 'candidates' %}btn-primary text-white font-weight-bold shadow{% else %}btn-outline-light text-white-50{% endif %}" style="border-radius: 20px; padding: 5px 14px;">
+                <i class="fa fa-id-card-o mr-1"></i> Talent CV Bank
             </a>
-            <a href="{% url 'jobs:admin-analytics-dashboard' %}" class="btn btn-sm {% if active_tab == 'analytics' %}btn-primary text-white font-weight-bold shadow{% else %}btn-outline-light text-white-50{% endif %}" style="border-radius: 20px; padding: 6px 16px;">
-                <i class="fa fa-line-chart mr-1"></i> System Analytics
+            <a href="{% url 'jobs:admin-broadcast' %}" class="btn btn-sm {% if active_tab == 'broadcast' %}btn-primary text-white font-weight-bold shadow{% else %}btn-outline-light text-white-50{% endif %}" style="border-radius: 20px; padding: 5px 14px;">
+                <i class="fa fa-bullhorn mr-1"></i> Broadcast Center
+            </a>
+            <a href="{% url 'jobs:admin-audit-logs' %}" class="btn btn-sm {% if active_tab == 'audit' %}btn-primary text-white font-weight-bold shadow{% else %}btn-outline-light text-white-50{% endif %}" style="border-radius: 20px; padding: 5px 14px;">
+                <i class="fa fa-history mr-1"></i> Audit Logs
+            </a>
+            <a href="{% url 'jobs:admin-dashboard' %}#users-section" class="btn btn-sm {% if active_tab == 'users' %}btn-primary text-white font-weight-bold shadow{% else %}btn-outline-light text-white-50{% endif %}" style="border-radius: 20px; padding: 5px 14px;">
+                <i class="fa fa-users mr-1"></i> Users
+            </a>
+            <a href="{% url 'jobs:admin-analytics-dashboard' %}" class="btn btn-sm {% if active_tab == 'analytics' %}btn-primary text-white font-weight-bold shadow{% else %}btn-outline-light text-white-50{% endif %}" style="border-radius: 20px; padding: 5px 14px;">
+                <i class="fa fa-line-chart mr-1"></i> Analytics
             </a>
         </div>
     </div>
