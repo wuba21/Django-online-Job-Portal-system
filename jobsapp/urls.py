@@ -6,7 +6,8 @@ from jobsapp.views.admin_dashboard import (
     admin_companies_verification, admin_verify_company, admin_reject_company, admin_rerun_ai_verification,
     admin_payments_dashboard, admin_update_payment_status,
     admin_candidates_talent_pool, admin_broadcast_announcements, admin_audit_logs_view,
-    admin_export_candidates_csv, admin_export_jobs_csv, admin_export_companies_csv, admin_export_payments_csv
+    admin_export_candidates_csv, admin_export_jobs_csv, admin_export_companies_csv, admin_export_payments_csv,
+    admin_export_job_alerts_csv
 )
 from jobsapp.views.employee import (
     ApplicantDashboardView, EditProfileView, EmployeeMyJobsListView, FavoriteListView,
@@ -128,6 +129,7 @@ urlpatterns = [
     path("platform-admin/export/jobs/", admin_export_jobs_csv, name="admin-export-jobs-csv"),
     path("platform-admin/export/companies/", admin_export_companies_csv, name="admin-export-companies-csv"),
     path("platform-admin/export/payments/", admin_export_payments_csv, name="admin-export-payments-csv"),
+    path("platform-admin/export/subscribers/", admin_export_job_alerts_csv, name="admin-export-alerts-csv"),
 
     # Public Job Pages
     path("apply-job/<int:job_id>/", ApplyJobView.as_view(), name="apply-job"),

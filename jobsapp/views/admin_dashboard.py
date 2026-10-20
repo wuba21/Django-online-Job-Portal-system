@@ -839,16 +839,21 @@ def admin_broadcast_announcements(request):
         elif target == "employers":
             recipients = User.objects.filter(role="employer", is_active=True)
             audience_name = "All Employers"
+        elif target == "subscribers":
+            from jobsapp.models import JobAlert
+            recipients = []
+            alert_emails = list(JobAlert.objects.filter(is_active=True).values_list("email", flat=True).distinct())
+            audience_name = f"Job Alert Subscribers ({len(alert_emails)} Emails)"
         else:
             recipients = User.objects.filter(is_active=True)
             audience_name = "All Registered Users"
 
-        recipient_count = recipients.count()
+        recipient_count = len(alert_emails) if target == "subscribers" else recipients.count()
         in_app_count = 0
         email_count = 0
 
         # Deliver In-App Notifications in bulk
-        if "in_app" in channels:
+        if "in_app" in channels and target != "subscribers":
             from jobsapp.models import Notification
             notifications = [
                 Notification(
@@ -864,25 +869,25 @@ def admin_broadcast_announcements(request):
 
         # Deliver Emails
         if "email" in channels:
-            for u in recipients:
-                if u.email:
-                    try:
-                        send_event_email(
-                            user_email=u.email,
-                            subject=subject,
-                            message=message_body,
-                            action_url=action_url or request.build_absolute_uri("/"),
-                            action_text=action_text
-                        )
-                        email_count += 1
-                    except Exception:
-                        pass
+            email_list = alert_emails if target == "subscribers" else [u.email for u in recipients if u.email]
+            for em in email_list:
+                try:
+                    send_event_email(
+                        user_email=em,
+                        subject=subject,
+                        message=message_body,
+                        action_url=action_url or request.build_absolute_uri("/"),
+                        action_text=action_text
+                    )
+                    email_count += 1
+                except Exception:
+                    pass
 
         # Log action in audit trail
         log_admin_action(
             request,
             action="BROADCAST_SENT",
-            target_repr=f"Target: {audience_name} ({recipient_count} users)",
+            target_repr=f"Target: {audience_name} ({recipient_count} recipients)",
             details=f"Subject: {subject} | Channels: {', '.join(channels)} | In-app: {in_app_count}, Email: {email_count}"
         )
 
@@ -893,9 +898,12 @@ def admin_broadcast_announcements(request):
         )
         return redirect("jobs:admin-broadcast")
 
+    from jobsapp.models import JobAlert
     total_candidates = User.objects.filter(role="employee").count()
     total_employers = User.objects.filter(role="employer").count()
     total_users = User.objects.count()
+    total_subscribers = JobAlert.objects.filter(is_active=True).count()
+    subscribers_list = JobAlert.objects.all().order_by("-created_at")[:15]
 
     context = {
         "active_tab": "broadcast",
@@ -904,6 +912,8 @@ def admin_broadcast_announcements(request):
         "total_candidates": total_candidates,
         "total_employers": total_employers,
         "total_users": total_users,
+        "total_subscribers": total_subscribers,
+        "subscribers_list": subscribers_list,
         "recent_broadcasts": recent_broadcasts,
     }
     return render(request, "jobs/admin/broadcast_center.html", context)
@@ -1101,5 +1111,38 @@ def admin_export_payments_csv(request):
 
     log_admin_action(request, "DATA_EXPORT", "Exported Financial Transactions to CSV", details=f"Total: {transactions.count()}")
     return response
+
+
+@superuser_required
+def admin_export_job_alerts_csv(request):
+    """
+    Exports all Job Alert email subscribers into Excel-compatible CSV.
+    """
+    from jobsapp.models import JobAlert
+    response = HttpResponse(content_type="text/csv; charset=utf-8-sig")
+    response["Content-Disposition"] = 'attachment; filename="job_alert_subscribers_export.csv"'
+    response.write("\ufeff")
+
+    writer = csv.writer(response)
+    writer.writerow([
+        "Subscriber ID", "Email", "Target Category", "Target Location", "Keywords", "Status", "Subscribed Date"
+    ])
+
+    subscribers = JobAlert.objects.all().order_by("-created_at")
+
+    for sub in subscribers:
+        writer.writerow([
+            sub.id,
+            sub.email,
+            sub.category or "All",
+            sub.location or "All",
+            sub.keywords or "N/A",
+            "Active" if sub.is_active else "Inactive",
+            sub.created_at.strftime("%Y-%m-%d %H:%M:%S")
+        ])
+
+    log_admin_action(request, "DATA_EXPORT", "Exported Job Alert Subscribers to CSV", details=f"Total: {subscribers.count()}")
+    return response
+
 
 

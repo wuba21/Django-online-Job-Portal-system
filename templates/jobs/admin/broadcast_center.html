@@ -10,7 +10,7 @@
 
         <!-- Metric Audience Stats -->
         <div class="row mb-4">
-            <div class="col-md-4 mb-3">
+            <div class="col-md-3 mb-3">
                 <div class="card border-0 shadow-sm p-3 text-center border-left border-primary" style="border-left-width: 4px !important; border-radius: 10px;">
                     <h3 class="font-weight-bold text-primary mb-0">{{ total_users }}</h3>
                     <small class="text-muted text-uppercase font-weight-bold">Total Platform Users</small>
@@ -19,7 +19,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 mb-3">
+            <div class="col-md-3 mb-3">
                 <div class="card border-0 shadow-sm p-3 text-center border-left border-info" style="border-left-width: 4px !important; border-radius: 10px;">
                     <h3 class="font-weight-bold text-info mb-0">{{ total_candidates }}</h3>
                     <small class="text-muted text-uppercase font-weight-bold">All Job Seekers</small>
@@ -28,12 +28,21 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 mb-3">
+            <div class="col-md-3 mb-3">
                 <div class="card border-0 shadow-sm p-3 text-center border-left border-success" style="border-left-width: 4px !important; border-radius: 10px;">
                     <h3 class="font-weight-bold text-success mb-0">{{ total_employers }}</h3>
-                    <small class="text-muted text-uppercase font-weight-bold">All Employers / Companies</small>
+                    <small class="text-muted text-uppercase font-weight-bold">All Employers</small>
                     <div class="mt-2 text-muted small">
                         <span>Recruiting Partners</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card border-0 shadow-sm p-3 text-center border-left border-warning" style="border-left-width: 4px !important; border-radius: 10px;">
+                    <h3 class="font-weight-bold text-warning mb-0">{{ total_subscribers }}</h3>
+                    <small class="text-muted text-uppercase font-weight-bold">Alert Subscribers</small>
+                    <div class="mt-2 text-muted small">
+                        <span>Email Vacancy Alerts</span>
                     </div>
                 </div>
             </div>
@@ -70,6 +79,12 @@
                                     <input type="radio" id="targetEmployers" name="target" value="employers" class="custom-control-input">
                                     <label class="custom-control-label font-weight-bold small text-dark" for="targetEmployers">
                                         All Employers ({{ total_employers }})
+                                    </label>
+                                </div>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="targetSubscribers" name="target" value="subscribers" class="custom-control-input">
+                                    <label class="custom-control-label font-weight-bold small text-dark" for="targetSubscribers">
+                                        Job Alert Subscribers ({{ total_subscribers }})
                                     </label>
                                 </div>
                                 <div class="custom-control custom-radio">
@@ -163,6 +178,93 @@
                         <li><strong>Multilingual:</strong> For Ethiopian audiences, bilingual messages in Amharic & English generate maximum engagement.</li>
                         <li><strong>Actionable:</strong> Always provide a direct link button (e.g. link to featured vacancies or CV Builder).</li>
                     </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Job Alert Email Subscribers List Table -->
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card border-0 shadow-sm p-4" style="border-radius: 12px;">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center text-warning mr-2" style="width: 36px; height: 36px; background: rgba(245, 158, 11, 0.15);">
+                                <i class="fa fa-envelope font-weight-bold"></i>
+                            </div>
+                            <div>
+                                <h5 class="card-title text-dark mb-0 font-weight-bold">Job Alert Email Subscribers ({{ total_subscribers }})</h5>
+                                <small class="text-muted">Users subscribed to receive automated email notifications when relevant vacancies are published</small>
+                            </div>
+                        </div>
+                        <div class="mt-2 mt-md-0">
+                            <a href="{% url 'jobs:admin-export-alerts-csv' %}" class="btn btn-outline-success font-weight-bold btn-sm shadow-sm">
+                                <i class="fa fa-file-excel-o mr-1"></i> Export Subscribers (CSV)
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="border-0 text-muted small text-uppercase">Email Address</th>
+                                    <th class="border-0 text-muted small text-uppercase">Category Filter</th>
+                                    <th class="border-0 text-muted small text-uppercase">Target City</th>
+                                    <th class="border-0 text-muted small text-uppercase">Keywords</th>
+                                    <th class="border-0 text-muted small text-uppercase">Subscribed On</th>
+                                    <th class="border-0 text-muted small text-uppercase text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sub in subscribers_list %}
+                                <tr>
+                                    <td class="font-weight-bold text-dark">
+                                        <i class="fa fa-envelope-o text-muted mr-1"></i>{{ sub.email }}
+                                        {% if sub.user %}
+                                            <span class="badge badge-light border text-primary ml-1">Member</span>
+                                        {% else %}
+                                            <span class="badge badge-light border text-secondary ml-1">Guest</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if sub.category %}
+                                            <span class="badge badge-info">{{ sub.category.name }}</span>
+                                        {% else %}
+                                            <span class="badge badge-light border text-muted">All Categories</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if sub.location %}
+                                            <i class="fa fa-map-marker text-danger mr-1"></i>{{ sub.location }}
+                                        {% else %}
+                                            <span class="text-muted">All Ethiopia</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ sub.keywords|default:"—" }}</small>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ sub.created_at|date:"M d, Y H:i" }}</small>
+                                    </td>
+                                    <td class="text-center">
+                                        {% if sub.is_active %}
+                                            <span class="badge badge-success px-2 py-1"><i class="fa fa-check-circle mr-1"></i>Active</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary px-2 py-1">Paused</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">
+                                        <i class="fa fa-envelope-open-o text-muted mb-2" style="font-size: 2rem;"></i>
+                                        <p class="mb-0">No job alert subscribers found.</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
