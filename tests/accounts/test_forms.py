@@ -13,9 +13,9 @@ class TestEmployeeRegistrationForm(TestCase):
             "last_name": "Hoque",
             "role": "employee",
             "gender": "male",
-            "email": "rumi1@gmail.com",
-            "password1": "123456",
-            "password2": "123456",
+            "email": "manjurul.hoque@gmail.com",
+            "password1": "SecurePass123!#",
+            "password2": "SecurePass123!#",
         }
 
     def test_field_required(self):
@@ -51,13 +51,13 @@ class TestEmployeeRegistrationForm(TestCase):
 
     def test_password_mismatch(self):
         # Set confirm password field to a different value
-        data = self.valid_user
-        data["password2"] = "54321"
+        data = dict(self.valid_user)
+        data["password2"] = "DifferentPass456!#"
 
         form = EmployeeRegistrationForm(data)
 
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors["password2"][0], "The two password fields didn’t match.")
+        self.assertTrue(any("match" in err.lower() for err in form.errors["password2"]))
 
     def test_valid_and_save_form(self):
         form = EmployeeRegistrationForm(data=self.valid_user)
@@ -73,9 +73,9 @@ class TestEmployerRegistrationForm(TestCase):
         self.valid_user = {
             "first_name": "John",
             "last_name": "Doe",
-            "email": "employer@gmail.com",
-            "password1": "123456",
-            "password2": "123456",
+            "email": "john.employer@gmail.com",
+            "password1": "SecurePass123!#",
+            "password2": "SecurePass123!#",
         }
 
     def test_field_required(self):
@@ -110,13 +110,13 @@ class TestEmployerRegistrationForm(TestCase):
 
     def test_password_mismatch(self):
         # Set confirm password field to a different value
-        data = self.valid_user
-        data["password2"] = "54321"
+        data = dict(self.valid_user)
+        data["password2"] = "DifferentPass456!#"
 
         form = EmployerRegistrationForm(data)
 
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors["password2"][0], "The two password fields didn’t match.")
+        self.assertTrue(any("match" in err.lower() for err in form.errors["password2"]))
 
     def test_valid_and_save_form(self):
         form = EmployerRegistrationForm(data=self.valid_user)

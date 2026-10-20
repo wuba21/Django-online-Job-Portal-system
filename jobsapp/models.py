@@ -108,8 +108,8 @@ class Job(models.Model):
 
     def get_absolute_url(self):
         if self.slug:
-            return f"/{self.slug}/"
-        return reverse("jobs:jobs-detail", args=[self.id])
+            return reverse("jobs:jobs-detail-slug", kwargs={"slug": self.slug})
+        return reverse("jobs:jobs-detail", kwargs={"id": self.id})
 
     def __str__(self):
         return self.title
