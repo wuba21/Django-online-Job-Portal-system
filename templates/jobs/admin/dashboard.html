@@ -5,15 +5,8 @@
 {% block content %}
 <section class="bg-light-gray py-4">
     <div class="container-fluid px-4">
-        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap" style="gap: 10px;">
-            <h2><i class="fa fa-shield text-warning"></i> Platform Admin Dashboard</h2>
-            <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
-                <a href="{% url 'jobs:employer-jobs-create' %}" class="btn btn-primary font-weight-bold shadow-sm">
-                    <i class="fa fa-plus-circle mr-1"></i> Post Job as Admin
-                </a>
-                <a href="/admin/" class="btn btn-outline-dark"><i class="fa fa-cogs"></i> Django Native Admin</a>
-            </div>
-        </div>
+        <!-- Shared Admin Header & Navigation -->
+        {% include 'jobs/admin/_admin_nav.html' %}
 
         <!-- Metric Stat Cards -->
         <div class="row mb-4">
@@ -175,7 +168,7 @@
             </div>
 
             <!-- Users Moderation -->
-            <div class="col-lg-5 mb-4">
+            <div class="col-lg-5 mb-4" id="users-section">
                 <div class="card border-0 shadow-sm p-3">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="card-title text-dark mb-0"><i class="fa fa-users text-info"></i> User Accounts Management</h5>

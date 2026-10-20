@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.db.models import Count
+from django.core.paginator import Paginator
+from django.db.models import Count, Sum, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -46,6 +47,12 @@ class AdminDashboardView(ListView):
         context["approved_jobs"] = approved_jobs
         context["total_applications"] = Applicant.objects.count()
         context["categories_count"] = Job.objects.values("category").distinct().count()
+
+        # Navigation & Badges
+        context["active_tab"] = "jobs"
+        context["pending_companies_count"] = Company.objects.filter(license_status__in=["pending", "review"]).count()
+        from payments.models import PaymentTransaction
+        context["pending_payments_count"] = PaymentTransaction.objects.filter(status="pending").count()
 
         # Provide recent users and jobs under both variable names (users/recent_users, jobs/recent_jobs)
         recent_users = User.objects.all().order_by("-date_joined")[:25]
@@ -309,7 +316,14 @@ def admin_analytics_dashboard(request):
     recent_users = User.objects.order_by("-date_joined")[:5]
     recent_jobs = Job.objects.select_related("user", "company").order_by("-created_at")[:5]
 
+    from payments.models import PaymentTransaction
+    pending_companies_count = Company.objects.filter(license_status__in=["pending", "review"]).count()
+    pending_payments_count = PaymentTransaction.objects.filter(status="pending").count()
+
     context = {
+        "active_tab": "analytics",
+        "pending_companies_count": pending_companies_count,
+        "pending_payments_count": pending_payments_count,
         "total_users": total_users,
         "total_candidates": total_candidates,
         "total_employers": total_employers,
@@ -326,3 +340,330 @@ def admin_analytics_dashboard(request):
         "recent_jobs": recent_jobs,
     }
     return render(request, "admin/admin_dashboard.html", context)
+
+
+# ===========================================================================
+# 1. Company License & TIN Verification Queue
+# ===========================================================================
+
+@superuser_required
+def admin_companies_verification(request):
+    """
+    Dedicated verification queue for Ethiopian business licenses and TINs.
+    Allows platform admins to review uploaded PDFs/images, inspect AI confidence,
+    and approve or reject company registrations.
+    """
+    companies = Company.objects.select_related("user").all().order_by("-created_at")
+
+    # Metrics
+    total_companies = Company.objects.count()
+    pending_companies_count = Company.objects.filter(license_status__in=["pending", "review"]).count()
+    verified_companies_count = Company.objects.filter(license_status="verified").count()
+    rejected_companies_count = Company.objects.filter(license_status="rejected").count()
+    with_docs_count = Company.objects.exclude(license_document="").exclude(license_document__isnull=True).count()
+    
+    from payments.models import PaymentTransaction
+    pending_payments_count = PaymentTransaction.objects.filter(status="pending").count()
+
+    status_filter = request.GET.get("status")
+    if status_filter in ["pending", "review", "verified", "rejected"]:
+        companies = companies.filter(license_status=status_filter)
+    elif status_filter == "has_doc":
+        companies = companies.exclude(license_document="").exclude(license_document__isnull=True)
+
+    query = request.GET.get("q", "").strip()
+    if query:
+        companies = companies.filter(
+            Q(name__icontains=query) |
+            Q(tin_number__icontains=query) |
+            Q(user__email__icontains=query) |
+            Q(location__icontains=query)
+        )
+
+    paginator = Paginator(companies, 12)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        "active_tab": "companies",
+        "companies": page_obj,
+        "total_companies": total_companies,
+        "pending_companies_count": pending_companies_count,
+        "verified_companies_count": verified_companies_count,
+        "rejected_companies_count": rejected_companies_count,
+        "with_docs_count": with_docs_count,
+        "pending_payments_count": pending_payments_count,
+        "status_filter": status_filter or "all",
+        "query": query,
+    }
+    return render(request, "jobs/admin/companies_verification.html", context)
+
+
+@superuser_required
+def admin_verify_company(request, company_id):
+    """
+    Approves and verifies a company's business license.
+    Marks company and employer user as verified, sends in-app notification and email.
+    """
+    company = get_object_or_404(Company, id=company_id)
+    company.license_status = "verified"
+    company.license_verified_at = timezone.now()
+    company.license_rejection_reason = ""
+    company.save()
+
+    if getattr(company, "user", None):
+        company.user.is_verified = True
+        company.user.save(update_fields=["is_verified"])
+        create_notification(
+            user=company.user,
+            title="✅ Business License Verified!",
+            message=f"Congratulations! The trade license and TIN for '{company.name}' have been verified by platform administrators. Your employer account now displays the official Verified badge.",
+            link="/employer/dashboard/"
+        )
+        if company.user.email:
+            send_event_email(
+                user_email=company.user.email,
+                subject=f"✅ Business License Verified: {company.name} is Verified!",
+                message=f"Hello,\n\nGreat news! Your Ethiopian Business License and TIN for '{company.name}' have been reviewed and approved by platform administrators.\n\nYour job postings will now display the verified employer badge to build high trust with candidates.\n\nBest regards,\nEthio Job Portal Team",
+                action_url=request.build_absolute_uri("/employer/dashboard/"),
+                action_text="Go to Employer Dashboard"
+            )
+
+    messages.success(request, f"Company '{company.name}' successfully verified!")
+    referer = request.META.get("HTTP_REFERER")
+    if referer:
+        return redirect(referer)
+    return redirect("jobs:admin-companies-verification")
+
+
+@superuser_required
+def admin_reject_company(request, company_id):
+    """
+    Rejects a company's business license submission with an actionable reason.
+    """
+    company = get_object_or_404(Company, id=company_id)
+    reason = request.POST.get("rejection_reason", "").strip() or request.GET.get("reason", "").strip()
+    if not reason:
+        reason = "The uploaded business license or TIN could not be verified against government records. Please re-upload a clear, valid official copy."
+
+    company.license_status = "rejected"
+    company.license_rejection_reason = reason
+    company.save()
+
+    if getattr(company, "user", None):
+        company.user.is_verified = False
+        company.user.save(update_fields=["is_verified"])
+        create_notification(
+            user=company.user,
+            title="⚠️ Trade License Verification Issue",
+            message=f"The trade license verification for '{company.name}' was rejected: {reason}. Please re-upload a valid document.",
+            link="/accounts/employer/verify-license/"
+        )
+        if company.user.email:
+            send_event_email(
+                user_email=company.user.email,
+                subject=f"Action Required: Business License Verification for {company.name}",
+                message=f"Hello,\n\nYour trade license submission for '{company.name}' could not be approved at this time.\n\nReason: {reason}\n\nPlease visit your dashboard to upload a new, clear copy of your valid trade license.\n\nBest regards,\nEthio Job Portal Team",
+                action_url=request.build_absolute_uri("/accounts/employer/verify-license/"),
+                action_text="Re-upload License"
+            )
+
+    messages.warning(request, f"Company '{company.name}' verification was rejected.")
+    referer = request.META.get("HTTP_REFERER")
+    if referer:
+        return redirect(referer)
+    return redirect("jobs:admin-companies-verification")
+
+
+@superuser_required
+def admin_rerun_ai_verification(request, company_id):
+    """
+    Re-runs the Ethiopian government AI verification pipeline on the company's uploaded document.
+    """
+    company = get_object_or_404(Company, id=company_id)
+    if not company.license_document:
+        messages.error(request, f"No document uploaded for '{company.name}' to analyze.")
+    else:
+        try:
+            from accounts.license_validator import verify_ethiopian_business_license
+            result = verify_ethiopian_business_license(
+                company.license_document,
+                tin_input=company.tin_number,
+                company_name=company.name
+            )
+            company.license_ai_confidence = result.get("confidence", 0)
+            if result.get("tin_number") and not company.tin_number:
+                company.tin_number = result["tin_number"]
+            company.save()
+            reasons_summary = " | ".join(result.get("reasons", [])) or "Analysis complete."
+            messages.info(request, f"AI Analysis for '{company.name}': Confidence {company.license_ai_confidence}% ({reasons_summary})")
+        except Exception as e:
+            messages.error(request, f"AI verification analysis failed: {e}")
+
+    referer = request.META.get("HTTP_REFERER")
+    if referer:
+        return redirect(referer)
+    return redirect("jobs:admin-companies-verification")
+
+
+# ===========================================================================
+# 2. Payments & Financial Revenue Dashboard
+# ===========================================================================
+
+@superuser_required
+def admin_payments_dashboard(request):
+    """
+    Executive financial control center: Tracks Chapa, Telebirr, and CBE Birr
+    transactions, computes ETB revenue metrics, and manages VIP subscriptions.
+    """
+    from payments.models import PaymentTransaction, SubscriptionPlan, UserSubscription
+
+    transactions = PaymentTransaction.objects.select_related("user", "job").all().order_by("-created_at")
+
+    # Financial KPIs
+    total_revenue = PaymentTransaction.objects.filter(status="success").aggregate(total=Sum("amount"))["total"] or 0
+    
+    now = timezone.now()
+    start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    month_revenue = PaymentTransaction.objects.filter(
+        status="success", created_at__gte=start_of_month
+    ).aggregate(total=Sum("amount"))["total"] or 0
+
+    start_of_today = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    today_revenue = PaymentTransaction.objects.filter(
+        status="success", created_at__gte=start_of_today
+    ).aggregate(total=Sum("amount"))["total"] or 0
+
+    success_count = PaymentTransaction.objects.filter(status="success").count()
+    pending_payments_count = PaymentTransaction.objects.filter(status="pending").count()
+    failed_count = PaymentTransaction.objects.filter(status="failed").count()
+    total_tx_count = PaymentTransaction.objects.count()
+
+    active_subscriptions_count = UserSubscription.objects.filter(is_active=True, end_date__gte=now).count()
+    pending_companies_count = Company.objects.filter(license_status__in=["pending", "review"]).count()
+
+    # Filtering
+    status_filter = request.GET.get("status")
+    if status_filter in ["success", "pending", "failed"]:
+        transactions = transactions.filter(status=status_filter)
+
+    method_filter = request.GET.get("method")
+    if method_filter in ["chapa", "telebirr", "cbe_birr"]:
+        transactions = transactions.filter(payment_method=method_filter)
+
+    purpose_filter = request.GET.get("purpose")
+    if purpose_filter in ["featured_job", "employer_subscription", "candidate_vip"]:
+        transactions = transactions.filter(purpose=purpose_filter)
+
+    query = request.GET.get("q", "").strip()
+    if query:
+        transactions = transactions.filter(
+            Q(tx_ref__icontains=query) |
+            Q(chapa_reference__icontains=query) |
+            Q(user__email__icontains=query) |
+            Q(user__first_name__icontains=query) |
+            Q(user__last_name__icontains=query)
+        )
+
+    paginator = Paginator(transactions, 15)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    recent_subscriptions = UserSubscription.objects.select_related("user", "plan").order_by("-start_date")[:8]
+    plans = SubscriptionPlan.objects.all().order_by("price")
+
+    context = {
+        "active_tab": "payments",
+        "transactions": page_obj,
+        "total_revenue": total_revenue,
+        "month_revenue": month_revenue,
+        "today_revenue": today_revenue,
+        "success_count": success_count,
+        "pending_payments_count": pending_payments_count,
+        "failed_count": failed_count,
+        "total_tx_count": total_tx_count,
+        "active_subscriptions_count": active_subscriptions_count,
+        "pending_companies_count": pending_companies_count,
+        "recent_subscriptions": recent_subscriptions,
+        "plans": plans,
+        "status_filter": status_filter or "all",
+        "method_filter": method_filter or "all",
+        "purpose_filter": purpose_filter or "all",
+        "query": query,
+    }
+    return render(request, "jobs/admin/payments_dashboard.html", context)
+
+
+@superuser_required
+def admin_update_payment_status(request, tx_id):
+    """
+    Manually overrides or confirms a transaction status.
+    When set to 'success', automatically fulfills user benefits:
+    - Features the Job for 30 days
+    - Activates Candidate VIP badge
+    - Creates or extends Employer Subscription
+    """
+    from payments.models import PaymentTransaction, SubscriptionPlan, UserSubscription
+    tx = get_object_or_404(PaymentTransaction, id=tx_id)
+    new_status = request.POST.get("status") or request.GET.get("status")
+
+    if new_status == "success":
+        tx.status = "success"
+        tx.save(update_fields=["status", "updated_at"])
+
+        # Automatically apply fulfillment
+        if tx.purpose == "featured_job" and tx.job:
+            tx.job.is_featured = True
+            tx.job.featured_until = timezone.now() + timedelta(days=30)
+            tx.job.save(update_fields=["is_featured", "featured_until"])
+            create_notification(
+                user=tx.user,
+                title="⭐ Job Featured Active!",
+                message=f"Your payment of {tx.amount} ETB was confirmed. Job '{tx.job.title}' is now VIP Featured for 30 days!",
+                link=f"/jobs/{tx.job.id}/"
+            )
+        elif tx.purpose in ["candidate_vip", "vip_candidate"]:
+            tx.user.is_vip = True
+            tx.user.save(update_fields=["is_vip"])
+            create_notification(
+                user=tx.user,
+                title="⭐ VIP Candidate Badge Active!",
+                message=f"Your payment of {tx.amount} ETB was confirmed. You now have a VIP Candidate profile badge for 30 days!",
+                link="/employee/dashboard/"
+            )
+        elif tx.purpose == "employer_subscription":
+            plan = SubscriptionPlan.objects.filter(target_role="employer").first()
+            UserSubscription.objects.create(
+                user=tx.user,
+                plan=plan,
+                start_date=timezone.now(),
+                end_date=timezone.now() + timedelta(days=30),
+                is_active=True
+            )
+            create_notification(
+                user=tx.user,
+                title="💼 Employer Pro Subscription Active!",
+                message=f"Your payment of {tx.amount} ETB was confirmed. Your Business Pro subscription is active for 30 days!",
+                link="/employer/dashboard/"
+            )
+
+        if tx.user.email:
+            send_event_email(
+                user_email=tx.user.email,
+                subject=f"Receipt: Payment Confirmed ({tx.amount} ETB) - Ethio Job Portal",
+                message=f"Hello {tx.user.get_full_name() or 'Valued Customer'},\n\nYour payment of {tx.amount} ETB (Ref: {tx.tx_ref}) has been confirmed and your platform benefits have been activated.\n\nThank you for choosing Ethio Job Portal!\n\nBest regards,\nEthio Job Portal Team",
+                action_url=request.build_absolute_uri("/"),
+                action_text="Visit Platform"
+            )
+        messages.success(request, f"Transaction {tx.tx_ref} marked SUCCESS and benefits applied!")
+
+    elif new_status in ["failed", "pending"]:
+        tx.status = new_status
+        tx.save(update_fields=["status", "updated_at"])
+        messages.info(request, f"Transaction {tx.tx_ref} status set to {new_status.upper()}.")
+
+    referer = request.META.get("HTTP_REFERER")
+    if referer:
+        return redirect(referer)
+    return redirect("jobs:admin-payments-dashboard")
+

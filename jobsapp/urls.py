@@ -2,7 +2,9 @@ from django.urls import include, path
 
 from jobsapp.views.admin_dashboard import (
     AdminDashboardView, admin_analytics_dashboard, approve_job, delete_job, toggle_user_active,
-    bulk_toggle_users, set_job_status, toggle_job_featured, broadcast_job_telegram
+    bulk_toggle_users, set_job_status, toggle_job_featured, broadcast_job_telegram,
+    admin_companies_verification, admin_verify_company, admin_reject_company, admin_rerun_ai_verification,
+    admin_payments_dashboard, admin_update_payment_status
 )
 from jobsapp.views.employee import (
     ApplicantDashboardView, EditProfileView, EmployeeMyJobsListView, FavoriteListView,
@@ -90,6 +92,16 @@ urlpatterns = [
     path("platform-admin/toggle-featured/<int:job_id>/", toggle_job_featured, name="admin-toggle-featured"),
     path("platform-admin/broadcast-telegram/<int:job_id>/", broadcast_job_telegram, name="admin-broadcast-telegram"),
     path("platform-admin/delete-job/<int:job_id>/", delete_job, name="admin-delete-job"),
+
+    # Admin: Ethiopian Business License & TIN Verification Queue
+    path("platform-admin/companies/", admin_companies_verification, name="admin-companies-verification"),
+    path("platform-admin/companies/<int:company_id>/verify/", admin_verify_company, name="admin-verify-company"),
+    path("platform-admin/companies/<int:company_id>/reject/", admin_reject_company, name="admin-reject-company"),
+    path("platform-admin/companies/<int:company_id>/ai-rescan/", admin_rerun_ai_verification, name="admin-rerun-ai-verification"),
+
+    # Admin: Payments & Revenue Management
+    path("platform-admin/payments/", admin_payments_dashboard, name="admin-payments-dashboard"),
+    path("platform-admin/payments/<int:tx_id>/status/", admin_update_payment_status, name="admin-update-payment-status"),
 
     # Public Job Pages
     path("apply-job/<int:job_id>/", ApplyJobView.as_view(), name="apply-job"),

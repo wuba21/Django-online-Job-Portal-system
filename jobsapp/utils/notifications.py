@@ -45,7 +45,7 @@ def send_event_email(user_email, subject, message, action_url=None, action_text=
         safe_subject = subject
         safe_message = message
         if "console" in backend_name.lower():
-            safe_subject = subject.encode("ascii", errors="ignore").decode("ascii").strip() or subject
+            safe_subject = subject.encode("ascii", errors="ignore").decode("ascii").strip() or "Notification Alert"
             safe_message = message.encode("ascii", errors="ignore").decode("ascii") or message
 
         button_html = ""
@@ -72,9 +72,9 @@ def send_event_email(user_email, subject, message, action_url=None, action_text=
                     <p style="color: #93c5fd; margin: 6px 0 0 0; font-size: 13px;">Official Notification Alert</p>
                 </div>
                 <div style="padding: 30px 32px;">
-                    <h3 style="margin-top: 0; color: #0f172a; font-size: 18px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px;">{escape(subject)}</h3>
+                    <h3 style="margin-top: 0; color: #0f172a; font-size: 18px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px;">{escape(safe_subject)}</h3>
                     <div style="font-size: 15px; line-height: 1.6; color: #334155;">
-                        {linebreaks(escape(message))}
+                        {linebreaks(escape(safe_message))}
                     </div>
                     {button_html}
                     <div style="margin-top: 30px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; text-align: center;">
