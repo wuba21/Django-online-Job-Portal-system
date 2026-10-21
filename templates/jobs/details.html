@@ -283,6 +283,12 @@
                         </a>
                     {% endif %}
 
+                    {% if request.user.is_authenticated and request.user.role == 'employee' and job.user != request.user %}
+                        <a href="{% url 'jobs:start-conversation' job.user.id %}?job_id={{ job.id }}" class="btn btn-outline-info btn-block btn-sm mb-2 font-weight-bold">
+                            <i class="fa fa-commenting-o mr-1"></i> Message Employer
+                        </a>
+                    {% endif %}
+
                     {% if job.website %}
                         <a href="{{ job.website }}" target="_blank" class="btn btn-outline-primary btn-block btn-sm">
                             <i class="fa fa-external-link mr-1"></i> Visit Website

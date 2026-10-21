@@ -255,13 +255,6 @@
                             </a>
                         </li>
                         {% if request.user.is_authenticated %}
-                            <li class="nav-item {% if url_name == 'inbox' %}active{% endif %}">
-                                <a href="{% url 'jobs:inbox' %}" class="nav-link">
-                                    <i class="fa fa-comments-o nav-icon"></i><span>{% trans "Messages" %}</span>
-                                </a>
-                            </li>
-                        {% endif %}
-                        {% if request.user.is_authenticated %}
                             <li class="nav-item dropdown">
                                 <a id="clientZone" href="#" data-toggle="dropdown"
                                    aria-haspopup="true" aria-expanded="false"
