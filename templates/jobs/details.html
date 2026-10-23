@@ -114,21 +114,25 @@
             <div class="col-md-4 text-md-right mt-3 mt-md-0">
                 {% if request.user.is_authenticated and request.user.role == 'employee' %}
                     {% if already_applied %}
-                        <button class="btn btn-secondary btn-lg shadow-sm px-4 py-3 fw-bold w-100 w-md-auto" disabled><i class="fa fa-check-circle me-1"></i> Already Applied</button>
+                        <button class="btn btn-secondary btn-lg shadow-sm px-4 py-3 fw-bold w-100 w-md-auto" disabled><i class="fa fa-check-circle mr-1"></i> Already Applied</button>
                     {% elif job.is_expired %}
-                        <button class="btn btn-danger btn-lg shadow-sm px-4 py-3 fw-bold w-100 w-md-auto" disabled><i class="fa fa-clock-o me-1"></i> Application Closed</button>
+                        <button class="btn btn-danger btn-lg shadow-sm px-4 py-3 fw-bold w-100 w-md-auto" disabled><i class="fa fa-clock-o mr-1"></i> Application Closed</button>
                     {% elif job.filled %}
-                        <button class="btn btn-secondary btn-lg shadow-sm px-4 py-3 fw-bold w-100 w-md-auto" disabled><i class="fa fa-ban me-1"></i> Position Filled</button>
+                        <button class="btn btn-secondary btn-lg shadow-sm px-4 py-3 fw-bold w-100 w-md-auto" disabled><i class="fa fa-ban mr-1"></i> Position Filled</button>
                     {% else %}
-                        <!-- 1-Click Easy Apply Modal Trigger -->
-                        <button type="button" class="btn btn-primary btn-lg shadow-sm px-4 py-3 fw-bold w-100 w-md-auto" data-toggle="modal" data-target="#easyApplyModal">
-                            <i class="fa fa-paper-plane mr-1"></i> 1-CLICK EASY APPLY
+                        <!-- Smart Application Modal Trigger -->
+                        <button type="button" class="btn {% if is_ready_to_apply %}btn-primary{% else %}btn-warning text-dark font-weight-bold{% endif %} btn-lg shadow-sm px-4 py-3 fw-bold w-100 w-md-auto" data-toggle="modal" data-target="#easyApplyModal">
+                            {% if is_ready_to_apply %}
+                                <i class="fa fa-paper-plane mr-1"></i> APPLY FOR THIS JOB
+                            {% else %}
+                                <i class="fa fa-exclamation-triangle mr-1"></i> APPLY (CHECK REQUIREMENTS)
+                            {% endif %}
                         </button>
                     {% endif %}
                 {% elif not request.user.is_authenticated %}
-                    <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary btn-lg shadow-sm px-4 py-3 fw-bold d-block d-md-inline-block"><i class="fa fa-paper-plane me-1"></i> APPLY NOW</a>
+                    <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary btn-lg shadow-sm px-4 py-3 fw-bold d-block d-md-inline-block"><i class="fa fa-paper-plane mr-1"></i> APPLY NOW</a>
                 {% else %}
-                    <span class="badge badge-info p-3 d-inline-block text-white fw-semibold"><i class="fa fa-info-circle me-1"></i> Logged in as Employer</span>
+                    <span class="badge badge-info p-3 d-inline-block text-white fw-semibold"><i class="fa fa-info-circle mr-1"></i> Logged in as Employer</span>
                 {% endif %}
             </div>
         </div>
@@ -318,72 +322,164 @@
     </div>
 </section>
 
-<!-- 1-Click Easy Apply Modal -->
+<!-- Smart Job Application Modal with Requirements Verification -->
 {% if request.user.is_authenticated and request.user.role == 'employee' and not already_applied %}
-<div class="modal fade" id="easyApplyModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title font-weight-bold">
-                    <i class="fa fa-paper-plane text-warning mr-2"></i> Easy Apply: {{ job.title }}
+<div class="modal fade" id="easyApplyModal" tabindex="-1" role="dialog" aria-labelledby="easyApplyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header bg-primary text-white p-3">
+                <h5 class="modal-title font-weight-bold" id="easyApplyModalLabel">
+                    <i class="fa fa-paper-plane mr-2"></i> Apply for: {{ job.title }}
                 </h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="{% url 'jobs:apply-job' job.id %}" method="post" enctype="multipart/form-data">
+            
+            <form action="{% url 'jobs:apply-job' job.id %}" method="post" enctype="multipart/form-data" id="jobApplicationForm">
                 {% csrf_token %}
                 <div class="modal-body p-4">
-                    <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
-                        {% if request.user.avatar %}
-                            <img src="{{ request.user.avatar.url }}" class="rounded-circle mr-3 border" style="width: 48px; height: 48px; object-fit: cover;">
-                        {% else %}
-                            <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center text-primary font-weight-bold mr-3" style="width: 48px; height: 48px; font-size: 1.2rem;">
-                                {{ request.user.first_name|first|default:request.user.email|first|upper }}
+                    <!-- Requirements Readiness Alert -->
+                    {% if not is_ready_to_apply %}
+                        <div class="alert alert-warning border shadow-sm mb-4" style="border-radius: 12px; background-color: #fffbeb; border-color: #fde68a !important;">
+                            <h6 class="font-weight-bold text-dark mb-1">
+                                <i class="fa fa-exclamation-triangle text-warning mr-1"></i> Application Requirements Check
+                            </h6>
+                            <p class="small text-muted mb-3">
+                                To ensure high-quality applications, employers require verified contact information, skills, and an attached CV. Please complete the missing items below before applying:
+                            </p>
+                            <div class="list-group list-group-flush border rounded bg-white mb-2">
+                                {% for req in missing_requirements %}
+                                    <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+                                        <div>
+                                            <strong class="text-danger small"><i class="fa fa-times-circle mr-1"></i> {{ req.title }}</strong>
+                                            <small class="d-block text-muted">{{ req.desc }}</small>
+                                        </div>
+                                        {% if req.fix_url %}
+                                            <a href="{{ req.fix_url }}" class="btn btn-xs btn-outline-primary font-weight-bold ml-2 text-nowrap" target="_blank">
+                                                {{ req.fix_text }} <i class="fa fa-external-link ml-1"></i>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
                             </div>
-                        {% endif %}
-                        <div>
-                            <strong class="text-dark d-block">{{ request.user.get_full_name|default:request.user.email }}</strong>
-                            <small class="text-muted">{{ request.user.email }} {% if request.user.phone_number %}&bull; {{ request.user.phone_number }}{% endif %}</small>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-success border shadow-sm mb-4 d-flex align-items-center" style="border-radius: 12px; background-color: #f0fdf4; border-color: #bbf7d0 !important;">
+                            <i class="fa fa-check-circle text-success mr-3" style="font-size: 1.8rem;"></i>
+                            <div>
+                                <h6 class="font-weight-bold text-success mb-0">All Requirements Fulfilled!</h6>
+                                <small class="text-muted">Your profile, contact information, skills, and CV are complete and ready for submission.</small>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Candidate Profile Summary Verification Box -->
+                    <div class="card border bg-light p-3 mb-3 shadow-none" style="border-radius: 10px;">
+                        <h6 class="font-weight-bold text-dark small mb-2"><i class="fa fa-user-circle text-primary mr-1"></i> Your Application Profile Details</h6>
+                        <div class="row small">
+                            <div class="col-sm-6 mb-2">
+                                <span class="text-muted d-block">Full Name:</span>
+                                <strong>
+                                    {% if has_name %}
+                                        <i class="fa fa-check text-success mr-1"></i> {{ request.user.get_full_name }}
+                                    {% else %}
+                                        <span class="text-danger"><i class="fa fa-times mr-1"></i> Missing Full Name</span>
+                                    {% endif %}
+                                </strong>
+                            </div>
+                            <div class="col-sm-6 mb-2">
+                                <span class="text-muted d-block">Contact Phone:</span>
+                                <strong>
+                                    {% if has_phone %}
+                                        <i class="fa fa-check text-success mr-1"></i> {{ request.user.phone_number }}
+                                    {% else %}
+                                        <span class="text-danger"><i class="fa fa-times mr-1"></i> Missing Phone</span>
+                                    {% endif %}
+                                </strong>
+                            </div>
+                            <div class="col-sm-6 mb-2">
+                                <span class="text-muted d-block">Professional Title:</span>
+                                <strong>
+                                    {% if has_title %}
+                                        <i class="fa fa-check text-success mr-1"></i> {{ applicant_profile.title }}
+                                    {% else %}
+                                        <span class="text-danger"><i class="fa fa-times mr-1"></i> Missing Title</span>
+                                    {% endif %}
+                                </strong>
+                            </div>
+                            <div class="col-sm-6 mb-2">
+                                <span class="text-muted d-block">Key Skills:</span>
+                                <strong>
+                                    {% if has_skills %}
+                                        <i class="fa fa-check text-success mr-1"></i> {{ request.user.skills.count }} Skills Listed
+                                    {% else %}
+                                        <span class="text-danger"><i class="fa fa-times mr-1"></i> No Skills Added</span>
+                                    {% endif %}
+                                </strong>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- CV Selection -->
+                    <!-- Resume / CV Upload Section -->
                     <div class="form-group mb-3">
-                        <label class="small font-weight-bold text-dark d-block mb-2">Resume / CV Document:</label>
-                        {% if request.user.applicant_profile.cv_file %}
-                            <div class="p-2 mb-2 bg-light rounded border d-flex align-items-center justify-content-between">
+                        <label class="font-weight-bold small text-dark d-block mb-1">
+                            Attached Resume / CV Document <span class="text-danger">*</span>
+                        </label>
+                        {% if applicant_profile.cv_file %}
+                            <div class="p-2 mb-2 bg-white rounded border d-flex align-items-center justify-content-between">
                                 <div class="small">
-                                    <i class="fa fa-check-circle text-success mr-1"></i>
+                                    <i class="fa fa-file-pdf-o text-danger mr-1"></i>
                                     <strong>Saved Profile CV (Ready)</strong>
                                 </div>
-                                <a href="{{ request.user.applicant_profile.cv_file.url }}" target="_blank" class="btn btn-xs btn-outline-danger">Preview</a>
+                                <a href="{{ applicant_profile.cv_file.url }}" target="_blank" class="btn btn-xs btn-outline-info font-weight-bold">
+                                    <i class="fa fa-eye mr-1"></i> Preview Saved CV
+                                </a>
                             </div>
+                            <small class="text-muted d-block mb-2">Or attach a different/updated CV for this vacancy (PDF/DOCX):</small>
+                            <input type="file" name="cv" class="form-control-file border p-2 rounded bg-white" accept=".pdf,.doc,.docx">
                         {% elif request.user.resume_cvs.exists %}
-                            <div class="p-2 mb-2 bg-light rounded border d-flex align-items-center justify-content-between">
+                            <div class="p-2 mb-2 bg-white rounded border d-flex align-items-center justify-content-between">
                                 <div class="small">
                                     <i class="fa fa-id-card text-primary mr-1"></i>
-                                    <strong>Built-in CV Builder Resume</strong>
+                                    <strong>Built-in CV Builder Resume (Ready)</strong>
                                 </div>
-                                <span class="badge badge-info">Auto-Attached</span>
+                                <span class="badge badge-success">Auto-Attached</span>
                             </div>
+                            <small class="text-muted d-block mb-2">Or attach a separate CV file for this vacancy:</small>
+                            <input type="file" name="cv" class="form-control-file border p-2 rounded bg-white" accept=".pdf,.doc,.docx">
+                        {% else %}
+                            <div class="p-3 mb-2 border rounded small" style="background-color: #fef2f2; border-color: #fecaca !important; color: #991b1b;">
+                                <i class="fa fa-exclamation-circle mr-1"></i> <strong>No CV on File:</strong> Please upload your Resume/CV (PDF or DOCX) below to submit this application.
+                            </div>
+                            <input type="file" name="cv" id="applicationCvInput" required class="form-control-file border p-2 rounded bg-white" accept=".pdf,.doc,.docx" style="border-color: #ef4444 !important;">
+                            <small class="text-muted mt-1 d-block">
+                                Don't have a CV ready? <a href="{% url 'resume_cv:auto_builder' %}" target="_blank" class="font-weight-bold text-primary">Build a professional CV in 2 minutes &rarr;</a>
+                            </small>
                         {% endif %}
-
-                        <label class="small text-muted mt-2 d-block">Or upload a new custom CV for this job (PDF/DOCX):</label>
-                        <input type="file" name="cv" class="form-control-file border p-2 rounded" accept=".pdf,.doc,.docx">
                     </div>
 
-                    <!-- Optional Note to Hiring Manager -->
+                    <!-- Cover Note -->
                     <div class="form-group mb-0">
-                        <label class="small font-weight-bold text-dark">Short Cover Note / Message to {{ job.company_name }} (Optional):</label>
-                        <textarea name="comment" class="form-control" rows="3" placeholder="Briefly state why you're a great fit for this role..."></textarea>
+                        <label class="font-weight-bold small text-dark">Cover Note / Message to {{ job.company_name }} (Optional):</label>
+                        <textarea name="comment" class="form-control" rows="2" placeholder="Briefly state why you're a strong candidate for this position..." style="border-radius: 8px;"></textarea>
                     </div>
                 </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary font-weight-bold px-4">
-                        <i class="fa fa-paper-plane mr-1"></i> Submit Application Now
-                    </button>
+
+                <div class="modal-footer bg-light d-flex justify-content-between align-items-center">
+                    <div>
+                        {% if not is_ready_to_apply %}
+                            <a href="{% url 'accounts:employee-profile-update' %}?next={{ request.path }}" class="btn btn-warning btn-sm font-weight-bold shadow-sm">
+                                <i class="fa fa-pencil mr-1"></i> Edit Profile & Complete Info
+                            </a>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-secondary font-weight-bold" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary font-weight-bold px-4 shadow-sm" id="applySubmitBtn">
+                            <i class="fa fa-paper-plane mr-1"></i> Submit Application Now
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>

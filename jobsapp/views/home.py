@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import Http404, HttpResponseNotAllowed, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic import CreateView, DetailView, ListView, TemplateView
@@ -11,7 +11,10 @@ from django.views.generic import CreateView, DetailView, ListView, TemplateView
 from categories.models import Category
 from jobsapp.decorators import user_is_employee
 from jobsapp.forms import ApplyJobForm
-from jobsapp.models import Applicant, ETHIOPIAN_LOCATIONS, EXPERIENCE_LEVEL_CHOICES, Favorite, Job, JobAlert, WORK_MODE_CHOICES
+from jobsapp.models import (
+    Applicant, ApplicantProfile, ETHIOPIAN_LOCATIONS, EXPERIENCE_LEVEL_CHOICES,
+    Favorite, Job, JobAlert, WORK_MODE_CHOICES
+)
 from jobsapp.utils.notifications import create_notification, send_event_email
 from jobsapp.utils.recommendation import calculate_job_match_score, get_recommended_jobs_for_user, invalidate_recommendation_cache
 
@@ -159,6 +162,68 @@ class JobDetailsView(DetailView):
             if user.is_employee:
                 context["match_score"] = calculate_job_match_score(user, job)
 
+                profile, _ = ApplicantProfile.objects.get_or_create(user=user)
+                context["applicant_profile"] = profile
+
+                has_cv = bool(
+                    profile.cv_file
+                    or (hasattr(user, "resume_cvs") and user.resume_cvs.exists())
+                )
+                has_phone = bool(user.phone_number and user.phone_number.strip())
+                has_name = bool(user.first_name and user.first_name.strip() and user.last_name and user.last_name.strip())
+                has_title = bool(profile.title and profile.title.strip())
+                has_skills = bool(hasattr(user, "skills") and user.skills.exists())
+
+                missing_reqs = []
+                if not has_name:
+                    missing_reqs.append({
+                        "id": "name",
+                        "title": "Full Name",
+                        "desc": "Please provide your first and last name so employers know who is applying.",
+                        "fix_url": reverse("accounts:employee-profile-update"),
+                        "fix_text": "Add Name"
+                    })
+                if not has_phone:
+                    missing_reqs.append({
+                        "id": "phone",
+                        "title": "Contact Phone Number",
+                        "desc": "Employers require a contact phone number to reach you for interview invitations.",
+                        "fix_url": reverse("accounts:employee-profile-update"),
+                        "fix_text": "Add Phone"
+                    })
+                if not has_title:
+                    missing_reqs.append({
+                        "id": "title",
+                        "title": "Professional Title / Profession",
+                        "desc": "Specify your profession or career headline (e.g. Software Engineer, Accountant, Sales Manager).",
+                        "fix_url": reverse("accounts:employee-profile-update"),
+                        "fix_text": "Add Title"
+                    })
+                if not has_skills:
+                    missing_reqs.append({
+                        "id": "skills",
+                        "title": "Key Skills",
+                        "desc": "Add your primary skills so employers can verify your qualifications for the role.",
+                        "fix_url": reverse("jobs:applicant-dashboard") + "#skillsSection",
+                        "fix_text": "Add Skills"
+                    })
+                if not has_cv:
+                    missing_reqs.append({
+                        "id": "cv",
+                        "title": "Resume / CV Document",
+                        "desc": "Employers require a Resume/CV. You can attach one below or generate one with Auto CV Builder.",
+                        "fix_url": reverse("resume_cv:auto_builder"),
+                        "fix_text": "Build CV Online"
+                    })
+
+                context["has_cv"] = has_cv
+                context["has_phone"] = has_phone
+                context["has_name"] = has_name
+                context["has_title"] = has_title
+                context["has_skills"] = has_skills
+                context["missing_requirements"] = missing_reqs
+                context["is_ready_to_apply"] = len(missing_reqs) == 0
+
         return context
 
 
@@ -190,25 +255,62 @@ class ApplyJobView(CreateView):
                 messages.info(request, "You have already applied for this job.")
                 return HttpResponseRedirect(reverse_lazy("jobs:jobs-detail", kwargs={"id": job.id}))
 
+            # Validate Required Applicant Information
+            user = request.user
+            profile, _ = ApplicantProfile.objects.get_or_create(user=user)
+            uploaded_cv = request.FILES.get("cv")
+            has_cv = bool(
+                uploaded_cv
+                or profile.cv_file
+                or (hasattr(user, "resume_cvs") and user.resume_cvs.exists())
+            )
+            has_phone = bool(user.phone_number and user.phone_number.strip())
+            has_name = bool(user.first_name and user.first_name.strip() and user.last_name and user.last_name.strip())
+            has_title = bool(profile.title and profile.title.strip())
+            has_skills = bool(hasattr(user, "skills") and user.skills.exists())
+
+            missing_fields = []
+            if not has_name:
+                missing_fields.append("Full Name (First and Last name)")
+            if not has_phone:
+                missing_fields.append("Phone Number")
+            if not has_title:
+                missing_fields.append("Professional Title / Profession")
+            if not has_skills:
+                missing_fields.append("Key Skills (at least 1 skill)")
+            if not has_cv:
+                missing_fields.append("Resume / CV Document (Please attach your CV)")
+
+            if missing_fields:
+                items_str = ", ".join(missing_fields)
+                messages.error(
+                    request,
+                    f"⚠️ Application Incomplete: To apply for '{job.title}', you must fulfill the required information first: {items_str}. Please complete this information in your profile or upload your CV."
+                )
+                return HttpResponseRedirect(reverse_lazy("jobs:jobs-detail", kwargs={"id": job.id}))
+
             # Create application safely
             comment_text = request.POST.get("comment", "").strip()
             applicant, created = Applicant.objects.get_or_create(
-                user=request.user,
+                user=user,
                 job=job,
                 defaults={"comment": comment_text}
             )
             if not created and comment_text:
                 applicant.comment = comment_text
 
-            if "cv" in request.FILES:
-                applicant.cv = request.FILES["cv"]
+            if uploaded_cv:
+                applicant.cv = uploaded_cv
+                if not profile.cv_file:
+                    profile.cv_file = uploaded_cv
+                    profile.save(update_fields=["cv_file"])
             elif not applicant.cv:
                 # Auto-link candidate's existing uploaded profile CV
-                if hasattr(request.user, "applicant_profile") and request.user.applicant_profile.cv_file:
-                    applicant.cv = request.user.applicant_profile.cv_file
+                if profile.cv_file:
+                    applicant.cv = profile.cv_file
 
             applicant.save()
-            invalidate_recommendation_cache(request.user.id)
+            invalidate_recommendation_cache(user.id)
 
             messages.success(request, f"🎉 Successfully applied for '{job.title}'!")
 

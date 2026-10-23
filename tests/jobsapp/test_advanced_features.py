@@ -229,3 +229,48 @@ class AdvancedPortalFeaturesTestCase(TestCase):
             approve_job(req, new_job.id)
             self.assertFalse(mock_broadcast.called, "broadcast_job_to_telegram should not be called automatically on approve_job!")
 
+    def test_job_application_requires_complete_profile_and_cv(self):
+        """Test that applying for a job verifies all required information (CV, phone, name, title, skills) before allowing submission."""
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from jobsapp.models import Applicant, ApplicantProfile, CandidateSkill
+
+        # Create incomplete candidate (missing phone, title, skills, CV)
+        incomplete_user = User.objects.create_user(
+            email="incomplete.applicant@test.com",
+            password="StrongPassword123!#",
+            first_name="",
+            last_name="",
+            role="employee"
+        )
+        self.client.login(email="incomplete.applicant@test.com", password="StrongPassword123!#")
+
+        apply_url = reverse("jobs:apply-job", kwargs={"job_id": self.job.id})
+        res = self.client.post(apply_url, {})
+        self.assertEqual(res.status_code, 302)
+        # Verify no applicant record was created
+        self.assertFalse(Applicant.objects.filter(user=incomplete_user, job=self.job).exists())
+
+        # Now fulfill user details
+        incomplete_user.first_name = "Almaz"
+        incomplete_user.last_name = "Ayana"
+        incomplete_user.phone_number = "+251911002233"
+        incomplete_user.save()
+
+        profile, _ = ApplicantProfile.objects.get_or_create(user=incomplete_user)
+        profile.title = "Software Engineer"
+        profile.save()
+
+        CandidateSkill.objects.create(user=incomplete_user, name="Python", level="expert")
+
+        # Now apply with attached CV file
+        fake_cv = SimpleUploadedFile("my_resume.pdf", b"%PDF-1.4 test resume content", content_type="application/pdf")
+        res_success = self.client.post(apply_url, {"cv": fake_cv, "comment": "I meet all criteria!"})
+        self.assertEqual(res_success.status_code, 302)
+
+        # Verify applicant record was created and CV attached
+        app = Applicant.objects.filter(user=incomplete_user, job=self.job).first()
+        self.assertIsNotNone(app)
+        self.assertTrue(bool(app.cv))
+        self.assertEqual(app.comment, "I meet all criteria!")
+
+
