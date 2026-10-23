@@ -37,6 +37,24 @@
     <section>
         <div class="container">
             <h3 class="heading">{% trans "We have found" %} <span class="accent">{{ total_jobs }}</span> {% trans "jobs" %}</h3>
+
+            {% if request.user.is_authenticated and request.user.role == 'employee' %}
+                <div class="mb-4 p-3 bg-white border rounded shadow-sm d-flex justify-content-between align-items-center flex-wrap" style="border-left: 4px solid #2563eb !important; border-radius: 12px;">
+                    <div class="d-flex align-items-center mb-2 mb-md-0">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mr-3 font-weight-bold" style="width: 40px; height: 40px; min-width: 40px;">
+                            <i class="fa fa-magic"></i>
+                        </div>
+                        <div>
+                            <strong class="text-dark d-block">Looking for jobs tailored specifically to your profile?</strong>
+                            <small class="text-muted">Our AI matches your registered skills, education, and career background against all active vacancies.</small>
+                        </div>
+                    </div>
+                    <a href="{% url 'jobs:employee-recommended-jobs' %}" class="btn btn-sm btn-primary font-weight-bold shadow-sm px-3" style="border-radius: 20px;">
+                        <i class="fa fa-bolt mr-1"></i> View My AI Recommended Jobs
+                    </a>
+                </div>
+            {% endif %}
+
             {% for job in jobs %}
                 <div class="job-listing mb-3 p-3 bg-white rounded shadow-sm border">
                     <div class="row align-items-center">

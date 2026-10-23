@@ -100,7 +100,7 @@
                             {% for msg in active_messages %}
                                 {% if msg.sender == request.user %}
                                     <!-- Sent by me -->
-                                    <div class="align-self-end text-right" style="max-width: 75%;">
+                                    <div class="align-self-end text-right chat-msg-bubble" data-msg-id="{{ msg.id }}" style="max-width: 75%;">
                                         <div class="p-3 text-white rounded shadow-sm text-left" style="background: #2563eb; border-radius: 14px 14px 2px 14px !important; font-size: 0.92rem; line-height: 1.5;">
                                             {{ msg.message|linebreaksbr }}
                                         </div>
@@ -110,7 +110,7 @@
                                     </div>
                                 {% else %}
                                     <!-- Received from other party -->
-                                    <div class="align-self-start text-left" style="max-width: 75%;">
+                                    <div class="align-self-start text-left chat-msg-bubble" data-msg-id="{{ msg.id }}" style="max-width: 75%;">
                                         <div class="p-3 bg-white text-dark rounded shadow-sm border" style="border-radius: 14px 14px 14px 2px !important; font-size: 0.92rem; line-height: 1.5;">
                                             {{ msg.message|linebreaksbr }}
                                         </div>
@@ -120,7 +120,7 @@
                                     </div>
                                 {% endif %}
                             {% empty %}
-                                <div class="text-center py-5 text-muted my-auto">
+                                <div class="text-center py-5 text-muted my-auto" id="emptyThreadPlaceholder">
                                     <i class="fa fa-comments-o text-muted mb-2" style="font-size: 2.5rem;"></i>
                                     <p class="mb-0">No messages in this conversation yet. Send the first message below!</p>
                                 </div>
@@ -133,9 +133,9 @@
                                 {% csrf_token %}
                                 <input type="hidden" name="conversation_id" value="{{ active_conversation.id }}">
                                 <div class="input-group">
-                                    <textarea name="message" class="form-control" rows="2" required placeholder="Type your message to {{ active_other_user.first_name|default:'recipient' }}... (Press Shift+Enter for new line)" style="resize: none; border-radius: 10px 0 0 10px;"></textarea>
+                                    <textarea name="message" id="chatMessageInput" class="form-control" rows="2" required placeholder="Type your message to {{ active_other_user.first_name|default:'recipient' }}... (Press Enter to send, Shift+Enter for new line)" style="resize: none; border-radius: 10px 0 0 10px;"></textarea>
                                     <div class="input-group-append">
-                                        <button type="submit" class="btn btn-primary font-weight-bold px-4" style="border-radius: 0 10px 10px 0;">
+                                        <button type="submit" id="chatSendBtn" class="btn btn-primary font-weight-bold px-4" style="border-radius: 0 10px 10px 0;">
                                             <i class="fa fa-paper-plane mr-1"></i> Send
                                         </button>
                                     </div>
@@ -227,12 +227,152 @@
 </div>
 
 <script>
-    // Auto-scroll chat thread to bottom on page load
     document.addEventListener("DOMContentLoaded", function() {
         var thread = document.getElementById("chatThread");
-        if (thread) {
-            thread.scrollTop = thread.scrollHeight;
+        var chatForm = document.getElementById("chatForm");
+        var chatInput = document.getElementById("chatMessageInput");
+        var sendBtn = document.getElementById("chatSendBtn");
+
+        // Scroll to bottom helper
+        function scrollToBottom() {
+            if (thread) {
+                thread.scrollTop = thread.scrollHeight;
+            }
         }
+        scrollToBottom();
+
+        // Track highest message ID present in thread
+        var maxMsgId = 0;
+        function updateMaxMsgId() {
+            var bubbles = document.querySelectorAll(".chat-msg-bubble");
+            bubbles.forEach(function(b) {
+                var mid = parseInt(b.getAttribute("data-msg-id"), 10);
+                if (!isNaN(mid) && mid > maxMsgId) {
+                    maxMsgId = mid;
+                }
+            });
+        }
+        updateMaxMsgId();
+
+        // Safe HTML escape helper
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;")
+                .replace(/\n/g, "<br>");
+        }
+
+        // Append message bubble dynamically
+        function appendMessageBubble(msgData) {
+            var placeholder = document.getElementById("emptyThreadPlaceholder");
+            if (placeholder) {
+                placeholder.remove();
+            }
+
+            // Check if already rendered
+            if (document.querySelector('.chat-msg-bubble[data-msg-id="' + msgData.id + '"]')) {
+                return;
+            }
+
+            var bubbleWrapper = document.createElement("div");
+            bubbleWrapper.className = (msgData.is_me ? "align-self-end text-right" : "align-self-start text-left") + " chat-msg-bubble";
+            bubbleWrapper.setAttribute("data-msg-id", msgData.id);
+            bubbleWrapper.style.maxWidth = "75%";
+
+            var safeBody = escapeHtml(msgData.message);
+            var innerHtml = "";
+
+            if (msgData.is_me) {
+                innerHtml = '<div class="p-3 text-white rounded shadow-sm text-left" style="background: #2563eb; border-radius: 14px 14px 2px 14px !important; font-size: 0.92rem; line-height: 1.5;">' +
+                    safeBody +
+                    '</div>' +
+                    '<small class="text-muted d-block mt-1 pr-1" style="font-size: 0.72rem;">' +
+                    escapeHtml(msgData.created_at) + ' <i class="fa fa-check text-primary"></i>' +
+                    '</small>';
+            } else {
+                innerHtml = '<div class="p-3 bg-white text-dark rounded shadow-sm border" style="border-radius: 14px 14px 14px 2px !important; font-size: 0.92rem; line-height: 1.5;">' +
+                    safeBody +
+                    '</div>' +
+                    '<small class="text-muted d-block mt-1 pl-1" style="font-size: 0.72rem;">' +
+                    escapeHtml(msgData.sender_name) + ' &bull; ' + escapeHtml(msgData.created_at) +
+                    '</small>';
+            }
+
+            bubbleWrapper.innerHTML = innerHtml;
+            thread.appendChild(bubbleWrapper);
+            if (msgData.id > maxMsgId) {
+                maxMsgId = msgData.id;
+            }
+            scrollToBottom();
+        }
+
+        {% if active_conversation %}
+        // 1. Instant AJAX Form Submit without page reload
+        if (chatForm && chatInput) {
+            chatForm.addEventListener("submit", function(e) {
+                e.preventDefault();
+                var msgText = chatInput.value.trim();
+                if (!msgText) return;
+
+                var formData = new FormData(chatForm);
+                chatInput.value = "";
+                chatInput.disabled = true;
+                if (sendBtn) sendBtn.disabled = true;
+
+                fetch("{% url 'jobs:inbox' %}", {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    chatInput.disabled = false;
+                    if (sendBtn) sendBtn.disabled = false;
+                    chatInput.focus();
+
+                    if (data.status === "success") {
+                        appendMessageBubble(data);
+                    }
+                })
+                .catch(function(err) {
+                    console.error("Chat send error:", err);
+                    chatInput.disabled = false;
+                    if (sendBtn) sendBtn.disabled = false;
+                    chatInput.value = msgText;
+                });
+            });
+
+            // Enter key sends, Shift+Enter for newline
+            chatInput.addEventListener("keydown", function(e) {
+                if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    chatForm.dispatchEvent(new Event("submit"));
+                }
+            });
+        }
+
+        // 2. Real-time background auto-fetch polling (every 3.5 seconds)
+        var pollUrl = "{% url 'jobs:poll-messages' active_conversation.id %}";
+        setInterval(function() {
+            fetch(pollUrl + "?last_id=" + maxMsgId, {
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.status === "success" && data.messages && data.messages.length > 0) {
+                    data.messages.forEach(function(msg) {
+                        appendMessageBubble(msg);
+                    });
+                }
+            })
+            .catch(function(e) { /* ignore transient background polling errors */ });
+        }, 3500);
+        {% endif %}
     });
 </script>
 {% endblock %}

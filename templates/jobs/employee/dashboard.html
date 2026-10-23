@@ -118,28 +118,175 @@
                 </div>
             </div>
 
-            <!-- Recommended Jobs Side Column -->
-            <div class="col-lg-4">
-                <div class="card border-0 shadow-sm p-3 mb-4">
-                    <h5 class="card-title text-primary"><i class="fa fa-magic"></i> Recommended for You</h5>
-                    <hr class="mt-2 mb-3">
+            <!-- Profile & Quick Skills Summary Column -->
+            <div class="col-lg-4 mb-4">
+                <div class="card border-0 shadow-sm p-4 mb-4" style="border-radius: 14px;">
+                    <h5 class="card-title text-dark font-weight-bold mb-3">
+                        <i class="fa fa-user-circle text-primary mr-1"></i> Your Profile & Skills
+                    </h5>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Target Career Title:</small>
+                        <strong class="text-dark">{{ profile.title|default:"Not specified yet" }}</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Preferred Location:</small>
+                        <strong class="text-dark"><i class="fa fa-map-marker text-danger mr-1"></i>{{ profile.location|default:"Addis Ababa" }}</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block mb-1">Registered Skills ({{ request.user.skills.count }}):</small>
+                        <div class="d-flex flex-wrap" style="gap: 4px;">
+                            {% for sk in request.user.skills.all|slice:":8" %}
+                                <span class="badge text-primary" style="background: #eff6ff; border: 1px solid #bfdbfe; font-size: 0.72rem;">{{ sk.name }}</span>
+                            {% empty %}
+                                <small class="text-muted font-italic">No skills added yet.</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <a href="{% url 'accounts:employee-profile-update' %}" class="btn btn-outline-primary btn-sm btn-block font-weight-bold mt-2" style="border-radius: 8px;">
+                        <i class="fa fa-plus-circle mr-1"></i> Update Skills & CV
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dedicated AI Recommended Jobs For You Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm p-4" style="border-radius: 16px;">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap mb-4" style="gap: 12px;">
+                        <div>
+                            <span class="badge badge-primary px-3 py-1 font-weight-bold mb-1" style="border-radius: 20px; font-size: 0.78rem; background: #2563eb;">
+                                <i class="fa fa-bolt mr-1"></i> AI-Powered Matching
+                            </span>
+                            <h3 class="font-weight-bold text-dark mb-1">
+                                Recommended Jobs For You
+                            </h3>
+                            <p class="text-muted small mb-0">
+                                Ranked using TF-IDF content similarity, verified skill overlap, location preferences, and career discipline.
+                            </p>
+                        </div>
+                        <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                            <a href="{% url 'accounts:employee-profile-update' %}" class="btn btn-sm btn-outline-secondary font-weight-bold" style="border-radius: 20px;">
+                                <i class="fa fa-sliders mr-1"></i> Improve Match
+                            </a>
+                            <a href="{% url 'jobs:employee-recommended-jobs' %}" class="btn btn-sm btn-primary font-weight-bold shadow-sm" style="border-radius: 20px;">
+                                View All Recommendations ({{ recommended_jobs|length }}+) <i class="fa fa-arrow-right ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+
                     {% if recommended_jobs %}
+                    <div class="row">
                         {% for item in recommended_jobs %}
-                        <div class="mb-3 pb-2 border-bottom">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <a href="{% url 'jobs:jobs-detail' item.job.id %}" class="font-weight-bold text-dark text-truncate" style="max-width: 180px;">{{ item.job.title }}</a>
-                                <span class="badge badge-success">{{ item.match_score }}% Match</span>
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 border bg-white shadow-none p-3 d-flex flex-column justify-content-between" style="border-radius: 12px; transition: transform 0.15s, box-shadow 0.15s;">
+                                <div>
+                                    <!-- Header: Company & Match Badge -->
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center mr-2 font-weight-bold text-primary" style="width: 38px; height: 38px; font-size: 0.9rem;">
+                                                {{ item.job.company_name|slice:":2"|upper|default:"JO" }}
+                                            </div>
+                                            <div>
+                                                <small class="text-muted text-uppercase d-block font-weight-bold" style="font-size: 0.68rem; letter-spacing: 0.4px;">{{ item.job.company_name }}</small>
+                                                <span class="text-muted small" style="font-size: 0.75rem;">
+                                                    <i class="fa fa-map-marker text-danger mr-1"></i>{{ item.job.location }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            {% if item.match_score >= 80 %}
+                                                <span class="badge badge-success px-2 py-1 font-weight-bold" style="border-radius: 10px; font-size: 0.78rem;">
+                                                    <i class="fa fa-bolt mr-1"></i>{{ item.match_score }}% Match
+                                                </span>
+                                            {% elif item.match_score >= 65 %}
+                                                <span class="badge badge-primary px-2 py-1 font-weight-bold" style="border-radius: 10px; font-size: 0.78rem; background: #2563eb;">
+                                                    <i class="fa fa-check mr-1"></i>{{ item.match_score }}% Match
+                                                </span>
+                                            {% else %}
+                                                <span class="badge badge-info px-2 py-1 font-weight-bold" style="border-radius: 10px; font-size: 0.78rem;">
+                                                    {{ item.match_score }}% Match
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Job Title -->
+                                    <h6 class="font-weight-bold mb-2">
+                                        <a href="{% url 'jobs:jobs-detail' item.job.id %}" class="text-dark text-decoration-none">
+                                            {{ item.job.title }}
+                                        </a>
+                                    </h6>
+
+                                    <!-- Tags & Work Mode -->
+                                    <div class="d-flex flex-wrap mb-2" style="gap: 4px;">
+                                        {% if item.job.type == '1' %}
+                                            <span class="badge badge-light border text-dark" style="font-size: 0.7rem;">Full Time</span>
+                                        {% elif item.job.type == '2' %}
+                                            <span class="badge badge-light border text-dark" style="font-size: 0.7rem;">Part Time</span>
+                                        {% elif item.job.type == '3' %}
+                                            <span class="badge badge-light border text-dark" style="font-size: 0.7rem;">Internship</span>
+                                        {% endif %}
+
+                                        {% if item.job.work_mode == 'remote' %}
+                                            <span class="badge badge-success text-success border border-success" style="background: #ecfdf5; font-size: 0.7rem;">Remote</span>
+                                        {% endif %}
+
+                                        {% if item.job.category %}
+                                            <span class="badge badge-light border text-muted" style="font-size: 0.7rem;">{{ item.job.category|truncatechars:18 }}</span>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Matched Skills -->
+                                    {% if item.matched_skills %}
+                                        <div class="mb-2">
+                                            <div class="d-flex flex-wrap" style="gap: 3px;">
+                                                {% for sk in item.matched_skills %}
+                                                    <span class="badge text-primary" style="background: #eff6ff; border: 1px solid #bfdbfe; font-size: 0.68rem;">
+                                                        <i class="fa fa-check mr-1"></i>{{ sk }}
+                                                    </span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Footer: Dates & Actions -->
+                                <div class="border-top pt-2 mt-2">
+                                    <div class="d-flex justify-content-between align-items-center text-muted mb-2" style="font-size: 0.72rem;">
+                                        <span><i class="fa fa-clock-o mr-1"></i>{{ item.job.created_at|date:"M d, Y" }}</span>
+                                        <span><i class="fa fa-calendar-times-o mr-1"></i>Deadline: {{ item.job.last_date|date:"M d, Y" }}</span>
+                                    </div>
+                                    <div class="row no-gutters" style="gap: 6px;">
+                                        <div class="col">
+                                            <a href="{% url 'jobs:jobs-detail' item.job.id %}" class="btn btn-outline-primary btn-sm btn-block font-weight-bold" style="border-radius: 6px; font-size: 0.8rem;">
+                                                View Details
+                                            </a>
+                                        </div>
+                                        <div class="col">
+                                            <a href="{% url 'jobs:jobs-detail' item.job.id %}#applySection" class="btn btn-primary btn-sm btn-block font-weight-bold" style="border-radius: 6px; font-size: 0.8rem;">
+                                                Apply Now
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <small class="text-muted d-block">{{ item.job.company_name }} | <i class="fa fa-map-marker"></i> {{ item.job.location }}</small>
                         </div>
                         {% endfor %}
+                    </div>
                     {% else %}
-                        <p class="text-muted small mb-0">No job recommendations found based on your current profile skills.</p>
+                    <div class="text-center py-4">
+                        <i class="fa fa-magic text-muted mb-2" style="font-size: 2rem;"></i>
+                        <h6 class="font-weight-bold text-dark">No job recommendations yet</h6>
+                        <p class="text-muted small mb-3">Add your skills, target title, and education to receive personalized job matches.</p>
+                        <a href="{% url 'accounts:employee-profile-update' %}" class="btn btn-sm btn-primary font-weight-bold px-3" style="border-radius: 20px;">
+                            <i class="fa fa-plus mr-1"></i> Complete Your Profile
+                        </a>
+                    </div>
                     {% endif %}
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- AI Resume Auto-Fill Modal -->
     <div class="modal fade" id="aiResumeModal" tabindex="-1" role="dialog" aria-hidden="true">

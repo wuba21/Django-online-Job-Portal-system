@@ -305,6 +305,9 @@
                                         <a href="{% url 'jobs:applicant-dashboard' %}" class="dropdown-item {% if url_name == 'applicant-dashboard' %}active{% endif %}">
                                             <i class="fa fa-tachometer mr-2"></i> {% trans "Dashboard" %}
                                         </a>
+                                        <a href="{% url 'jobs:employee-recommended-jobs' %}" class="dropdown-item {% if url_name == 'employee-recommended-jobs' or url_name == 'recommended-jobs' %}active{% endif %}">
+                                            <i class="fa fa-bolt mr-2 text-warning"></i> {% trans "Recommended Jobs" %}
+                                        </a>
                                         <a href="{% url 'jobs:inbox' %}" class="dropdown-item {% if url_name == 'inbox' %}active{% endif %}">
                                             <i class="fa fa-comments mr-2 text-info"></i> {% trans "Messages" %}
                                         </a>

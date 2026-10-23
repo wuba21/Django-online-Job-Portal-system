@@ -13,7 +13,7 @@ from jobsapp.decorators import user_is_employee
 from jobsapp.forms import ApplyJobForm
 from jobsapp.models import Applicant, ETHIOPIAN_LOCATIONS, EXPERIENCE_LEVEL_CHOICES, Favorite, Job, JobAlert, WORK_MODE_CHOICES
 from jobsapp.utils.notifications import create_notification, send_event_email
-from jobsapp.utils.recommendation import calculate_job_match_score
+from jobsapp.utils.recommendation import calculate_job_match_score, invalidate_recommendation_cache
 
 
 class HomeView(ListView):
@@ -213,6 +213,7 @@ class ApplyJobView(CreateView):
                     applicant.cv = request.user.applicant_profile.cv_file
 
             applicant.save()
+            invalidate_recommendation_cache(request.user.id)
 
             messages.success(request, f"🎉 Successfully applied for '{job.title}'!")
 

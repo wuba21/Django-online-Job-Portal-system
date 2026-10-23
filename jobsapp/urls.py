@@ -13,7 +13,7 @@ from jobsapp.views.employee import (
     ApplicantDashboardView, EditProfileView, EmployeeMyJobsListView, FavoriteListView,
     add_education, add_experience, add_skill, delete_education, delete_experience, delete_skill,
     mark_all_notifications_as_read, mark_notification_as_read, notifications_view, withdraw_application,
-    ai_parse_resume
+    ai_parse_resume, RecommendedJobsListView
 )
 from jobsapp.views.employer import (
     ApplicantPerJobView, ApplicantsListView, AppliedApplicantView, DashboardView,
@@ -21,7 +21,7 @@ from jobsapp.views.employer import (
     export_applicants_csv, schedule_interview, quick_update_applicant_status
 )
 from jobsapp.views.company import CompanyDetailView, CompanyListView, add_company_review
-from jobsapp.views.messages import inbox_view, start_conversation
+from jobsapp.views.messages import inbox_view, start_conversation, poll_messages
 from jobsapp.views.telegram_webapp import telegram_webapp_view
 from jobsapp.views.home import (
     AboutUsView, ApplyJobView, HomeView, JobDetailsView, JobListView, SearchView, SalaryCalculatorView,
@@ -36,6 +36,7 @@ urlpatterns = [
     path("search/", SearchView.as_view(), name="search"),
     path("salary-calculator/", SalaryCalculatorView.as_view(), name="salary-calculator"),
     path("job-alert/subscribe/", create_job_alert, name="create-job-alert"),
+    path("recommended/", RecommendedJobsListView.as_view(), name="recommended-jobs"),
 
     # Public Company Directory & Reviews
     path("companies/", CompanyListView.as_view(), name="companies-list"),
@@ -46,6 +47,7 @@ urlpatterns = [
     path("messages/", inbox_view, name="inbox"),
     path("messages/start/", start_conversation, name="start-conversation-direct"),
     path("messages/start/<int:candidate_id>/", start_conversation, name="start-conversation"),
+    path("messages/poll/<int:conversation_id>/", poll_messages, name="poll-messages"),
 
     # AI Resume Auto-Profile Extractor
     path("profile/ai-parse-resume/", ai_parse_resume, name="ai-parse-resume"),
@@ -89,6 +91,7 @@ urlpatterns = [
         include(
             [
                 path("dashboard/", ApplicantDashboardView.as_view(), name="applicant-dashboard"),
+                path("recommended/", RecommendedJobsListView.as_view(), name="employee-recommended-jobs"),
                 path("my-applications", EmployeeMyJobsListView.as_view(), name="employee-my-applications"),
                 path("withdraw-application/<int:applicant_id>/", withdraw_application, name="withdraw-application"),
                 path("favorites", FavoriteListView.as_view(), name="employee-favorites"),

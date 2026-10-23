@@ -54,12 +54,14 @@ def inbox_view(request):
             )
 
             # AJAX response support
-            if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            if request.headers.get("x-requested-with") == "XMLHttpRequest" or request.POST.get("ajax"):
                 return JsonResponse({
                     "status": "success",
+                    "id": msg.id,
                     "sender": user.get_full_name() or user.email,
                     "message": msg.message,
-                    "created_at": msg.created_at.strftime("%H:%M"),
+                    "created_at": msg.created_at.strftime("%b %d, %H:%M"),
+                    "is_me": True,
                 })
 
             return redirect(f"/messages/?c={active_conversation.id}")
@@ -184,3 +186,42 @@ def start_conversation(request, candidate_id=None):
         )
 
     return redirect(f"/messages/?c={conv.id}")
+
+
+@login_required
+def poll_messages(request, conversation_id):
+    """
+    Real-time auto-fetch endpoint for chat messages without needing full page reloads.
+    Returns messages sent after `last_id`.
+    """
+    conv = get_object_or_404(Conversation, id=conversation_id)
+    user = request.user
+    if user != conv.employer and user != conv.candidate and not user.is_staff:
+        return JsonResponse({"error": "unauthorized"}, status=403)
+
+    last_id = int(request.GET.get("last_id", 0))
+    new_messages = (
+        conv.messages.filter(id__gt=last_id)
+        .select_related("sender")
+        .order_by("created_at")
+    )
+
+    # Mark unread incoming messages as read
+    conv.messages.filter(is_read=False).exclude(sender=user).update(is_read=True)
+
+    data = []
+    for m in new_messages:
+        data.append({
+            "id": m.id,
+            "sender_name": m.sender.get_full_name() or m.sender.email,
+            "sender_id": m.sender.id,
+            "message": m.message,
+            "created_at": m.created_at.strftime("%b %d, %H:%M"),
+            "is_me": m.sender == user,
+        })
+
+    return JsonResponse({
+        "status": "success",
+        "messages": data,
+        "count": len(data)
+    })

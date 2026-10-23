@@ -162,6 +162,11 @@ class JobCreateView(CreateView):
 
         if job.status == "approved":
             try:
+                from jobsapp.utils.telegram import broadcast_job_to_telegram
+                broadcast_job_to_telegram(job, request=self.request)
+            except Exception:
+                pass
+            try:
                 from jobsapp.views.home import send_job_alert_notifications
                 send_job_alert_notifications(job, request=self.request)
             except Exception:

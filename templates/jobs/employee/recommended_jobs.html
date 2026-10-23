@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% load static i18n humanize %}
+{% block title %}AI Recommended Jobs For You - Ethio Job Portal{% endblock %}
+
+{% block content %}
+<section class="bg-light-gray py-4">
+    <div class="container">
+        <!-- Header Banner -->
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; overflow: hidden; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+            <div class="card-body p-4 p-md-5 text-white">
+                <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap: 16px;">
+                    <div>
+                        <span class="badge badge-primary px-3 py-2 font-weight-bold mb-2" style="border-radius: 20px; font-size: 0.82rem; background: #3b82f6;">
+                            <i class="fa fa-magic mr-1"></i> AI Content-Based Match
+                        </span>
+                        <h2 class="font-weight-bold mb-1 text-white">Recommended Jobs For You</h2>
+                        <p class="text-light mb-0 small" style="opacity: 0.88; max-width: 650px;">
+                            Personalized job recommendations calculated using TF-IDF natural language matching, your registered skills, education, and career experience.
+                        </p>
+                    </div>
+                    <div class="d-flex align-items-center flex-wrap" style="gap: 10px;">
+                        <a href="{% url 'accounts:employee-profile-update' %}" class="btn btn-outline-light font-weight-bold" style="border-radius: 25px;">
+                            <i class="fa fa-sliders mr-1"></i> Improve Recommendations
+                        </a>
+                        <a href="{% url 'jobs:applicant-dashboard' %}" class="btn btn-light font-weight-bold text-dark" style="border-radius: 25px;">
+                            <i class="fa fa-dashboard mr-1"></i> Dashboard
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Profile Strength Callout -->
+                <div class="mt-4 pt-3 border-top border-secondary d-flex align-items-center justify-content-between flex-wrap" style="gap: 12px; font-size: 0.85rem;">
+                    <div>
+                        <span class="text-light mr-2">Target Title:</span>
+                        <strong class="text-white">{{ profile.title|default:"Job Seeker (Add title to boost accuracy)" }}</strong>
+                        <span class="mx-2 text-muted">|</span>
+                        <span class="text-light mr-2">Location:</span>
+                        <strong class="text-white">{{ profile.location|default:"Addis Ababa" }}</strong>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="text-light mr-2">Profile Completeness:</span>
+                        <div class="progress mr-2" style="width: 100px; height: 8px; border-radius: 4px; background: rgba(255,255,255,0.2);">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ completion_percentage }}%;"></div>
+                        </div>
+                        <span class="text-success font-weight-bold">{{ completion_percentage }}%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter / Filter Controls Bar -->
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+            <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap" style="gap: 12px;">
+                <div class="d-flex align-items-center">
+                    <strong class="text-dark mr-2"><i class="fa fa-filter text-primary mr-1"></i> Filter by Match Score:</strong>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <a href="?min_score=15" class="btn {% if min_score == '15' or not min_score %}btn-primary{% else %}btn-outline-secondary{% endif %}">All Matches</a>
+                        <a href="?min_score=60" class="btn {% if min_score == '60' %}btn-primary{% else %}btn-outline-secondary{% endif %}">60%+ Good</a>
+                        <a href="?min_score=75" class="btn {% if min_score == '75' %}btn-primary{% else %}btn-outline-secondary{% endif %}">75%+ Strong</a>
+                        <a href="?min_score=85" class="btn {% if min_score == '85' %}btn-primary{% else %}btn-outline-secondary{% endif %}">85%+ Top Match</a>
+                    </div>
+                </div>
+                <div class="small text-muted">
+                    Found <strong>{{ recommended_jobs|length }}</strong> matching active job vacancies
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommended Jobs Grid -->
+        <div class="row">
+            {% for item in recommended_jobs %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 border-0 shadow-sm job-rec-card" style="border-radius: 16px; transition: transform 0.2s, box-shadow 0.2s;">
+                        <div class="card-body p-4 d-flex flex-column justify-content-between">
+                            <div>
+                                <!-- Header & Match Badge -->
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center mr-2 font-weight-bold text-primary" style="width: 44px; height: 44px; font-size: 1rem;">
+                                            {{ item.job.company_name|slice:":2"|upper|default:"JO" }}
+                                        </div>
+                                        <div>
+                                            <small class="text-muted text-uppercase d-block font-weight-bold" style="font-size: 0.72rem; letter-spacing: 0.5px;">{{ item.job.company_name }}</small>
+                                            <span class="badge badge-light border text-muted" style="font-size: 0.7rem;">
+                                                <i class="fa fa-map-marker text-danger mr-1"></i>{{ item.job.location }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        {% if item.match_score >= 80 %}
+                                            <span class="badge badge-success px-2 py-1 font-weight-bold shadow-sm" style="border-radius: 12px; font-size: 0.82rem;">
+                                                <i class="fa fa-bolt mr-1"></i>{{ item.match_score }}% Match
+                                            </span>
+                                        {% elif item.match_score >= 65 %}
+                                            <span class="badge badge-primary px-2 py-1 font-weight-bold shadow-sm" style="border-radius: 12px; font-size: 0.82rem; background: #2563eb;">
+                                                <i class="fa fa-check-circle mr-1"></i>{{ item.match_score }}% Match
+                                            </span>
+                                        {% else %}
+                                            <span class="badge badge-info px-2 py-1 font-weight-bold" style="border-radius: 12px; font-size: 0.82rem;">
+                                                {{ item.match_score }}% Match
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Title -->
+                                <h5 class="font-weight-bold mt-2 mb-2">
+                                    <a href="{% url 'jobs:jobs-detail' item.job.id %}" class="text-dark text-decoration-none">
+                                        {{ item.job.title }}
+                                    </a>
+                                </h5>
+
+                                <!-- Badges & Details -->
+                                <div class="mb-3 d-flex flex-wrap" style="gap: 4px;">
+                                    {% if item.job.type == '1' %}
+                                        <span class="badge badge-light border text-dark">Full Time</span>
+                                    {% elif item.job.type == '2' %}
+                                        <span class="badge badge-light border text-dark">Part Time</span>
+                                    {% elif item.job.type == '3' %}
+                                        <span class="badge badge-light border text-dark">Internship</span>
+                                    {% endif %}
+
+                                    {% if item.job.work_mode == 'remote' %}
+                                        <span class="badge badge-success-light text-success border border-success" style="background: #ecfdf5;">Remote</span>
+                                    {% elif item.job.work_mode == 'hybrid' %}
+                                        <span class="badge badge-warning-light text-warning border border-warning" style="background: #fffbeb;">Hybrid</span>
+                                    {% endif %}
+
+                                    {% if item.job.category %}
+                                        <span class="badge badge-light border text-muted">{{ item.job.category|truncatechars:20 }}</span>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Matching Skills Tags -->
+                                {% if item.matched_skills %}
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block mb-1 font-weight-bold" style="font-size: 0.72rem;">Matched Skills:</small>
+                                        <div class="d-flex flex-wrap" style="gap: 4px;">
+                                            {% for sk in item.matched_skills %}
+                                                <span class="badge text-primary" style="background: #eff6ff; border: 1px solid #bfdbfe; font-size: 0.72rem;">
+                                                    <i class="fa fa-check mr-1"></i>{{ sk }}
+                                                </span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                <!-- Description Snippet -->
+                                <p class="text-muted small mb-3" style="font-size: 0.82rem; line-height: 1.5;">
+                                    {{ item.job.description|striptags|truncatewords:20 }}
+                                </p>
+                            </div>
+
+                            <!-- Footer: Dates & Actions -->
+                            <div class="border-top pt-3 mt-2">
+                                <div class="d-flex justify-content-between align-items-center small text-muted mb-3" style="font-size: 0.75rem;">
+                                    <span><i class="fa fa-clock-o mr-1"></i>Posted {{ item.job.created_at|naturaltime }}</span>
+                                    <span><i class="fa fa-calendar-check-o mr-1"></i>Deadline: {{ item.job.last_date|date:"M d, Y" }}</span>
+                                </div>
+                                <div class="row no-gutters" style="gap: 8px;">
+                                    <div class="col">
+                                        <a href="{% url 'jobs:jobs-detail' item.job.id %}" class="btn btn-outline-primary btn-block btn-sm font-weight-bold" style="border-radius: 8px;">
+                                            <i class="fa fa-eye mr-1"></i> View Details
+                                        </a>
+                                    </div>
+                                    <div class="col">
+                                        <a href="{% url 'jobs:jobs-detail' item.job.id %}#applySection" class="btn btn-primary btn-block btn-sm font-weight-bold shadow-sm" style="border-radius: 8px;">
+                                            <i class="fa fa-paper-plane mr-1"></i> Apply Now
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 py-5 text-center">
+                    <div class="card border-0 shadow-sm p-5 mx-auto" style="max-width: 600px; border-radius: 16px;">
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                            <i class="fa fa-magic text-muted" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h4 class="font-weight-bold text-dark mb-2">No Matching Jobs Found</h4>
+                        <p class="text-muted small mb-4">
+                            We couldn't find active jobs matching your criteria at this threshold. Updating your profile title, skills, education, and work experience helps our AI recommendation engine find the best vacancies for you!
+                        </p>
+                        <div class="d-flex justify-content-center flex-wrap" style="gap: 10px;">
+                            <a href="{% url 'accounts:employee-profile-update' %}" class="btn btn-primary font-weight-bold px-4" style="border-radius: 25px;">
+                                <i class="fa fa-pencil mr-1"></i> Add Skills & Experience
+                            </a>
+                            <a href="{% url 'jobs:jobs' %}" class="btn btn-outline-secondary font-weight-bold px-4" style="border-radius: 25px;">
+                                <i class="fa fa-search mr-1"></i> Browse All Jobs
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<style>
+    .job-rec-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important;
+    }
+</style>
+{% endblock %}

@@ -16,7 +16,9 @@ from jobsapp.forms import (
 from jobsapp.models import (
     Applicant, ApplicantProfile, CandidateSkill, Education, Favorite, Job, Notification, WorkExperience
 )
-from jobsapp.utils.recommendation import calculate_job_match_score
+from jobsapp.utils.recommendation import (
+    calculate_job_match_score, get_recommended_jobs_for_user, invalidate_recommendation_cache
+)
 
 
 @method_decorator(login_required(login_url=reverse_lazy("accounts:login")), name="dispatch")
@@ -37,22 +39,8 @@ class ApplicantDashboardView(TemplateView):
         # Favorites
         favorites = Favorite.objects.select_related("job", "job__user").filter(user=user, soft_deleted=False)
 
-        # Pre-fetch user skills, title, and location once to avoid N+1 queries in the recommendation loop
-        user_skills = set(user.skills.values_list("name", flat=True)) if hasattr(user, "skills") else set()
-        user_title = getattr(profile, "title", "") or ""
-        user_location = getattr(profile, "location", "") or ""
-
-        # Job Recommendations with match scores
-        all_jobs = Job.objects.select_related("user", "company").prefetch_related("tags").filter(filled=False, status="approved")[:10]
-        recommended_jobs = []
-        for job in all_jobs:
-            score = calculate_job_match_score(
-                user, job, user_skills=user_skills, user_title=user_title, user_location=user_location
-            )
-            recommended_jobs.append({"job": job, "match_score": score})
-
-        # Sort recommendations by match score descending
-        recommended_jobs.sort(key=lambda x: x["match_score"], reverse=True)
+        # AI Job Recommendations using Content-Based TF-IDF & Cosine Similarity
+        recommended_jobs = get_recommended_jobs_for_user(user, limit=6)
 
         context["profile"] = profile
         context["completion_percentage"] = profile.completion_percentage
@@ -62,8 +50,36 @@ class ApplicantDashboardView(TemplateView):
         context["shortlisted_applications"] = applications.filter(status=2).count()
         context["accepted_applications"] = applications.filter(status=4).count()
         context["favorites_count"] = favorites.count()
-        context["recommended_jobs"] = recommended_jobs[:5]
+        context["recommended_jobs"] = recommended_jobs
         context["unread_notifications_count"] = Notification.objects.filter(user=user, is_read=False).count()
+        return context
+
+
+@method_decorator(login_required(login_url=reverse_lazy("accounts:login")), name="dispatch")
+@method_decorator(user_is_employee, name="dispatch")
+class RecommendedJobsListView(ListView):
+    """
+    Dedicated view for exploring all personalized AI recommended jobs with match scores and details.
+    """
+    template_name = "jobs/employee/recommended_jobs.html"
+    context_object_name = "recommended_jobs"
+    paginate_by = 12
+
+    def get_queryset(self):
+        user = self.request.user
+        try:
+            min_score = int(self.request.GET.get("min_score", 15))
+        except (ValueError, TypeError):
+            min_score = 15
+        return get_recommended_jobs_for_user(user, limit=60, min_score=min_score)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        profile, _ = ApplicantProfile.objects.get_or_create(user=self.request.user)
+        context["profile"] = profile
+        context["completion_percentage"] = profile.completion_percentage
+        context["min_score"] = self.request.GET.get("min_score", "15")
+        context["user_skills"] = self.request.user.skills.all() if hasattr(self.request.user, "skills") else []
         return context
 
 
@@ -122,6 +138,7 @@ class EditProfileView(UpdateView):
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             profile_form.save()
+            invalidate_recommendation_cache(user.id)
             messages.success(request, "Profile updated successfully.")
             return redirect("accounts:employee-profile-update")
         else:
@@ -142,6 +159,7 @@ def add_education(request):
             edu = form.save(commit=False)
             edu.user = request.user
             edu.save()
+            invalidate_recommendation_cache(request.user.id)
             messages.success(request, "Education added successfully.")
         else:
             institution = request.POST.get("institution", "").strip()
@@ -154,6 +172,7 @@ def add_education(request):
                     degree=degree,
                     field_of_study=field_of_study
                 )
+                invalidate_recommendation_cache(request.user.id)
                 messages.success(request, "Education added successfully.")
             else:
                 messages.error(request, "Please fill in Institution and Degree fields.")
@@ -165,6 +184,7 @@ def add_education(request):
 def delete_education(request, pk):
     edu = get_object_or_404(Education, pk=pk, user=request.user)
     edu.delete()
+    invalidate_recommendation_cache(request.user.id)
     messages.success(request, "Education deleted successfully.")
     return redirect("accounts:employee-profile-update")
 
@@ -178,6 +198,7 @@ def add_experience(request):
             exp = form.save(commit=False)
             exp.user = request.user
             exp.save()
+            invalidate_recommendation_cache(request.user.id)
             messages.success(request, "Work experience added successfully.")
         else:
             title = request.POST.get("title", "").strip()
@@ -190,6 +211,7 @@ def add_experience(request):
                     company=company,
                     description=description
                 )
+                invalidate_recommendation_cache(request.user.id)
                 messages.success(request, "Work experience added successfully.")
             else:
                 messages.error(request, "Please fill in Job Title and Company fields.")
@@ -201,6 +223,7 @@ def add_experience(request):
 def delete_experience(request, pk):
     exp = get_object_or_404(WorkExperience, pk=pk, user=request.user)
     exp.delete()
+    invalidate_recommendation_cache(request.user.id)
     messages.success(request, "Work experience deleted successfully.")
     return redirect("accounts:employee-profile-update")
 
@@ -217,6 +240,7 @@ def add_skill(request):
                 name=name,
                 defaults={"level": level}
             )
+            invalidate_recommendation_cache(request.user.id)
             messages.success(request, f"Skill '{name}' added successfully.")
         else:
             messages.error(request, "Please enter a valid skill name.")
@@ -228,6 +252,7 @@ def add_skill(request):
 def delete_skill(request, pk):
     skill = get_object_or_404(CandidateSkill, pk=pk, user=request.user)
     skill.delete()
+    invalidate_recommendation_cache(request.user.id)
     messages.success(request, "Skill deleted successfully.")
     return redirect("accounts:employee-profile-update")
 
@@ -239,6 +264,7 @@ def withdraw_application(request, applicant_id):
     if applicant.status == 1:  # Only pending
         job_title = applicant.job.title
         applicant.delete()
+        invalidate_recommendation_cache(request.user.id)
         messages.success(request, f"Your application for '{job_title}' has been withdrawn.")
     else:
         messages.error(request, "You can only withdraw applications that are pending.")
@@ -417,6 +443,7 @@ def ai_parse_resume(request):
                 profile.bio = lines[0][:450]
 
         profile.save()
+        invalidate_recommendation_cache(user.id)
 
         summary_msg = f"⚡ AI Profile Auto-Fill Complete! "
         details = []
