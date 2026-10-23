@@ -83,20 +83,61 @@ def inbox_view(request):
             "last_message": last_msg,
         })
 
+    # Available contacts for starting a new conversation
+    contacts = []
+    user_jobs = []
+    if user.role == "employer":
+        applied_candidates = list(
+            User.objects.filter(applicant__job__user=user)
+            .exclude(id=user.id)
+            .distinct()[:50]
+        )
+        if len(applied_candidates) < 15:
+            other_cands = list(
+                User.objects.filter(role="employee", is_active=True)
+                .exclude(id=user.id)
+                .exclude(id__in=[u.id for u in applied_candidates])[:30]
+            )
+            contacts = applied_candidates + other_cands
+        else:
+            contacts = applied_candidates
+        user_jobs = Job.objects.filter(user=user).order_by("-created_at")[:20]
+    else:
+        applied_employers = list(
+            User.objects.filter(job__applicants__user=user)
+            .exclude(id=user.id)
+            .distinct()[:50]
+        )
+        if len(applied_employers) < 15:
+            other_emps = list(
+                User.objects.filter(role="employer", is_active=True)
+                .exclude(id=user.id)
+                .exclude(id__in=[u.id for u in applied_employers])[:30]
+            )
+            contacts = applied_employers + other_emps
+        else:
+            contacts = applied_employers
+        user_jobs = Job.objects.filter(applicants__user=user).distinct()[:20]
+
     context = {
         "conversations": conversation_items,
         "active_conversation": active_conversation,
         "active_messages": active_messages,
         "active_other_user": active_conversation.get_other_user(user) if active_conversation else None,
+        "contacts": contacts,
+        "user_jobs": user_jobs,
     }
     return render(request, "jobs/messages/inbox.html", context)
 
 
 @login_required
-def start_conversation(request, candidate_id):
+def start_conversation(request, candidate_id=None):
     """
-    Opens or creates a conversation with a candidate (from Employer ATS or Candidate profile).
+    Opens or creates a conversation with a candidate/employer (from ATS, Job details, or Inbox modal).
     """
+    if not candidate_id:
+        candidate_id = request.POST.get("recipient_id") or request.GET.get("recipient_id")
+
     candidate = get_object_or_404(User, id=candidate_id)
     user = request.user
 
@@ -104,11 +145,17 @@ def start_conversation(request, candidate_id):
         messages.warning(request, "You cannot start a conversation with yourself.")
         return redirect("jobs:inbox")
 
-    job_id = request.GET.get("job_id")
-    job = get_object_or_404(Job, id=job_id) if job_id else None
+    job_id = request.POST.get("job_id") or request.GET.get("job_id")
+    job = Job.objects.filter(id=job_id).first() if job_id else None
 
-    # Determine employer vs candidate roles
-    if user.role == "employer":
+    # Determine employer vs candidate roles consistently
+    if user.role == "employer" and candidate.role != "employer":
+        employer = user
+        cand = candidate
+    elif candidate.role == "employer" and user.role != "employer":
+        employer = candidate
+        cand = user
+    elif user.id < candidate.id:
         employer = user
         cand = candidate
     else:
@@ -121,7 +168,7 @@ def start_conversation(request, candidate_id):
         job=job
     )
 
-    initial_msg = request.GET.get("intro")
+    initial_msg = (request.POST.get("message") or request.GET.get("intro") or "").strip()
     if initial_msg:
         ChatMessage.objects.create(
             conversation=conv,
@@ -129,5 +176,11 @@ def start_conversation(request, candidate_id):
             message=initial_msg
         )
         conv.save()
+        create_notification(
+            user=candidate,
+            title=f"💬 New message from {user.get_full_name() or user.email}",
+            message=initial_msg[:140],
+            link=f"/messages/?c={conv.id}"
+        )
 
     return redirect(f"/messages/?c={conv.id}")

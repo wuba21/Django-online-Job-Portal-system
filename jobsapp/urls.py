@@ -44,6 +44,7 @@ urlpatterns = [
 
     # Direct 2-Way Candidate <-> Employer Messaging
     path("messages/", inbox_view, name="inbox"),
+    path("messages/start/", start_conversation, name="start-conversation-direct"),
     path("messages/start/<int:candidate_id>/", start_conversation, name="start-conversation"),
 
     # AI Resume Auto-Profile Extractor
