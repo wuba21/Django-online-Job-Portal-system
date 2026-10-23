@@ -25,7 +25,7 @@ from jobsapp.views.messages import inbox_view, start_conversation, poll_messages
 from jobsapp.views.telegram_webapp import telegram_webapp_view
 from jobsapp.views.home import (
     AboutUsView, ApplyJobView, HomeView, JobDetailsView, JobListView, SearchView, SalaryCalculatorView,
-    create_job_alert, favorite
+    create_job_alert, favorite, verify_resume_api
 )
 
 app_name = "jobs"
@@ -36,6 +36,7 @@ urlpatterns = [
     path("search/", SearchView.as_view(), name="search"),
     path("salary-calculator/", SalaryCalculatorView.as_view(), name="salary-calculator"),
     path("job-alert/subscribe/", create_job_alert, name="create-job-alert"),
+    path("api/verify-resume/", verify_resume_api, name="verify-resume"),
     path("recommended/", RecommendedJobsListView.as_view(), name="recommended-jobs"),
 
     # Public Company Directory & Reviews

@@ -230,11 +230,11 @@ class AdvancedPortalFeaturesTestCase(TestCase):
             self.assertFalse(mock_broadcast.called, "broadcast_job_to_telegram should not be called automatically on approve_job!")
 
     def test_job_application_requires_complete_profile_and_cv(self):
-        """Test that applying for a job verifies all required information (CV, phone, name, title, skills) before allowing submission."""
+        """Test that applying for a job verifies all required information (name, phone, email, gender, location, title, experience, skills, CV) before allowing submission."""
         from django.core.files.uploadedfile import SimpleUploadedFile
-        from jobsapp.models import Applicant, ApplicantProfile, CandidateSkill
+        from jobsapp.models import Applicant, ApplicantProfile, CandidateSkill, WorkExperience
 
-        # Create incomplete candidate (missing phone, title, skills, CV)
+        # Create incomplete candidate (missing everything)
         incomplete_user = User.objects.create_user(
             email="incomplete.applicant@test.com",
             password="StrongPassword123!#",
@@ -250,20 +250,63 @@ class AdvancedPortalFeaturesTestCase(TestCase):
         # Verify no applicant record was created
         self.assertFalse(Applicant.objects.filter(user=incomplete_user, job=self.job).exists())
 
-        # Now fulfill user details
+        # Now fulfill ALL 8 required items
         incomplete_user.first_name = "Almaz"
         incomplete_user.last_name = "Ayana"
         incomplete_user.phone_number = "+251911002233"
+        incomplete_user.gender = "female"
         incomplete_user.save()
 
         profile, _ = ApplicantProfile.objects.get_or_create(user=incomplete_user)
         profile.title = "Software Engineer"
+        profile.location = "Addis Ababa"
         profile.save()
 
         CandidateSkill.objects.create(user=incomplete_user, name="Python", level="expert")
 
-        # Now apply with attached CV file
-        fake_cv = SimpleUploadedFile("my_resume.pdf", b"%PDF-1.4 test resume content", content_type="application/pdf")
+        # Add work experience
+        from datetime import date
+        WorkExperience.objects.create(
+            user=incomplete_user,
+            title="Junior Developer",
+            company="Tech Corp",
+            is_current=True,
+            start_date=date.today()
+        )
+
+        # Create a realistic CV content that passes AI verification
+        cv_content = b"""%PDF-1.4
+        ALMAZ AYANA
+        Software Engineer
+        Email: almaz.ayana@test.com
+        Phone: +251911002233
+        Address: Addis Ababa, Ethiopia
+
+        PROFESSIONAL SUMMARY
+        Experienced software engineer with expertise in Python, Django, and web development.
+        Strong background in building scalable applications and RESTful APIs.
+
+        WORK EXPERIENCE
+        Junior Developer at Tech Corp (2023 - Present)
+        - Developed and maintained web applications using Python and Django framework
+        - Implemented RESTful APIs for mobile application backend services
+        - Collaborated with cross-functional teams to deliver quality software solutions
+        - Participated in code reviews and improved code quality standards
+
+        EDUCATION
+        Bachelor of Science in Computer Science
+        Addis Ababa University, 2019-2023
+        Graduated with distinction in software engineering track
+
+        SKILLS
+        Python, Django, JavaScript, React, SQL, PostgreSQL, Git, REST API, Docker
+        Communication, Leadership, Project Management, Problem Solving
+
+        CERTIFICATIONS
+        AWS Certified Cloud Practitioner
+        Google IT Automation with Python Professional Certificate
+        """
+        fake_cv = SimpleUploadedFile("my_resume.pdf", cv_content, content_type="application/pdf")
         res_success = self.client.post(apply_url, {"cv": fake_cv, "comment": "I meet all criteria!"})
         self.assertEqual(res_success.status_code, 302)
 
@@ -272,5 +315,4 @@ class AdvancedPortalFeaturesTestCase(TestCase):
         self.assertIsNotNone(app)
         self.assertTrue(bool(app.cv))
         self.assertEqual(app.comment, "I meet all criteria!")
-
 

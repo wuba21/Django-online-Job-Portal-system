@@ -17,6 +17,9 @@ from jobsapp.models import (
 )
 from jobsapp.utils.notifications import create_notification, send_event_email
 from jobsapp.utils.recommendation import calculate_job_match_score, get_recommended_jobs_for_user, invalidate_recommendation_cache
+from jobsapp.utils.ai_resume_detector import extract_text_from_file, analyze_resume_authenticity
+from jobsapp.models import CandidateSkill, WorkExperience
+from django.views.decorators.http import require_POST
 
 
 class HomeView(ListView):
@@ -173,6 +176,10 @@ class JobDetailsView(DetailView):
                 has_name = bool(user.first_name and user.first_name.strip() and user.last_name and user.last_name.strip())
                 has_title = bool(profile.title and profile.title.strip())
                 has_skills = bool(hasattr(user, "skills") and user.skills.exists())
+                has_email = bool(user.email and user.email.strip())
+                has_gender = bool(user.gender and user.gender.strip())
+                has_location = bool(profile.location and profile.location.strip())
+                has_experience = bool(hasattr(user, "experiences") and user.experiences.exists())
 
                 missing_reqs = []
                 if not has_name:
@@ -191,6 +198,30 @@ class JobDetailsView(DetailView):
                         "fix_url": reverse("accounts:employee-profile-update"),
                         "fix_text": "Add Phone"
                     })
+                if not has_email:
+                    missing_reqs.append({
+                        "id": "email",
+                        "title": "Email Address",
+                        "desc": "A valid email address is required for communication.",
+                        "fix_url": reverse("accounts:employee-profile-update"),
+                        "fix_text": "Add Email"
+                    })
+                if not has_gender:
+                    missing_reqs.append({
+                        "id": "gender",
+                        "title": "Gender",
+                        "desc": "Please specify your gender for equal opportunity compliance.",
+                        "fix_url": reverse("accounts:employee-profile-update"),
+                        "fix_text": "Set Gender"
+                    })
+                if not has_location:
+                    missing_reqs.append({
+                        "id": "location",
+                        "title": "Address / City Location",
+                        "desc": "Specify your city or location so employers can assess proximity.",
+                        "fix_url": reverse("accounts:employee-profile-update"),
+                        "fix_text": "Add Location"
+                    })
                 if not has_title:
                     missing_reqs.append({
                         "id": "title",
@@ -198,6 +229,14 @@ class JobDetailsView(DetailView):
                         "desc": "Specify your profession or career headline (e.g. Software Engineer, Accountant, Sales Manager).",
                         "fix_url": reverse("accounts:employee-profile-update"),
                         "fix_text": "Add Title"
+                    })
+                if not has_experience:
+                    missing_reqs.append({
+                        "id": "experience",
+                        "title": "Work Experience",
+                        "desc": "Add at least one work experience entry so employers can evaluate your background.",
+                        "fix_url": reverse("accounts:employee-profile-update"),
+                        "fix_text": "Add Experience"
                     })
                 if not has_skills:
                     missing_reqs.append({
@@ -221,6 +260,11 @@ class JobDetailsView(DetailView):
                 context["has_name"] = has_name
                 context["has_title"] = has_title
                 context["has_skills"] = has_skills
+                context["has_email"] = has_email
+                context["has_gender"] = has_gender
+                context["has_location"] = has_location
+                context["has_experience"] = has_experience
+                context["ethiopian_locations"] = ETHIOPIAN_LOCATIONS
                 context["missing_requirements"] = missing_reqs
                 context["is_ready_to_apply"] = len(missing_reqs) == 0
 
@@ -259,6 +303,94 @@ class ApplyJobView(CreateView):
             user = request.user
             profile, _ = ApplicantProfile.objects.get_or_create(user=user)
             uploaded_cv = request.FILES.get("cv")
+
+            # ── Process Inline Quick-Complete Fields from Modal ──
+            user_changed = False
+            profile_changed_fields = []
+
+            # 1. Full Name
+            inline_first = request.POST.get("first_name", "").strip()
+            inline_last = request.POST.get("last_name", "").strip()
+            if inline_first and not (user.first_name and user.first_name.strip()):
+                user.first_name = inline_first
+                user_changed = True
+            if inline_last and not (user.last_name and user.last_name.strip()):
+                user.last_name = inline_last
+                user_changed = True
+
+            # 2. Phone Number
+            inline_phone = request.POST.get("phone_number", "").strip()
+            if inline_phone and not (user.phone_number and user.phone_number.strip()):
+                user.phone_number = inline_phone
+                user_changed = True
+
+            # 3. Gender
+            inline_gender = request.POST.get("gender", "").strip()
+            if inline_gender in ("male", "female") and not (user.gender and user.gender.strip()):
+                user.gender = inline_gender
+                user_changed = True
+
+            # 4. Location / Address
+            inline_location = request.POST.get("location", "").strip()
+            if inline_location and not (profile.location and profile.location.strip()):
+                profile.location = inline_location
+                profile_changed_fields.append("location")
+
+            # 5. Professional Title
+            inline_title = request.POST.get("title", "").strip()
+            if inline_title and not (profile.title and profile.title.strip()):
+                profile.title = inline_title
+                profile_changed_fields.append("title")
+
+            # Save user changes
+            if user_changed:
+                user.save(update_fields=[f for f in ["first_name", "last_name", "phone_number", "gender"] if getattr(user, f)])
+
+            # Save profile changes
+            if profile_changed_fields:
+                profile.save(update_fields=profile_changed_fields)
+
+            # 6. Quick Skills (comma-separated)
+            inline_skills = request.POST.get("quick_skills", "").strip()
+            if inline_skills and not (hasattr(user, "skills") and user.skills.exists()):
+                for skill_name in inline_skills.split(","):
+                    skill_name = skill_name.strip()
+                    if skill_name and len(skill_name) <= 100:
+                        CandidateSkill.objects.get_or_create(
+                            user=user, name=skill_name,
+                            defaults={"level": "intermediate"}
+                        )
+
+            # 7. Quick Work Experience
+            inline_exp_title = request.POST.get("exp_title", "").strip()
+            inline_exp_company = request.POST.get("exp_company", "").strip()
+            if inline_exp_title and inline_exp_company and not (hasattr(user, "experiences") and user.experiences.exists()):
+                from datetime import date
+                WorkExperience.objects.create(
+                    user=user,
+                    title=inline_exp_title,
+                    company=inline_exp_company,
+                    is_current=True,
+                    start_date=date.today()
+                )
+
+            # ── AI Resume/CV Verification ──
+            if uploaded_cv:
+                try:
+                    cv_text = extract_text_from_file(uploaded_cv, uploaded_cv.name)
+                    uploaded_cv.seek(0)  # Reset for later save
+                    cv_analysis = analyze_resume_authenticity(cv_text, uploaded_cv.name)
+                    if not cv_analysis["is_valid"] and cv_analysis["score"] < 30:
+                        messages.error(
+                            request,
+                            f"❌ AI Resume Verification Failed: {cv_analysis['message']} "
+                            f"Please upload a genuine, complete Resume/CV document."
+                        )
+                        return HttpResponseRedirect(reverse_lazy("jobs:jobs-detail", kwargs={"id": job.id}))
+                except Exception:
+                    pass  # Allow submission if AI check encounters an error
+
+            # ── Re-validate ALL 8 Required Items ──
             has_cv = bool(
                 uploaded_cv
                 or profile.cv_file
@@ -266,7 +398,11 @@ class ApplyJobView(CreateView):
             )
             has_phone = bool(user.phone_number and user.phone_number.strip())
             has_name = bool(user.first_name and user.first_name.strip() and user.last_name and user.last_name.strip())
+            has_email = bool(user.email and user.email.strip())
+            has_gender = bool(user.gender and user.gender.strip())
+            has_location = bool(profile.location and profile.location.strip())
             has_title = bool(profile.title and profile.title.strip())
+            has_experience = bool(hasattr(user, "experiences") and user.experiences.exists())
             has_skills = bool(hasattr(user, "skills") and user.skills.exists())
 
             missing_fields = []
@@ -274,8 +410,16 @@ class ApplyJobView(CreateView):
                 missing_fields.append("Full Name (First and Last name)")
             if not has_phone:
                 missing_fields.append("Phone Number")
+            if not has_email:
+                missing_fields.append("Email Address")
+            if not has_gender:
+                missing_fields.append("Gender")
+            if not has_location:
+                missing_fields.append("Address / City Location")
             if not has_title:
                 missing_fields.append("Professional Title / Profession")
+            if not has_experience:
+                missing_fields.append("Work Experience (at least 1 entry)")
             if not has_skills:
                 missing_fields.append("Key Skills (at least 1 skill)")
             if not has_cv:
@@ -285,7 +429,7 @@ class ApplyJobView(CreateView):
                 items_str = ", ".join(missing_fields)
                 messages.error(
                     request,
-                    f"⚠️ Application Incomplete: To apply for '{job.title}', you must fulfill the required information first: {items_str}. Please complete this information in your profile or upload your CV."
+                    f"⚠️ Application Incomplete: To apply for '{job.title}', you must complete the following: {items_str}. Please fill in the missing fields and try again."
                 )
                 return HttpResponseRedirect(reverse_lazy("jobs:jobs-detail", kwargs={"id": job.id}))
 
@@ -446,3 +590,27 @@ def send_job_alert_notifications(job, request=None):
     except Exception:
         pass
 
+
+@login_required(login_url=reverse_lazy("accounts:login"))
+@require_POST
+def verify_resume_api(request):
+    """AJAX endpoint for instant AI Resume/CV authenticity verification."""
+    uploaded = request.FILES.get("cv")
+    if not uploaded:
+        return JsonResponse({"is_valid": False, "score": 0, "message": "No file uploaded."})
+
+    try:
+        text = extract_text_from_file(uploaded, uploaded.name)
+        uploaded.seek(0)
+        analysis = analyze_resume_authenticity(text, uploaded.name)
+        return JsonResponse({
+            "is_valid": analysis["is_valid"],
+            "score": analysis["score"],
+            "message": analysis["message"],
+            "status": analysis["status"],
+            "detected_sections": analysis["detected_sections"],
+            "extracted_skills": analysis["extracted_skills"],
+            "word_count": analysis["word_count"],
+        })
+    except Exception as e:
+        return JsonResponse({"is_valid": False, "score": 0, "message": f"Error analyzing file: {str(e)}"})
