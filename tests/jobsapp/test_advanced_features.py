@@ -154,3 +154,78 @@ class AdvancedPortalFeaturesTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Ethio Job Portal")
         self.assertContains(response, "Senior Python Django Developer")
+
+    def test_real_time_chat_live_status_and_conversations_sync(self):
+        """Test dynamic live status polling and conversation sync APIs for zero-refresh updates."""
+        # Create conversation and unread message for candidate
+        conv = Conversation.objects.create(employer=self.employer_user, candidate=self.candidate_user, job=self.job)
+        ChatMessage.objects.create(
+            conversation=conv,
+            sender=self.employer_user,
+            message="Hey Abebe, are you available tomorrow?"
+        )
+
+        # Log in as candidate
+        self.client.login(email="candidate.test@gmail.com", password="StrongPassword123!#")
+
+        # 1. Live status heartbeat API
+        status_url = reverse("jobs:live-chat-status")
+        res_status = self.client.get(status_url, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        self.assertEqual(res_status.status_code, 200)
+        data_status = res_status.json()
+        self.assertEqual(data_status["status"], "success")
+        self.assertEqual(data_status["unread_messages"], 1)
+
+        # 2. Conversations sync API (updates left inbox pane)
+        sync_url = reverse("jobs:conversations-sync")
+        res_sync = self.client.get(sync_url, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        self.assertEqual(res_sync.status_code, 200)
+        data_sync = res_sync.json()
+        self.assertEqual(data_sync["status"], "success")
+        self.assertEqual(len(data_sync["conversations"]), 1)
+        c_item = data_sync["conversations"][0]
+        self.assertEqual(c_item["id"], conv.id)
+        self.assertEqual(c_item["unread_count"], 1)
+        self.assertIn("Hey Abebe", c_item["last_message"])
+        self.assertFalse(c_item["is_me"])
+
+    def test_job_save_or_check_does_not_auto_broadcast_to_telegram(self):
+        """Verify that creating, checking, or approving a job does NOT automatically broadcast to Telegram."""
+        from unittest.mock import patch
+        from jobsapp.views.admin_dashboard import approve_job
+        from django.test import RequestFactory
+        from django.contrib.messages.storage.fallback import FallbackStorage
+        from django.utils import timezone
+
+        superuser = User.objects.create_superuser(
+            email="admin.check@test.com",
+            password="AdminPassword123!#",
+            first_name="Super",
+            last_name="Admin"
+        )
+
+        with patch("jobsapp.utils.telegram.broadcast_job_to_telegram") as mock_broadcast:
+            # 1. Save new job
+            new_job = Job.objects.create(
+                user=self.employer_user,
+                title="Frontend Vue Developer",
+                category=self.category,
+                location="Addis Ababa",
+                salary=35000,
+                status="approved",
+                last_date=timezone.now() + timezone.timedelta(days=30)
+            )
+            # Ensure mock was NOT called
+            self.assertFalse(mock_broadcast.called, "broadcast_job_to_telegram should not be called automatically on Job save!")
+
+            # 2. Admin approves job
+            factory = RequestFactory()
+            req = factory.get(f"/platform-admin/approve-job/{new_job.id}/")
+            req.user = superuser
+            setattr(req, "session", "session")
+            messages_storage = FallbackStorage(req)
+            setattr(req, "_messages", messages_storage)
+
+            approve_job(req, new_job.id)
+            self.assertFalse(mock_broadcast.called, "broadcast_job_to_telegram should not be called automatically on approve_job!")
+

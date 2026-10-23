@@ -283,14 +283,13 @@
                                         <a href="{% url 'jobs:employer-dashboard' %}" class="dropdown-item {% if url_name == 'employer-dashboard' %}active{% endif %}">
                                             <i class="fa fa-tachometer mr-2"></i> {% trans "Dashboard" %}
                                         </a>
-                                        <a href="{% url 'jobs:inbox' %}" class="dropdown-item {% if url_name == 'inbox' %}active{% endif %}">
-                                            <i class="fa fa-comments mr-2 text-info"></i> {% trans "Messages" %}
+                                        <a href="{% url 'jobs:inbox' %}" class="dropdown-item {% if url_name == 'inbox' %}active{% endif %} d-flex align-items-center justify-content-between">
+                                            <span><i class="fa fa-comments mr-2 text-info"></i> {% trans "Messages" %}</span>
+                                            <span class="badge badge-danger badge-pill nav-unread-messages-badge" style="{% if not unread_messages_count %}display: none;{% endif %}">{{ unread_messages_count|default:"" }}</span>
                                         </a>
-                                        <a href="{% url 'jobs:notifications' %}" class="dropdown-item {% if url_name == 'notifications' %}active{% endif %}">
-                                            <i class="fa fa-bell mr-2"></i> {% trans "Notifications" %}
-                                            {% if unread_notifications_count > 0 %}
-                                                <span class="badge badge-danger ml-2">{{ unread_notifications_count }}</span>
-                                            {% endif %}
+                                        <a href="{% url 'jobs:notifications' %}" class="dropdown-item {% if url_name == 'notifications' %}active{% endif %} d-flex align-items-center justify-content-between">
+                                            <span><i class="fa fa-bell mr-2"></i> {% trans "Notifications" %}</span>
+                                            <span class="badge badge-danger badge-pill nav-unread-notifications-badge" style="{% if not unread_notifications_count %}display: none;{% endif %}">{{ unread_notifications_count|default:"" }}</span>
                                         </a>
                                         <a href="{% url 'jobs:employer-all-applicants' %}" class="dropdown-item {% if url_name == 'employer-all-applicants' %}active{% endif %}">
                                             <i class="fa fa-users mr-2"></i> {% trans "Applicants" %}
@@ -308,14 +307,13 @@
                                         <a href="{% url 'jobs:employee-recommended-jobs' %}" class="dropdown-item {% if url_name == 'employee-recommended-jobs' or url_name == 'recommended-jobs' %}active{% endif %}">
                                             <i class="fa fa-bolt mr-2 text-warning"></i> {% trans "Recommended Jobs" %}
                                         </a>
-                                        <a href="{% url 'jobs:inbox' %}" class="dropdown-item {% if url_name == 'inbox' %}active{% endif %}">
-                                            <i class="fa fa-comments mr-2 text-info"></i> {% trans "Messages" %}
+                                        <a href="{% url 'jobs:inbox' %}" class="dropdown-item {% if url_name == 'inbox' %}active{% endif %} d-flex align-items-center justify-content-between">
+                                            <span><i class="fa fa-comments mr-2 text-info"></i> {% trans "Messages" %}</span>
+                                            <span class="badge badge-danger badge-pill nav-unread-messages-badge" style="{% if not unread_messages_count %}display: none;{% endif %}">{{ unread_messages_count|default:"" }}</span>
                                         </a>
-                                        <a href="{% url 'jobs:notifications' %}" class="dropdown-item {% if url_name == 'notifications' %}active{% endif %}">
-                                            <i class="fa fa-bell mr-2"></i> {% trans "Notifications" %}
-                                            {% if unread_notifications_count > 0 %}
-                                                <span class="badge badge-danger ml-2">{{ unread_notifications_count }}</span>
-                                            {% endif %}
+                                        <a href="{% url 'jobs:notifications' %}" class="dropdown-item {% if url_name == 'notifications' %}active{% endif %} d-flex align-items-center justify-content-between">
+                                            <span><i class="fa fa-bell mr-2"></i> {% trans "Notifications" %}</span>
+                                            <span class="badge badge-danger badge-pill nav-unread-notifications-badge" style="{% if not unread_notifications_count %}display: none;{% endif %}">{{ unread_notifications_count|default:"" }}</span>
                                         </a>
                                         <a href="{% url 'jobs:employee-favorites' %}" class="dropdown-item {% if url_name == 'employee-favorites' %}active{% endif %}">
                                             <i class="fa fa-heart mr-2"></i> {% trans "Favorites" %}
@@ -683,6 +681,50 @@
         localStorage.setItem('pwa_banner_dismissed', 'true');
     }
 </script>
+
+{% if request.user.is_authenticated %}
+<script>
+    // Real-Time Global Polling: Live message and notification counters without manual page reload
+    (function() {
+        var liveStatusUrl = "{% url 'jobs:live-chat-status' %}";
+        function syncLiveCounters() {
+            fetch(liveStatusUrl, {
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            })
+            .then(function(res) {
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                return res.json();
+            })
+            .then(function(data) {
+                if (data && data.status === "success") {
+                    var msgBadges = document.querySelectorAll(".nav-unread-messages-badge");
+                    msgBadges.forEach(function(el) {
+                        if (data.unread_messages > 0) {
+                            el.textContent = data.unread_messages;
+                            el.style.display = "inline-block";
+                        } else {
+                            el.style.display = "none";
+                        }
+                    });
+
+                    var notifBadges = document.querySelectorAll(".nav-unread-notifications-badge");
+                    notifBadges.forEach(function(el) {
+                        if (data.unread_notifications > 0) {
+                            el.textContent = data.unread_notifications;
+                            el.style.display = "inline-block";
+                        } else {
+                            el.style.display = "none";
+                        }
+                    });
+                }
+            })
+            .catch(function(e) { /* ignore background sync errors */ });
+        }
+        // Poll every 6.5 seconds
+        setInterval(syncLiveCounters, 6500);
+    })();
+</script>
+{% endif %}
 
 </body>
 

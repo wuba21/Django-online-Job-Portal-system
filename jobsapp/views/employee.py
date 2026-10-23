@@ -42,13 +42,22 @@ class ApplicantDashboardView(TemplateView):
         # AI Job Recommendations using Content-Based TF-IDF & Cosine Similarity
         recommended_jobs = get_recommended_jobs_for_user(user, limit=6)
 
+        # Single-query aggregation for all application metrics
+        from django.db.models import Count, Q
+        app_stats = applications.aggregate(
+            total=Count("id"),
+            pending=Count("id", filter=Q(status=1)),
+            shortlisted=Count("id", filter=Q(status=2)),
+            accepted=Count("id", filter=Q(status=4)),
+        )
+
         context["profile"] = profile
         context["completion_percentage"] = profile.completion_percentage
         context["applications"] = applications
-        context["total_applications"] = applications.count()
-        context["pending_applications"] = applications.filter(status=1).count()
-        context["shortlisted_applications"] = applications.filter(status=2).count()
-        context["accepted_applications"] = applications.filter(status=4).count()
+        context["total_applications"] = app_stats["total"]
+        context["pending_applications"] = app_stats["pending"]
+        context["shortlisted_applications"] = app_stats["shortlisted"]
+        context["accepted_applications"] = app_stats["accepted"]
         context["favorites_count"] = favorites.count()
         context["recommended_jobs"] = recommended_jobs
         context["unread_notifications_count"] = Notification.objects.filter(user=user, is_read=False).count()

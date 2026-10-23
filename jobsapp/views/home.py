@@ -13,7 +13,7 @@ from jobsapp.decorators import user_is_employee
 from jobsapp.forms import ApplyJobForm
 from jobsapp.models import Applicant, ETHIOPIAN_LOCATIONS, EXPERIENCE_LEVEL_CHOICES, Favorite, Job, JobAlert, WORK_MODE_CHOICES
 from jobsapp.utils.notifications import create_notification, send_event_email
-from jobsapp.utils.recommendation import calculate_job_match_score, invalidate_recommendation_cache
+from jobsapp.utils.recommendation import calculate_job_match_score, get_recommended_jobs_for_user, invalidate_recommendation_cache
 
 
 class HomeView(ListView):
@@ -33,17 +33,7 @@ class HomeView(ListView):
         context["locations"] = ETHIOPIAN_LOCATIONS
 
         if self.request.user.is_authenticated and self.request.user.is_employee:
-            user_skills = set(self.request.user.skills.values_list("name", flat=True)) if hasattr(self.request.user, "skills") else set()
-            user_title = getattr(getattr(self.request.user, "applicant_profile", None), "title", "") or ""
-            user_location = getattr(getattr(self.request.user, "applicant_profile", None), "location", "") or ""
-            
-            all_jobs = self.model.objects.select_related("user", "company").prefetch_related("tags").filter(filled=False, status="approved")[:10]
-            recommended = []
-            for j in all_jobs:
-                score = calculate_job_match_score(self.request.user, j, user_skills=user_skills, user_title=user_title, user_location=user_location)
-                recommended.append({"job": j, "match_score": score})
-            recommended.sort(key=lambda x: x["match_score"], reverse=True)
-            context["recommended_jobs"] = recommended[:3]
+            context["recommended_jobs"] = get_recommended_jobs_for_user(self.request.user, limit=3)
 
         return context
 
@@ -139,14 +129,19 @@ class JobDetailsView(DetailView):
     context_object_name = "job"
     pk_url_kwarg = "id"
 
+    def get_queryset(self):
+        return self.model.objects.select_related("user", "company").prefetch_related("tags", "images")
+
     def get_object(self, queryset=None):
+        if queryset is None:
+            queryset = self.get_queryset()
         # Try slug from URL kwargs (root-level or /jobs/<slug>/ URLs)
         slug = self.kwargs.get("slug")
         pk = self.kwargs.get("id")
         if slug:
-            return get_object_or_404(Job, slug=slug)
+            return get_object_or_404(queryset, slug=slug)
         if pk:
-            return get_object_or_404(Job, pk=pk)
+            return get_object_or_404(queryset, pk=pk)
         raise Http404("Job doesn't exist")
 
     def get_context_data(self, **kwargs):

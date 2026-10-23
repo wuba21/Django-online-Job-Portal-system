@@ -94,13 +94,6 @@ def approve_job(request, job_id):
     job.status = "approved"
     job.save()
     
-    # Broadcast vacancy alert to Telegram Channel/Bot
-    try:
-        from jobsapp.utils.telegram import broadcast_job_to_telegram
-        broadcast_job_to_telegram(job, request=request)
-    except Exception:
-        pass
-
     # Notify Job Owner
     if getattr(job, "user", None):
         create_notification(
@@ -131,11 +124,6 @@ def set_job_status(request, job_id, status):
     if status in ["approved", "pending", "rejected"]:
         job.status = status
         if status == "approved":
-            try:
-                from jobsapp.utils.telegram import broadcast_job_to_telegram
-                broadcast_job_to_telegram(job, request=request)
-            except Exception:
-                pass
             if getattr(job, "user", None):
                 create_notification(
                     user=job.user,

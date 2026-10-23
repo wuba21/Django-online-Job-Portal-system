@@ -225,3 +225,67 @@ def poll_messages(request, conversation_id):
         "messages": data,
         "count": len(data)
     })
+
+
+@login_required
+def live_chat_status_api(request):
+    """
+    Lightweight heartbeat endpoint for base navigation.
+    Returns unread counts for messages and notifications so badges update dynamically
+    across all portal pages in real-time without requiring manual page reload.
+    """
+    user = request.user
+    unread_msgs = (
+        ChatMessage.objects.filter(
+            Q(conversation__employer=user) | Q(conversation__candidate=user),
+            is_read=False,
+        )
+        .exclude(sender=user)
+        .count()
+    )
+    from jobsapp.models import Notification
+    unread_notifs = Notification.objects.filter(user=user, is_read=False).count()
+
+    return JsonResponse({
+        "status": "success",
+        "unread_messages": unread_msgs,
+        "unread_notifications": unread_notifs,
+    })
+
+
+@login_required
+def conversations_sync_api(request):
+    """
+    Returns dynamic summary of all conversations for the authenticated user.
+    Used by the 2-pane Inbox to update conversation previews, timestamps, and
+    unread badges live in the background without reloading the page.
+    """
+    user = request.user
+    conversations = (
+        Conversation.objects.filter(Q(employer=user) | Q(candidate=user))
+        .select_related("employer", "candidate", "job")
+        .prefetch_related("messages__sender")
+        .order_by("-updated_at")
+    )
+    items = []
+    for c in conversations:
+        other = c.get_other_user(user)
+        unread = c.messages.filter(is_read=False).exclude(sender=user).count()
+        last_m = c.messages.last()
+        items.append({
+            "id": c.id,
+            "other_name": other.get_full_name() or other.email,
+            "other_initial": (other.first_name[:1] or other.email[:1] or "U").upper(),
+            "unread_count": unread,
+            "last_message": (last_m.message[:80] + ("..." if len(last_m.message) > 80 else "")) if last_m else "Conversation started",
+            "is_me": (last_m.sender == user) if last_m else False,
+            "time_ago": last_m.created_at.strftime("%b %d, %H:%M") if last_m else c.updated_at.strftime("%b %d, %H:%M"),
+            "job_title": c.job.title if c.job else None,
+        })
+
+    return JsonResponse({
+        "status": "success",
+        "conversations": items,
+        "count": len(items),
+    })
+

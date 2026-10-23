@@ -18,10 +18,11 @@
                         </button>
                     </div>
 
-                    <div class="list-group list-group-flush">
+                    <div class="list-group list-group-flush" id="conversationsListGroup">
                         {% for item in conversations %}
                         <a href="{% url 'jobs:inbox' %}?c={{ item.obj.id }}"
-                           class="list-group-item list-group-item-action p-3 border-bottom {% if active_conversation and active_conversation.id == item.obj.id %}bg-light border-left border-primary{% endif %}"
+                           data-conv-id="{{ item.obj.id }}"
+                           class="list-group-item list-group-item-action p-3 border-bottom conv-item-link {% if active_conversation and active_conversation.id == item.obj.id %}bg-light border-left border-primary active-conv-selected{% endif %}"
                            style="{% if active_conversation and active_conversation.id == item.obj.id %}border-left-width: 4px !important;{% endif %}">
                             <div class="d-flex align-items-center justify-content-between mb-1">
                                 <strong class="text-dark small d-flex align-items-center">
@@ -30,30 +31,32 @@
                                     </div>
                                     <span>{{ item.other_user.get_full_name|default:item.other_user.email }}</span>
                                 </strong>
-                                {% if item.unread_count > 0 %}
-                                    <span class="badge badge-danger badge-pill">{{ item.unread_count }}</span>
-                                {% endif %}
+                                <span class="conv-badge-box">
+                                    {% if item.unread_count > 0 %}
+                                        <span class="badge badge-danger badge-pill">{{ item.unread_count }}</span>
+                                    {% endif %}
+                                </span>
                             </div>
 
                             {% if item.obj.job %}
-                                <small class="text-primary d-block font-weight-bold mb-1" style="font-size: 0.76rem;">
+                                <small class="text-primary d-block font-weight-bold mb-1 conv-job-title" style="font-size: 0.76rem;">
                                     <i class="fa fa-briefcase mr-1"></i>{{ item.obj.job.title|truncatechars:26 }}
                                 </small>
                             {% endif %}
 
-                            <p class="text-muted small mb-0 text-truncate" style="font-size: 0.8rem;">
+                            <p class="text-muted small mb-0 text-truncate conv-snippet" style="font-size: 0.8rem;">
                                 {% if item.last_message %}
                                     {% if item.last_message.sender == request.user %}You: {% endif %}{{ item.last_message.message }}
                                 {% else %}
                                     <em>Conversation started</em>
                                 {% endif %}
                             </p>
-                            <small class="text-muted d-block text-right mt-1" style="font-size: 0.72rem;">
+                            <small class="text-muted d-block text-right mt-1 conv-timestamp" style="font-size: 0.72rem;">
                                 {{ item.obj.updated_at|naturaltime }}
                             </small>
                         </a>
                         {% empty %}
-                        <div class="text-center py-5 text-muted p-3">
+                        <div class="text-center py-5 text-muted p-3" id="emptyConversationsPlaceholder">
                             <i class="fa fa-envelope-open-o text-muted mb-2" style="font-size: 2.2rem;"></i>
                             <h6 class="font-weight-bold text-dark">No Messages Yet</h6>
                             <small class="d-block mb-3">When you or an employer starts a conversation, it will appear here.</small>
@@ -232,6 +235,8 @@
         var chatForm = document.getElementById("chatForm");
         var chatInput = document.getElementById("chatMessageInput");
         var sendBtn = document.getElementById("chatSendBtn");
+        var convsList = document.getElementById("conversationsListGroup");
+        var activeConvId = {% if active_conversation %}{{ active_conversation.id }}{% else %}null{% endif %};
 
         // Scroll to bottom helper
         function scrollToBottom() {
@@ -241,7 +246,7 @@
         }
         scrollToBottom();
 
-        // Track highest message ID present in thread
+        // Track highest message ID present in active thread
         var maxMsgId = 0;
         function updateMaxMsgId() {
             var bubbles = document.querySelectorAll(".chat-msg-bubble");
@@ -256,7 +261,7 @@
 
         // Safe HTML escape helper
         function escapeHtml(str) {
-            return String(str)
+            return String(str || "")
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;")
@@ -265,7 +270,35 @@
                 .replace(/\n/g, "<br>");
         }
 
-        // Append message bubble dynamically
+        // Helper to update or reposition a conversation card on the left pane
+        function updateConversationCard(convId, snippetText, isMe, timeStr, unreadCount) {
+            if (!convsList) return;
+            var card = convsList.querySelector('.conv-item-link[data-conv-id="' + convId + '"]');
+            if (card) {
+                var snippetEl = card.querySelector(".conv-snippet");
+                if (snippetEl && snippetText) {
+                    snippetEl.textContent = (isMe ? "You: " : "") + snippetText;
+                }
+                var timeEl = card.querySelector(".conv-timestamp");
+                if (timeEl && timeStr) {
+                    timeEl.textContent = timeStr;
+                }
+                var badgeBox = card.querySelector(".conv-badge-box");
+                if (badgeBox) {
+                    if (unreadCount > 0 && convId !== activeConvId) {
+                        badgeBox.innerHTML = '<span class="badge badge-danger badge-pill">' + unreadCount + '</span>';
+                    } else if (convId === activeConvId) {
+                        badgeBox.innerHTML = '';
+                    }
+                }
+                // Reposition to top of the conversation list
+                if (convsList.firstElementChild !== card) {
+                    convsList.insertBefore(card, convsList.firstElementChild);
+                }
+            }
+        }
+
+        // Append message bubble dynamically into active thread
         function appendMessageBubble(msgData) {
             var placeholder = document.getElementById("emptyThreadPlaceholder");
             if (placeholder) {
@@ -309,7 +342,6 @@
             scrollToBottom();
         }
 
-        {% if active_conversation %}
         // 1. Instant AJAX Form Submit without page reload
         if (chatForm && chatInput) {
             chatForm.addEventListener("submit", function(e) {
@@ -318,6 +350,7 @@
                 if (!msgText) return;
 
                 var formData = new FormData(chatForm);
+                formData.append("ajax", "1");
                 chatInput.value = "";
                 chatInput.disabled = true;
                 if (sendBtn) sendBtn.disabled = true;
@@ -337,6 +370,9 @@
 
                     if (data.status === "success") {
                         appendMessageBubble(data);
+                        if (activeConvId) {
+                            updateConversationCard(activeConvId, data.message, true, "Just now", 0);
+                        }
                     }
                 })
                 .catch(function(err) {
@@ -356,7 +392,8 @@
             });
         }
 
-        // 2. Real-time background auto-fetch polling (every 3.5 seconds)
+        {% if active_conversation %}
+        // 2. Real-time background auto-fetch polling for active conversation thread (every 3 seconds)
         var pollUrl = "{% url 'jobs:poll-messages' active_conversation.id %}";
         setInterval(function() {
             fetch(pollUrl + "?last_id=" + maxMsgId, {
@@ -365,14 +402,88 @@
             .then(function(res) { return res.json(); })
             .then(function(data) {
                 if (data.status === "success" && data.messages && data.messages.length > 0) {
+                    var lastOne = data.messages[data.messages.length - 1];
                     data.messages.forEach(function(msg) {
                         appendMessageBubble(msg);
                     });
+                    if (lastOne) {
+                        updateConversationCard(activeConvId, lastOne.message, lastOne.is_me, lastOne.created_at, 0);
+                    }
                 }
             })
             .catch(function(e) { /* ignore transient background polling errors */ });
-        }, 3500);
+        }, 3000);
         {% endif %}
+
+        // 3. Dynamic background sync of the conversations list (every 4 seconds)
+        // Detects when messages arrive in other conversations or new conversations appear
+        var syncConvsUrl = "{% url 'jobs:conversations-sync' %}";
+        setInterval(function() {
+            fetch(syncConvsUrl, {
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data && data.status === "success" && data.conversations) {
+                    var emptyHolder = document.getElementById("emptyConversationsPlaceholder");
+                    if (emptyHolder && data.conversations.length > 0) {
+                        emptyHolder.remove();
+                    }
+
+                    data.conversations.forEach(function(item) {
+                        var card = convsList ? convsList.querySelector('.conv-item-link[data-conv-id="' + item.id + '"]') : null;
+                        if (card) {
+                            var snippetEl = card.querySelector(".conv-snippet");
+                            if (snippetEl) {
+                                snippetEl.textContent = (item.is_me ? "You: " : "") + item.last_message;
+                            }
+                            var timeEl = card.querySelector(".conv-timestamp");
+                            if (timeEl) {
+                                timeEl.textContent = item.time_ago;
+                            }
+                            var badgeBox = card.querySelector(".conv-badge-box");
+                            if (badgeBox) {
+                                if (item.unread_count > 0 && item.id !== activeConvId) {
+                                    badgeBox.innerHTML = '<span class="badge badge-danger badge-pill">' + item.unread_count + '</span>';
+                                } else if (item.id === activeConvId) {
+                                    badgeBox.innerHTML = '';
+                                }
+                            }
+                        } else if (convsList) {
+                            // Dynamically insert newly created conversation into list
+                            var newCard = document.createElement("a");
+                            newCard.href = "{% url 'jobs:inbox' %}?c=" + item.id;
+                            newCard.setAttribute("data-conv-id", item.id);
+                            newCard.className = "list-group-item list-group-item-action p-3 border-bottom conv-item-link";
+
+                            var jobHtml = item.job_title ? ('<small class="text-primary d-block font-weight-bold mb-1 conv-job-title" style="font-size: 0.76rem;"><i class="fa fa-briefcase mr-1"></i>' + escapeHtml(item.job_title) + '</small>') : '';
+                            var badgeHtml = item.unread_count > 0 ? ('<span class="badge badge-danger badge-pill">' + item.unread_count + '</span>') : '';
+
+                            newCard.innerHTML =
+                                '<div class="d-flex align-items-center justify-content-between mb-1">' +
+                                    '<strong class="text-dark small d-flex align-items-center">' +
+                                        '<div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mr-2 font-weight-bold" style="width: 32px; height: 32px; font-size: 0.85rem;">' +
+                                            escapeHtml(item.other_initial) +
+                                        '</div>' +
+                                        '<span>' + escapeHtml(item.other_name) + '</span>' +
+                                    '</strong>' +
+                                    '<span class="conv-badge-box">' + badgeHtml + '</span>' +
+                                '</div>' +
+                                jobHtml +
+                                '<p class="text-muted small mb-0 text-truncate conv-snippet" style="font-size: 0.8rem;">' +
+                                    (item.is_me ? "You: " : "") + escapeHtml(item.last_message) +
+                                '</p>' +
+                                '<small class="text-muted d-block text-right mt-1 conv-timestamp" style="font-size: 0.72rem;">' +
+                                    escapeHtml(item.time_ago) +
+                                '</small>';
+
+                            convsList.insertBefore(newCard, convsList.firstElementChild);
+                        }
+                    });
+                }
+            })
+            .catch(function(e) { /* ignore background sync errors */ });
+        }, 4000);
     });
 </script>
 {% endblock %}

@@ -38,13 +38,27 @@ class DashboardView(ListView):
         user_jobs = self.get_queryset()
         user_applicants = Applicant.objects.filter(job__user=self.request.user)
 
-        context["total_jobs"] = user_jobs.count()
-        context["active_jobs"] = user_jobs.filter(filled=False, last_date__gte=timezone.now()).count()
-        context["expired_jobs"] = user_jobs.filter(last_date__lt=timezone.now()).count()
-        context["total_applications"] = user_applicants.count()
-        context["pending_applications"] = user_applicants.filter(status=1).count()
-        context["shortlisted_applications"] = user_applicants.filter(status=2).count()
-        context["accepted_applications"] = user_applicants.filter(status=4).count()
+        now = timezone.now()
+        from django.db.models import Count
+        job_stats = user_jobs.aggregate(
+            total=Count("id"),
+            active=Count("id", filter=Q(filled=False, last_date__gte=now)),
+            expired=Count("id", filter=Q(last_date__lt=now)),
+        )
+        app_stats = user_applicants.aggregate(
+            total=Count("id"),
+            pending=Count("id", filter=Q(status=1)),
+            shortlisted=Count("id", filter=Q(status=2)),
+            accepted=Count("id", filter=Q(status=4)),
+        )
+
+        context["total_jobs"] = job_stats["total"]
+        context["active_jobs"] = job_stats["active"]
+        context["expired_jobs"] = job_stats["expired"]
+        context["total_applications"] = app_stats["total"]
+        context["pending_applications"] = app_stats["pending"]
+        context["shortlisted_applications"] = app_stats["shortlisted"]
+        context["accepted_applications"] = app_stats["accepted"]
 
         company, _ = Company.objects.get_or_create(
             user=self.request.user,
@@ -161,11 +175,6 @@ class JobCreateView(CreateView):
             job.save(update_fields=["logo"])
 
         if job.status == "approved":
-            try:
-                from jobsapp.utils.telegram import broadcast_job_to_telegram
-                broadcast_job_to_telegram(job, request=self.request)
-            except Exception:
-                pass
             try:
                 from jobsapp.views.home import send_job_alert_notifications
                 send_job_alert_notifications(job, request=self.request)

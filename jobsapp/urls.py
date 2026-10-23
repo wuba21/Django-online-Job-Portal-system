@@ -21,7 +21,7 @@ from jobsapp.views.employer import (
     export_applicants_csv, schedule_interview, quick_update_applicant_status
 )
 from jobsapp.views.company import CompanyDetailView, CompanyListView, add_company_review
-from jobsapp.views.messages import inbox_view, start_conversation, poll_messages
+from jobsapp.views.messages import inbox_view, start_conversation, poll_messages, live_chat_status_api, conversations_sync_api
 from jobsapp.views.telegram_webapp import telegram_webapp_view
 from jobsapp.views.home import (
     AboutUsView, ApplyJobView, HomeView, JobDetailsView, JobListView, SearchView, SalaryCalculatorView,
@@ -48,6 +48,8 @@ urlpatterns = [
     path("messages/start/", start_conversation, name="start-conversation-direct"),
     path("messages/start/<int:candidate_id>/", start_conversation, name="start-conversation"),
     path("messages/poll/<int:conversation_id>/", poll_messages, name="poll-messages"),
+    path("messages/api/live-status/", live_chat_status_api, name="live-chat-status"),
+    path("messages/api/conversations-sync/", conversations_sync_api, name="conversations-sync"),
 
     # AI Resume Auto-Profile Extractor
     path("profile/ai-parse-resume/", ai_parse_resume, name="ai-parse-resume"),
