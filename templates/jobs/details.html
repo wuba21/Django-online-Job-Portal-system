@@ -316,7 +316,49 @@
                         </div>
                         <small class="text-muted" style="font-size: 0.74rem;"><i class="fa fa-lock mr-1"></i> No spam. Unsubscribe anytime.</small>
                     </form>
+                <!-- Salary & Compensation Insights (Glassdoor/LinkedIn style) -->
+                <div class="card border-0 shadow-sm p-3 mb-3 bg-white mt-3" style="border-radius: 12px;">
+                    <h6 class="font-weight-bold text-dark mb-2"><i class="fa fa-line-chart text-success mr-1"></i> Salary &amp; Compensation Insights</h6>
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="mr-3 text-center p-2 rounded bg-light" style="min-width: 55px;">
+                            <i class="fa fa-money text-success" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Offered Compensation</small>
+                            <strong class="text-dark">
+                                {% if job.salary > 0 %}{{ job.salary|intcomma }} {{ job.currency }}{% else %}Negotiable / Competitive{% endif %}
+                            </strong>
+                        </div>
+                    </div>
+                    {% if category_avg_salary %}
+                        <div class="p-2 rounded bg-light small text-muted">
+                            <i class="fa fa-info-circle text-primary mr-1"></i> Category Benchmark ({{ job.category }}): <strong>~{{ category_avg_salary|intcomma }} ETB</strong>
+                        </div>
+                    {% endif %}
                 </div>
+
+                <!-- Similar Vacancies (LinkedIn / Indeed style) -->
+                {% if similar_jobs %}
+                <div class="card border-0 shadow-sm p-3 mb-3 bg-white" style="border-radius: 12px;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="font-weight-bold text-dark mb-0"><i class="fa fa-clone text-primary mr-1"></i> Similar Vacancies</h6>
+                        <small class="text-muted">{{ similar_jobs|length }} found</small>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for sim in similar_jobs %}
+                            <a href="{% url 'jobs:jobs-detail' sim.id %}" class="list-group-item list-group-item-action px-0 py-2 border-bottom text-decoration-none">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div style="max-width: 80%;">
+                                        <div class="font-weight-bold text-dark small" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ sim.title }}</div>
+                                        <small class="text-muted d-block">{{ sim.company_name }} • <i class="fa fa-map-marker mr-1"></i>{{ sim.location }}</small>
+                                    </div>
+                                    <span class="badge badge-light border text-primary small py-1 px-2 font-weight-bold">View</span>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>

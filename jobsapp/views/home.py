@@ -271,6 +271,19 @@ class JobDetailsView(DetailView):
                 context["missing_requirements"] = missing_reqs
                 context["is_ready_to_apply"] = len(missing_reqs) == 0
 
+        # Similar Jobs & Salary Benchmark (LinkedIn/Indeed style)
+        similar_jobs = Job.objects.filter(
+            status="approved",
+            filled=False
+        ).exclude(id=job.id).filter(
+            Q(category=job.category) | Q(location=job.location)
+        ).select_related("user", "company").prefetch_related("tags").distinct()[:4]
+        context["similar_jobs"] = similar_jobs
+
+        from django.db.models import Avg
+        avg_sal = Job.objects.filter(category=job.category, salary__gt=0).aggregate(Avg("salary"))["salary__avg"]
+        context["category_avg_salary"] = int(avg_sal) if avg_sal else None
+
         return context
 
 

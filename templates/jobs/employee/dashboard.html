@@ -42,14 +42,35 @@
                             <a href="{% url 'accounts:employee-profile-update' %}" class="btn btn-outline-primary" style="border-radius: 8px;"><i class="fa fa-edit"></i> Edit Profile & CV</a>
                         </div>
                     </div>
-                    <!-- Profile Completion Progress -->
-                    <div class="mt-4">
+                    <!-- LinkedIn All-Star Profile Strength Meter -->
+                    <div class="mt-4 pt-3 border-top">
                         <div class="d-flex justify-content-between align-items-center mb-1">
-                            <small class="font-weight-bold">Profile Completion</small>
-                            <small class="font-weight-bold text-primary">{{ completion_percentage }}%</small>
+                            <div>
+                                <small class="font-weight-bold text-dark">
+                                    <i class="fa fa-tachometer text-primary mr-1"></i> Profile Strength &amp; Recruiter Visibility:
+                                </small>
+                                <span class="badge {% if completion_percentage >= 85 %}badge-success{% elif completion_percentage >= 50 %}badge-info{% else %}badge-warning{% endif %} ml-1">
+                                    {% if completion_percentage >= 85 %}All-Star (High Visibility){% elif completion_percentage >= 50 %}Intermediate{% else %}Getting Started{% endif %}
+                                </span>
+                            </div>
+                            <small class="font-weight-bold {% if completion_percentage >= 85 %}text-success{% elif completion_percentage >= 50 %}text-primary{% else %}text-warning{% endif %}">{{ completion_percentage }}%</small>
                         </div>
-                        <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ completion_percentage }}%;" aria-valuenow="{{ completion_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress" style="height: 10px; border-radius: 6px;">
+                            <div class="progress-bar {% if completion_percentage >= 85 %}bg-success{% elif completion_percentage >= 50 %}bg-primary{% else %}bg-warning{% endif %}" role="progressbar" style="width: {{ completion_percentage }}%;" aria-valuenow="{{ completion_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-2 flex-wrap" style="gap: 6px;">
+                            <small class="text-muted">
+                                {% if completion_percentage >= 85 %}
+                                    <i class="fa fa-check-circle text-success mr-1"></i> Excellent profile! You appear in top recruiter searches and AI recommendations.
+                                {% elif completion_percentage >= 50 %}
+                                    <i class="fa fa-info-circle text-primary mr-1"></i> Add your skills, work experience or resume to reach All-Star status.
+                                {% else %}
+                                    <i class="fa fa-exclamation-circle text-warning mr-1"></i> Complete your profile details to unlock 1-click apply and top matches.
+                                {% endif %}
+                            </small>
+                            <a href="{% url 'accounts:employee-profile-update' %}" class="small font-weight-bold text-primary">
+                                Complete Profile &rarr;
+                            </a>
                         </div>
                     </div>
                 </div>

@@ -336,6 +336,17 @@
                                 <strong>{% trans "Instructions from Employer" %}:</strong> "{{ app.interview_notes }}"
                             </p>
                             {% endif %}
+
+                            <div class="mt-2 pt-2 border-top d-flex align-items-center flex-wrap" style="gap: 8px;">
+                                <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text={{ app.job.title|urlencode }}+Interview+at+{{ app.job.company_name|urlencode }}&dates={{ app.interview_date|date:'Ymd\THis' }}/{{ app.interview_date|date:'Ymd\THis' }}&details={{ app.interview_notes|urlencode }}&location={{ app.interview_location|urlencode }}" target="_blank" class="btn btn-xs btn-primary font-weight-bold" style="border-radius: 20px;">
+                                    <i class="fa fa-calendar-plus-o mr-1"></i> {% trans "Add to Google Calendar" %}
+                                </a>
+                                {% if 'http' in app.interview_location %}
+                                    <a href="{{ app.interview_location }}" target="_blank" class="btn btn-xs btn-success font-weight-bold" style="border-radius: 20px;">
+                                        <i class="fa fa-video-camera mr-1"></i> {% trans "Join Meeting" %}
+                                    </a>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
