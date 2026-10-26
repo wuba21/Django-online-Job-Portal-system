@@ -24,7 +24,8 @@ class AdvancedPortalFeaturesTestCase(TestCase):
             user=self.employer_user,
             name="Tech Ethiopia PLC",
             location="Addis Ababa",
-            industry="Information Technology & Software"
+            industry="Information Technology & Software",
+            license_status="verified"
         )
 
         # Create Candidate
@@ -315,4 +316,102 @@ class AdvancedPortalFeaturesTestCase(TestCase):
         self.assertIsNotNone(app)
         self.assertTrue(bool(app.cv))
         self.assertEqual(app.comment, "I meet all criteria!")
+
+    def test_job_application_with_career_attributes_and_scorecard(self):
+        """Test applying with career attributes, AI match score calculation, and recruiter scorecard evaluation."""
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from jobsapp.models import Applicant, ApplicantProfile, CandidateSkill, WorkExperience
+        from datetime import date
+
+        user = User.objects.create_user(
+            email="career.candidate@test.com",
+            password="StrongPassword123!#",
+            first_name="Dawit",
+            last_name="Tadesse",
+            role="employee",
+            gender="male",
+            phone_number="+251912345678"
+        )
+        profile, _ = ApplicantProfile.objects.get_or_create(user=user)
+        profile.location = "Addis Ababa"
+        profile.title = "Senior Python Engineer"
+        profile.save()
+
+        CandidateSkill.objects.create(user=user, name="Python", level="expert")
+        CandidateSkill.objects.create(user=user, name="Django", level="expert")
+        WorkExperience.objects.create(user=user, title="Python Dev", company="Addis Tech", is_current=True, start_date=date.today())
+
+        self.client.login(email="career.candidate@test.com", password="StrongPassword123!#")
+        apply_url = reverse("jobs:apply-job", kwargs={"job_id": self.job.id})
+
+        cv_content = b"""%PDF-1.4
+        DAWIT TADESSE
+        Senior Python Engineer
+        Email: dawit.tadesse@test.com
+        Phone: +251912345678
+        Address: Addis Ababa, Ethiopia
+
+        PROFESSIONAL SUMMARY
+        Seasoned engineer with deep knowledge in Python and Django backends.
+
+        WORK EXPERIENCE
+        Python Dev at Addis Tech (2022 - Present)
+        - Built large scale Django portals and high throughput APIs.
+
+        EDUCATION
+        BSc in Software Engineering from Addis Ababa University, 2022.
+
+        SKILLS
+        Python, Django, PostgreSQL, Docker, Redis, REST APIs.
+        """
+        fake_cv = SimpleUploadedFile("dawit_cv.pdf", cv_content, content_type="application/pdf")
+
+        res = self.client.post(apply_url, {
+            "cv": fake_cv,
+            "comment": "Excited to apply for this vacancy!",
+            "expected_salary": "40,000 ETB / month",
+            "notice_period": "immediate",
+            "experience_years": "3-5",
+            "education_level": "bachelor",
+            "portfolio_link": "https://github.com/dawit-dev"
+        })
+        self.assertEqual(res.status_code, 302)
+
+        # Check Applicant attributes
+        applicant = Applicant.objects.filter(user=user, job=self.job).first()
+        self.assertIsNotNone(applicant)
+        self.assertEqual(applicant.expected_salary, "40,000 ETB / month")
+        self.assertEqual(applicant.notice_period, "immediate")
+        self.assertEqual(applicant.experience_years, "3-5")
+        self.assertEqual(applicant.education_level, "bachelor")
+        self.assertEqual(applicant.portfolio_link, "https://github.com/dawit-dev")
+        self.assertGreater(applicant.ai_match_score, 0)
+
+        # Check ApplicantProfile was updated
+        user.refresh_from_db()
+        self.assertEqual(user.applicant_profile.expected_salary, "40,000 ETB / month")
+        self.assertEqual(user.applicant_profile.notice_period, "immediate")
+
+        # Test Recruiter Scorecard Evaluation
+        self.client.login(email="employer.test@gmail.com", password="StrongPassword123!#")
+        eval_url = reverse("jobs:update-applicant-evaluation", kwargs={"applicant_id": applicant.id})
+        res_eval = self.client.post(eval_url, {
+            "recruiter_rating": "5",
+            "recruiter_notes": "Candidate has excellent skills and immediate availability."
+        })
+        self.assertEqual(res_eval.status_code, 302)
+
+        applicant.refresh_from_db()
+        self.assertEqual(applicant.recruiter_rating, 5)
+        self.assertEqual(applicant.recruiter_notes, "Candidate has excellent skills and immediate availability.")
+
+        # Test Enhanced CSV Export
+        export_url = reverse("jobs:export-applicants-csv", kwargs={"job_id": self.job.id})
+        res_export = self.client.get(export_url)
+        self.assertEqual(res_export.status_code, 200)
+        self.assertIn(b"Expected Monthly Salary", res_export.content)
+        self.assertIn(b"Notice Period / Availability", res_export.content)
+        self.assertIn(b"Recruiter Rating", res_export.content)
+        self.assertIn(b"40,000 ETB / month", res_export.content)
+
 

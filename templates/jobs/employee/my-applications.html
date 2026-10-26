@@ -1,169 +1,449 @@
 {% extends 'base.html' %}
-{% block title %}
-    Applicants
-{% endblock %}
-{% load static %}
-{% load is_favorited %}
-{% load url_replace %}
+{% load static i18n url_replace humanize %}
+
+{% block title %}{% trans "My Job Applications" %} - {% trans "Application Tracker" %}{% endblock %}
 
 {% block styles %}
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet"/>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css"
-          rel="stylesheet"/>
+<style>
+    .tracker-hero {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border-radius: 16px;
+        color: #fff;
+        padding: 2rem 2.2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+    }
+    .app-card {
+        background: #ffffff;
+        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        margin-bottom: 1.5rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        overflow: hidden;
+    }
+    .app-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        border-color: #cbd5e1;
+    }
+    .company-logo-box {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 1.25rem;
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    .company-logo-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 
-    <link rel="stylesheet" href="{% static 'vendor/bootstrap-select/css/bootstrap-select.min.css' %}">
-    <style>
-        .bootstrap-select .dropdown-menu a {
-            color: #000000;
-        }
-    </style>
+    /* LinkedIn-Style Progress Stepper */
+    .stepper-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        padding: 1.2rem 1rem 0.5rem;
+    }
+    .stepper-progress-line {
+        position: absolute;
+        top: 28px;
+        left: 5%;
+        right: 5%;
+        height: 4px;
+        background: #e2e8f0;
+        z-index: 1;
+    }
+    .stepper-progress-bar {
+        height: 100%;
+        background: #3b82f6;
+        transition: width 0.3s ease;
+    }
+    .step-item {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        width: 20%;
+    }
+    .step-circle {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 3px solid #cbd5e1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #64748b;
+        margin-bottom: 6px;
+        transition: all 0.2s ease;
+    }
+    .step-item.completed .step-circle {
+        background: #10b981;
+        border-color: #10b981;
+        color: #ffffff;
+    }
+    .step-item.active .step-circle {
+        background: #3b82f6;
+        border-color: #93c5fd;
+        color: #ffffff;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+    }
+    .step-item.rejected .step-circle {
+        background: #ef4444;
+        border-color: #fca5a5;
+        color: #ffffff;
+    }
+    .step-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #64748b;
+        display: block;
+    }
+    .step-item.completed .step-label {
+        color: #059669;
+    }
+    .step-item.active .step-label {
+        color: #1d4ed8;
+        font-weight: 700;
+    }
+    .step-item.rejected .step-label {
+        color: #dc2626;
+    }
+
+    /* Filter Tabs */
+    .filter-tab-btn {
+        font-size: 0.88rem;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 30px;
+        color: #475569;
+        text-decoration: none !important;
+        background: #f1f5f9;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+        margin-right: 0.4rem;
+        margin-bottom: 0.5rem;
+    }
+    .filter-tab-btn:hover {
+        background: #e2e8f0;
+        color: #0f172a;
+    }
+    .filter-tab-btn.active {
+        background: #2563eb;
+        color: #ffffff;
+    }
+    .filter-tab-btn .badge {
+        font-size: 0.75rem;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-
-    <section class="bg-light-gray">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-8 mx-auto">
-                    <h1 class="heading">All jobs you have applied</h1>
+<section class="py-4 bg-light">
+    <div class="container">
+        <!-- Hero Header -->
+        <div class="tracker-hero">
+            <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap: 15px;">
+                <div>
+                    <span class="badge badge-primary px-3 py-1 font-weight-bold mb-2" style="font-size: 0.8rem;">
+                        <i class="fa fa-briefcase mr-1"></i> {% trans "Candidate Career Hub" %}
+                    </span>
+                    <h2 class="h3 font-weight-bold text-white mb-1">{% trans "My Job Applications" %}</h2>
+                    <p class="text-white-50 mb-0 small">
+                        {% trans "Track your real-time recruitment progress, interview invitations, and employer responses." %}
+                    </p>
+                </div>
+                <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                    <a href="{% url 'jobs:jobs' %}" class="btn btn-outline-light btn-sm font-weight-bold px-3">
+                        <i class="fa fa-search mr-1"></i> {% trans "Discover Jobs" %}
+                    </a>
+                    <a href="{% url 'jobs:recommended-jobs' %}" class="btn btn-primary btn-sm font-weight-bold px-3 shadow-sm">
+                        <i class="fa fa-magic mr-1"></i> {% trans "AI Recommended" %}
+                    </a>
                 </div>
             </div>
         </div>
-    </section>
-    <section style="margin-top: 0 !important;">
-        <div class="container">
-            <form id="job-main-form" method="get" action="" class="job-main-form">
-                <div class="controls">
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <div class="form-group">
-                                <select id="status" name="status" class="form-control select2">
-                                    <option value="" selected>Select status</option>
-                                    <option value="1" {% if request.GET.status == "1" %} selected {% endif %}>Pending
-                                    </option>
-                                    <option value="2" {% if request.GET.status == "2" %} selected {% endif %}>Accepted
-                                    </option>
-                                    <option value="3" {% if request.GET.status == "3" %} selected {% endif %}>Rejected
-                                    </option>
-                                </select>
+
+        <!-- Filter Status Tabs -->
+        <div class="mb-4 d-flex flex-wrap align-items-center">
+            <a href="{% url 'jobs:employee-my-applications' %}" class="filter-tab-btn {% if not request.GET.status %}active{% endif %}">
+                <i class="fa fa-list"></i> {% trans "All Applications" %}
+            </a>
+            <a href="?status=1" class="filter-tab-btn {% if request.GET.status == '1' %}active{% endif %}">
+                <i class="fa fa-clock-o text-warning"></i> {% trans "In Review" %}
+            </a>
+            <a href="?status=2" class="filter-tab-btn {% if request.GET.status == '2' %}active{% endif %}">
+                <i class="fa fa-star text-info"></i> {% trans "Shortlisted" %}
+            </a>
+            <a href="?status=3" class="filter-tab-btn {% if request.GET.status == '3' %}active{% endif %}">
+                <i class="fa fa-calendar-check-o text-primary"></i> {% trans "Interviews" %}
+            </a>
+            <a href="?status=4" class="filter-tab-btn {% if request.GET.status == '4' %}active{% endif %}">
+                <i class="fa fa-check-circle text-success"></i> {% trans "Offers / Accepted" %}
+            </a>
+            <a href="?status=5" class="filter-tab-btn {% if request.GET.status == '5' %}active{% endif %}">
+                <i class="fa fa-times-circle text-danger"></i> {% trans "Archived / Rejected" %}
+            </a>
+        </div>
+
+        <!-- Applications List -->
+        {% if applicants %}
+            {% for app in applicants %}
+            <div class="app-card">
+                <!-- Top Main Info Header -->
+                <div class="p-3 p-md-4 border-bottom">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap" style="gap: 15px;">
+                        <div class="d-flex align-items-start" style="gap: 15px;">
+                            <!-- Company Logo / Initials -->
+                            <div class="company-logo-box">
+                                {% if app.job.get_logo_url %}
+                                    <img src="{{ app.job.get_logo_url }}" alt="{{ app.job.company_name }}" class="company-logo-img">
+                                {% else %}
+                                    <span>{{ app.job.company_initials }}</span>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h4 class="h5 font-weight-bold mb-1">
+                                    <a href="{% url 'jobs:jobs-detail' app.job.id %}" class="text-dark text-decoration-none">
+                                        {{ app.job.title }}
+                                    </a>
+                                    {% if app.job.filled %}
+                                        <span class="badge badge-secondary ml-1 small">{% trans "Filled" %}</span>
+                                    {% endif %}
+                                </h4>
+                                <div class="text-muted small d-flex flex-wrap align-items-center" style="gap: 10px;">
+                                    <span><i class="fa fa-building-o text-primary mr-1"></i> {{ app.job.company_name }}</span>
+                                    <span>&bull;</span>
+                                    <span><i class="fa fa-map-marker text-danger mr-1"></i> {{ app.job.location }}</span>
+                                    <span>&bull;</span>
+                                    <span><i class="fa fa-briefcase text-info mr-1"></i> {{ app.job.get_type_display }}</span>
+                                    {% if app.job.salary %}
+                                        <span>&bull;</span>
+                                        <span><i class="fa fa-money text-success mr-1"></i> {{ app.job.salary|intcomma }} {{ app.job.currency }}</span>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
-                        <div class="col-6">
-                            <div class="form-group">
-                                <button type="submit" class="btn btn-outline-white-primary"><i class="fa fa-magic"></i>
-                                    Filter
-                                </button>
-                            </div>
+
+                        <!-- Match Badge & Applied Date -->
+                        <div class="text-right">
+                            <span class="small text-muted d-block mb-1">
+                                <i class="fa fa-calendar-check-o text-muted mr-1"></i> Applied {{ app.created_at|date:"M d, Y" }}
+                            </span>
+                            {% if app.ai_match_score %}
+                                <span class="badge badge-pill badge-primary px-3 py-1 font-weight-bold" title="{% trans 'AI match score based on your qualifications' %}">
+                                    <i class="fa fa-bolt mr-1"></i> {{ app.ai_match_score }}% {% trans "Match" %}
+                                </span>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-            </form>
-            {% for applicant in applicants %}
-                <div class="job-listing">
-                    <div class="row">
-                        <div class="col-md-12 col-lg-6">
-                            <div class="row">
-                                <div class="col-2">
-                                    <img src="{{ applicant.job.user.profile.image }}"
-                                         alt="" class="img-fluid">
-                                </div>
-                                <div class="col-10">
-                                    <h4 class="job__title">
-                                        <a href="{% url 'jobs:jobs-detail' applicant.job.id %}">{{ applicant.job.title }}</a>
-                                        {% if applicant.job.filled %}
-                                            (Filled)
-                                        {% endif %}
-                                    </h4>
-                                    <p class="job__company">
-                                        <a href="#" style="color: #1b1e21">{{ applicant.job.company_name }}</a>
-                                    </p>
-                                </div>
-                            </div>
+
+                <!-- LinkedIn-Style Application Stage Stepper -->
+                <div class="bg-light px-3 py-2 border-bottom">
+                    <div class="stepper-wrap">
+                        <!-- Progress Background Line -->
+                        <div class="stepper-progress-line">
+                            <div class="stepper-progress-bar" style="width: {% if app.status == 1 %}15%{% elif app.status == 2 %}40%{% elif app.status == 3 %}65%{% elif app.status == 4 %}100%{% elif app.status == 5 %}100%{% else %}15%{% endif %};"></div>
                         </div>
-                        <div class="col-10 col-md-3 col-lg-3 ml-auto">
-                            <p>Status: <b>{{ applicant.get_status }}</b></p>
+
+                        <!-- Step 1: Applied -->
+                        <div class="step-item completed">
+                            <div class="step-circle"><i class="fa fa-check"></i></div>
+                            <span class="step-label">{% trans "Applied" %}</span>
+                        </div>
+
+                        <!-- Step 2: In Review -->
+                        <div class="step-item {% if app.status >= 1 and app.status != 5 %}completed{% elif app.status == 5 %}rejected{% else %}active{% endif %}">
+                            <div class="step-circle">
+                                {% if app.status >= 2 and app.status != 5 %}<i class="fa fa-check"></i>{% else %}2{% endif %}
+                            </div>
+                            <span class="step-label">{% trans "In Review" %}</span>
+                        </div>
+
+                        <!-- Step 3: Shortlisted -->
+                        <div class="step-item {% if app.status >= 2 and app.status != 5 %}completed{% elif app.status == 5 %}rejected{% else %}pending{% endif %}">
+                            <div class="step-circle">
+                                {% if app.status >= 3 and app.status != 5 %}<i class="fa fa-check"></i>{% else %}3{% endif %}
+                            </div>
+                            <span class="step-label">{% trans "Shortlisted" %}</span>
+                        </div>
+
+                        <!-- Step 4: Interview -->
+                        <div class="step-item {% if app.status >= 3 and app.status != 5 %}{% if app.status == 3 %}active{% else %}completed{% endif %}{% elif app.status == 5 %}rejected{% else %}pending{% endif %}">
+                            <div class="step-circle">
+                                {% if app.status >= 4 %}<i class="fa fa-check"></i>{% elif app.status == 3 %}<i class="fa fa-calendar"></i>{% else %}4{% endif %}
+                            </div>
+                            <span class="step-label">{% trans "Interview" %}</span>
+                        </div>
+
+                        <!-- Step 5: Final Decision -->
+                        <div class="step-item {% if app.status == 4 %}completed{% elif app.status == 5 %}rejected{% else %}pending{% endif %}">
+                            <div class="step-circle">
+                                {% if app.status == 4 %}<i class="fa fa-trophy"></i>{% elif app.status == 5 %}<i class="fa fa-times"></i>{% else %}5{% endif %}
+                            </div>
+                            <span class="step-label">
+                                {% if app.status == 4 %}{% trans "Hired / Offer" %}{% elif app.status == 5 %}{% trans "Not Selected" %}{% else %}{% trans "Decision" %}{% endif %}
+                            </span>
                         </div>
                     </div>
                 </div>
-            {% endfor %}
-            <div class="modal fade" id="myModal">
-                <div class="modal-dialog">
-                    <div class="modal-content">
 
-                        <div class="modal-header">
-                            <h4 class="modal-title">Comment by employer</h4>
-                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <!-- Interview Scheduled Highlight Card -->
+                {% if app.status == 3 and app.interview_date %}
+                <div class="p-3 mx-3 my-3 rounded border" style="background-color: #f5f3ff; border-color: #ddd6fe !important;">
+                    <div class="d-flex align-items-start" style="gap: 12px;">
+                        <div style="font-size: 1.8rem; color: #7c3aed;">
+                            <i class="fa fa-calendar-check-o"></i>
                         </div>
-
-                        <div class="modal-body">
-                            <p class="comment"></p>
+                        <div class="flex-grow-1">
+                            <h6 class="font-weight-bold mb-1" style="color: #5b21b6;">
+                                {% trans "Interview Scheduled!" %}
+                            </h6>
+                            <p class="mb-1 small text-dark">
+                                <strong>{% trans "Date & Time" %}:</strong> {{ app.interview_date|date:"l, F d, Y" }} at {{ app.interview_date|date:"h:i A" }}
+                            </p>
+                            {% if app.interview_location %}
+                            <p class="mb-1 small text-dark">
+                                <strong>{% trans "Location / Meeting Link" %}:</strong>
+                                {% if 'http' in app.interview_location %}
+                                    <a href="{{ app.interview_location }}" target="_blank" class="text-primary font-weight-bold">
+                                        {{ app.interview_location }} <i class="fa fa-external-link ml-1"></i>
+                                    </a>
+                                {% else %}
+                                    {{ app.interview_location }}
+                                {% endif %}
+                            </p>
+                            {% endif %}
+                            {% if app.interview_notes %}
+                            <p class="mb-0 small text-muted font-italic">
+                                <strong>{% trans "Instructions from Employer" %}:</strong> "{{ app.interview_notes }}"
+                            </p>
+                            {% endif %}
                         </div>
+                    </div>
+                </div>
+                {% endif %}
 
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                        </div>
+                <!-- Employer Feedback Note if available -->
+                {% if app.comment and app.comment != "" %}
+                <div class="p-3 mx-3 my-2 rounded bg-light border">
+                    <small class="text-muted font-weight-bold d-block mb-1">
+                        <i class="fa fa-comment-o text-primary mr-1"></i> {% trans "Employer Note / Status Comment" %}:
+                    </small>
+                    <p class="small text-dark mb-0 font-italic">"{{ app.comment }}"</p>
+                </div>
+                {% endif %}
 
+                <!-- Bottom Action Toolbar -->
+                <div class="p-3 bg-white d-flex justify-content-between align-items-center flex-wrap" style="gap: 10px;">
+                    <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                        {% if app.expected_salary %}
+                            <span class="badge badge-light border text-muted small py-1 px-2">
+                                <i class="fa fa-money text-success mr-1"></i> {% trans "Asking" %}: {{ app.expected_salary }}
+                            </span>
+                        {% endif %}
+                        {% if app.notice_period %}
+                            <span class="badge badge-light border text-muted small py-1 px-2">
+                                <i class="fa fa-clock-o text-info mr-1"></i> {{ app.notice_period }}
+                            </span>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                        <!-- 1-Click Message Employer -->
+                        {% if app.job.user %}
+                            <a href="{% url 'jobs:start-conversation' app.job.user.id %}?job_id={{ app.job.id }}" class="btn btn-sm btn-outline-primary font-weight-bold">
+                                <i class="fa fa-commenting-o mr-1"></i> {% trans "Message Employer" %}
+                            </a>
+                        {% endif %}
+
+                        <!-- View Submitted CV -->
+                        {% if app.cv or app.user.applicant_profile.cv_file %}
+                            <a href="{% if app.cv %}{{ app.cv.url }}{% else %}{{ app.user.applicant_profile.cv_file.url }}{% endif %}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                <i class="fa fa-file-pdf-o text-danger mr-1"></i> {% trans "My Submitted CV" %}
+                            </a>
+                        {% endif %}
+
+                        <!-- View Job Post -->
+                        <a href="{% url 'jobs:jobs-detail' app.job.id %}" class="btn btn-sm btn-outline-dark">
+                            <i class="fa fa-eye mr-1"></i> {% trans "Job Details" %}
+                        </a>
                     </div>
                 </div>
             </div>
+            {% endfor %}
+
+            <!-- Pagination -->
+            {% if is_paginated %}
             <div class="row">
                 <div class="col-md-12">
-                    <nav aria-label="Page navigation example" class="d-flex justify-content-center mt-4 mb-4">
+                    <nav aria-label="Page navigation" class="d-flex justify-content-center mt-4 mb-4">
                         <ul class="pagination">
                             {% if page_obj.has_previous %}
                                 <li class="page-item">
-                                    <a href="?page={{ page_obj.previous_page_number }}"
-                                       class="page-link">&laquo;</a>
+                                    <a href="?{% url_replace 'page' page_obj.previous_page_number %}" class="page-link">&laquo;</a>
                                 </li>
                             {% else %}
-                                <li class="page-item disabled">
-                                    <a class="page-link">&laquo;</a>
-                                </li>
+                                <li class="page-item disabled"><a class="page-link">&laquo;</a></li>
                             {% endif %}
                             {% for i in page_obj.paginator.page_range %}
                                 {% if page_obj.number == i %}
-                                    <li class="page-item active">
-                                        <a class="page-link">{{ i }}</a>
-                                    </li>
+                                    <li class="page-item active"><a class="page-link">{{ i }}</a></li>
                                 {% else %}
-                                    <li class="page-item">
-                                        <a href="?{% url_replace 'page' i %}" class="page-link">{{ i }}</a>
-                                    </li>
+                                    <li class="page-item"><a href="?{% url_replace 'page' i %}" class="page-link">{{ i }}</a></li>
                                 {% endif %}
                             {% endfor %}
                             {% if page_obj.has_next %}
                                 <li class="page-item">
-                                    <a href="?{% url_replace 'page' page_obj.next_page_number %}"
-                                       class="page-link">&raquo;</a>
+                                    <a href="?{% url_replace 'page' page_obj.next_page_number %}" class="page-link">&raquo;</a>
                                 </li>
                             {% else %}
-                                <li class="page-item disabled">
-                                    <a class="page-link">&raquo;</a>
-                                </li>
+                                <li class="page-item disabled"><a class="page-link">&raquo;</a></li>
                             {% endif %}
                         </ul>
                     </nav>
                 </div>
             </div>
-        </div>
-    </section>
+            {% endif %}
 
-{% endblock %}
-
-{% block javascripts %}
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.full.js"></script>
-
-    <script>
-        $('.js-select2').select2({
-            theme: "bootstrap"
-        });
-
-        $('.view-comment').on('click', function () {
-            $('#myModal').modal('show');
-
-            $('.modal-body .comment').html($(this).data('comment'));
-        })
-    </script>
-
+        {% else %}
+            <!-- Empty State -->
+            <div class="card border-0 shadow-sm p-5 text-center my-4" style="border-radius: 16px;">
+                <div class="my-3">
+                    <div style="width: 80px; height: 80px; border-radius: 50%; background: #eff6ff; display: inline-flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #3b82f6;" class="mb-3">
+                        <i class="fa fa-folder-open-o"></i>
+                    </div>
+                    <h4 class="font-weight-bold text-dark mb-2">{% trans "No Applications Found" %}</h4>
+                    <p class="text-muted mx-auto" style="max-width: 480px;">
+                        {% trans "You haven't submitted any applications in this status yet. Explore open vacancies that match your skills and experience." %}
+                    </p>
+                    <div class="mt-4">
+                        <a href="{% url 'jobs:jobs' %}" class="btn btn-primary font-weight-bold px-4 py-2 shadow-sm mr-2">
+                            <i class="fa fa-search mr-1"></i> {% trans "Browse Open Vacancies" %}
+                        </a>
+                        <a href="{% url 'jobs:recommended-jobs' %}" class="btn btn-outline-primary font-weight-bold px-4 py-2">
+                            <i class="fa fa-magic mr-1"></i> {% trans "View AI Recommendations" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
 {% endblock %}

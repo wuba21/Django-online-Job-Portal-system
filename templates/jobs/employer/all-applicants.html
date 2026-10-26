@@ -148,6 +148,14 @@
                                             <a href="{% url 'jobs:applied-applicant-view' app.job.id app.id %}" class="font-weight-bold text-dark text-decoration-none" style="font-size: 1.05rem;">
                                                 {{ app.user.get_full_name|default:app.user.email }}
                                             </a>
+                                            {% if app.recruiter_rating %}
+                                                <span class="text-warning font-weight-bold small ml-1" title="Recruiter Rating: {{ app.recruiter_rating }}/5">
+                                                    {% for r in "12345"|slice:app.recruiter_rating %}★{% endfor %}
+                                                </span>
+                                            {% endif %}
+                                            {% if app.user.applicant_profile.is_open_to_work %}
+                                                <span class="badge badge-success px-1 font-weight-bold" style="font-size: 0.65rem; background-color: #10b981;">#OpenToWork</span>
+                                            {% endif %}
                                             {% if app.user.is_vip %}
                                                 <span class="badge badge-warning text-dark font-weight-bold px-1" style="font-size: 0.65rem;"><i class="fa fa-star"></i> VIP</span>
                                             {% endif %}
@@ -155,6 +163,7 @@
                                         <small class="text-muted d-block">
                                             <i class="fa fa-envelope-o mr-1"></i>{{ app.user.email }}
                                             {% if app.user.phone_number %} &bull; {{ app.user.phone_number }}{% endif %}
+                                            {% if app.expected_salary %} &bull; <strong class="text-success"><i class="fa fa-money mr-1"></i>{{ app.expected_salary }}</strong>{% endif %}
                                         </small>
                                         <span class="badge badge-primary px-2 py-1 mt-1 font-weight-normal" style="font-size: 0.72rem;">
                                             <i class="fa fa-briefcase mr-1"></i> Applied for: <strong>{{ app.job.title|truncatechars:30 }}</strong>

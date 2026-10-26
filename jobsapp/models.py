@@ -161,16 +161,52 @@ class JobImage(models.Model):
         return f"Image for {self.job.title} (#{self.id})"
 
 
+EXPERIENCE_YEARS_CHOICES = (
+    ("0-1", "Less than 1 year (Fresh Graduate)"),
+    ("1-2", "1 - 2 years (Junior)"),
+    ("3-5", "3 - 5 years (Mid-Level)"),
+    ("6-8", "6 - 8 years (Senior)"),
+    ("9+", "9+ years (Lead / Executive)"),
+)
+
+NOTICE_PERIOD_CHOICES = (
+    ("immediate", "Immediately available"),
+    ("1_week", "1 week"),
+    ("2_weeks", "2 weeks"),
+    ("1_month", "1 month"),
+    ("2_months", "2+ months"),
+)
+
+EDUCATION_LEVEL_CHOICES = (
+    ("high_school", "High School / Secondary"),
+    ("tvet_diploma", "TVET / Diploma"),
+    ("bachelor", "Bachelor's Degree (BSc/BA)"),
+    ("master", "Master's Degree (MSc/MA/MBA)"),
+    ("phd", "Doctorate / Medical (PhD/MD)"),
+    ("other", "Other / Professional Certificate"),
+)
+
+
 class Applicant(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="applicants")
     created_at = models.DateTimeField(default=timezone.now)
-    comment = models.TextField(blank=True, null=True)
+    comment = models.TextField(blank=True, null=True, help_text="Cover letter or candidate pitch")
     status = models.SmallIntegerField(choices=APPLICANT_STATUS_CHOICES, default=1)
     cv = models.FileField(upload_to="applications/", blank=True, null=True)
     interview_date = models.DateTimeField(blank=True, null=True)
     interview_location = models.CharField(max_length=255, blank=True, null=True)
     interview_notes = models.TextField(blank=True, null=True)
+
+    # Real-World LinkedIn/Workday Application Attributes
+    expected_salary = models.CharField(max_length=50, blank=True, null=True, help_text="e.g. 25,000 ETB / month")
+    experience_years = models.CharField(max_length=50, blank=True, null=True, help_text="Years of professional experience")
+    notice_period = models.CharField(max_length=50, blank=True, null=True, help_text="Availability / notice period")
+    education_level = models.CharField(max_length=100, blank=True, null=True, help_text="Highest education level")
+    portfolio_link = models.URLField(blank=True, null=True, help_text="LinkedIn, GitHub, or Portfolio URL")
+    ai_match_score = models.IntegerField(default=0, help_text="AI job match score at application time (0-100)")
+    recruiter_rating = models.PositiveSmallIntegerField(default=0, help_text="Recruiter scorecard evaluation (0 to 5 stars)")
+    recruiter_notes = models.TextField(blank=True, null=True, help_text="Internal recruiter notes on this candidate")
 
     class Meta:
         ordering = ["-id"]
@@ -210,6 +246,11 @@ class ApplicantProfile(models.Model):
     github_link = models.URLField(blank=True, null=True)
     linkedin_link = models.URLField(blank=True, null=True)
     website = models.URLField(blank=True, null=True)
+    expected_salary = models.CharField(max_length=50, blank=True, null=True)
+    experience_years = models.CharField(max_length=50, blank=True, null=True)
+    notice_period = models.CharField(max_length=50, blank=True, null=True)
+    education_level = models.CharField(max_length=100, blank=True, null=True)
+    is_open_to_work = models.BooleanField(default=True, help_text="Open to Work badge for recruiters")
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -219,7 +260,7 @@ class ApplicantProfile(models.Model):
     @property
     def completion_percentage(self):
         score = 0
-        total_parts = 6
+        total_parts = 8
         if self.user.first_name and self.user.last_name:
             score += 1
         if self.title:
@@ -230,7 +271,11 @@ class ApplicantProfile(models.Model):
             score += 1
         if self.user.skills.exists():
             score += 1
-        if self.user.experiences.exists() or self.cv_file:
+        if self.user.experiences.exists():
+            score += 1
+        if self.cv_file:
+            score += 1
+        if self.expected_salary or self.experience_years:
             score += 1
         return int((score / total_parts) * 100)
 

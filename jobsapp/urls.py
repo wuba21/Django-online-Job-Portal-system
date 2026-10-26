@@ -18,7 +18,7 @@ from jobsapp.views.employee import (
 from jobsapp.views.employer import (
     ApplicantPerJobView, ApplicantsListView, AppliedApplicantView, DashboardView,
     EmployerProfileEditView, JobCreateView, JobUpdateView, SendResponseView, delete_employer_job, filled,
-    export_applicants_csv, schedule_interview, quick_update_applicant_status
+    export_applicants_csv, schedule_interview, quick_update_applicant_status, update_applicant_evaluation
 )
 from jobsapp.views.company import CompanyDetailView, CompanyListView, add_company_review
 from jobsapp.views.messages import inbox_view, start_conversation, poll_messages, live_chat_status_api, conversations_sync_api
@@ -82,6 +82,7 @@ urlpatterns = [
                 path("send-response/<int:applicant_id>", SendResponseView.as_view(), name="applicant-send-response"),
                 path("schedule-interview/<int:applicant_id>/", schedule_interview, name="schedule-interview"),
                 path("update-status/<int:applicant_id>/<int:status_id>/", quick_update_applicant_status, name="quick-update-status"),
+                path("applicant-evaluation/<int:applicant_id>/", update_applicant_evaluation, name="update-applicant-evaluation"),
                 path("jobs/create/", JobCreateView.as_view(), name="employer-jobs-create"),
                 path("jobs/<int:id>/edit/", JobUpdateView.as_view(), name="employer-jobs-edit"),
             ]

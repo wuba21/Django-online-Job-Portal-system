@@ -281,6 +281,17 @@
                                 {% elif applicant.status == 5 %}
                                     <span class="status-pill status-pill-5"><i class="fa fa-times-circle"></i> {% trans "Rejected" %}</span>
                                 {% endif %}
+
+                                {% if applicant.user.applicant_profile.is_open_to_work %}
+                                    <span class="badge badge-success px-2 py-1 ml-2 font-weight-bold" style="background-color: #10b981; font-size: 0.78rem;">
+                                        <i class="fa fa-circle mr-1" style="font-size: 0.6rem;"></i> #OpenToWork
+                                    </span>
+                                {% endif %}
+                                {% if applicant.ai_match_score %}
+                                    <span class="badge badge-pill badge-warning px-2 py-1 ml-2 font-weight-bold text-dark" style="font-size: 0.78rem;">
+                                        <i class="fa fa-bolt mr-1 text-primary"></i> {{ applicant.ai_match_score }}% Match
+                                    </span>
+                                {% endif %}
                             </div>
 
                             <p class="text-white-50 mb-2 font-weight-normal">
@@ -308,6 +319,9 @@
                     <a href="{% url 'jobs:start-conversation' applicant.user.id %}?job_id={{ applicant.job.id }}" class="btn btn-info btn-lg shadow-sm font-weight-bold px-3 mb-2 mb-sm-0">
                         <i class="fa fa-commenting-o mr-1"></i> {% trans "Message" %}
                     </a>
+                    <button type="button" class="btn btn-warning btn-lg shadow-sm font-weight-bold px-3 mb-2 mb-sm-0 text-dark" data-toggle="modal" data-target="#interviewModal">
+                        <i class="fa fa-calendar-plus-o mr-1"></i> {% trans "Schedule Interview" %}
+                    </button>
                     <button type="button" class="btn btn-primary btn-lg shadow-sm font-weight-bold px-3 mb-2 mb-sm-0" data-toggle="modal" data-target="#statusModal">
                         <i class="fa fa-sliders mr-1"></i> {% trans "Change Stage" %}
                     </button>
@@ -376,6 +390,46 @@
                                 </span>
                             </div>
 
+                            <!-- Expected Salary -->
+                            {% if applicant.expected_salary or applicant.user.applicant_profile.expected_salary %}
+                            <div class="info-list-item">
+                                <span class="info-label"><i class="fa fa-money text-success mr-1"></i> {% trans "Expected" %}:</span>
+                                <span class="info-value font-weight-bold text-success">
+                                    {{ applicant.expected_salary|default:applicant.user.applicant_profile.expected_salary }}
+                                </span>
+                            </div>
+                            {% endif %}
+
+                            <!-- Notice Period / Availability -->
+                            {% if applicant.notice_period or applicant.user.applicant_profile.notice_period %}
+                            <div class="info-list-item">
+                                <span class="info-label"><i class="fa fa-clock-o text-info mr-1"></i> {% trans "Availability" %}:</span>
+                                <span class="info-value font-weight-bold text-dark">
+                                    {{ applicant.notice_period|default:applicant.user.applicant_profile.notice_period }}
+                                </span>
+                            </div>
+                            {% endif %}
+
+                            <!-- Experience Years -->
+                            {% if applicant.experience_years or applicant.user.applicant_profile.experience_years %}
+                            <div class="info-list-item">
+                                <span class="info-label"><i class="fa fa-briefcase text-secondary mr-1"></i> {% trans "Experience" %}:</span>
+                                <span class="info-value text-dark">
+                                    {{ applicant.experience_years|default:applicant.user.applicant_profile.experience_years }}
+                                </span>
+                            </div>
+                            {% endif %}
+
+                            <!-- Education Level -->
+                            {% if applicant.education_level or applicant.user.applicant_profile.education_level %}
+                            <div class="info-list-item">
+                                <span class="info-label"><i class="fa fa-graduation-cap text-primary mr-1"></i> {% trans "Education" %}:</span>
+                                <span class="info-value text-dark">
+                                    {{ applicant.education_level|default:applicant.user.applicant_profile.education_level }}
+                                </span>
+                            </div>
+                            {% endif %}
+
                             <!-- Profile Strength -->
                             {% if applicant.user.applicant_profile.completion_percentage %}
                             <div class="info-list-item border-bottom-0 pb-1">
@@ -401,6 +455,39 @@
                                 </a>
                             {% endif %}
                         </div>
+                    </div>
+                </div>
+
+                <!-- Recruiter Scorecard & Internal Notes Card -->
+                <div class="ats-card border-warning">
+                    <div class="ats-card-header bg-light">
+                        <h5 class="ats-card-title text-dark">
+                            <i class="fa fa-star text-warning"></i> {% trans "Recruiter Evaluation Scorecard" %}
+                        </h5>
+                    </div>
+                    <div class="ats-card-body">
+                        <form action="{% url 'jobs:update-applicant-evaluation' applicant.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-dark d-block mb-1">{% trans "Candidate Rating" %}:</label>
+                                <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+                                    {% for r_val in "12345" %}
+                                        <label class="btn btn-sm btn-outline-warning {% if applicant.recruiter_rating|stringformat:'s' == r_val %}active font-weight-bold{% endif %}">
+                                            <input type="radio" name="recruiter_rating" value="{{ r_val }}" {% if applicant.recruiter_rating|stringformat:'s' == r_val %}checked{% endif %}>
+                                            {{ r_val }} ★
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-dark mb-1">{% trans "Private Internal Notes" %}:</label>
+                                <textarea name="recruiter_notes" rows="3" class="form-control form-control-sm" placeholder="{% trans 'Private notes for your hiring team (e.g., strong communication, salary flexibility)...' %}">{{ applicant.recruiter_notes|default:'' }}</textarea>
+                                <small class="text-muted"><i class="fa fa-lock mr-1"></i> {% trans "Only visible to you and your recruitment team." %}</small>
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-warning btn-block font-weight-bold text-dark shadow-sm">
+                                <i class="fa fa-save mr-1"></i> {% trans "Save Scorecard & Notes" %}
+                            </button>
+                        </form>
                     </div>
                 </div>
 
@@ -482,6 +569,29 @@
 
             <!-- Right Column: Status Log, Bio, Work Experience, Education -->
             <div class="col-lg-8">
+                <!-- Quick ATS Stage Action Bar -->
+                <div class="card border-0 shadow-sm p-3 mb-4 bg-white" style="border-radius: 12px; border-left: 4px solid #3b82f6 !important;">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap: 10px;">
+                        <span class="small font-weight-bold text-dark text-uppercase">
+                            <i class="fa fa-sliders mr-1 text-primary"></i> {% trans "One-Click Stage Actions" %}:
+                        </span>
+                        <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
+                            <a href="{% url 'jobs:quick-update-status' applicant.id 2 %}" class="btn btn-sm {% if applicant.status == 2 %}btn-info font-weight-bold{% else %}btn-outline-info{% endif %}">
+                                <i class="fa fa-star mr-1"></i> {% trans "Shortlist" %}
+                            </a>
+                            <button type="button" class="btn btn-sm {% if applicant.status == 3 %}btn-primary font-weight-bold{% else %}btn-outline-primary{% endif %}" data-toggle="modal" data-target="#interviewModal">
+                                <i class="fa fa-calendar-check-o mr-1"></i> {% trans "Schedule Interview" %}
+                            </button>
+                            <a href="{% url 'jobs:quick-update-status' applicant.id 4 %}" class="btn btn-sm {% if applicant.status == 4 %}btn-success font-weight-bold{% else %}btn-outline-success{% endif %}">
+                                <i class="fa fa-check-circle mr-1"></i> {% trans "Offer / Hire" %}
+                            </a>
+                            <a href="{% url 'jobs:quick-update-status' applicant.id 5 %}" class="btn btn-sm {% if applicant.status == 5 %}btn-danger font-weight-bold{% else %}btn-outline-danger{% endif %}">
+                                <i class="fa fa-times-circle mr-1"></i> {% trans "Reject" %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Employer Feedback & Status Box -->
                 <div class="ats-card border-primary">
                     <div class="ats-card-header bg-light">
@@ -507,6 +617,38 @@
                                 <span class="status-pill status-pill-5"><i class="fa fa-times-circle"></i> {% trans "Rejected" %}</span>
                             {% endif %}
                         </div>
+
+                        <!-- Scheduled Interview Callout -->
+                        {% if applicant.status == 3 and applicant.interview_date %}
+                            <div class="alert alert-primary p-3 rounded mb-3" style="background-color: #ede9fe; border-color: #ddd6fe !important;">
+                                <div class="d-flex align-items-start" style="gap: 10px;">
+                                    <i class="fa fa-calendar-check-o fa-2x text-primary mt-1"></i>
+                                    <div>
+                                        <h6 class="font-weight-bold text-dark mb-1">{% trans "Interview Scheduled" %}</h6>
+                                        <p class="mb-1 small text-dark">
+                                            <strong>{% trans "Date & Time" %}:</strong> {{ applicant.interview_date|date:"l, F d, Y at h:i A" }}
+                                        </p>
+                                        {% if applicant.interview_location %}
+                                            <p class="mb-1 small text-dark">
+                                                <strong>{% trans "Venue / Link" %}:</strong>
+                                                {% if 'http' in applicant.interview_location %}
+                                                    <a href="{{ applicant.interview_location }}" target="_blank" class="text-primary font-weight-bold">
+                                                        {{ applicant.interview_location }} <i class="fa fa-external-link ml-1"></i>
+                                                    </a>
+                                                {% else %}
+                                                    {{ applicant.interview_location }}
+                                                {% endif %}
+                                            </p>
+                                        {% endif %}
+                                        {% if applicant.interview_notes %}
+                                            <p class="mb-0 small text-muted font-italic">
+                                                <strong>{% trans "Notes" %}:</strong> {{ applicant.interview_notes }}
+                                            </p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
 
                         {% if applicant.comment %}
                             <div class="alert alert-secondary bg-light border p-3 rounded mb-0">
@@ -662,6 +804,51 @@
                     <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">{% trans "Cancel" %}</button>
                     <button type="submit" class="btn btn-success font-weight-bold px-4">
                         <i class="fa fa-check mr-1"></i> {% trans "Save & Notify Candidate" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Dedicated Schedule Interview Modal -->
+<div class="modal fade" id="interviewModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 14px; overflow: hidden;">
+            <div class="modal-header bg-primary text-white px-4 py-3">
+                <h5 class="modal-title font-weight-bold text-white mb-0">
+                    <i class="fa fa-calendar-plus-o mr-2"></i> {% trans "Schedule Candidate Interview" %}
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{% url 'jobs:schedule-interview' applicant.id %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body px-4 py-3">
+                    <div class="form-group mb-3">
+                        <label class="font-weight-bold text-dark small text-uppercase">{% trans "Interview Date & Time" %} *</label>
+                        <input type="datetime-local" name="interview_date" class="form-control" required value="{{ applicant.interview_date|date:'Y-m-d\TH:i' }}">
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="font-weight-bold text-dark small text-uppercase">{% trans "Venue / Video Meeting Link" %} *</label>
+                        <input type="text" name="interview_location" class="form-control" placeholder="e.g. Google Meet link, Zoom, or Office Address (Bole, Addis Ababa)" required value="{{ applicant.interview_location|default:'' }}">
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="font-weight-bold text-dark small text-uppercase">{% trans "Instructions for Candidate" %}</label>
+                        <textarea name="interview_notes" rows="3" class="form-control" placeholder="{% trans 'e.g. Please bring an updated CV copy and portfolio, or test your webcam beforehand...' %}">{{ applicant.interview_notes|default:'' }}</textarea>
+                    </div>
+
+                    <div class="alert alert-info py-2 px-3 small mb-0 rounded">
+                        <i class="fa fa-bell mr-1"></i> {% trans "Candidate will automatically receive an in-app invitation alert and email with these exact details." %}
+                    </div>
+                </div>
+                <div class="modal-footer bg-light px-4 py-3">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn btn-primary font-weight-bold px-4">
+                        <i class="fa fa-paper-plane mr-1"></i> {% trans "Confirm & Send Interview Invitation" %}
                     </button>
                 </div>
             </form>

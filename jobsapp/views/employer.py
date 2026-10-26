@@ -489,27 +489,48 @@ class EmployerProfileEditView(UpdateView):
 @user_is_employer
 def export_applicants_csv(request, job_id):
     """
-    Exports all applicants for a specific job into a clean CSV spreadsheet.
+    Exports all applicants for a specific job into a clean CSV spreadsheet with all LinkedIn-grade attributes.
     """
     import csv
     from django.http import HttpResponse
 
-    job = get_object_or_404(Job, id=job_id, user=request.user)
-    applicants = Applicant.objects.select_related("user").filter(job=job)
+    if request.user.is_superuser or request.user.is_staff:
+        job = get_object_or_404(Job, id=job_id)
+    else:
+        job = get_object_or_404(Job, id=job_id, user=request.user)
+
+    applicants = Applicant.objects.select_related("user", "user__applicant_profile").filter(job=job)
 
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = f'attachment; filename="Applicants_{job.id}_{job.title.replace(" ", "_")}.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(["Applicant Name", "Email", "Phone Number", "Applied Date", "Status", "Comment"])
+    writer.writerow([
+        "Applicant Name", "Email", "Phone Number", "Gender", "Location",
+        "Professional Title", "Total Experience", "Highest Education",
+        "Expected Monthly Salary", "Notice Period / Availability",
+        "AI Match Score (%)", "Recruiter Rating (1-5)", "Recruiter Internal Notes",
+        "Application Status", "Applied Date", "Candidate Cover Pitch"
+    ])
 
     for app in applicants:
+        profile = getattr(app.user, "applicant_profile", None)
         writer.writerow([
             app.user.get_full_name() or app.user.email,
             app.user.email,
             getattr(app.user, "phone_number", "") or "N/A",
-            app.created_at.strftime("%Y-%m-%d %H:%M"),
+            app.user.get_gender_display() if app.user.gender else "N/A",
+            (profile.location if profile else "") or "N/A",
+            (profile.title if profile else "") or "N/A",
+            app.experience_years or (profile.experience_years if profile else "") or "N/A",
+            app.education_level or (profile.education_level if profile else "") or "N/A",
+            app.expected_salary or (profile.expected_salary if profile else "") or "N/A",
+            app.notice_period or (profile.notice_period if profile else "") or "N/A",
+            f"{app.ai_match_score}%" if app.ai_match_score else "N/A",
+            f"{app.recruiter_rating}★" if app.recruiter_rating else "Unrated",
+            app.recruiter_notes or "",
             app.get_status,
+            app.created_at.strftime("%Y-%m-%d %H:%M"),
             app.comment or ""
         ])
 
@@ -619,4 +640,37 @@ def quick_update_applicant_status(request, applicant_id, status_id):
     if referer:
         return redirect(referer)
     return redirect("jobs:employer-dashboard-applicants", job_id=applicant.job.id)
+
+
+@login_required(login_url=reverse_lazy("accounts:login"))
+@user_is_employer
+def update_applicant_evaluation(request, applicant_id):
+    """
+    Recruiter Scorecard: saves recruiter 1-5 star rating and internal notes on candidate.
+    """
+    if request.method == "POST":
+        if request.user.is_superuser or request.user.is_staff:
+            applicant = get_object_or_404(Applicant, id=applicant_id)
+        else:
+            applicant = get_object_or_404(Applicant, id=applicant_id, job__user=request.user)
+
+        rating_str = request.POST.get("recruiter_rating", "0")
+        notes = request.POST.get("recruiter_notes", "").strip()
+
+        try:
+            rating = int(rating_str)
+            if 0 <= rating <= 5:
+                applicant.recruiter_rating = rating
+        except (ValueError, TypeError):
+            pass
+
+        applicant.recruiter_notes = notes
+        applicant.save(update_fields=["recruiter_rating", "recruiter_notes"])
+        messages.success(request, f"Recruiter evaluation and internal notes saved for {applicant.user.get_full_name() or applicant.user.email}.")
+
+    referer = request.META.get("HTTP_REFERER")
+    if referer:
+        return redirect(referer)
+    return redirect("jobs:applied-applicant-view", job_id=applicant.job.id, applicant_id=applicant.id)
+
 

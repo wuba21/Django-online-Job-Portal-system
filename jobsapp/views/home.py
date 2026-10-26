@@ -13,12 +13,12 @@ from jobsapp.decorators import user_is_employee
 from jobsapp.forms import ApplyJobForm
 from jobsapp.models import (
     Applicant, ApplicantProfile, ETHIOPIAN_LOCATIONS, EXPERIENCE_LEVEL_CHOICES,
-    Favorite, Job, JobAlert, WORK_MODE_CHOICES
+    Favorite, Job, JobAlert, WORK_MODE_CHOICES, CandidateSkill, WorkExperience,
+    EXPERIENCE_YEARS_CHOICES, NOTICE_PERIOD_CHOICES, EDUCATION_LEVEL_CHOICES
 )
 from jobsapp.utils.notifications import create_notification, send_event_email
 from jobsapp.utils.recommendation import calculate_job_match_score, get_recommended_jobs_for_user, invalidate_recommendation_cache
 from jobsapp.utils.ai_resume_detector import extract_text_from_file, analyze_resume_authenticity
-from jobsapp.models import CandidateSkill, WorkExperience
 from django.views.decorators.http import require_POST
 
 
@@ -265,6 +265,9 @@ class JobDetailsView(DetailView):
                 context["has_location"] = has_location
                 context["has_experience"] = has_experience
                 context["ethiopian_locations"] = ETHIOPIAN_LOCATIONS
+                context["experience_years_choices"] = EXPERIENCE_YEARS_CHOICES
+                context["notice_period_choices"] = NOTICE_PERIOD_CHOICES
+                context["education_level_choices"] = EDUCATION_LEVEL_CHOICES
                 context["missing_requirements"] = missing_reqs
                 context["is_ready_to_apply"] = len(missing_reqs) == 0
 
@@ -435,6 +438,12 @@ class ApplyJobView(CreateView):
 
             # Create application safely
             comment_text = request.POST.get("comment", "").strip()
+            expected_salary = request.POST.get("expected_salary", "").strip()
+            experience_years = request.POST.get("experience_years", "").strip()
+            notice_period = request.POST.get("notice_period", "").strip()
+            education_level = request.POST.get("education_level", "").strip()
+            portfolio_link = request.POST.get("portfolio_link", "").strip()
+
             applicant, created = Applicant.objects.get_or_create(
                 user=user,
                 job=job,
@@ -443,17 +452,57 @@ class ApplyJobView(CreateView):
             if not created and comment_text:
                 applicant.comment = comment_text
 
+            if expected_salary:
+                applicant.expected_salary = expected_salary
+                if not profile.expected_salary:
+                    profile.expected_salary = expected_salary
+                    profile_changed_fields.append("expected_salary")
+
+            if experience_years:
+                applicant.experience_years = experience_years
+                if not profile.experience_years:
+                    profile.experience_years = experience_years
+                    profile_changed_fields.append("experience_years")
+
+            if notice_period:
+                applicant.notice_period = notice_period
+                if not profile.notice_period:
+                    profile.notice_period = notice_period
+                    profile_changed_fields.append("notice_period")
+
+            if education_level:
+                applicant.education_level = education_level
+                if not profile.education_level:
+                    profile.education_level = education_level
+                    profile_changed_fields.append("education_level")
+
+            if portfolio_link:
+                applicant.portfolio_link = portfolio_link
+                if not profile.website:
+                    profile.website = portfolio_link
+                    profile_changed_fields.append("website")
+
+            # Calculate AI Job Match Score at application time
+            try:
+                applicant.ai_match_score = calculate_job_match_score(user, job)
+            except Exception:
+                applicant.ai_match_score = 0
+
             if uploaded_cv:
                 applicant.cv = uploaded_cv
                 if not profile.cv_file:
                     profile.cv_file = uploaded_cv
-                    profile.save(update_fields=["cv_file"])
+                    profile_changed_fields.append("cv_file")
             elif not applicant.cv:
                 # Auto-link candidate's existing uploaded profile CV
                 if profile.cv_file:
                     applicant.cv = profile.cv_file
 
             applicant.save()
+
+            if profile_changed_fields:
+                profile.save(update_fields=list(set(profile_changed_fields)))
+
             invalidate_recommendation_cache(user.id)
 
             messages.success(request, f"🎉 Successfully applied for '{job.title}'!")

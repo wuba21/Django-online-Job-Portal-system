@@ -542,6 +542,62 @@
                                 {% endif %}
                             </div>
                         </div>
+
+                        <!-- 9. Compensation, Availability & Education (Professional Attributes) -->
+                        <div class="border-top pt-3 mt-3">
+                            <h6 class="font-weight-bold text-dark small mb-2"><i class="fa fa-briefcase text-primary mr-1"></i> Career Details &amp; Availability</h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <label class="small text-muted font-weight-bold mb-1">Expected Monthly Salary</label>
+                                    <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text bg-white"><i class="fa fa-money text-success"></i></span>
+                                        </div>
+                                        <input type="text" name="expected_salary" value="{{ applicant_profile.expected_salary|default:'' }}" class="form-control" placeholder="e.g. 25,000 ETB / month or Negotiable">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="small text-muted font-weight-bold mb-1">Notice Period / Availability</label>
+                                    <select name="notice_period" class="form-control form-control-sm">
+                                        <option value="">-- Select Availability --</option>
+                                        {% for val, label in notice_period_choices %}
+                                            <option value="{{ val }}" {% if applicant_profile.notice_period == val %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <label class="small text-muted font-weight-bold mb-1">Highest Education Level</label>
+                                    <select name="education_level" class="form-control form-control-sm">
+                                        <option value="">-- Select Education Level --</option>
+                                        {% for val, label in education_level_choices %}
+                                            <option value="{{ val }}" {% if applicant_profile.education_level == val %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="small text-muted font-weight-bold mb-1">Total Years of Experience</label>
+                                    <select name="experience_years" class="form-control form-control-sm">
+                                        <option value="">-- Select Experience --</option>
+                                        {% for val, label in experience_years_choices %}
+                                            <option value="{{ val }}" {% if applicant_profile.experience_years == val %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <label class="small text-muted font-weight-bold mb-1">LinkedIn, GitHub or Portfolio Link</label>
+                                    <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text bg-white"><i class="fa fa-link text-info"></i></span>
+                                        </div>
+                                        <input type="url" name="portfolio_link" value="{{ applicant_profile.linkedin_link|default:applicant_profile.github_link|default:applicant_profile.website|default:'' }}" class="form-control" placeholder="https://linkedin.com/in/... or https://github.com/...">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- ═══════ RESUME / CV UPLOAD WITH AI VERIFICATION ═══════ -->

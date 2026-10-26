@@ -96,6 +96,36 @@
                                     {{ profile_form.bio }}
                                 </div>
 
+                                <div class="card border p-3 mb-3 bg-light" style="border-radius: 10px;">
+                                    <h6 class="font-weight-bold text-dark small mb-2"><i class="fa fa-briefcase text-primary mr-1"></i> Career Preferences &amp; Availability</h6>
+                                    <div class="row">
+                                        <div class="col-md-6 form-group">
+                                            <label class="small font-weight-bold">Expected Monthly Salary</label>
+                                            {{ profile_form.expected_salary }}
+                                        </div>
+                                        <div class="col-md-6 form-group">
+                                            <label class="small font-weight-bold">Availability / Notice Period</label>
+                                            {{ profile_form.notice_period }}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 form-group">
+                                            <label class="small font-weight-bold">Total Experience</label>
+                                            {{ profile_form.experience_years }}
+                                        </div>
+                                        <div class="col-md-6 form-group">
+                                            <label class="small font-weight-bold">Highest Education Level</label>
+                                            {{ profile_form.education_level }}
+                                        </div>
+                                    </div>
+                                    <div class="form-check mt-1">
+                                        {{ profile_form.is_open_to_work }}
+                                        <label class="form-check-label font-weight-bold text-success ml-2" for="id_open_to_work">
+                                            <i class="fa fa-circle mr-1" style="font-size: 0.7rem;"></i> #OpenToWork &mdash; Let recruiters know you're actively looking for opportunities
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <div class="row">
                                     <div class="col-md-4 form-group">
                                         <label>GitHub Profile</label>

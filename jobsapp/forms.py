@@ -4,7 +4,8 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from jobsapp.models import (
-    Applicant, Job, ApplicantProfile, Education, WorkExperience, CandidateSkill
+    Applicant, Job, ApplicantProfile, Education, WorkExperience, CandidateSkill,
+    EXPERIENCE_YEARS_CHOICES, NOTICE_PERIOD_CHOICES, EDUCATION_LEVEL_CHOICES
 )
 from accounts.models import Company
 from tags.models import Tag
@@ -156,17 +157,39 @@ class ApplyJobForm(forms.ModelForm):
 
 
 class ApplicantProfileForm(forms.ModelForm):
+    experience_years = forms.ChoiceField(
+        choices=[("", "-- Select Experience --")] + list(EXPERIENCE_YEARS_CHOICES),
+        required=False,
+        widget=forms.Select(attrs={"class": "form-control"})
+    )
+    notice_period = forms.ChoiceField(
+        choices=[("", "-- Select Availability --")] + list(NOTICE_PERIOD_CHOICES),
+        required=False,
+        widget=forms.Select(attrs={"class": "form-control"})
+    )
+    education_level = forms.ChoiceField(
+        choices=[("", "-- Select Education Level --")] + list(EDUCATION_LEVEL_CHOICES),
+        required=False,
+        widget=forms.Select(attrs={"class": "form-control"})
+    )
+
     class Meta:
         model = ApplicantProfile
-        fields = ("title", "bio", "location", "cv_file", "github_link", "linkedin_link", "website")
+        fields = (
+            "title", "bio", "location", "expected_salary", "experience_years",
+            "notice_period", "education_level", "is_open_to_work",
+            "cv_file", "github_link", "linkedin_link", "website"
+        )
         widgets = {
             "title": forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. Senior Python / Django Developer"}),
             "bio": forms.Textarea(attrs={"rows": 4, "class": "form-control", "placeholder": "Brief summary of your professional background..."}),
             "location": forms.Select(attrs={"class": "form-control"}),
+            "expected_salary": forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. 25,000 ETB / month"}),
+            "is_open_to_work": forms.CheckboxInput(attrs={"class": "form-check-input", "id": "id_open_to_work"}),
             "cv_file": forms.FileInput(attrs={"class": "form-control-file"}),
             "github_link": forms.TextInput(attrs={"class": "form-control", "placeholder": "https://github.com/username"}),
             "linkedin_link": forms.TextInput(attrs={"class": "form-control", "placeholder": "https://linkedin.com/in/username"}),
-            "website": forms.TextInput(attrs={"class": "form-control", "placeholder": "https://yourwebsite.com"}),
+            "website": forms.TextInput(attrs={"class": "form-control", "placeholder": "https://yourportfolio.com"}),
         }
 
     def clean_github_link(self):
