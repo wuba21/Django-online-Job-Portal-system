@@ -314,34 +314,34 @@ class ApplyJobView(CreateView):
             # 1. Full Name
             inline_first = request.POST.get("first_name", "").strip()
             inline_last = request.POST.get("last_name", "").strip()
-            if inline_first and not (user.first_name and user.first_name.strip()):
+            if inline_first and inline_first != user.first_name:
                 user.first_name = inline_first
                 user_changed = True
-            if inline_last and not (user.last_name and user.last_name.strip()):
+            if inline_last and inline_last != user.last_name:
                 user.last_name = inline_last
                 user_changed = True
 
             # 2. Phone Number
             inline_phone = request.POST.get("phone_number", "").strip()
-            if inline_phone and not (user.phone_number and user.phone_number.strip()):
+            if inline_phone and inline_phone != user.phone_number:
                 user.phone_number = inline_phone
                 user_changed = True
 
             # 3. Gender
             inline_gender = request.POST.get("gender", "").strip()
-            if inline_gender in ("male", "female") and not (user.gender and user.gender.strip()):
+            if inline_gender in ("male", "female") and inline_gender != user.gender:
                 user.gender = inline_gender
                 user_changed = True
 
             # 4. Location / Address
             inline_location = request.POST.get("location", "").strip()
-            if inline_location and not (profile.location and profile.location.strip()):
+            if inline_location and inline_location != profile.location:
                 profile.location = inline_location
                 profile_changed_fields.append("location")
 
             # 5. Professional Title
             inline_title = request.POST.get("title", "").strip()
-            if inline_title and not (profile.title and profile.title.strip()):
+            if inline_title and inline_title != profile.title:
                 profile.title = inline_title
                 profile_changed_fields.append("title")
 
@@ -355,7 +355,7 @@ class ApplyJobView(CreateView):
 
             # 6. Quick Skills (comma-separated)
             inline_skills = request.POST.get("quick_skills", "").strip()
-            if inline_skills and not (hasattr(user, "skills") and user.skills.exists()):
+            if inline_skills:
                 for skill_name in inline_skills.split(","):
                     skill_name = skill_name.strip()
                     if skill_name and len(skill_name) <= 100:
@@ -367,14 +367,13 @@ class ApplyJobView(CreateView):
             # 7. Quick Work Experience
             inline_exp_title = request.POST.get("exp_title", "").strip()
             inline_exp_company = request.POST.get("exp_company", "").strip()
-            if inline_exp_title and inline_exp_company and not (hasattr(user, "experiences") and user.experiences.exists()):
+            if inline_exp_title and inline_exp_company:
                 from datetime import date
-                WorkExperience.objects.create(
+                WorkExperience.objects.get_or_create(
                     user=user,
                     title=inline_exp_title,
                     company=inline_exp_company,
-                    is_current=True,
-                    start_date=date.today()
+                    defaults={"is_current": True, "start_date": date.today()}
                 )
 
             # ── AI Resume/CV Verification ──
@@ -643,15 +642,24 @@ def send_job_alert_notifications(job, request=None):
 @login_required(login_url=reverse_lazy("accounts:login"))
 @require_POST
 def verify_resume_api(request):
-    """AJAX endpoint for instant AI Resume/CV authenticity verification."""
+    """AJAX endpoint for instant AI Resume/CV authenticity verification and smart form auto-fill."""
     uploaded = request.FILES.get("cv")
+    use_saved = request.POST.get("use_saved_cv") in ("1", "true", "True")
+
+    if not uploaded and use_saved:
+        profile = getattr(request.user, "applicant_profile", None)
+        if profile and profile.cv_file:
+            uploaded = profile.cv_file
+
     if not uploaded:
-        return JsonResponse({"is_valid": False, "score": 0, "message": "No file uploaded."})
+        return JsonResponse({"is_valid": False, "score": 0, "message": "No file provided for AI inspection."})
 
     try:
-        text = extract_text_from_file(uploaded, uploaded.name)
-        uploaded.seek(0)
-        analysis = analyze_resume_authenticity(text, uploaded.name)
+        filename = getattr(uploaded, "name", "resume.pdf")
+        text = extract_text_from_file(uploaded, filename)
+        if hasattr(uploaded, "seek"):
+            uploaded.seek(0)
+        analysis = analyze_resume_authenticity(text, filename)
         return JsonResponse({
             "is_valid": analysis["is_valid"],
             "score": analysis["score"],
@@ -659,6 +667,13 @@ def verify_resume_api(request):
             "status": analysis["status"],
             "detected_sections": analysis["detected_sections"],
             "extracted_skills": analysis["extracted_skills"],
+            "extracted_phone": analysis.get("extracted_phone"),
+            "extracted_email": analysis.get("extracted_email"),
+            "extracted_title": analysis.get("extracted_title"),
+            "extracted_name": analysis.get("extracted_name"),
+            "extracted_location": analysis.get("extracted_location"),
+            "extracted_education": analysis.get("extracted_education"),
+            "extracted_experience_years": analysis.get("extracted_experience_years"),
             "word_count": analysis["word_count"],
         })
     except Exception as e:

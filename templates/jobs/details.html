@@ -360,33 +360,60 @@
                         </div>
                     {% endif %}
 
-                    <!-- ═══════ 8-ITEM REQUIREMENT CHECKLIST WITH INLINE INPUTS ═══════ -->
+                    <!-- ═══════ 8-ITEM REQUIREMENT CHECKLIST WITH INLINE INPUTS & AI AUTO-FILL ═══════ -->
                     <div class="card border bg-light p-3 mb-3 shadow-none" style="border-radius: 10px;">
-                        <h6 class="font-weight-bold text-dark small mb-3"><i class="fa fa-clipboard-check text-primary mr-1"></i> Application Requirements Checklist</h6>
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap" style="gap: 8px;">
+                            <div>
+                                <h6 class="font-weight-bold text-dark small mb-0">
+                                    <i class="fa fa-clipboard-check text-primary mr-1"></i> Application Requirements Checklist
+                                </h6>
+                                <small class="text-muted">Review, edit, or auto-fill your application details</small>
+                            </div>
+                            <div class="d-flex align-items-center" style="gap: 6px;">
+                                <button type="button" class="btn btn-xs btn-outline-primary font-weight-bold" id="toggleEditDetailsBtn" onclick="toggleEditDetails()">
+                                    <i class="fa fa-pencil mr-1"></i> <span id="toggleEditText">Edit Details</span>
+                                </button>
+                                <button type="button" class="btn btn-xs btn-info text-white font-weight-bold shadow-sm" id="aiAutofillBtn" onclick="triggerAIAutoFill()" title="Auto-fill form fields using AI from your Resume/CV">
+                                    <i class="fa fa-magic mr-1"></i> Auto-Fill with AI
+                                </button>
+                                <a href="{% url 'accounts:employee-profile-update' %}" target="_blank" class="btn btn-xs btn-outline-secondary font-weight-bold" title="Open full profile settings">
+                                    <i class="fa fa-external-link mr-1"></i> Full Profile
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- AI Auto-Fill Notification Banner -->
+                        <div id="aiAutoFillAlert" class="alert alert-success alert-dismissible fade show small py-2 px-3 mb-3" style="display: none; border-radius: 8px;">
+                            <i class="fa fa-check-circle mr-1"></i> <strong>AI Auto-Fill Applied:</strong> <span id="aiAutoFillDetails">Profile details updated from your resume. Review and edit any field below.</span>
+                        </div>
 
                         <!-- 1. Full Name -->
                         <div class="d-flex align-items-start mb-2 p-2 rounded {% if not has_name %}border{% endif %}" style="{% if not has_name %}background-color: #fffbeb; border-color: #fde68a !important;{% endif %}">
                             <div class="mr-2 mt-1">
                                 {% if has_name %}
-                                    <i class="fa fa-check-circle text-success"></i>
+                                    <i class="fa fa-check-circle text-success" id="icon_name"></i>
                                 {% else %}
-                                    <i class="fa fa-times-circle text-danger"></i>
+                                    <i class="fa fa-times-circle text-danger" id="icon_name"></i>
                                 {% endif %}
                             </div>
                             <div class="flex-grow-1">
-                                <strong class="small {% if has_name %}text-success{% else %}text-danger{% endif %}">Full Name</strong>
-                                {% if has_name %}
-                                    <span class="small text-muted ml-2">{{ request.user.get_full_name }}</span>
-                                {% else %}
-                                    <div class="row mt-1">
-                                        <div class="col-6">
-                                            <input type="text" name="first_name" class="form-control form-control-sm" placeholder="First Name" required>
-                                        </div>
-                                        <div class="col-6">
-                                            <input type="text" name="last_name" class="form-control form-control-sm" placeholder="Last Name" required>
-                                        </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong class="small {% if has_name %}text-success{% else %}text-danger{% endif %}">Full Name</strong>
+                                    {% if has_name %}
+                                        <a href="javascript:void(0)" onclick="toggleSingleField('name')" class="badge badge-light border text-primary small py-1 px-2 font-weight-bold"><i class="fa fa-pencil mr-1"></i>Edit</a>
+                                    {% endif %}
+                                </div>
+                                <div id="display_name" class="small text-muted {% if not has_name %}d-none{% endif %}">
+                                    {{ request.user.get_full_name }}
+                                </div>
+                                <div id="edit_name" class="row mt-1 {% if has_name %}editable-field d-none{% endif %}">
+                                    <div class="col-6">
+                                        <input type="text" name="first_name" id="modalFirstName" value="{{ request.user.first_name|default:'' }}" class="form-control form-control-sm" placeholder="First Name" required>
                                     </div>
-                                {% endif %}
+                                    <div class="col-6">
+                                        <input type="text" name="last_name" id="modalLastName" value="{{ request.user.last_name|default:'' }}" class="form-control form-control-sm" placeholder="Last Name" required>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -394,20 +421,24 @@
                         <div class="d-flex align-items-start mb-2 p-2 rounded {% if not has_phone %}border{% endif %}" style="{% if not has_phone %}background-color: #fffbeb; border-color: #fde68a !important;{% endif %}">
                             <div class="mr-2 mt-1">
                                 {% if has_phone %}
-                                    <i class="fa fa-check-circle text-success"></i>
+                                    <i class="fa fa-check-circle text-success" id="icon_phone"></i>
                                 {% else %}
-                                    <i class="fa fa-times-circle text-danger"></i>
+                                    <i class="fa fa-times-circle text-danger" id="icon_phone"></i>
                                 {% endif %}
                             </div>
                             <div class="flex-grow-1">
-                                <strong class="small {% if has_phone %}text-success{% else %}text-danger{% endif %}">Phone Number</strong>
-                                {% if has_phone %}
-                                    <span class="small text-muted ml-2">{{ request.user.phone_number }}</span>
-                                {% else %}
-                                    <div class="mt-1">
-                                        <input type="tel" name="phone_number" class="form-control form-control-sm" placeholder="+251 9XX XXX XXX" required>
-                                    </div>
-                                {% endif %}
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong class="small {% if has_phone %}text-success{% else %}text-danger{% endif %}">Phone Number</strong>
+                                    {% if has_phone %}
+                                        <a href="javascript:void(0)" onclick="toggleSingleField('phone')" class="badge badge-light border text-primary small py-1 px-2 font-weight-bold"><i class="fa fa-pencil mr-1"></i>Edit</a>
+                                    {% endif %}
+                                </div>
+                                <div id="display_phone" class="small text-muted {% if not has_phone %}d-none{% endif %}">
+                                    {{ request.user.phone_number }}
+                                </div>
+                                <div id="edit_phone" class="mt-1 {% if has_phone %}editable-field d-none{% endif %}">
+                                    <input type="tel" name="phone_number" id="modalPhone" value="{{ request.user.phone_number|default:'' }}" class="form-control form-control-sm" placeholder="+251 9XX XXX XXX" required>
+                                </div>
                             </div>
                         </div>
 
@@ -426,24 +457,28 @@
                         <div class="d-flex align-items-start mb-2 p-2 rounded {% if not has_gender %}border{% endif %}" style="{% if not has_gender %}background-color: #fffbeb; border-color: #fde68a !important;{% endif %}">
                             <div class="mr-2 mt-1">
                                 {% if has_gender %}
-                                    <i class="fa fa-check-circle text-success"></i>
+                                    <i class="fa fa-check-circle text-success" id="icon_gender"></i>
                                 {% else %}
-                                    <i class="fa fa-times-circle text-danger"></i>
+                                    <i class="fa fa-times-circle text-danger" id="icon_gender"></i>
                                 {% endif %}
                             </div>
                             <div class="flex-grow-1">
-                                <strong class="small {% if has_gender %}text-success{% else %}text-danger{% endif %}">Gender</strong>
-                                {% if has_gender %}
-                                    <span class="small text-muted ml-2">{{ request.user.get_gender_display }}</span>
-                                {% else %}
-                                    <div class="mt-1">
-                                        <select name="gender" class="form-control form-control-sm" required>
-                                            <option value="">-- Select Gender --</option>
-                                            <option value="male">Male</option>
-                                            <option value="female">Female</option>
-                                        </select>
-                                    </div>
-                                {% endif %}
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong class="small {% if has_gender %}text-success{% else %}text-danger{% endif %}">Gender</strong>
+                                    {% if has_gender %}
+                                        <a href="javascript:void(0)" onclick="toggleSingleField('gender')" class="badge badge-light border text-primary small py-1 px-2 font-weight-bold"><i class="fa fa-pencil mr-1"></i>Edit</a>
+                                    {% endif %}
+                                </div>
+                                <div id="display_gender" class="small text-muted {% if not has_gender %}d-none{% endif %}">
+                                    {{ request.user.get_gender_display|default:'Not specified' }}
+                                </div>
+                                <div id="edit_gender" class="mt-1 {% if has_gender %}editable-field d-none{% endif %}">
+                                    <select name="gender" id="modalGender" class="form-control form-control-sm" required>
+                                        <option value="">-- Select Gender --</option>
+                                        <option value="male" {% if request.user.gender == 'male' %}selected{% endif %}>Male</option>
+                                        <option value="female" {% if request.user.gender == 'female' %}selected{% endif %}>Female</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
 
@@ -451,25 +486,29 @@
                         <div class="d-flex align-items-start mb-2 p-2 rounded {% if not has_location %}border{% endif %}" style="{% if not has_location %}background-color: #fffbeb; border-color: #fde68a !important;{% endif %}">
                             <div class="mr-2 mt-1">
                                 {% if has_location %}
-                                    <i class="fa fa-check-circle text-success"></i>
+                                    <i class="fa fa-check-circle text-success" id="icon_location"></i>
                                 {% else %}
-                                    <i class="fa fa-times-circle text-danger"></i>
+                                    <i class="fa fa-times-circle text-danger" id="icon_location"></i>
                                 {% endif %}
                             </div>
                             <div class="flex-grow-1">
-                                <strong class="small {% if has_location %}text-success{% else %}text-danger{% endif %}">Address / City</strong>
-                                {% if has_location %}
-                                    <span class="small text-muted ml-2"><i class="fa fa-map-marker mr-1"></i>{{ applicant_profile.location }}</span>
-                                {% else %}
-                                    <div class="mt-1">
-                                        <select name="location" class="form-control form-control-sm" required>
-                                            <option value="">-- Select Your City --</option>
-                                            {% for loc_val, loc_label in ethiopian_locations %}
-                                                <option value="{{ loc_val }}">{{ loc_label }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                {% endif %}
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong class="small {% if has_location %}text-success{% else %}text-danger{% endif %}">Address / City</strong>
+                                    {% if has_location %}
+                                        <a href="javascript:void(0)" onclick="toggleSingleField('location')" class="badge badge-light border text-primary small py-1 px-2 font-weight-bold"><i class="fa fa-pencil mr-1"></i>Edit</a>
+                                    {% endif %}
+                                </div>
+                                <div id="display_location" class="small text-muted {% if not has_location %}d-none{% endif %}">
+                                    <i class="fa fa-map-marker mr-1"></i>{{ applicant_profile.location }}
+                                </div>
+                                <div id="edit_location" class="mt-1 {% if has_location %}editable-field d-none{% endif %}">
+                                    <select name="location" id="modalLocation" class="form-control form-control-sm" required>
+                                        <option value="">-- Select Your City --</option>
+                                        {% for loc_val, loc_label in ethiopian_locations %}
+                                            <option value="{{ loc_val }}" {% if applicant_profile.location == loc_val %}selected{% endif %}>{{ loc_label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                             </div>
                         </div>
 
@@ -477,20 +516,24 @@
                         <div class="d-flex align-items-start mb-2 p-2 rounded {% if not has_title %}border{% endif %}" style="{% if not has_title %}background-color: #fffbeb; border-color: #fde68a !important;{% endif %}">
                             <div class="mr-2 mt-1">
                                 {% if has_title %}
-                                    <i class="fa fa-check-circle text-success"></i>
+                                    <i class="fa fa-check-circle text-success" id="icon_title"></i>
                                 {% else %}
-                                    <i class="fa fa-times-circle text-danger"></i>
+                                    <i class="fa fa-times-circle text-danger" id="icon_title"></i>
                                 {% endif %}
                             </div>
                             <div class="flex-grow-1">
-                                <strong class="small {% if has_title %}text-success{% else %}text-danger{% endif %}">Professional Title</strong>
-                                {% if has_title %}
-                                    <span class="small text-muted ml-2">{{ applicant_profile.title }}</span>
-                                {% else %}
-                                    <div class="mt-1">
-                                        <input type="text" name="title" class="form-control form-control-sm" placeholder="e.g. Software Engineer, Accountant, Sales Manager" required>
-                                    </div>
-                                {% endif %}
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong class="small {% if has_title %}text-success{% else %}text-danger{% endif %}">Professional Title</strong>
+                                    {% if has_title %}
+                                        <a href="javascript:void(0)" onclick="toggleSingleField('title')" class="badge badge-light border text-primary small py-1 px-2 font-weight-bold"><i class="fa fa-pencil mr-1"></i>Edit</a>
+                                    {% endif %}
+                                </div>
+                                <div id="display_title" class="small text-muted {% if not has_title %}d-none{% endif %}">
+                                    {{ applicant_profile.title }}
+                                </div>
+                                <div id="edit_title" class="mt-1 {% if has_title %}editable-field d-none{% endif %}">
+                                    <input type="text" name="title" id="modalTitle" value="{{ applicant_profile.title|default:'' }}" class="form-control form-control-sm" placeholder="e.g. Software Engineer, Accountant, Sales Manager" required>
+                                </div>
                             </div>
                         </div>
 
@@ -498,26 +541,35 @@
                         <div class="d-flex align-items-start mb-2 p-2 rounded {% if not has_experience %}border{% endif %}" style="{% if not has_experience %}background-color: #fffbeb; border-color: #fde68a !important;{% endif %}">
                             <div class="mr-2 mt-1">
                                 {% if has_experience %}
-                                    <i class="fa fa-check-circle text-success"></i>
+                                    <i class="fa fa-check-circle text-success" id="icon_experience"></i>
                                 {% else %}
-                                    <i class="fa fa-times-circle text-danger"></i>
+                                    <i class="fa fa-times-circle text-danger" id="icon_experience"></i>
                                 {% endif %}
                             </div>
                             <div class="flex-grow-1">
-                                <strong class="small {% if has_experience %}text-success{% else %}text-danger{% endif %}">Work Experience</strong>
-                                {% if has_experience %}
-                                    <span class="small text-muted ml-2">{{ request.user.experiences.count }} experience{{ request.user.experiences.count|pluralize }} on record</span>
-                                {% else %}
-                                    <div class="row mt-1">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong class="small {% if has_experience %}text-success{% else %}text-danger{% endif %}">Work Experience</strong>
+                                    {% if has_experience %}
+                                        <a href="javascript:void(0)" onclick="toggleSingleField('experience')" class="badge badge-light border text-primary small py-1 px-2 font-weight-bold"><i class="fa fa-plus mr-1"></i>Add / Update</a>
+                                    {% endif %}
+                                </div>
+                                <div id="display_experience" class="small text-muted {% if not has_experience %}d-none{% endif %}">
+                                    {{ request.user.experiences.count }} experience{{ request.user.experiences.count|pluralize }} on record
+                                    {% for exp in request.user.experiences.all|slice:":2" %}
+                                        <span class="d-block text-muted">• {{ exp.title }} at {{ exp.company }}</span>
+                                    {% endfor %}
+                                </div>
+                                <div id="edit_experience" class="mt-1 {% if has_experience %}editable-field d-none{% endif %}">
+                                    <div class="row">
                                         <div class="col-6">
-                                            <input type="text" name="exp_title" class="form-control form-control-sm" placeholder="Job Title" required>
+                                            <input type="text" name="exp_title" id="modalExpTitle" class="form-control form-control-sm" placeholder="Job Title" {% if not has_experience %}required{% endif %}>
                                         </div>
                                         <div class="col-6">
-                                            <input type="text" name="exp_company" class="form-control form-control-sm" placeholder="Company Name" required>
+                                            <input type="text" name="exp_company" id="modalExpCompany" class="form-control form-control-sm" placeholder="Company Name" {% if not has_experience %}required{% endif %}>
                                         </div>
                                     </div>
-                                    <small class="text-muted d-block mt-1"><i class="fa fa-info-circle mr-1"></i>Enter your most recent or current position.</small>
-                                {% endif %}
+                                    <small class="text-muted d-block mt-1"><i class="fa fa-info-circle mr-1"></i>Enter your current or most recent employment.</small>
+                                </div>
                             </div>
                         </div>
 
@@ -525,21 +577,30 @@
                         <div class="d-flex align-items-start mb-2 p-2 rounded {% if not has_skills %}border{% endif %}" style="{% if not has_skills %}background-color: #fffbeb; border-color: #fde68a !important;{% endif %}">
                             <div class="mr-2 mt-1">
                                 {% if has_skills %}
-                                    <i class="fa fa-check-circle text-success"></i>
+                                    <i class="fa fa-check-circle text-success" id="icon_skills"></i>
                                 {% else %}
-                                    <i class="fa fa-times-circle text-danger"></i>
+                                    <i class="fa fa-times-circle text-danger" id="icon_skills"></i>
                                 {% endif %}
                             </div>
                             <div class="flex-grow-1">
-                                <strong class="small {% if has_skills %}text-success{% else %}text-danger{% endif %}">Key Skills</strong>
-                                {% if has_skills %}
-                                    <span class="small text-muted ml-2">{{ request.user.skills.count }} skill{{ request.user.skills.count|pluralize }} listed</span>
-                                {% else %}
-                                    <div class="mt-1">
-                                        <input type="text" name="quick_skills" class="form-control form-control-sm" placeholder="e.g. Python, Excel, Project Management (comma-separated)" required>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong class="small {% if has_skills %}text-success{% else %}text-danger{% endif %}">Key Skills</strong>
+                                    {% if has_skills %}
+                                        <a href="javascript:void(0)" onclick="toggleSingleField('skills')" class="badge badge-light border text-primary small py-1 px-2 font-weight-bold"><i class="fa fa-plus mr-1"></i>Add Skills</a>
+                                    {% endif %}
+                                </div>
+                                <div id="display_skills" class="small text-muted {% if not has_skills %}d-none{% endif %}">
+                                    {{ request.user.skills.count }} skill{{ request.user.skills.count|pluralize }} listed:
+                                    <div class="d-flex flex-wrap mt-1" style="gap: 4px;">
+                                        {% for sk in request.user.skills.all|slice:":6" %}
+                                            <span class="badge badge-light border text-dark">{{ sk.name }}</span>
+                                        {% endfor %}
                                     </div>
-                                    <small class="text-muted d-block mt-1"><i class="fa fa-info-circle mr-1"></i>Enter your top skills separated by commas.</small>
-                                {% endif %}
+                                </div>
+                                <div id="edit_skills" class="mt-1 {% if has_skills %}editable-field d-none{% endif %}">
+                                    <input type="text" name="quick_skills" id="modalSkills" class="form-control form-control-sm" placeholder="e.g. Python, Excel, Project Management (comma-separated)" {% if not has_skills %}required{% endif %}>
+                                    <small class="text-muted d-block mt-1"><i class="fa fa-info-circle mr-1"></i>Enter skills separated by commas.</small>
+                                </div>
                             </div>
                         </div>
 
@@ -672,8 +733,186 @@
     </div>
 </div>
 
-<!-- AI Resume Verification JavaScript -->
+<!-- AI Resume Verification & Interactive Auto-Fill JavaScript -->
 <script>
+var isEditingAllDetails = false;
+
+function toggleEditDetails() {
+    isEditingAllDetails = !isEditingAllDetails;
+    var editFields = document.querySelectorAll('.editable-field');
+    var btnText = document.getElementById('toggleEditText');
+    var btn = document.getElementById('toggleEditDetailsBtn');
+
+    editFields.forEach(function(el) {
+        if (isEditingAllDetails) {
+            el.classList.remove('d-none');
+        } else {
+            el.classList.add('d-none');
+        }
+    });
+
+    if (isEditingAllDetails) {
+        if (btnText) btnText.textContent = "Done Editing";
+        if (btn) {
+            btn.classList.remove('btn-outline-primary');
+            btn.classList.add('btn-primary');
+        }
+    } else {
+        if (btnText) btnText.textContent = "Edit Details";
+        if (btn) {
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline-primary');
+        }
+    }
+}
+
+function toggleSingleField(name) {
+    var editEl = document.getElementById('edit_' + name);
+    if (editEl) {
+        editEl.classList.toggle('d-none');
+    }
+}
+
+function populateFieldsFromExtractedData(data) {
+    var details = [];
+
+    // 1. Name
+    if (data.extracted_name) {
+        var parts = data.extracted_name.split(' ');
+        var fnInput = document.getElementById('modalFirstName');
+        var lnInput = document.getElementById('modalLastName');
+        if (fnInput && parts.length >= 1) fnInput.value = parts[0];
+        if (lnInput && parts.length >= 2) lnInput.value = parts.slice(1).join(' ');
+        details.push("Name: " + data.extracted_name);
+        var editName = document.getElementById('edit_name');
+        if (editName) editName.classList.remove('d-none');
+    }
+
+    // 2. Phone
+    if (data.extracted_phone) {
+        var phoneInput = document.getElementById('modalPhone');
+        if (phoneInput) {
+            phoneInput.value = data.extracted_phone;
+            details.push("Phone: " + data.extracted_phone);
+            var editPhone = document.getElementById('edit_phone');
+            if (editPhone) editPhone.classList.remove('d-none');
+        }
+    }
+
+    // 3. Title
+    if (data.extracted_title) {
+        var titleInput = document.getElementById('modalTitle');
+        if (titleInput) {
+            titleInput.value = data.extracted_title;
+            details.push("Title: " + data.extracted_title);
+            var editTitle = document.getElementById('edit_title');
+            if (editTitle) editTitle.classList.remove('d-none');
+        }
+    }
+
+    // 4. Location
+    if (data.extracted_location) {
+        var locSelect = document.getElementById('modalLocation');
+        if (locSelect) {
+            for (var i = 0; i < locSelect.options.length; i++) {
+                if (locSelect.options[i].value.toLowerCase() === data.extracted_location.toLowerCase()) {
+                    locSelect.selectedIndex = i;
+                    details.push("Location: " + data.extracted_location);
+                    break;
+                }
+            }
+            var editLoc = document.getElementById('edit_location');
+            if (editLoc) editLoc.classList.remove('d-none');
+        }
+    }
+
+    // 5. Skills
+    if (data.extracted_skills && data.extracted_skills.length > 0) {
+        var skillsInput = document.getElementById('modalSkills');
+        if (skillsInput) {
+            skillsInput.value = data.extracted_skills.join(', ');
+            details.push(data.extracted_skills.length + " skills");
+            var editSkills = document.getElementById('edit_skills');
+            if (editSkills) editSkills.classList.remove('d-none');
+        }
+    }
+
+    // 6. Education
+    if (data.extracted_education) {
+        var eduSelect = document.querySelector('select[name="education_level"]');
+        if (eduSelect) {
+            for (var j = 0; j < eduSelect.options.length; j++) {
+                if (eduSelect.options[j].value === data.extracted_education) {
+                    eduSelect.selectedIndex = j;
+                    details.push("Education: " + data.extracted_education);
+                    break;
+                }
+            }
+        }
+    }
+
+    // 7. Experience Years
+    if (data.extracted_experience_years) {
+        var expSelect = document.querySelector('select[name="experience_years"]');
+        if (expSelect) {
+            for (var k = 0; k < expSelect.options.length; k++) {
+                if (expSelect.options[k].value === data.extracted_experience_years) {
+                    expSelect.selectedIndex = k;
+                    details.push("Experience: " + data.extracted_experience_years);
+                    break;
+                }
+            }
+        }
+    }
+
+    // Show AI alert banner
+    var alertBox = document.getElementById('aiAutoFillAlert');
+    var detailsSpan = document.getElementById('aiAutoFillDetails');
+    if (alertBox && detailsSpan) {
+        if (details.length > 0) {
+            detailsSpan.textContent = "Extracted and populated: " + details.join(" • ") + ". You can review or adjust any details before submitting.";
+        } else {
+            detailsSpan.textContent = "AI analyzed your resume and verified all requirements.";
+        }
+        alertBox.style.display = 'block';
+    }
+}
+
+function triggerAIAutoFill() {
+    var cvInput = document.getElementById('cvFileInput');
+    var btn = document.getElementById('aiAutofillBtn');
+    var origHtml = btn ? btn.innerHTML : '';
+    if (btn) btn.innerHTML = '<i class="fa fa-spinner fa-spin mr-1"></i> Analyzing...';
+
+    var formData = new FormData();
+    if (cvInput && cvInput.files && cvInput.files[0]) {
+        formData.append('cv', cvInput.files[0]);
+    } else {
+        formData.append('use_saved_cv', '1');
+    }
+
+    var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    fetch('{% url "jobs:verify-resume" %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrfToken},
+        body: formData
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (btn) btn.innerHTML = origHtml;
+        if (data.is_valid || data.extracted_skills || data.extracted_title || data.extracted_phone) {
+            populateFieldsFromExtractedData(data);
+        } else {
+            alert(data.message || "Could not extract resume information. Please upload a clear CV file first.");
+        }
+    })
+    .catch(function(err) {
+        if (btn) btn.innerHTML = origHtml;
+        alert("Unable to run AI auto-fill right now. Please upload a CV or fill fields manually.");
+    });
+}
+
 (function() {
     var cvInput = document.getElementById('cvFileInput');
     var resultDiv = document.getElementById('cvVerificationResult');
@@ -694,7 +933,7 @@
         }
 
         // Show loading
-        resultDiv.innerHTML = '<div class="alert alert-info small py-2 px-3 mb-0" style="border-radius: 8px;"><i class="fa fa-spinner fa-spin mr-1"></i> AI is verifying your resume...</div>';
+        resultDiv.innerHTML = '<div class="alert alert-info small py-2 px-3 mb-0" style="border-radius: 8px;"><i class="fa fa-spinner fa-spin mr-1"></i> AI is verifying and extracting resume data...</div>';
         resultDiv.style.display = 'block';
 
         var formData = new FormData();
@@ -710,11 +949,27 @@
         .then(function(r) { return r.json(); })
         .then(function(data) {
             if (data.is_valid) {
+                var autoFillHtml = '<div class="mt-2 pt-2 border-top d-flex justify-content-between align-items-center">' +
+                    '<small class="text-success font-weight-bold"><i class="fa fa-magic mr-1"></i> Auto-fill form fields with extracted data?</small>' +
+                    '<button type="button" class="btn btn-xs btn-success font-weight-bold" id="applyExtractedBtn"><i class="fa fa-check mr-1"></i> Apply Extracted Data</button>' +
+                    '</div>';
+
                 resultDiv.innerHTML = '<div class="alert alert-success small py-2 px-3 mb-0" style="border-radius: 8px;">' +
                     '<i class="fa fa-shield mr-1"></i> <strong>AI Verified</strong> (Score: ' + data.score + '%) — ' +
                     data.detected_sections.length + ' sections detected, ' +
-                    data.extracted_skills.length + ' skills found.' +
+                    (data.extracted_skills ? data.extracted_skills.length : 0) + ' skills found.' +
+                    autoFillHtml +
                     '</div>';
+
+                var applyBtn = document.getElementById('applyExtractedBtn');
+                if (applyBtn) {
+                    applyBtn.addEventListener('click', function() {
+                        populateFieldsFromExtractedData(data);
+                    });
+                }
+
+                // Also automatically pre-fill inputs
+                populateFieldsFromExtractedData(data);
             } else {
                 resultDiv.innerHTML = '<div class="alert alert-danger small py-2 px-3 mb-0" style="border-radius: 8px;">' +
                     '<i class="fa fa-exclamation-triangle mr-1"></i> ' + data.message +

@@ -180,6 +180,63 @@ def analyze_resume_authenticity(text, filename=""):
             extracted_title = title
             break
 
+    # Candidate Name Extraction (typical first 4 lines)
+    extracted_name = None
+    lines = [l.strip() for l in text.splitlines() if l.strip()]
+    for line in lines[:5]:
+        cleaned_line = re.sub(r'[^a-zA-Z\s]', '', line).strip()
+        words_line = cleaned_line.split()
+        lower_line = line.lower()
+        if 2 <= len(words_line) <= 3 and 5 <= len(cleaned_line) <= 35:
+            if not any(skip_word in lower_line for skip_word in [
+                "curriculum", "vitae", "resume", "cv", "page", "profile", "contact", "email",
+                "phone", "address", "summary", "experience", "education", "skills", "objective",
+                "http", "www", "com", "net", "university", "college", "school"
+            ]):
+                extracted_name = cleaned_line.title()
+                break
+
+    # Location Extraction (Ethiopian major cities)
+    extracted_location = None
+    ethiopian_cities = [
+        "Addis Ababa", "Hawassa", "Dire Dawa", "Bahir Dar", "Mekelle",
+        "Adama", "Gondar", "Jimma", "Bishoftu", "Dessie"
+    ]
+    for city in ethiopian_cities:
+        if city.lower() in lower_text:
+            extracted_location = city
+            break
+
+    # Education Level Extraction
+    extracted_education = None
+    if re.search(r'\b(phd|doctorate|doctor of)\b', lower_text):
+        extracted_education = "phd"
+    elif re.search(r'\b(master|msc|m\.sc|mba|ma|m\.a)\b', lower_text):
+        extracted_education = "master"
+    elif re.search(r'\b(bachelor|bsc|b\.sc|ba|b\.a|degree|undergraduate)\b', lower_text):
+        extracted_education = "bachelor"
+    elif re.search(r'\b(diploma|tvte|tvet|level iv|level 4)\b', lower_text):
+        extracted_education = "diploma"
+
+    # Experience Years Extraction
+    extracted_experience_years = None
+    exp_match = re.search(r'(\d+)\+?\s*(?:years?|yrs?)\s*(?:of\s*)?(?:experience|exp|work)', lower_text)
+    if exp_match:
+        try:
+            yrs = int(exp_match.group(1))
+            if yrs >= 10:
+                extracted_experience_years = "10+"
+            elif yrs >= 5:
+                extracted_experience_years = "5-10"
+            elif yrs >= 3:
+                extracted_experience_years = "3-5"
+            elif yrs >= 1:
+                extracted_experience_years = "1-3"
+            else:
+                extracted_experience_years = "0-1"
+        except (ValueError, TypeError):
+            pass
+
     # Calculate AI Authenticity Confidence Score (0 - 100)
     score = 0
     # Length / depth: up to 25 pts
@@ -235,5 +292,9 @@ def analyze_resume_authenticity(text, filename=""):
         "extracted_phone": extracted_phone,
         "extracted_email": extracted_email,
         "extracted_title": extracted_title,
+        "extracted_name": extracted_name,
+        "extracted_location": extracted_location,
+        "extracted_education": extracted_education,
+        "extracted_experience_years": extracted_experience_years,
         "word_count": word_count,
     }
