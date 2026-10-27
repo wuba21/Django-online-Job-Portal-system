@@ -167,8 +167,8 @@
                 border: 1px solid rgba(255, 255, 255, 0.1) !important;
             }
             .user-dropdown-header {
-                background: rgba(255, 255, 255, 0.05) !important;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+                background: rgba(255, 255, 255, 0.04) !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
             }
             .user-dropdown-header .user-name {
                 color: #ffffff !important;
@@ -176,22 +176,41 @@
             .user-dropdown-header .user-email {
                 color: #94a3b8 !important;
             }
+            .profile-action-btn {
+                background: rgba(37, 99, 235, 0.15) !important;
+                border: 1px solid #3b82f6 !important;
+                color: #93c5fd !important;
+                border-radius: 20px !important;
+                font-size: 12.5px !important;
+                padding: 5px 12px !important;
+            }
+            .profile-action-btn:hover {
+                background: #2563eb !important;
+                color: #ffffff !important;
+            }
         }
 
-        /* User Profile Dropdown Styling (Desktop) */
+        /* User Profile Dropdown Styling (Desktop & Global Resets) */
+        .user-profile-dropdown,
+        .user-profile-dropdown * {
+            text-transform: none !important;
+            letter-spacing: normal !important;
+        }
         @media (min-width: 992px) {
             .user-profile-dropdown {
                 min-width: 300px !important;
+                max-width: 320px !important;
                 padding: 0 !important;
-                border-radius: 14px !important;
+                border-radius: 12px !important;
                 overflow: hidden !important;
-                border: 1px solid rgba(0, 0, 0, 0.08) !important;
-                box-shadow: 0 14px 35px rgba(0, 0, 0, 0.18) !important;
+                border: 1px solid #e2e8f0 !important;
+                box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12) !important;
                 background: #ffffff !important;
             }
             .user-dropdown-header {
-                background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
-                border-bottom: 1px solid #e2e8f0 !important;
+                padding: 16px !important;
+                background: #ffffff !important;
+                border-bottom: 1px solid #f1f5f9 !important;
             }
             .user-dropdown-header .user-name {
                 color: #0f172a !important;
@@ -200,11 +219,30 @@
             .user-dropdown-header .user-email {
                 color: #64748b !important;
             }
+            .profile-action-btn {
+                border: 1.5px solid #0a66c2 !important;
+                color: #0a66c2 !important;
+                background: transparent !important;
+                border-radius: 20px !important;
+                font-size: 13px !important;
+                font-weight: 600 !important;
+                padding: 5px 14px !important;
+                text-decoration: none !important;
+                transition: all 0.15s ease !important;
+                display: block !important;
+                text-align: center !important;
+            }
+            .profile-action-btn:hover {
+                background: #f0f7ff !important;
+                border-color: #004182 !important;
+                color: #004182 !important;
+            }
             .user-dropdown-body {
                 padding: 6px 0 !important;
+                background: #ffffff !important;
             }
             .user-dropdown-body .dropdown-item {
-                color: #1e293b !important;
+                color: #334155 !important;
                 font-size: 0.88rem !important;
                 padding: 9px 18px !important;
                 display: flex !important;
@@ -212,16 +250,21 @@
                 transition: background 0.15s ease, color 0.15s ease !important;
             }
             .user-dropdown-body .dropdown-item:hover {
-                background: #f1f5f9 !important;
+                background: #f8fafc !important;
                 color: #0a66c2 !important;
             }
             .user-dropdown-body .dropdown-item i {
                 width: 20px !important;
                 text-align: center !important;
+                color: #64748b !important;
+                margin-right: 8px !important;
+            }
+            .user-dropdown-body .dropdown-item:hover i {
+                color: #0a66c2 !important;
             }
             .user-dropdown-body .dropdown-divider {
                 margin: 4px 0 !important;
-                border-top: 1px solid #e2e8f0 !important;
+                border-top: 1px solid #f1f5f9 !important;
             }
         }
     </style>
@@ -319,83 +362,67 @@
                             <li class="nav-item dropdown">
                                 <a id="clientZone" href="#" data-toggle="dropdown"
                                    aria-haspopup="true" aria-expanded="false"
-                                   class="nav-link dropdown-toggle has-img">
-                                    <div class="client-menu-image mr-2">
-                                        <div class="inner">
-                                            {% if request.user.role == 'employer' %}
-                                                {% if request.user.company.logo %}
-                                                    <img src="{{ request.user.company.logo.url }}" alt="company logo" class="img-fluid" style="width: 100%; height: 100%; object-fit: cover;">
-                                                {% else %}
-                                                    <img src="{% static 'img/company-1.png' %}" alt="company avatar" class="img-fluid">
-                                                {% endif %}
+                                   class="nav-link dropdown-toggle has-img d-flex align-items-center">
+                                    <div class="client-menu-image mr-2" style="width: 32px; height: 32px; min-width: 32px; border-radius: 50% !important; overflow: hidden !important; border: 1.5px solid rgba(255,255,255,0.3); background: #ffffff;">
+                                        {% if request.user.role == 'employer' %}
+                                            {% if request.user.company.logo %}
+                                                <img src="{{ request.user.company.logo.url }}" alt="company logo" style="width: 100% !important; height: 100% !important; border-radius: 50% !important; object-fit: cover !important; display: block;">
                                             {% else %}
-                                                {% if request.user.avatar %}
-                                                    <img src="{{ request.user.avatar.url }}" alt="user avatar" class="img-fluid" style="width: 100%; height: 100%; object-fit: cover;">
-                                                {% else %}
-                                                    <img src="{% static 'img/avatar.png' %}" alt="user avatar" class="img-fluid">
-                                                {% endif %}
+                                                <img src="{% static 'img/company-1.png' %}" alt="company avatar" style="width: 100% !important; height: 100% !important; border-radius: 50% !important; object-fit: cover !important; display: block;">
                                             {% endif %}
-                                        </div>
+                                        {% else %}
+                                            {% if request.user.avatar %}
+                                                <img src="{{ request.user.avatar.url }}" alt="user avatar" style="width: 100% !important; height: 100% !important; border-radius: 50% !important; object-fit: cover !important; display: block;">
+                                            {% else %}
+                                                <img src="{% static 'img/avatar.png' %}" alt="user avatar" style="width: 100% !important; height: 100% !important; border-radius: 50% !important; object-fit: cover !important; display: block;">
+                                            {% endif %}
+                                        {% endif %}
                                     </div>
-                                    <span>{{ request.user.first_name|default:request.user.email }}</span>
+                                    <span style="font-size: 13.5px; font-weight: 500; text-transform: capitalize !important;">{{ request.user.first_name|default:request.user.email }}</span>
                                 </a>
                                 <div aria-labelledby="clientZone" class="dropdown-menu dropdown-menu-right user-profile-dropdown">
-                                    <!-- User Profile Header Card (LinkedIn/Google Style) -->
-                                    <div class="user-dropdown-header p-3 border-bottom">
+                                    <!-- User Profile Header Card (LinkedIn Standard) -->
+                                    <div class="user-dropdown-header">
                                         <div class="d-flex align-items-center">
-                                            <div class="position-relative mr-3" style="width: 52px; height: 52px; flex-shrink: 0;">
-                                                <div class="rounded-circle overflow-hidden shadow-xs border" style="width: 52px; height: 52px; background: #ffffff;">
-                                                    {% if request.user.role == 'employer' %}
-                                                        {% if request.user.company.logo %}
-                                                            <img src="{{ request.user.company.logo.url }}" alt="Company Logo" style="width: 100%; height: 100%; object-fit: cover;">
-                                                        {% else %}
-                                                            <img src="{% static 'img/company-1.png' %}" alt="Company Avatar" style="width: 100%; height: 100%; object-fit: cover;">
-                                                        {% endif %}
+                                            <div style="width: 52px; height: 52px; min-width: 52px; max-width: 52px; border-radius: 50% !important; overflow: hidden !important; border: 2px solid #e2e8f0; margin-right: 14px; flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.06); background: #ffffff;">
+                                                {% if request.user.role == 'employer' %}
+                                                    {% if request.user.company.logo %}
+                                                        <img src="{{ request.user.company.logo.url }}" alt="Logo" style="width: 100% !important; height: 100% !important; border-radius: 50% !important; object-fit: cover !important; display: block;">
                                                     {% else %}
-                                                        {% if request.user.avatar %}
-                                                            <img src="{{ request.user.avatar.url }}" alt="User Avatar" style="width: 100%; height: 100%; object-fit: cover;">
-                                                        {% else %}
-                                                            <img src="{% static 'img/avatar.png' %}" alt="User Avatar" style="width: 100%; height: 100%; object-fit: cover;">
-                                                        {% endif %}
+                                                        <img src="{% static 'img/company-1.png' %}" alt="Avatar" style="width: 100% !important; height: 100% !important; border-radius: 50% !important; object-fit: cover !important; display: block;">
                                                     {% endif %}
-                                                </div>
-                                                <a href="{% if request.user.role == 'employer' %}{% url 'accounts:employer-profile-update' %}{% else %}{% url 'accounts:employee-profile-update' %}{% endif %}" 
-                                                   class="position-absolute d-flex align-items-center justify-content-center text-white shadow-xs" 
-                                                   title="{% trans 'Change Profile Photo' %}"
-                                                   style="bottom: -2px; right: -2px; width: 20px; height: 20px; border-radius: 50%; background: #0a66c2; border: 2px solid #ffffff; font-size: 10px;">
-                                                    <i class="fa fa-camera"></i>
-                                                </a>
+                                                {% else %}
+                                                    {% if request.user.avatar %}
+                                                        <img src="{{ request.user.avatar.url }}" alt="Avatar" style="width: 100% !important; height: 100% !important; border-radius: 50% !important; object-fit: cover !important; display: block;">
+                                                    {% else %}
+                                                        <img src="{% static 'img/avatar.png' %}" alt="Avatar" style="width: 100% !important; height: 100% !important; border-radius: 50% !important; object-fit: cover !important; display: block;">
+                                                    {% endif %}
+                                                {% endif %}
                                             </div>
-                                            <div class="overflow-hidden" style="min-width: 0;">
-                                                <div class="font-weight-bold text-truncate user-name" style="font-size: 0.95rem; line-height: 1.25;">
+                                            <div class="overflow-hidden" style="min-width: 0; flex: 1;">
+                                                <div class="user-name text-truncate" style="font-size: 15px; font-weight: 700; line-height: 1.25; text-transform: capitalize !important;">
                                                     {{ request.user.get_full_name|default:request.user.first_name|default:request.user.email }}
                                                 </div>
-                                                <div class="text-truncate small user-email mt-1" style="font-size: 0.8rem;" title="{{ request.user.email }}">
-                                                    <i class="fa fa-envelope-o mr-1 text-primary"></i>{{ request.user.email }}
+                                                <div class="user-email text-truncate" style="font-size: 12.5px; margin-top: 2px; text-transform: lowercase !important;" title="{{ request.user.email }}">
+                                                    {{ request.user.email|lower }}
                                                 </div>
-                                                <div class="mt-1 d-flex align-items-center flex-wrap">
+                                                <div class="mt-1 d-flex align-items-center">
                                                     {% if request.user.role == 'employer' %}
-                                                        <span class="badge badge-success px-2 py-0 font-weight-normal" style="font-size: 0.72rem; border-radius: 4px;">
-                                                            <i class="fa fa-building-o mr-1"></i>{% trans "Employer" %}
+                                                        <span style="display: inline-flex; align-items: center; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; border-radius: 12px; font-size: 11px; font-weight: 600; padding: 2px 8px; text-transform: none !important; letter-spacing: normal;">
+                                                            <i class="fa fa-building-o mr-1"></i>{% trans "Employer" %}{% if request.user.is_verified %} • <i class="fa fa-check-circle text-success ml-1" title="{% trans 'Verified' %}"></i>{% endif %}
                                                         </span>
                                                     {% else %}
-                                                        <span class="badge badge-primary px-2 py-0 font-weight-normal" style="font-size: 0.72rem; border-radius: 4px; background-color: #0a66c2;">
-                                                            <i class="fa fa-user mr-1"></i>{% trans "Job Seeker" %}
-                                                        </span>
-                                                    {% endif %}
-                                                    {% if request.user.is_verified %}
-                                                        <span class="badge badge-info ml-1 px-1 py-0 font-weight-normal" style="font-size: 0.7rem; border-radius: 4px;" title="{% trans 'Verified Account' %}">
-                                                            <i class="fa fa-check-circle"></i>
+                                                        <span style="display: inline-flex; align-items: center; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 12px; font-size: 11px; font-weight: 600; padding: 2px 8px; text-transform: none !important; letter-spacing: normal;">
+                                                            <i class="fa fa-user-circle-o mr-1"></i>{% trans "Job Seeker" %}{% if request.user.is_verified %} • <i class="fa fa-check-circle text-primary ml-1" title="{% trans 'Verified' %}"></i>{% endif %}
                                                         </span>
                                                     {% endif %}
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="mt-2 pt-2 border-top">
+                                        <div class="mt-3">
                                             <a href="{% if request.user.role == 'employer' %}{% url 'accounts:employer-profile-update' %}{% else %}{% url 'accounts:employee-profile-update' %}{% endif %}" 
-                                               class="btn btn-sm btn-outline-primary btn-block py-1 font-weight-bold" 
-                                               style="font-size: 0.78rem; border-radius: 20px;">
-                                                <i class="fa fa-pencil mr-1"></i> {% trans "Edit Profile & Photo" %}
+                                               class="profile-action-btn">
+                                                {% trans "View & Edit Profile" %}
                                             </a>
                                         </div>
                                     </div>
