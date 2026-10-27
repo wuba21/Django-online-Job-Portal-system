@@ -19,6 +19,15 @@ class RegisterEmployeeView(CreateView):
 
     extra_context = {"title": "Register"}
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from jobsapp.models import Job
+        from accounts.models import Company, User
+        context["total_jobs"] = Job.objects.filter(filled=False).count()
+        context["total_companies"] = Company.objects.count()
+        context["total_candidates"] = User.objects.filter(role="employee").count()
+        return context
+
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             return HttpResponseRedirect(self.success_url)
@@ -55,6 +64,15 @@ class RegisterEmployerView(CreateView):
     success_url = "/"
 
     extra_context = {"title": "Register"}
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from jobsapp.models import Job
+        from accounts.models import Company, User
+        context["total_jobs"] = Job.objects.filter(filled=False).count()
+        context["total_companies"] = Company.objects.count()
+        context["total_candidates"] = User.objects.filter(role="employee").count()
+        return context
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -101,6 +119,16 @@ class LoginView(FormView):
     template_name = "accounts/login.html"
 
     extra_context = {"title": "Login"}
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from jobsapp.models import Job
+        from accounts.models import Company, User
+        context["total_jobs"] = Job.objects.filter(filled=False).count()
+        context["total_companies"] = Company.objects.count()
+        context["total_candidates"] = User.objects.filter(role="employee").count()
+        context["recommended_preview_jobs"] = Job.objects.filter(filled=False).order_by("-id")[:2]
+        return context
 
     def dispatch(self, request, *args, **kwargs):
         if self.request.user.is_authenticated:

@@ -19,10 +19,10 @@
                         {% trans "Welcome to your professional community" %}
                     </h1>
                     <p class="auth-sub-headline text-muted mb-4">
-                        {% trans "Find opportunities, build verified resumes, and connect directly with hiring managers at 5,000+ top Ethiopian companies." %}
+                        {% trans "Find opportunities, build verified resumes, and connect directly with hiring managers at top Ethiopian companies." %}
                     </p>
 
-                    <!-- Live Job Recommendation Card Preview ("login recommendationu") -->
+                    <!-- Live Job Recommendation Card Preview -->
                     <div class="recommendation-preview-card p-3 mb-4 rounded-xl shadow-sm bg-white border">
                         <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
                             <span class="small font-weight-bold text-dark text-uppercase letter-spacing-1">
@@ -33,59 +33,83 @@
                             </span>
                         </div>
 
-                        <!-- Sample Live Job 1 -->
-                        <div class="mini-job-item d-flex align-items-center mb-3">
-                            <div class="mini-logo-box bg-light-blue mr-3 rounded-lg d-flex align-items-center justify-content-center text-primary font-weight-bold">
-                                <i class="fa fa-plane font-size-18"></i>
-                            </div>
-                            <div class="flex-grow-1 overflow-hidden">
-                                <div class="font-weight-bold text-dark text-truncate" style="font-size: 0.92rem;">
-                                    Senior Software Engineer / DevOps
+                        {% if recommended_preview_jobs %}
+                            {% for job in recommended_preview_jobs %}
+                                <div class="mini-job-item d-flex align-items-center mb-3">
+                                    <div class="mini-logo-box bg-light-blue mr-3 rounded-lg d-flex align-items-center justify-content-center text-primary font-weight-bold">
+                                        <i class="fa fa-briefcase font-size-18"></i>
+                                    </div>
+                                    <div class="flex-grow-1 overflow-hidden">
+                                        <div class="font-weight-bold text-dark text-truncate" style="font-size: 0.92rem;">
+                                            <a href="{% url 'jobs:jobs-detail' job.id %}" class="text-dark">{{ job.title }}</a>
+                                        </div>
+                                        <div class="small text-muted text-truncate">
+                                            {{ job.company_name|default:job.user.get_full_name|default:"Verified Employer" }} &bull; {{ job.location|default:"Ethiopia" }} &bull; <span class="text-success font-weight-600">Active</span>
+                                        </div>
+                                    </div>
+                                    <span class="badge badge-light border text-primary small ml-2">{{ job.get_job_type_display|default:job.type }}</span>
                                 </div>
-                                <div class="small text-muted text-truncate">
-                                    Ethiopian Airlines &bull; Addis Ababa &bull; <span class="text-success font-weight-600">98% Match</span>
+                            {% endfor %}
+                        {% else %}
+                            <!-- Default Featured Live Jobs -->
+                            <div class="mini-job-item d-flex align-items-center mb-3">
+                                <div class="mini-logo-box bg-light-blue mr-3 rounded-lg d-flex align-items-center justify-content-center text-primary font-weight-bold">
+                                    <i class="fa fa-plane font-size-18"></i>
                                 </div>
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="font-weight-bold text-dark text-truncate" style="font-size: 0.92rem;">
+                                        Software Engineer & Systems Architect
+                                    </div>
+                                    <div class="small text-muted text-truncate">
+                                        Ethiopian Airlines &bull; Addis Ababa &bull; <span class="text-success font-weight-600">98% Match</span>
+                                    </div>
+                                </div>
+                                <span class="badge badge-light border text-primary small ml-2">Full-time</span>
                             </div>
-                            <span class="badge badge-light border text-primary small ml-2">Full-time</span>
-                        </div>
 
-                        <!-- Sample Live Job 2 -->
-                        <div class="mini-job-item d-flex align-items-center mb-2">
-                            <div class="mini-logo-box bg-light-green mr-3 rounded-lg d-flex align-items-center justify-content-center text-success font-weight-bold">
-                                <i class="fa fa-university font-size-18"></i>
-                            </div>
-                            <div class="flex-grow-1 overflow-hidden">
-                                <div class="font-weight-bold text-dark text-truncate" style="font-size: 0.92rem;">
-                                    Data Analyst & Financial Modeler
+                            <div class="mini-job-item d-flex align-items-center mb-2">
+                                <div class="mini-logo-box bg-light-green mr-3 rounded-lg d-flex align-items-center justify-content-center text-success font-weight-bold">
+                                    <i class="fa fa-university font-size-18"></i>
                                 </div>
-                                <div class="small text-muted text-truncate">
-                                    Commercial Bank of Ethiopia &bull; Full-Time &bull; <span class="text-success font-weight-600">95% Match</span>
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="font-weight-bold text-dark text-truncate" style="font-size: 0.92rem;">
+                                        Commercial & Banking Officer
+                                    </div>
+                                    <div class="small text-muted text-truncate">
+                                        Commercial Bank of Ethiopia &bull; Full-Time &bull; <span class="text-success font-weight-600">95% Match</span>
+                                    </div>
                                 </div>
+                                <span class="badge badge-light border text-primary small ml-2">Bank Job</span>
                             </div>
-                            <span class="badge badge-light border text-primary small ml-2">Bank Job</span>
-                        </div>
+                        {% endif %}
 
                         <div class="pt-2 text-center border-top mt-2">
                             <small class="text-muted">
                                 <i class="fa fa-lock text-muted mr-1"></i>
-                                {% trans "Sign in below to unlock 12,400+ custom job matches tailored to your profile." %}
+                                {% trans "Sign in below to unlock custom job matches tailored to your profile." %}
                             </small>
                         </div>
                     </div>
 
-                    <!-- Platform Trust Metric Badges -->
+                    <!-- Platform Trust Metric Badges (Real Database Numbers) -->
                     <div class="row pt-2 text-left">
                         <div class="col-4">
-                            <div class="font-weight-bold text-dark" style="font-size: 1.35rem; color: #0a66c2 !important;">12,400+</div>
+                            <div class="font-weight-bold text-dark" style="font-size: 1.45rem; color: #0a66c2 !important;">
+                                {{ total_jobs|default:"0" }}
+                            </div>
                             <div class="small text-muted">{% trans "Active Vacancies" %}</div>
                         </div>
                         <div class="col-4">
-                            <div class="font-weight-bold text-dark" style="font-size: 1.35rem; color: #057642 !important;">5,000+</div>
+                            <div class="font-weight-bold text-dark" style="font-size: 1.45rem; color: #057642 !important;">
+                                {{ total_companies|default:"0" }}
+                            </div>
                             <div class="small text-muted">{% trans "Verified Companies" %}</div>
                         </div>
                         <div class="col-4">
-                            <div class="font-weight-bold text-dark" style="font-size: 1.35rem; color: #0a66c2 !important;">98%</div>
-                            <div class="small text-muted">{% trans "Recruiter Response" %}</div>
+                            <div class="font-weight-bold text-dark" style="font-size: 1.45rem; color: #0a66c2 !important;">
+                                {{ total_candidates|default:"0" }}
+                            </div>
+                            <div class="small text-muted">{% trans "Registered Talents" %}</div>
                         </div>
                     </div>
 
@@ -105,7 +129,7 @@
                         </p>
                     </div>
 
-                    <!-- Google 1-Click Sign-in Button (Top Priority) -->
+                    <!-- Google 1-Click Sign-in Button -->
                     <div class="mb-3">
                         <a href="{% url 'social:begin' 'google-oauth2' %}" 
                            class="linkedin-google-btn w-100 text-center">
@@ -119,20 +143,6 @@
                             </div>
                             <span class="btn-label font-weight-600">{% trans "Continue with Google" %}</span>
                         </a>
-                    </div>
-
-                    <!-- Alternative Social Logins Row (LinkedIn, GitHub) -->
-                    <div class="row no-gutters mb-3" style="margin-left: -4px; margin-right: -4px;">
-                        <div class="col-6 px-1">
-                            <a href="{% url 'social:begin' 'linkedin-oauth2' %}" class="btn btn-outline-secondary btn-sm btn-block font-weight-600 py-2 d-flex align-items-center justify-content-center" style="border-radius: 20px; font-size: 0.82rem; border-color: #cbd5e1; color: #0a66c2;">
-                                <i class="fa fa-linkedin-square mr-1" style="font-size: 15px;"></i> LinkedIn
-                            </a>
-                        </div>
-                        <div class="col-6 px-1">
-                            <a href="{% url 'social:begin' 'github' %}" class="btn btn-outline-secondary btn-sm btn-block font-weight-600 py-2 d-flex align-items-center justify-content-center" style="border-radius: 20px; font-size: 0.82rem; border-color: #cbd5e1; color: #1e293b;">
-                                <i class="fa fa-github mr-1" style="font-size: 15px;"></i> GitHub
-                            </a>
-                        </div>
                     </div>
 
                     <!-- Clean Divider -->
@@ -156,17 +166,15 @@
                         <!-- Email Input -->
                         <div class="form-group mb-3">
                             <label for="id_email" class="linkedin-form-label">
-                                {% trans "Email (or Google Email)" %} <span class="text-danger">*</span>
+                                {% trans "Email address" %} <span class="text-danger">*</span>
                             </label>
-                            <div class="input-with-icon position-relative">
-                                <input type="email"
-                                       class="form-control linkedin-input {% if form.email.errors %}is-invalid{% endif %}"
-                                       name="email"
-                                       id="id_email"
-                                       value="{{ form.email.value|default_if_none:'' }}"
-                                       placeholder="{% trans 'Enter your email address' %}"
-                                       required>
-                            </div>
+                            <input type="email"
+                                   class="form-control linkedin-input {% if form.email.errors %}is-invalid{% endif %}"
+                                   name="email"
+                                   id="id_email"
+                                   value="{{ form.email.value|default_if_none:'' }}"
+                                   placeholder="{% trans 'Enter your email address' %}"
+                                   required>
                             {% if form.email.errors %}
                                 <div class="text-danger small mt-1 font-weight-500">
                                     {{ form.email.errors.0 }}
@@ -174,13 +182,11 @@
                             {% endif %}
                         </div>
 
-                        <!-- Password Input -->
+                        <!-- Password Input with Eye Icon -->
                         <div class="form-group mb-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <label for="id_password" class="linkedin-form-label mb-0">
-                                    {% trans "Password" %} <span class="text-danger">*</span>
-                                </label>
-                            </div>
+                            <label for="id_password" class="linkedin-form-label mb-1">
+                                {% trans "Password" %} <span class="text-danger">*</span>
+                            </label>
                             <div class="position-relative">
                                 <input type="password"
                                        class="form-control linkedin-input pr-5 {% if form.password.errors %}is-invalid{% endif %}"
@@ -189,10 +195,11 @@
                                        placeholder="{% trans 'Enter your password' %}"
                                        required>
                                 <button type="button" 
-                                        class="btn-toggle-show-hide" 
+                                        class="btn-toggle-eye" 
                                         data-target="id_password" 
-                                        tabindex="-1">
-                                    {% trans "Show" %}
+                                        tabindex="-1"
+                                        title="{% trans 'Toggle password visibility' %}">
+                                    <i class="fa fa-eye"></i>
                                 </button>
                             </div>
                             {% if form.password.errors %}
@@ -218,19 +225,20 @@
                         </button>
                     </form>
 
-                    <!-- Join Now Footer -->
+                    <!-- Join Now Text Link (Clean LinkedIn Style) -->
                     <div class="mt-4 pt-3 text-center border-top">
-                        <p class="text-muted small mb-2">
+                        <p class="text-muted small mb-1">
                             {% trans "New to EthioJobs?" %}
+                            <a href="{% url 'accounts:employee-register' %}" class="font-weight-bold text-primary ml-1">
+                                {% trans "Join now" %}
+                            </a>
                         </p>
-                        <div class="d-flex justify-content-center" style="gap: 10px;">
-                            <a href="{% url 'accounts:employee-register' %}" class="linkedin-join-pill">
-                                <i class="fa fa-user mr-1"></i> {% trans "Join as Job Seeker" %}
+                        <p class="text-muted small mb-0">
+                            {% trans "Looking to hire talent?" %}
+                            <a href="{% url 'accounts:employer-register' %}" class="text-success font-weight-600 ml-1">
+                                {% trans "Register as Employer" %} &rarr;
                             </a>
-                            <a href="{% url 'accounts:employer-register' %}" class="linkedin-join-pill employer-pill">
-                                <i class="fa fa-building mr-1"></i> {% trans "Register as Employer" %}
-                            </a>
-                        </div>
+                        </p>
                     </div>
 
                 </div>
@@ -269,7 +277,6 @@
     color: #475569;
 }
 
-/* Badge Soft */
 .badge-primary-soft {
     background-color: #e8f0fe;
     color: #0a66c2;
@@ -280,7 +287,6 @@
     color: #137333;
 }
 
-/* Recommendation Card */
 .recommendation-preview-card {
     border-radius: 14px;
     border: 1px solid #e0dfdc !important;
@@ -295,14 +301,12 @@
 }
 .font-size-18 { font-size: 18px; }
 
-/* Right Column Card */
 .linkedin-auth-card {
     border-radius: 14px;
     border: 1px solid #e0dfdc !important;
     box-shadow: 0 4px 16px rgba(0,0,0,0.06);
 }
 
-/* Google Button */
 .linkedin-google-btn {
     display: flex;
     align-items: center;
@@ -329,7 +333,6 @@
     align-items: center;
 }
 
-/* Divider */
 .linkedin-divider {
     position: relative;
     border-top: 1px solid #e0dfdc;
@@ -347,7 +350,6 @@
     letter-spacing: 0.5px;
 }
 
-/* Form Inputs */
 .linkedin-form-label {
     font-size: 0.88rem;
     font-weight: 600;
@@ -367,25 +369,28 @@
     border-color: #0a66c2;
     box-shadow: 0 0 0 2px rgba(10,102,194,0.25);
 }
-.btn-toggle-show-hide {
+
+/* Eye Icon Button */
+.btn-toggle-eye {
     position: absolute;
-    right: 12px;
+    right: 14px;
     top: 50%;
     transform: translateY(-50%);
-    background: none;
+    background: transparent;
     border: none;
-    color: #0a66c2;
-    font-size: 0.85rem;
-    font-weight: 600;
+    color: #64748b;
+    font-size: 1.05rem;
     cursor: pointer;
-    padding: 4px 6px;
+    padding: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
 }
-.btn-toggle-show-hide:hover {
-    color: #004182;
-    text-decoration: underline;
+.btn-toggle-eye:hover {
+    color: #0a66c2;
 }
 
-/* Primary Button (LinkedIn Blue Pill) */
 .btn-linkedin-primary {
     background-color: #0a66c2;
     border: none;
@@ -401,47 +406,22 @@
     box-shadow: 0 4px 12px rgba(10,102,194,0.3);
     transform: translateY(-1px);
 }
-
-/* Join Pills */
-.linkedin-join-pill {
-    display: inline-block;
-    padding: 7px 16px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    border: 1px solid #0a66c2;
-    color: #0a66c2;
-    text-decoration: none;
-    transition: all 0.2s;
-}
-.linkedin-join-pill:hover {
-    background-color: rgba(10,102,194,0.08);
-    color: #004182;
-    text-decoration: none;
-}
-.linkedin-join-pill.employer-pill {
-    border-color: #057642;
-    color: #057642;
-}
-.linkedin-join-pill.employer-pill:hover {
-    background-color: rgba(5,118,66,0.08);
-    color: #034d2b;
-}
 </style>
 {% endblock %}
 
 {% block javascripts %}
 <script>
     $(document).ready(function() {
-        $('.btn-toggle-show-hide').on('click', function() {
+        $('.btn-toggle-eye').on('click', function() {
             var targetId = $(this).data('target');
             var input = $('#' + targetId);
+            var icon = $(this).find('i');
             if (input.attr('type') === 'password') {
                 input.attr('type', 'text');
-                $(this).text('{% trans "Hide" %}');
+                icon.removeClass('fa-eye').addClass('fa-eye-slash text-primary');
             } else {
                 input.attr('type', 'password');
-                $(this).text('{% trans "Show" %}');
+                icon.removeClass('fa-eye-slash text-primary').addClass('fa-eye');
             }
         });
     });

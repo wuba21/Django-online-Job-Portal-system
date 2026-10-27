@@ -8,20 +8,6 @@
 <section class="linkedin-auth-section py-4 py-md-5">
     <div class="container">
         
-        <!-- Role Switcher Tab (LinkedIn Style) -->
-        <div class="row justify-content-center mb-4">
-            <div class="col-12 col-md-8 col-lg-6 text-center">
-                <div class="linkedin-role-switcher p-1 d-inline-flex bg-white rounded-pill border shadow-xs">
-                    <a href="{% url 'accounts:employee-register' %}" class="role-switch-btn rounded-pill">
-                        <i class="fa fa-user mr-1"></i> {% trans "Job Seeker (ሰራተኛ)" %}
-                    </a>
-                    <a href="{% url 'accounts:employer-register' %}" class="role-switch-btn active employer-active rounded-pill">
-                        <i class="fa fa-building-o mr-1"></i> {% trans "Employer / Company (ቀጣሪ)" %}
-                    </a>
-                </div>
-            </div>
-        </div>
-
         <div class="row align-items-center justify-content-between auth-grid-row">
             
             <!-- Left Column: LinkedIn-Style Value Proposition & Employer Showcase -->
@@ -34,7 +20,7 @@
                         {% trans "Hire the top 1% Ethiopian talent" %}
                     </h1>
                     <p class="auth-sub-headline text-muted mb-4">
-                        {% trans "Post vacancies, auto-rank applicants with AI resume parsing, and connect directly with 350,000+ verified professionals." %}
+                        {% trans "Post vacancies, auto-rank applicants with AI resume parsing, and connect directly with verified Ethiopian professionals." %}
                     </p>
 
                     <!-- Live Employer Benefits Showcase -->
@@ -82,19 +68,25 @@
                         </div>
                     </div>
 
-                    <!-- Platform Trust Metric Badges -->
+                    <!-- Platform Trust Metric Badges (Real Database Numbers) -->
                     <div class="row pt-2 text-left">
                         <div class="col-4">
-                            <div class="font-weight-bold text-dark" style="font-size: 1.35rem; color: #057642 !important;">350K+</div>
-                            <div class="small text-muted">{% trans "Active Talents" %}</div>
+                            <div class="font-weight-bold text-dark" style="font-size: 1.45rem; color: #057642 !important;">
+                                {{ total_jobs|default:"0" }}
+                            </div>
+                            <div class="small text-muted">{% trans "Active Vacancies" %}</div>
                         </div>
                         <div class="col-4">
-                            <div class="font-weight-bold text-dark" style="font-size: 1.35rem; color: #0a66c2 !important;">48 Hrs</div>
-                            <div class="small text-muted">{% trans "Avg. Hire Time" %}</div>
+                            <div class="font-weight-bold text-dark" style="font-size: 1.45rem; color: #0a66c2 !important;">
+                                {{ total_companies|default:"0" }}
+                            </div>
+                            <div class="small text-muted">{% trans "Verified Companies" %}</div>
                         </div>
                         <div class="col-4">
-                            <div class="font-weight-bold text-dark" style="font-size: 1.35rem; color: #057642 !important;">99.2%</div>
-                            <div class="small text-muted">{% trans "Employer Rating" %}</div>
+                            <div class="font-weight-bold text-dark" style="font-size: 1.45rem; color: #057642 !important;">
+                                {{ total_candidates|default:"0" }}
+                            </div>
+                            <div class="small text-muted">{% trans "Registered Talents" %}</div>
                         </div>
                     </div>
 
@@ -187,15 +179,13 @@
                             <label for="id_company_name" class="linkedin-form-label">
                                 {% trans "Company / Organization Name" %} <span class="text-danger">*</span>
                             </label>
-                            <div class="position-relative">
-                                <input type="text"
-                                       name="company_name"
-                                       id="id_company_name"
-                                       class="form-control linkedin-input {% if form.company_name.errors %}is-invalid{% endif %}"
-                                       value="{{ form.company_name.value|default_if_none:'' }}"
-                                       placeholder="{% trans 'e.g. Awash Bank, Ethio Telecom, Nile Tech PLC' %}"
-                                       required>
-                            </div>
+                            <input type="text"
+                                   name="company_name"
+                                   id="id_company_name"
+                                   class="form-control linkedin-input {% if form.company_name.errors %}is-invalid{% endif %}"
+                                   value="{{ form.company_name.value|default_if_none:'' }}"
+                                   placeholder="{% trans 'e.g. Awash Bank, Ethio Telecom, Nile Tech PLC' %}"
+                                   required>
                             {% if form.company_name.errors %}
                                 <div class="text-danger small mt-1 font-weight-500">{{ form.company_name.errors.0 }}</div>
                             {% endif %}
@@ -229,16 +219,11 @@
                             </div>
                         </div>
 
-                        <!-- Company Google Email Input -->
+                        <!-- Company Google Email Input (Clean label without bulky badges) -->
                         <div class="form-group mb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <label for="id_email" class="linkedin-form-label mb-0">
-                                    {% trans "Company Google Email" %} <span class="text-danger">*</span>
-                                </label>
-                                <span class="badge badge-light border text-success small font-weight-600">
-                                    <i class="fa fa-google mr-1"></i> @gmail.com required
-                                </span>
-                            </div>
+                            <label for="id_email" class="linkedin-form-label mb-1">
+                                {% trans "Company Google Email" %} <span class="text-danger">*</span>
+                            </label>
                             <input type="email"
                                    name="email"
                                    id="id_email"
@@ -254,7 +239,7 @@
                             {% endif %}
                         </div>
 
-                        <!-- Password Row -->
+                        <!-- Password Row with Eye Icon Toggle -->
                         <div class="form-row">
                             <div class="form-group col-md-6 mb-3">
                                 <label for="id_password1" class="linkedin-form-label">
@@ -267,8 +252,8 @@
                                            class="form-control linkedin-input pr-5 {% if form.password1.errors %}is-invalid{% endif %}"
                                            placeholder="{% trans 'Min. 8 characters' %}"
                                            required>
-                                    <button type="button" class="btn-toggle-show-hide" data-target="id_password1" tabindex="-1">
-                                        {% trans "Show" %}
+                                    <button type="button" class="btn-toggle-eye" data-target="id_password1" tabindex="-1" title="{% trans 'Toggle password visibility' %}">
+                                        <i class="fa fa-eye"></i>
                                     </button>
                                 </div>
                                 {% if form.password1.errors %}
@@ -286,8 +271,8 @@
                                            class="form-control linkedin-input pr-5 {% if form.password2.errors %}is-invalid{% endif %}"
                                            placeholder="{% trans 'Re-type password' %}"
                                            required>
-                                    <button type="button" class="btn-toggle-show-hide" data-target="id_password2" tabindex="-1">
-                                        {% trans "Show" %}
+                                    <button type="button" class="btn-toggle-eye" data-target="id_password2" tabindex="-1" title="{% trans 'Toggle password visibility' %}">
+                                        <i class="fa fa-eye"></i>
                                     </button>
                                 </div>
                                 {% if form.password2.errors %}
@@ -314,10 +299,16 @@
 
                     <!-- Sign In Footer -->
                     <div class="mt-4 pt-3 text-center border-top">
-                        <p class="text-muted small mb-0">
+                        <p class="text-muted small mb-1">
                             {% trans "Already registered as an employer?" %}
                             <a href="{% url 'accounts:login' %}" class="text-success font-weight-bold ml-1">
                                 {% trans "Sign in" %} &rarr;
+                            </a>
+                        </p>
+                        <p class="text-muted small mb-0">
+                            {% trans "Looking for a job?" %}
+                            <a href="{% url 'accounts:employee-register' %}" class="text-primary font-weight-600 ml-1">
+                                {% trans "Join as Job Seeker" %} &rarr;
                             </a>
                         </p>
                     </div>
@@ -337,28 +328,6 @@
     display: flex;
     align-items: center;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-/* Role Switcher */
-.linkedin-role-switcher {
-    border-color: #e0dfdc !important;
-}
-.role-switch-btn {
-    padding: 8px 22px;
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: #64748b;
-    text-decoration: none;
-    transition: all 0.2s;
-}
-.role-switch-btn:hover {
-    color: #057642;
-    text-decoration: none;
-}
-.role-switch-btn.active.employer-active {
-    background-color: #057642;
-    color: #ffffff !important;
-    box-shadow: 0 2px 6px rgba(5,118,66,0.3);
 }
 
 .auth-main-headline {
@@ -384,7 +353,6 @@
     font-size: 0.85rem;
 }
 
-/* Benefit Cards */
 .benefits-showcase-card {
     border-radius: 14px;
     border: 1px solid #e0dfdc !important;
@@ -397,14 +365,12 @@
 .bg-light-blue { background-color: #e8f0fe; }
 .bg-light-green { background-color: #e6f4ea; }
 
-/* Right Card */
 .linkedin-auth-card {
     border-radius: 14px;
     border: 1px solid #e0dfdc !important;
     box-shadow: 0 4px 16px rgba(0,0,0,0.06);
 }
 
-/* Google Button */
 .linkedin-google-btn {
     display: flex;
     align-items: center;
@@ -431,7 +397,6 @@
     align-items: center;
 }
 
-/* Divider */
 .linkedin-divider {
     position: relative;
     border-top: 1px solid #e0dfdc;
@@ -449,7 +414,6 @@
     letter-spacing: 0.5px;
 }
 
-/* Form Controls */
 .linkedin-form-label {
     font-size: 0.88rem;
     font-weight: 600;
@@ -478,25 +442,28 @@ select.form-control:focus {
     border-color: #057642;
     box-shadow: 0 0 0 2px rgba(5,118,66,0.25);
 }
-.btn-toggle-show-hide {
+
+/* Eye Icon Button */
+.btn-toggle-eye {
     position: absolute;
-    right: 12px;
+    right: 14px;
     top: 50%;
     transform: translateY(-50%);
-    background: none;
+    background: transparent;
     border: none;
-    color: #057642;
-    font-size: 0.85rem;
-    font-weight: 600;
+    color: #64748b;
+    font-size: 1rem;
     cursor: pointer;
-    padding: 4px 6px;
+    padding: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
 }
-.btn-toggle-show-hide:hover {
-    color: #034d2b;
-    text-decoration: underline;
+.btn-toggle-eye:hover {
+    color: #057642;
 }
 
-/* Primary Button */
 .btn-linkedin-employer {
     background-color: #057642;
     border: none;
@@ -518,15 +485,16 @@ select.form-control:focus {
 {% block javascripts %}
 <script>
     $(document).ready(function() {
-        $('.btn-toggle-show-hide').on('click', function() {
+        $('.btn-toggle-eye').on('click', function() {
             var targetId = $(this).data('target');
             var input = $('#' + targetId);
+            var icon = $(this).find('i');
             if (input.attr('type') === 'password') {
                 input.attr('type', 'text');
-                $(this).text('{% trans "Hide" %}');
+                icon.removeClass('fa-eye').addClass('fa-eye-slash text-success');
             } else {
                 input.attr('type', 'password');
-                $(this).text('{% trans "Show" %}');
+                icon.removeClass('fa-eye-slash text-success').addClass('fa-eye');
             }
         });
     });
