@@ -162,110 +162,137 @@
                 background: #2563eb !important;
                 color: #ffffff !important;
             }
-            .navbar-nav .user-profile-dropdown {
-                background: #1e293b !important;
-                border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            }
-            .user-dropdown-header {
-                background: rgba(255, 255, 255, 0.04) !important;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-            }
-            .user-dropdown-header .user-name {
-                color: #ffffff !important;
-            }
-            .user-dropdown-header .user-email {
-                color: #94a3b8 !important;
-            }
-            .profile-action-btn {
-                background: rgba(37, 99, 235, 0.15) !important;
-                border: 1px solid #3b82f6 !important;
-                color: #93c5fd !important;
-                border-radius: 20px !important;
-                font-size: 12.5px !important;
-                padding: 5px 12px !important;
-            }
-            .profile-action-btn:hover {
-                background: #2563eb !important;
-                color: #ffffff !important;
-            }
         }
 
-        /* User Profile Dropdown Styling (Desktop & Global Resets) */
+        /* User Profile Dropdown Styling (Universal - Desktop & Mobile) */
         .user-profile-dropdown,
         .user-profile-dropdown * {
             text-transform: none !important;
             letter-spacing: normal !important;
+            box-sizing: border-box !important;
         }
-        @media (min-width: 992px) {
-            .user-profile-dropdown {
-                min-width: 300px !important;
-                max-width: 320px !important;
-                padding: 0 !important;
-                border-radius: 12px !important;
-                overflow: hidden !important;
-                border: 1px solid #e2e8f0 !important;
-                box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12) !important;
-                background: #ffffff !important;
-            }
-            .user-dropdown-header {
-                padding: 16px !important;
-                background: #ffffff !important;
-                border-bottom: 1px solid #f1f5f9 !important;
-            }
-            .user-dropdown-header .user-name {
-                color: #0f172a !important;
-                font-weight: 700 !important;
-            }
-            .user-dropdown-header .user-email {
-                color: #64748b !important;
-            }
-            .profile-action-btn {
-                border: 1.5px solid #0a66c2 !important;
-                color: #0a66c2 !important;
-                background: transparent !important;
-                border-radius: 20px !important;
-                font-size: 13px !important;
-                font-weight: 600 !important;
-                padding: 5px 14px !important;
-                text-decoration: none !important;
-                transition: all 0.15s ease !important;
-                display: block !important;
-                text-align: center !important;
-            }
-            .profile-action-btn:hover {
-                background: #f0f7ff !important;
-                border-color: #004182 !important;
-                color: #004182 !important;
-            }
-            .user-dropdown-body {
-                padding: 6px 0 !important;
-                background: #ffffff !important;
-            }
-            .user-dropdown-body .dropdown-item {
-                color: #334155 !important;
-                font-size: 0.88rem !important;
-                padding: 9px 18px !important;
-                display: flex !important;
-                align-items: center !important;
-                transition: background 0.15s ease, color 0.15s ease !important;
-            }
-            .user-dropdown-body .dropdown-item:hover {
-                background: #f8fafc !important;
-                color: #0a66c2 !important;
-            }
-            .user-dropdown-body .dropdown-item i {
-                width: 20px !important;
-                text-align: center !important;
-                color: #64748b !important;
-                margin-right: 8px !important;
-            }
-            .user-dropdown-body .dropdown-item:hover i {
-                color: #0a66c2 !important;
-            }
-            .user-dropdown-body .dropdown-divider {
-                margin: 4px 0 !important;
-                border-top: 1px solid #f1f5f9 !important;
-            }
+
+        .user-profile-dropdown,
+        .navbar-nav .user-profile-dropdown,
+        .navbar-nav .dropdown-menu.user-profile-dropdown {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 14px !important;
+            overflow: hidden !important;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12) !important;
+            padding: 0 !important;
+            min-width: 300px !important;
+            max-width: 330px !important;
+        }
+
+        .user-profile-dropdown .user-dropdown-header {
+            padding: 16px 18px 14px 18px !important;
+            background: #ffffff !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+        }
+
+        .user-profile-dropdown .user-name {
+            color: #0f172a !important;
+            font-weight: 700 !important;
+            font-size: 15px !important;
+        }
+
+        .user-profile-dropdown .user-email {
+            color: #64748b !important;
+            font-size: 12.5px !important;
+        }
+
+        .user-profile-dropdown .profile-action-btn {
+            border: 1.5px solid #0a66c2 !important;
+            color: #0a66c2 !important;
+            background: #ffffff !important;
+            border-radius: 20px !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            padding: 5px 14px !important;
+            text-decoration: none !important;
+            transition: all 0.15s ease !important;
+            display: block !important;
+            text-align: center !important;
+            margin-top: 10px !important;
+        }
+
+        .user-profile-dropdown .profile-action-btn:hover {
+            background: #f0f7ff !important;
+            border-color: #004182 !important;
+            color: #004182 !important;
+        }
+
+        .user-profile-dropdown .user-dropdown-body {
+            padding: 6px 0 !important;
+            background: #ffffff !important;
+        }
+
+        /* 100% Guaranteed High-Contrast Dark Text for ALL menu items on Desktop AND Mobile */
+        .user-profile-dropdown .dropdown-item,
+        .navbar-nav .user-profile-dropdown .dropdown-item,
+        .navbar-nav .dropdown-menu.user-profile-dropdown .dropdown-item,
+        .user-profile-dropdown .user-dropdown-body .dropdown-item,
+        .navbar-nav .user-profile-dropdown .user-dropdown-body .dropdown-item {
+            color: #1e293b !important; /* Bold Charcoal / Slate - 100% visible */
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            padding: 10px 20px !important;
+            display: flex !important;
+            align-items: center !important;
+            background: transparent !important;
+            text-decoration: none !important;
+            transition: background 0.15s ease, color 0.15s ease !important;
+        }
+
+        .user-profile-dropdown .dropdown-item:hover,
+        .navbar-nav .user-profile-dropdown .dropdown-item:hover,
+        .navbar-nav .dropdown-menu.user-profile-dropdown .dropdown-item:hover,
+        .user-profile-dropdown .user-dropdown-body .dropdown-item:hover,
+        .navbar-nav .user-profile-dropdown .user-dropdown-body .dropdown-item:hover {
+            background: #f8fafc !important;
+            color: #0a66c2 !important;
+        }
+
+        /* Icons inside profile dropdown */
+        .user-profile-dropdown .dropdown-item i,
+        .navbar-nav .user-profile-dropdown .dropdown-item i,
+        .user-profile-dropdown .user-dropdown-body .dropdown-item i {
+            width: 22px !important;
+            text-align: center !important;
+            color: #475569 !important; /* Visible dark-slate icons */
+            font-size: 14px !important;
+            margin-right: 8px !important;
+            transition: color 0.15s ease !important;
+        }
+
+        .user-profile-dropdown .dropdown-item:hover i,
+        .navbar-nav .user-profile-dropdown .dropdown-item:hover i,
+        .user-profile-dropdown .user-dropdown-body .dropdown-item:hover i {
+            color: #0a66c2 !important;
+        }
+
+        /* Dividers inside profile dropdown */
+        .user-profile-dropdown .dropdown-divider {
+            margin: 4px 0 !important;
+            border-top: 1px solid #f1f5f9 !important;
+        }
+
+        /* Logout button inside profile dropdown */
+        .user-profile-dropdown .dropdown-item.text-danger,
+        .navbar-nav .user-profile-dropdown .dropdown-item.text-danger {
+            color: #dc2626 !important;
+        }
+        .user-profile-dropdown .dropdown-item.text-danger i,
+        .navbar-nav .user-profile-dropdown .dropdown-item.text-danger i {
+            color: #dc2626 !important;
+        }
+        .user-profile-dropdown .dropdown-item.text-danger:hover {
+            background: #fef2f2 !important;
+            color: #b91c1c !important;
+        }
+        .user-profile-dropdown .dropdown-item.text-danger:hover i {
+            color: #b91c1c !important;
         }
     </style>
 </head>
