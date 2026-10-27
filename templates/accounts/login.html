@@ -1,140 +1,233 @@
 {% extends 'base.html' %}
-{% load i18n %}
+{% load i18n static %}
 {% block title %}
-    Sign In | Ethiopian Job Portal
+    {% trans "Sign In" %} | EthioJobs Professional Network
 {% endblock %}
 
 {% block content %}
-<section class="py-5 bg-light-gray" style="min-height: 80vh; display: flex; align-items: center; background: #f8fafc;">
+<section class="linkedin-auth-section py-4 py-md-5">
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-12 col-md-8 col-lg-5">
-                <div class="card border-0 shadow-sm rounded-xl p-4 p-md-5 bg-white position-relative overflow-hidden" style="border-radius: 18px; border: 1px solid #e2e8f0 !important;">
-                    
-                    <div class="text-center mb-4">
-                        <div class="mx-auto mb-3" style="width: 60px; height: 60px; background: #eff6ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(37,99,235,0.12);">
-                            <i class="fa fa-lock text-primary" style="font-size: 26px;"></i>
+        <div class="row align-items-center justify-content-between auth-grid-row">
+            
+            <!-- Left Column: LinkedIn-Style Value Proposition & Job Recommendations Showcase -->
+            <div class="col-12 col-lg-6 pr-lg-5 mb-5 mb-lg-0 order-2 order-lg-1">
+                <div class="auth-showcase-box">
+                    <span class="badge badge-pill badge-primary-soft mb-3 px-3 py-2 font-weight-bold">
+                        <i class="fa fa-briefcase mr-1"></i> {% trans "Ethiopia's Premier Career Community" %}
+                    </span>
+                    <h1 class="auth-main-headline font-weight-bold mb-3">
+                        {% trans "Welcome to your professional community" %}
+                    </h1>
+                    <p class="auth-sub-headline text-muted mb-4">
+                        {% trans "Find opportunities, build verified resumes, and connect directly with hiring managers at 5,000+ top Ethiopian companies." %}
+                    </p>
+
+                    <!-- Live Job Recommendation Card Preview ("login recommendationu") -->
+                    <div class="recommendation-preview-card p-3 mb-4 rounded-xl shadow-sm bg-white border">
+                        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+                            <span class="small font-weight-bold text-dark text-uppercase letter-spacing-1">
+                                <i class="fa fa-bolt text-warning mr-1"></i> {% trans "Recommended Jobs For You" %}
+                            </span>
+                            <span class="badge badge-success-soft font-weight-600 px-2 py-1 small">
+                                {% trans "Live Matching" %}
+                            </span>
                         </div>
-                        <h3 class="font-weight-bold mb-1" style="color: #0f172a; font-size: 1.55rem; letter-spacing: -0.5px;">
-                            {% trans "Welcome Back" %}
-                        </h3>
+
+                        <!-- Sample Live Job 1 -->
+                        <div class="mini-job-item d-flex align-items-center mb-3">
+                            <div class="mini-logo-box bg-light-blue mr-3 rounded-lg d-flex align-items-center justify-content-center text-primary font-weight-bold">
+                                <i class="fa fa-plane font-size-18"></i>
+                            </div>
+                            <div class="flex-grow-1 overflow-hidden">
+                                <div class="font-weight-bold text-dark text-truncate" style="font-size: 0.92rem;">
+                                    Senior Software Engineer / DevOps
+                                </div>
+                                <div class="small text-muted text-truncate">
+                                    Ethiopian Airlines &bull; Addis Ababa &bull; <span class="text-success font-weight-600">98% Match</span>
+                                </div>
+                            </div>
+                            <span class="badge badge-light border text-primary small ml-2">Full-time</span>
+                        </div>
+
+                        <!-- Sample Live Job 2 -->
+                        <div class="mini-job-item d-flex align-items-center mb-2">
+                            <div class="mini-logo-box bg-light-green mr-3 rounded-lg d-flex align-items-center justify-content-center text-success font-weight-bold">
+                                <i class="fa fa-university font-size-18"></i>
+                            </div>
+                            <div class="flex-grow-1 overflow-hidden">
+                                <div class="font-weight-bold text-dark text-truncate" style="font-size: 0.92rem;">
+                                    Data Analyst & Financial Modeler
+                                </div>
+                                <div class="small text-muted text-truncate">
+                                    Commercial Bank of Ethiopia &bull; Full-Time &bull; <span class="text-success font-weight-600">95% Match</span>
+                                </div>
+                            </div>
+                            <span class="badge badge-light border text-primary small ml-2">Bank Job</span>
+                        </div>
+
+                        <div class="pt-2 text-center border-top mt-2">
+                            <small class="text-muted">
+                                <i class="fa fa-lock text-muted mr-1"></i>
+                                {% trans "Sign in below to unlock 12,400+ custom job matches tailored to your profile." %}
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Platform Trust Metric Badges -->
+                    <div class="row pt-2 text-left">
+                        <div class="col-4">
+                            <div class="font-weight-bold text-dark" style="font-size: 1.35rem; color: #0a66c2 !important;">12,400+</div>
+                            <div class="small text-muted">{% trans "Active Vacancies" %}</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="font-weight-bold text-dark" style="font-size: 1.35rem; color: #057642 !important;">5,000+</div>
+                            <div class="small text-muted">{% trans "Verified Companies" %}</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="font-weight-bold text-dark" style="font-size: 1.35rem; color: #0a66c2 !important;">98%</div>
+                            <div class="small text-muted">{% trans "Recruiter Response" %}</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Right Column: Clean, Modern LinkedIn Authentication Card -->
+            <div class="col-12 col-lg-5 order-1 order-lg-2">
+                <div class="linkedin-auth-card bg-white p-4 p-md-5 rounded-2xl shadow-md border">
+                    
+                    <div class="mb-4">
+                        <h2 class="font-weight-bold text-dark mb-1" style="font-size: 1.75rem; letter-spacing: -0.5px;">
+                            {% trans "Sign in" %}
+                        </h2>
                         <p class="text-muted small mb-0">
-                            {% trans "Log in with your registered Google email or 1-Click Google Sign-In" %}
+                            {% trans "Stay updated on your professional career" %}
                         </p>
                     </div>
 
-                    <!-- 1-Click Google Sign-In Button -->
-                    <div class="mb-4">
+                    <!-- Google 1-Click Sign-in Button (Top Priority) -->
+                    <div class="mb-3">
                         <a href="{% url 'social:begin' 'google-oauth2' %}" 
-                           class="google-auth-btn w-100 text-center">
-                            <div class="google-icon-wrapper">
-                                <svg viewBox="0 0 48 48" width="22px" height="22px">
+                           class="linkedin-google-btn w-100 text-center">
+                            <div class="google-svg-box mr-2">
+                                <svg viewBox="0 0 48 48" width="20px" height="20px">
                                     <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
                                     <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
                                     <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
                                     <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
                                 </svg>
                             </div>
-                            <span class="font-weight-600">{% trans "Sign in with Google" %}</span>
+                            <span class="btn-label font-weight-600">{% trans "Continue with Google" %}</span>
                         </a>
                     </div>
 
-                    <!-- Divider -->
-                    <div class="text-center position-relative my-4">
-                        <hr style="border-top: 1px solid #e2e8f0;">
-                        <span class="bg-white px-3 text-muted text-uppercase font-weight-bold" style="position: absolute; top: -11px; left: 50%; transform: translateX(-50%); font-size: 0.72rem; letter-spacing: 0.5px;">
-                            {% trans "OR SIGN IN WITH EMAIL & PASSWORD" %}
-                        </span>
+                    <!-- Alternative Social Logins Row (LinkedIn, GitHub) -->
+                    <div class="row no-gutters mb-3" style="margin-left: -4px; margin-right: -4px;">
+                        <div class="col-6 px-1">
+                            <a href="{% url 'social:begin' 'linkedin-oauth2' %}" class="btn btn-outline-secondary btn-sm btn-block font-weight-600 py-2 d-flex align-items-center justify-content-center" style="border-radius: 20px; font-size: 0.82rem; border-color: #cbd5e1; color: #0a66c2;">
+                                <i class="fa fa-linkedin-square mr-1" style="font-size: 15px;"></i> LinkedIn
+                            </a>
+                        </div>
+                        <div class="col-6 px-1">
+                            <a href="{% url 'social:begin' 'github' %}" class="btn btn-outline-secondary btn-sm btn-block font-weight-600 py-2 d-flex align-items-center justify-content-center" style="border-radius: 20px; font-size: 0.82rem; border-color: #cbd5e1; color: #1e293b;">
+                                <i class="fa fa-github mr-1" style="font-size: 15px;"></i> GitHub
+                            </a>
+                        </div>
                     </div>
 
-                    <!-- Non-field Errors -->
+                    <!-- Clean Divider -->
+                    <div class="linkedin-divider text-center my-4">
+                        <span class="divider-text">{% trans "or" %}</span>
+                    </div>
+
+                    <!-- Error Messages -->
                     {% if form.non_field_errors %}
-                        <div class="alert alert-danger alert-dismissible fade show rounded-lg mb-3">
-                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <div class="alert alert-danger py-2 px-3 small rounded-lg mb-3">
                             {% for error in form.non_field_errors %}
                                 <div><i class="fa fa-exclamation-circle mr-1"></i> {{ error }}</div>
                             {% endfor %}
                         </div>
                     {% endif %}
 
-                    <!-- Login Form -->
+                    <!-- Standard Form -->
                     <form action="" method="post" novalidate>
                         {% csrf_token %}
 
-                        <!-- Email -->
+                        <!-- Email Input -->
                         <div class="form-group mb-3">
-                            <label for="id_email" class="font-weight-bold text-dark small">
-                                {% trans "Google Email Address (የጉግል ኢሜይል)" %} <span class="text-danger">*</span>
+                            <label for="id_email" class="linkedin-form-label">
+                                {% trans "Email (or Google Email)" %} <span class="text-danger">*</span>
                             </label>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text bg-white border-right-0 text-muted">
-                                        <i class="fa fa-envelope-o"></i>
-                                    </span>
-                                </div>
+                            <div class="input-with-icon position-relative">
                                 <input type="email"
-                                       class="form-control border-left-0"
+                                       class="form-control linkedin-input {% if form.email.errors %}is-invalid{% endif %}"
                                        name="email"
                                        id="id_email"
                                        value="{{ form.email.value|default_if_none:'' }}"
-                                       placeholder="Enter registered Google email (e.g. name@gmail.com)"
+                                       placeholder="{% trans 'Enter your email address' %}"
                                        required>
                             </div>
                             {% if form.email.errors %}
                                 <div class="text-danger small mt-1 font-weight-500">
-                                    <i class="fa fa-times-circle mr-1"></i> {{ form.email.errors.0 }}
+                                    {{ form.email.errors.0 }}
                                 </div>
                             {% endif %}
                         </div>
 
-                        <!-- Password -->
+                        <!-- Password Input -->
                         <div class="form-group mb-3">
-                            <label for="id_password" class="font-weight-bold text-dark small">
-                                {% trans "Password (የይለፍ ቃል)" %} <span class="text-danger">*</span>
-                            </label>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text bg-white border-right-0 text-muted">
-                                        <i class="fa fa-lock"></i>
-                                    </span>
-                                </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label for="id_password" class="linkedin-form-label mb-0">
+                                    {% trans "Password" %} <span class="text-danger">*</span>
+                                </label>
+                            </div>
+                            <div class="position-relative">
                                 <input type="password"
-                                       class="form-control border-left-0"
+                                       class="form-control linkedin-input pr-5 {% if form.password.errors %}is-invalid{% endif %}"
                                        name="password"
                                        id="id_password"
-                                       placeholder="Enter your password"
+                                       placeholder="{% trans 'Enter your password' %}"
                                        required>
-                                <div class="input-group-append">
-                                    <button class="btn btn-outline-secondary toggle-password-btn" type="button" data-target="id_password" style="border-color: #ced4da;">
-                                        <i class="fa fa-eye"></i>
-                                    </button>
-                                </div>
+                                <button type="button" 
+                                        class="btn-toggle-show-hide" 
+                                        data-target="id_password" 
+                                        tabindex="-1">
+                                    {% trans "Show" %}
+                                </button>
                             </div>
                             {% if form.password.errors %}
                                 <div class="text-danger small mt-1 font-weight-500">
-                                    <i class="fa fa-times-circle mr-1"></i> {{ form.password.errors.0 }}
+                                    {{ form.password.errors.0 }}
                                 </div>
                             {% endif %}
                         </div>
 
-                        <!-- Submit Button -->
-                        <div class="mt-4">
-                            <button type="submit" class="btn btn-primary btn-block py-2 font-weight-bold shadow-sm" style="font-size: 1rem; border-radius: 8px;">
-                                <i class="fa fa-sign-in mr-2"></i>{% trans "Log in" %}
-                            </button>
+                        <!-- Keep me signed in -->
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="rememberMeCheckbox" checked>
+                                <label class="custom-control-label small text-muted" for="rememberMeCheckbox">
+                                    {% trans "Keep me logged in" %}
+                                </label>
+                            </div>
                         </div>
+
+                        <!-- Submit Button (LinkedIn Blue Pill) -->
+                        <button type="submit" class="btn btn-linkedin-primary btn-block font-weight-bold py-3">
+                            {% trans "Sign in" %}
+                        </button>
                     </form>
 
-                    <!-- Links to Register -->
-                    <div class="mt-4 pt-3 border-top text-center" style="border-color: #f1f5f9 !important;">
+                    <!-- Join Now Footer -->
+                    <div class="mt-4 pt-3 text-center border-top">
                         <p class="text-muted small mb-2">
-                            {% trans "Don't have an account yet?" %}
+                            {% trans "New to EthioJobs?" %}
                         </p>
-                        <div class="d-flex justify-content-center gap-2" style="gap: 12px;">
-                            <a href="{% url 'accounts:employee-register' %}" class="btn btn-sm btn-outline-primary font-weight-bold px-3" style="border-radius: 6px;">
-                                <i class="fa fa-user mr-1"></i> {% trans "Register as Employee" %}
+                        <div class="d-flex justify-content-center" style="gap: 10px;">
+                            <a href="{% url 'accounts:employee-register' %}" class="linkedin-join-pill">
+                                <i class="fa fa-user mr-1"></i> {% trans "Join as Job Seeker" %}
                             </a>
-                            <a href="{% url 'accounts:employer-register' %}" class="btn btn-sm btn-outline-success font-weight-bold px-3 ml-2" style="border-radius: 6px;">
+                            <a href="{% url 'accounts:employer-register' %}" class="linkedin-join-pill employer-pill">
                                 <i class="fa fa-building mr-1"></i> {% trans "Register as Employer" %}
                             </a>
                         </div>
@@ -142,44 +235,197 @@
 
                 </div>
             </div>
+
         </div>
     </div>
 </section>
 
 <style>
-.font-weight-500 { font-weight: 500; }
-.font-weight-600 { font-weight: 600; }
+/* LinkedIn Modern Styling */
+.linkedin-auth-section {
+    background-color: #f3f2ef;
+    min-height: 86vh;
+    display: flex;
+    align-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
 
-.google-auth-btn {
+.auth-main-headline {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1.15;
+    color: #181818;
+    letter-spacing: -0.8px;
+}
+@media (max-width: 768px) {
+    .auth-main-headline {
+        font-size: 1.85rem;
+    }
+}
+
+.auth-sub-headline {
+    font-size: 1.05rem;
+    line-height: 1.5;
+    color: #475569;
+}
+
+/* Badge Soft */
+.badge-primary-soft {
+    background-color: #e8f0fe;
+    color: #0a66c2;
+    font-size: 0.85rem;
+}
+.badge-success-soft {
+    background-color: #e6f4ea;
+    color: #137333;
+}
+
+/* Recommendation Card */
+.recommendation-preview-card {
+    border-radius: 14px;
+    border: 1px solid #e0dfdc !important;
+    background: #ffffff;
+}
+.bg-light-blue { background-color: #e8f0fe; }
+.bg-light-green { background-color: #e6f4ea; }
+.mini-logo-box {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+}
+.font-size-18 { font-size: 18px; }
+
+/* Right Column Card */
+.linkedin-auth-card {
+    border-radius: 14px;
+    border: 1px solid #e0dfdc !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+
+/* Google Button */
+.linkedin-google-btn {
     display: flex;
     align-items: center;
     justify-content: center;
     background: #ffffff;
-    color: #1e293b;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 11px 18px;
-    font-size: 0.98rem;
+    color: #181818;
+    border: 1px solid #dadce0;
+    border-radius: 28px;
+    padding: 10px 18px;
+    font-size: 0.95rem;
     text-decoration: none;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-    transition: all 0.25s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
-.google-auth-btn:hover {
-    color: #0f172a;
-    border-color: #4285f4;
+.linkedin-google-btn:hover {
     background: #f8fafc;
-    box-shadow: 0 4px 14px rgba(66, 133, 244, 0.15);
+    border-color: #0a66c2;
+    color: #0a66c2;
     text-decoration: none;
-    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(10,102,194,0.15);
 }
-.google-icon-wrapper {
-    margin-right: 10px;
+.google-svg-box {
     display: inline-flex;
     align-items: center;
 }
-.form-control:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+
+/* Divider */
+.linkedin-divider {
+    position: relative;
+    border-top: 1px solid #e0dfdc;
+}
+.divider-text {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ffffff;
+    padding: 0 12px;
+    color: #666666;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Form Inputs */
+.linkedin-form-label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #181818;
+    margin-bottom: 6px;
+}
+.linkedin-input {
+    height: 48px;
+    border-radius: 6px;
+    border: 1px solid #00000099;
+    font-size: 0.95rem;
+    color: #181818;
+    padding-left: 14px;
+    transition: all 0.2s ease;
+}
+.linkedin-input:focus {
+    border-color: #0a66c2;
+    box-shadow: 0 0 0 2px rgba(10,102,194,0.25);
+}
+.btn-toggle-show-hide {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #0a66c2;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 6px;
+}
+.btn-toggle-show-hide:hover {
+    color: #004182;
+    text-decoration: underline;
+}
+
+/* Primary Button (LinkedIn Blue Pill) */
+.btn-linkedin-primary {
+    background-color: #0a66c2;
+    border: none;
+    color: #ffffff;
+    border-radius: 28px;
+    font-size: 1.05rem;
+    letter-spacing: -0.2px;
+    transition: all 0.2s ease;
+}
+.btn-linkedin-primary:hover {
+    background-color: #004182;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(10,102,194,0.3);
+    transform: translateY(-1px);
+}
+
+/* Join Pills */
+.linkedin-join-pill {
+    display: inline-block;
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid #0a66c2;
+    color: #0a66c2;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+.linkedin-join-pill:hover {
+    background-color: rgba(10,102,194,0.08);
+    color: #004182;
+    text-decoration: none;
+}
+.linkedin-join-pill.employer-pill {
+    border-color: #057642;
+    color: #057642;
+}
+.linkedin-join-pill.employer-pill:hover {
+    background-color: rgba(5,118,66,0.08);
+    color: #034d2b;
 }
 </style>
 {% endblock %}
@@ -187,16 +433,15 @@
 {% block javascripts %}
 <script>
     $(document).ready(function() {
-        $('.toggle-password-btn').on('click', function() {
+        $('.btn-toggle-show-hide').on('click', function() {
             var targetId = $(this).data('target');
             var input = $('#' + targetId);
-            var icon = $(this).find('i');
             if (input.attr('type') === 'password') {
                 input.attr('type', 'text');
-                icon.removeClass('fa-eye').addClass('fa-eye-slash');
+                $(this).text('{% trans "Hide" %}');
             } else {
                 input.attr('type', 'password');
-                icon.removeClass('fa-eye-slash').addClass('fa-eye');
+                $(this).text('{% trans "Show" %}');
             }
         });
     });
