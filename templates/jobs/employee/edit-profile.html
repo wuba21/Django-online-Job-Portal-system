@@ -10,9 +10,19 @@
             <div class="col-lg-3 mb-4">
                 <div class="card border-0 shadow-sm p-3">
                     <div class="text-center mb-3">
-                        <img src="{% static 'img/avatar.png' %}" class="rounded-circle mb-2" width="70" alt="Avatar">
-                        <h6 class="mb-0 font-weight-bold">{{ request.user.get_full_name|default:request.user.email }}</h6>
-                        <small class="text-muted">{{ profile.title|default:"Job Seeker" }}</small>
+                        <div class="position-relative d-inline-block mb-2">
+                            {% if request.user.avatar %}
+                                <img id="sidebarAvatarPreview" src="{{ request.user.avatar.url }}" class="rounded-circle shadow-sm border" width="76" height="76" style="object-fit: cover;" alt="Avatar">
+                            {% else %}
+                                <img id="sidebarAvatarPreview" src="{% static 'img/avatar.png' %}" class="rounded-circle shadow-sm border" width="76" height="76" style="object-fit: cover;" alt="Avatar">
+                            {% endif %}
+                            <label for="id_avatar_input" class="position-absolute d-flex align-items-center justify-content-center text-white mb-0 shadow-sm" style="bottom: 0; right: 0; width: 24px; height: 24px; border-radius: 50%; background: #0a66c2; border: 2px solid #ffffff; cursor: pointer;" title="{% trans 'Change Photo' %}">
+                                <i class="fa fa-camera" style="font-size: 10px;"></i>
+                            </label>
+                        </div>
+                        <h6 class="mb-0 font-weight-bold text-dark">{{ request.user.get_full_name|default:request.user.first_name|default:request.user.email }}</h6>
+                        <div class="text-muted small text-truncate">{{ request.user.email }}</div>
+                        <span class="badge badge-pill badge-primary-soft mt-1">{{ profile.title|default:"Job Seeker" }}</span>
                     </div>
                     <div class="nav flex-column nav-pills" role="tablist">
                         <a class="nav-link active" data-toggle="pill" href="#tab-basic" role="tab"><i class="fa fa-user"></i> Basic Info & Summary</a>
@@ -58,6 +68,35 @@
 
                             <form action="" method="post" enctype="multipart/form-data">
                                 {% csrf_token %}
+
+                                <!-- Profile Photo Upload Section -->
+                                <div class="card border rounded-lg p-3 mb-4 bg-light" style="border: 1px dashed #94a3b8 !important;">
+                                    <div class="d-flex align-items-center flex-wrap">
+                                        <div class="position-relative mr-3 mb-2 mb-sm-0" style="width: 74px; height: 74px; flex-shrink: 0;">
+                                            <div class="rounded-circle overflow-hidden border shadow-sm" style="width: 74px; height: 74px; background: #ffffff;">
+                                                {% if request.user.avatar %}
+                                                    <img id="profilePhotoPreview" src="{{ request.user.avatar.url }}" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover;">
+                                                {% else %}
+                                                    <img id="profilePhotoPreview" src="{% static 'img/avatar.png' %}" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover;">
+                                                {% endif %}
+                                            </div>
+                                            <label for="id_avatar_input" class="position-absolute d-flex align-items-center justify-content-center text-white mb-0 shadow-sm" style="bottom: 0; right: 0; width: 26px; height: 26px; border-radius: 50%; background: #0a66c2; border: 2px solid #ffffff; cursor: pointer;" title="{% trans 'Upload Photo' %}">
+                                                <i class="fa fa-camera" style="font-size: 11px;"></i>
+                                            </label>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="font-weight-bold mb-1 text-dark">{% trans "Profile Photo" %}</h6>
+                                            <p class="text-muted small mb-2">{% trans "Upload a professional photo or avatar (JPG, PNG). Max 2MB." %}</p>
+                                            <div class="d-flex align-items-center flex-wrap">
+                                                <input type="file" name="avatar" id="id_avatar_input" class="d-none" accept="image/*" onchange="previewAvatar(this)">
+                                                <label for="id_avatar_input" class="btn btn-sm btn-outline-primary mb-0 font-weight-bold" style="border-radius: 6px; cursor: pointer; font-size: 0.8rem; padding: 5px 14px;">
+                                                    <i class="fa fa-cloud-upload mr-1"></i> {% trans "Change Photo" %}
+                                                </label>
+                                                <span id="avatarFileName" class="text-muted small ml-2 text-truncate" style="max-width: 220px;"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="row">
                                     <div class="col-md-6 form-group">
                                         <label>First Name</label>
@@ -303,4 +342,30 @@
         </div>
     </div>
 </section>
+
+<script>
+function previewAvatar(input) {
+    if (input.files && input.files[0]) {
+        var file = input.files[0];
+        if (file.size > 5 * 1024 * 1024) {
+            alert("{% trans 'File size must be under 5MB.' %}");
+            input.value = "";
+            return;
+        }
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var p1 = document.getElementById('profilePhotoPreview');
+            var p2 = document.getElementById('sidebarAvatarPreview');
+            if (p1) p1.src = e.target.result;
+            if (p2) p2.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+        var nameSpan = document.getElementById('avatarFileName');
+        if (nameSpan) {
+            nameSpan.textContent = file.name;
+            nameSpan.classList.add('text-success', 'font-weight-bold');
+        }
+    }
+}
+</script>
 {% endblock %}

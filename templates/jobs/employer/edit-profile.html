@@ -78,14 +78,23 @@
                         </div>
 
                         <div class="form-group mb-3">
-                            <label for="id_logo" class="font-weight-bold text-secondary">{% trans "Company Logo" %}</label>
-                            {% if request.user.company.logo %}
-                                <div class="mb-2 d-flex align-items-center">
-                                    <img src="{{ request.user.company.logo.url }}" alt="Logo" class="rounded border p-1" style="max-height: 50px; max-width: 120px;">
-                                    <small class="text-muted ml-2">Current logo</small>
+                            <label class="font-weight-bold text-secondary">{% trans "Company Logo" %}</label>
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="mr-3 border rounded p-1 bg-light d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; overflow: hidden; background: #ffffff;">
+                                    {% if request.user.company.logo %}
+                                        <img id="companyLogoPreview" src="{{ request.user.company.logo.url }}" alt="Logo" style="max-height: 100%; max-width: 100%; object-fit: contain;">
+                                    {% else %}
+                                        <img id="companyLogoPreview" src="{% static 'img/company-1.png' %}" alt="Logo" style="max-height: 100%; max-width: 100%; object-fit: contain;">
+                                    {% endif %}
                                 </div>
-                            {% endif %}
-                            <input type="file" name="logo" id="id_logo" class="form-control-file border rounded p-2" accept="image/*">
+                                <div>
+                                    <input type="file" name="logo" id="id_logo" class="d-none" accept="image/*" onchange="previewCompanyLogo(this)">
+                                    <label for="id_logo" class="btn btn-sm btn-outline-primary mb-1 font-weight-bold" style="cursor: pointer; border-radius: 6px;">
+                                        <i class="fa fa-cloud-upload mr-1"></i> {% trans "Upload New Logo" %}
+                                    </label>
+                                    <div id="companyLogoName" class="small text-muted">{% trans "Recommended size: 200x200px (PNG, JPG)" %}</div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="form-group mb-4">
@@ -129,4 +138,28 @@
         </div>
     </div>
 </section>
+
+<script>
+function previewCompanyLogo(input) {
+    if (input.files && input.files[0]) {
+        var file = input.files[0];
+        if (file.size > 5 * 1024 * 1024) {
+            alert("{% trans 'File size must be under 5MB.' %}");
+            input.value = "";
+            return;
+        }
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var img = document.getElementById('companyLogoPreview');
+            if (img) img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+        var label = document.getElementById('companyLogoName');
+        if (label) {
+            label.textContent = file.name;
+            label.classList.add('text-success', 'font-weight-bold');
+        }
+    }
+}
+</script>
 {% endblock %}

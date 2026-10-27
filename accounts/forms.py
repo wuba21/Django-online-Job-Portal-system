@@ -224,10 +224,13 @@ class EmployeeProfileUpdateForm(forms.ModelForm):
         self.fields["last_name"].widget.attrs.update({"class": "form-control", "placeholder": "Enter Last Name"})
         if "phone_number" in self.fields:
             self.fields["phone_number"].widget.attrs.update({"class": "form-control", "placeholder": "+251 9..."})
+        if "avatar" in self.fields:
+            self.fields["avatar"].required = False
+            self.fields["avatar"].widget.attrs.update({"class": "form-control-file", "accept": "image/*"})
 
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "gender", "phone_number"]
+        fields = ["first_name", "last_name", "gender", "phone_number", "avatar"]
 
 
 class EmployerProfileUpdateForm(forms.ModelForm):
