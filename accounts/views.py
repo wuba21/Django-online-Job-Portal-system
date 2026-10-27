@@ -344,18 +344,18 @@ class GoogleOneTapLoginView(View):
 
         user = User.objects.filter(email=email).first()
         if not user:
-            user = User.objects.create_user(
-                email=email,
-                role="employer" if is_admin else "employee",
-                first_name=first_name,
-                last_name=last_name,
-                is_verified=True,
-                email_verified_at=timezone.now(),
+            # Option 2 (Strict Policy): Unregistered users cannot auto-login via Google One Tap
+            from django.contrib import messages
+            from django.urls import reverse
+            messages.error(
+                request,
+                "በዚህ የጉግል ኢሜይል የተመዘገበ አካውንት አልተገኘም። እባክዎ አስቀድመው እንደ ሰራተኛ ወይም አሰሪ ድርጅት ይመዝገቡ። (No account found with this Google email. Please register first.)"
             )
-            if is_admin:
-                user.is_staff = True
-                user.is_superuser = True
-                user.save()
+            return JsonResponse({
+                "status": "not_registered",
+                "message": "በዚህ የጉግል ኢሜይል የተመዘገበ አካውንት አልተገኘም። እባክዎ አስቀድመው ይመዝገቡ።",
+                "redirect_url": reverse("accounts:employee-register")
+            }, status=403)
         else:
             updated = False
             if not user.first_name and first_name:

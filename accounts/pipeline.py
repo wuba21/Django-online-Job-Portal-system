@@ -3,6 +3,46 @@ from django.core.files.base import ContentFile
 from django.utils import timezone
 
 
+def check_user_exists_for_login(backend, details, user=None, *args, **kwargs):
+    """
+    Strict Login Policy (Option 2):
+    Prevents arbitrary account creation on Login.
+    If authentication was initiated from Login (no 'role' explicitly passed in request/session),
+    and no user account already exists with this email or social profile,
+    halts the pipeline and redirects to the login page with a message instructing them to register first.
+    """
+    if user:
+        return  # Existing user found, permit login
+
+    strategy = kwargs.get("strategy")
+    chosen_role = None
+    if strategy:
+        chosen_role = strategy.session_get("role") or strategy.request_data().get("role")
+
+    # If the user came from a Registration page (?role=employee or ?role=employer), permit account creation
+    if chosen_role in ("employee", "employer"):
+        return
+
+    # Check if a user with this email already exists in our database
+    email = details.get("email")
+    if email:
+        from accounts.models import User
+        if User.objects.filter(email__iexact=email).exists():
+            return  # associate_by_email will link this user
+
+    # No existing account found and didn't initiate from registration:
+    # Stop pipeline and redirect to login page with clear error message
+    from django.contrib import messages
+    from django.shortcuts import redirect
+    request = strategy.request if strategy else None
+    if request:
+        messages.error(
+            request,
+            "በዚህ የጉግል ኢሜይል የተመዘገበ አካውንት አልተገኘም። እባክዎ አስቀድመው እንደ ሰራተኛ ወይም አሰሪ ድርጅት ይመዝገቡ። (No account found with this Google email. Please register first.)"
+        )
+    return redirect("accounts:login")
+
+
 def update_user(backend, user, response, *args, **kwargs):
     """
     Social Auth pipeline step:

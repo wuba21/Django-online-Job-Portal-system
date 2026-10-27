@@ -150,6 +150,16 @@
                         <span class="divider-text">{% trans "or" %}</span>
                     </div>
 
+                    <!-- Messages / Alerts (e.g. from Social Auth when account is not registered) -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show py-2 px-3 small rounded-lg mb-3">
+                                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                                <i class="fa fa-exclamation-triangle mr-1"></i> {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
                     <!-- Error Messages -->
                     {% if form.non_field_errors %}
                         <div class="alert alert-danger py-2 px-3 small rounded-lg mb-3">

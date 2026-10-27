@@ -594,6 +594,10 @@
             .then(data => {
                 if (data.status === "success") {
                     window.location.href = data.redirect_url || window.location.href;
+                } else if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else if (data.message) {
+                    alert(data.message);
                 }
             })
             .catch(err => console.error("Google One Tap Error:", err));
