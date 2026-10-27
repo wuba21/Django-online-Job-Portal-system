@@ -1,0 +1,451 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Cookie Policy & Preferences" %} | EthioJobs{% endblock %}
+
+{% block styles %}
+<style>
+  .legal-page-wrapper {
+    background: #f8fafc;
+    min-height: 100vh;
+    padding-bottom: 70px;
+  }
+  .legal-hero {
+    background: linear-gradient(135deg, #0a2540 0%, #312e81 60%, #4338ca 100%);
+    color: #ffffff;
+    padding: 55px 0 75px;
+    position: relative;
+    overflow: hidden;
+  }
+  .legal-hero::after {
+    content: '';
+    position: absolute;
+    right: -10%;
+    bottom: -50px;
+    width: 350px;
+    height: 350px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 50%;
+  }
+  .legal-hero h1 {
+    font-size: 2.3rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+  .legal-hero p {
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.88);
+    max-width: 650px;
+  }
+  .legal-nav-tabs {
+    margin-top: -32px;
+    position: relative;
+    z-index: 10;
+    margin-bottom: 35px;
+  }
+  .legal-tab-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 8px 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    border: 1px solid #e2e8f0;
+  }
+  .legal-tab-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #475569;
+    text-decoration: none !important;
+    transition: all 0.2s ease;
+  }
+  .legal-tab-link:hover {
+    color: #4338ca;
+    background: #f1f5f9;
+  }
+  .legal-tab-link.active {
+    background: #4338ca;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(67, 56, 202, 0.25);
+  }
+  .legal-toc-card {
+    position: sticky;
+    top: 90px;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  }
+  .legal-toc-title {
+    font-size: 0.88rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 0.05em;
+    margin-bottom: 14px;
+  }
+  .legal-toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .legal-toc-list li {
+    margin-bottom: 10px;
+  }
+  .legal-toc-list a {
+    color: #334155;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: block;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+  }
+  .legal-toc-list a:hover {
+    background: #f1f5f9;
+    color: #4338ca;
+    padding-left: 16px;
+  }
+  .legal-content-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    padding: 40px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    line-height: 1.75;
+    color: #334155;
+  }
+  .legal-content-card h2 {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 36px;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f1f5f9;
+    scroll-margin-top: 95px;
+  }
+  .legal-content-card h2:first-of-type {
+    margin-top: 10px;
+  }
+  .legal-content-card h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+  .legal-content-card p, .legal-content-card li {
+    font-size: 0.98rem;
+    color: #475569;
+  }
+  .legal-badge-pill {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #e0e7ff;
+    color: #3730a3;
+    margin-bottom: 16px;
+  }
+  .cookie-box-item {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 18px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .cookie-box-item:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  }
+  .cookie-pref-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .custom-switch .custom-control-label::before {
+    height: 1.4rem;
+    width: 2.5rem;
+    border-radius: 1.4rem;
+  }
+  .custom-switch .custom-control-label::after {
+    width: calc(1.4rem - 4px);
+    height: calc(1.4rem - 4px);
+    border-radius: 50%;
+  }
+  .data-grid-table {
+    width: 100%;
+    margin: 20px 0;
+    border-collapse: collapse;
+  }
+  .data-grid-table th {
+    background: #f8fafc;
+    color: #0f172a;
+    font-weight: 600;
+    padding: 12px 14px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.9rem;
+  }
+  .data-grid-table td {
+    padding: 12px 14px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.88rem;
+    color: #475569;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="legal-page-wrapper">
+  <!-- Hero Section -->
+  <section class="legal-hero">
+    <div class="container">
+      <span class="legal-badge-pill" style="background: rgba(255,255,255,0.18); color: #ffffff;">
+        <i class="fa fa-sliders mr-1"></i> {% trans "Transparency & User Choice" %}
+      </span>
+      <h1>{% trans "Cookie Policy & Preferences" %}</h1>
+      <p>{% trans "Understand how we use cookies, local storage, and related tracking technologies to provide secure authentication, preserve your settings, and optimize site speed." %}</p>
+      <div class="small text-white-50 mt-3">
+        <i class="fa fa-info-circle mr-1"></i> {% trans "You have full control over optional functional and analytics cookies" %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Legal Navigation Tabs -->
+  <div class="container legal-nav-tabs">
+    <div class="legal-tab-card">
+      <a href="{% url 'jobs:user-agreement' %}" class="legal-tab-link">
+        <i class="fa fa-file-text-o mr-2"></i> {% trans "User Agreement" %}
+      </a>
+      <a href="{% url 'jobs:privacy-policy' %}" class="legal-tab-link">
+        <i class="fa fa-shield mr-2"></i> {% trans "Privacy Policy" %}
+      </a>
+      <a href="{% url 'jobs:cookie-policy' %}" class="legal-tab-link active">
+        <i class="fa fa-sliders mr-2"></i> {% trans "Cookie Policy & Preferences" %}
+      </a>
+    </div>
+  </div>
+
+  <!-- Main Content Layout -->
+  <div class="container">
+    <div class="row">
+      <!-- Left Column: Table of Contents -->
+      <div class="col-lg-4 d-none d-lg-block">
+        <div class="legal-toc-card">
+          <div class="legal-toc-title">{% trans "Cookie Policy Sections" %}</div>
+          <ul class="legal-toc-list">
+            <li><a href="#section-1"><i class="fa fa-angle-right mr-2 text-primary"></i>1. {% trans "What Are Cookies?" %}</a></li>
+            <li><a href="#section-2"><i class="fa fa-angle-right mr-2 text-primary"></i>2. {% trans "Cookie Categories We Use" %}</a></li>
+            <li><a href="#section-3"><i class="fa fa-angle-right mr-2 text-primary"></i>3. {% trans "Cookie Inventory Table" %}</a></li>
+            <li><a href="#section-4"><i class="fa fa-angle-right mr-2 text-primary"></i>4. {% trans "Your Cookie Preferences" %}</a></li>
+            <li><a href="#section-5"><i class="fa fa-angle-right mr-2 text-primary"></i>5. {% trans "Browser Management" %}</a></li>
+          </ul>
+
+          <div class="mt-4 pt-3 border-top">
+            <button onclick="document.getElementById('section-4').scrollIntoView({behavior: 'smooth'})" class="btn btn-sm btn-indigo btn-block font-weight-bold" style="background: #4338ca; color: #fff;">
+              <i class="fa fa-sliders mr-1"></i> {% trans "Adjust My Preferences" %}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Full Content & Interactive Preference Panel -->
+      <div class="col-lg-8">
+        <div class="legal-content-card">
+          
+          <h2 id="section-1">1. {% trans "What Are Cookies & Similar Technologies?" %}</h2>
+          <p>
+            {% trans "Cookies are small text files placed on your computer or mobile device when you visit websites. They are widely used to make web applications operate efficiently, preserve your security during sign-in sessions, and remember your interface preferences." %}
+          </p>
+          <p>
+            {% trans "We also utilize browser LocalStorage and SessionStorage to cache temporary UI states, such as message badge counters and dismissal states for helpful hints." %}
+          </p>
+
+          <h2 id="section-2">2. {% trans "Cookie Categories We Use" %}</h2>
+          <p>{% trans "We classify cookies into three distinct functional tiers:" %}</p>
+
+          <div class="cookie-box-item">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <h4 class="mb-0 font-weight-bold text-dark font-size-16">
+                <i class="fa fa-shield text-success mr-2"></i> {% trans "Strictly Necessary Cookies (Essential)" %}
+              </h4>
+              <span class="badge badge-success font-weight-bold px-2 py-1">{% trans "Always Active" %}</span>
+            </div>
+            <p class="small text-muted mb-0">
+              {% trans "Required for basic site navigation, account sign-in sessions, Cross-Site Request Forgery (CSRF) protection, and secure data submissions. The platform cannot function properly without these cookies." %}
+            </p>
+          </div>
+
+          <div class="cookie-box-item">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <h4 class="mb-0 font-weight-bold text-dark font-size-16">
+                <i class="fa fa-cog text-primary mr-2"></i> {% trans "Functional & Preference Cookies" %}
+              </h4>
+              <span class="badge badge-primary font-weight-bold px-2 py-1">{% trans "Customizable" %}</span>
+            </div>
+            <p class="small text-muted mb-0">
+              {% trans "Remembers your preferred language (e.g. Amharic / English), job search filter choices, and keep-me-signed-in preferences across browser sessions." %}
+            </p>
+          </div>
+
+          <div class="cookie-box-item">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <h4 class="mb-0 font-weight-bold text-dark font-size-16">
+                <i class="fa fa-bar-chart text-info mr-2"></i> {% trans "Analytics & Performance Cookies" %}
+              </h4>
+              <span class="badge badge-info font-weight-bold px-2 py-1">{% trans "Optional" %}</span>
+            </div>
+            <p class="small text-muted mb-0">
+              {% trans "Helps us understand how visitors interact with job search pages, detect loading bottlenecks, and refine vacancy recommendations without identifying individual users." %}
+            </p>
+          </div>
+
+          <h2 id="section-3">3. {% trans "Cookie Inventory Table" %}</h2>
+          <table class="data-grid-table">
+            <thead>
+              <tr>
+                <th>{% trans "Cookie Name" %}</th>
+                <th>{% trans "Provider" %}</th>
+                <th>{% trans "Purpose" %}</th>
+                <th>{% trans "Expiry" %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>sessionid</code></td>
+                <td>EthioJobs</td>
+                <td>{% trans "Maintains your authenticated user session." %}</td>
+                <td>{% trans "14 Days or Session" %}</td>
+              </tr>
+              <tr>
+                <td><code>csrftoken</code></td>
+                <td>EthioJobs</td>
+                <td>{% trans "Protects forms against cross-site forged requests." %}</td>
+                <td>{% trans "1 Year" %}</td>
+              </tr>
+              <tr>
+                <td><code>django_language</code></td>
+                <td>EthioJobs</td>
+                <td>{% trans "Preserves your chosen language (English or Amharic)." %}</td>
+                <td>{% trans "1 Year" %}</td>
+              </tr>
+              <tr>
+                <td><code>ethiojobs_cookie_consent</code></td>
+                <td>EthioJobs</td>
+                <td>{% trans "Records your cookie consent choices." %}</td>
+                <td>{% trans "1 Year" %}</td>
+              </tr>
+              <tr>
+                <td><code>G_AUTHUSER_H</code></td>
+                <td>Google OAuth</td>
+                <td>{% trans "Supports 1-click Google account verification." %}</td>
+                <td>{% trans "Session" %}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2 id="section-4">4. {% trans "Manage Your Cookie Preferences" %}</h2>
+          <p>{% trans "You can adjust your cookie settings right here. Changes take effect immediately:" %}</p>
+
+          <div class="card border p-4 rounded-xl shadow-xs mb-4 bg-light">
+            <!-- Essential -->
+            <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+              <div>
+                <div class="font-weight-bold text-dark">{% trans "Strictly Necessary Cookies" %}</div>
+                <small class="text-muted">{% trans "Required for security, CSRF protection, and login." %}</small>
+              </div>
+              <div>
+                <input type="checkbox" checked disabled style="width: 20px; height: 20px; accent-color: #057642;">
+              </div>
+            </div>
+
+            <!-- Functional -->
+            <div class="d-flex align-items-center justify-content-between py-3 border-bottom">
+              <div>
+                <div class="font-weight-bold text-dark">{% trans "Functional & Preference Cookies" %}</div>
+                <small class="text-muted">{% trans "Save language and search filters for future visits." %}</small>
+              </div>
+              <div>
+                <input type="checkbox" id="prefFunctional" checked style="width: 20px; height: 20px; accent-color: #0a66c2; cursor: pointer;">
+              </div>
+            </div>
+
+            <!-- Analytics -->
+            <div class="d-flex align-items-center justify-content-between py-3 border-bottom">
+              <div>
+                <div class="font-weight-bold text-dark">{% trans "Performance & Analytics Cookies" %}</div>
+                <small class="text-muted">{% trans "Anonymous site performance and query metrics." %}</small>
+              </div>
+              <div>
+                <input type="checkbox" id="prefAnalytics" checked style="width: 20px; height: 20px; accent-color: #0a66c2; cursor: pointer;">
+              </div>
+            </div>
+
+            <div class="pt-3 d-flex flex-wrap gap-2 justify-content-between align-items-center">
+              <span id="prefSaveNotice" class="text-success small font-weight-bold" style="display: none;">
+                <i class="fa fa-check-circle mr-1"></i> {% trans "Your preferences have been saved!" %}
+              </span>
+              <button type="button" id="btnSaveCookiePrefs" class="btn btn-primary font-weight-bold px-4 ml-auto" style="background: #0a66c2; border-radius: 8px;">
+                <i class="fa fa-save mr-1"></i> {% trans "Save My Preferences" %}
+              </button>
+            </div>
+          </div>
+
+          <h2 id="section-5">5. {% trans "How to Manage Cookies in Your Browser" %}</h2>
+          <p>
+            {% trans "In addition to our preference panel, you can configure your web browser to reject cookies or prompt you before accepting cookies. Please consult your browser's documentation:" %}
+          </p>
+          <ul>
+            <li><a href="https://support.google.com/chrome/answer/95647" target="_blank" rel="noopener" class="text-primary font-weight-500">Google Chrome</a></li>
+            <li><a href="https://support.mozilla.org/en-US/kb/enhanced-tracking-protection-firefox-desktop" target="_blank" rel="noopener" class="text-primary font-weight-500">Mozilla Firefox</a></li>
+            <li><a href="https://support.apple.com/guide/safari/manage-cookies-sfri11471/mac" target="_blank" rel="noopener" class="text-primary font-weight-500">Apple Safari</a></li>
+            <li><a href="https://support.microsoft.com/en-us/microsoft-edge/delete-cookies-in-microsoft-edge-63947406-40ac-c3b8-57b9-2a946a29ae09" target="_blank" rel="noopener" class="text-primary font-weight-500">Microsoft Edge</a></li>
+          </ul>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+  $(function() {
+    // Load existing preferences
+    var consent = localStorage.getItem('ethiojobs_cookie_consent');
+    if (consent === 'essential') {
+      $('#prefFunctional').prop('checked', false);
+      $('#prefAnalytics').prop('checked', false);
+    } else {
+      $('#prefFunctional').prop('checked', true);
+      $('#prefAnalytics').prop('checked', true);
+    }
+
+    $('#btnSaveCookiePrefs').on('click', function() {
+      var functional = $('#prefFunctional').is(':checked');
+      var analytics = $('#prefAnalytics').is(':checked');
+      var status = (functional && analytics) ? 'all' : 'custom';
+      localStorage.setItem('ethiojobs_cookie_consent', status);
+      localStorage.setItem('ethiojobs_cookie_functional', functional ? 'true' : 'false');
+      localStorage.setItem('ethiojobs_cookie_analytics', analytics ? 'true' : 'false');
+      
+      $('#prefSaveNotice').fadeIn().delay(3000).fadeOut();
+      if (typeof toastr !== 'undefined') {
+        toastr.success('{% trans "Cookie preferences saved successfully." %}');
+      }
+    });
+  });
+</script>
+{% endblock %}

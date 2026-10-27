@@ -25,6 +25,7 @@ from jobsapp.views.messages import inbox_view, start_conversation, poll_messages
 from jobsapp.views.telegram_webapp import telegram_webapp_view
 from jobsapp.views.home import (
     AboutUsView, ApplyJobView, HomeView, JobDetailsView, JobListView, SearchView, SalaryCalculatorView,
+    UserAgreementView, PrivacyPolicyView, CookiePolicyView,
     create_job_alert, favorite, verify_resume_api
 )
 
@@ -165,4 +166,8 @@ urlpatterns = [
     path("jobs/<int:id>/", JobDetailsView.as_view(), name="jobs-detail"),
     path("jobs/<slug:slug>/", JobDetailsView.as_view(), name="jobs-detail-slug"),
     path("about-us/", AboutUsView.as_view(), name="about-us"),
+    path("terms/", UserAgreementView.as_view(), name="user-agreement"),
+    path("user-agreement/", UserAgreementView.as_view(), name="user-agreement-alias"),
+    path("privacy-policy/", PrivacyPolicyView.as_view(), name="privacy-policy"),
+    path("cookie-policy/", CookiePolicyView.as_view(), name="cookie-policy"),
 ]

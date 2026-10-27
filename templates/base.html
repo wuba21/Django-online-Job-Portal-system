@@ -606,9 +606,12 @@
                     {% trans "Quick Links" %}
                     <span style="position: absolute !important; left: 0 !important; bottom: 0 !important; width: 40px !important; height: 3px !important; background: #ffffff !important; border-radius: 2px !important;"></span>
                 </h4>
-                <a href="/" style="color: rgba(255,255,255,0.85) !important; text-decoration: none !important; display: block !important; margin-bottom: 10px !important; transition: all 0.3s ease !important;">{% trans "Home" %}</a>
-                <a href="/jobs/" style="color: rgba(255,255,255,0.85) !important; text-decoration: none !important; display: block !important; margin-bottom: 10px !important; transition: all 0.3s ease !important;">{% trans "Jobs" %}</a>
-                <a href="/{% get_current_language as LANGUAGE_CODE %}{{ LANGUAGE_CODE }}/about-us/" style="color: rgba(255,255,255,0.85) !important; text-decoration: none !important; display: block !important; margin-bottom: 10px !important; transition: all 0.3s ease !important;">{% trans "About Us" %}</a>
+                <a href="/" style="color: rgba(255,255,255,0.85) !important; text-decoration: none !important; display: block !important; margin-bottom: 8px !important; transition: all 0.3s ease !important;">{% trans "Home" %}</a>
+                <a href="/jobs/" style="color: rgba(255,255,255,0.85) !important; text-decoration: none !important; display: block !important; margin-bottom: 8px !important; transition: all 0.3s ease !important;">{% trans "Jobs" %}</a>
+                <a href="/{% get_current_language as LANGUAGE_CODE %}{{ LANGUAGE_CODE }}/about-us/" style="color: rgba(255,255,255,0.85) !important; text-decoration: none !important; display: block !important; margin-bottom: 8px !important; transition: all 0.3s ease !important;">{% trans "About Us" %}</a>
+                <a href="{% url 'jobs:user-agreement' %}" style="color: rgba(255,255,255,0.85) !important; text-decoration: none !important; display: block !important; margin-bottom: 8px !important; transition: all 0.3s ease !important;">{% trans "User Agreement" %}</a>
+                <a href="{% url 'jobs:privacy-policy' %}" style="color: rgba(255,255,255,0.85) !important; text-decoration: none !important; display: block !important; margin-bottom: 8px !important; transition: all 0.3s ease !important;">{% trans "Privacy Policy" %}</a>
+                <a href="{% url 'jobs:cookie-policy' %}" style="color: rgba(255,255,255,0.85) !important; text-decoration: none !important; display: block !important; margin-bottom: 8px !important; transition: all 0.3s ease !important;">{% trans "Cookie Policy" %}</a>
             </div>
             
             <!-- Social Media Section -->
@@ -660,11 +663,19 @@
     </div>
     <div style="margin-top: 40px !important; padding: 20px 0 !important; border-top: 1px solid rgba(255,255,255,0.1) !important; background: rgba(0,0,0,0.1) !important;">
         <div class="container">
-            <div class="row">
-                <div class="col-md-12 text-center">
-                    <p style="margin-bottom: 0 !important; text-align: center !important; font-size: 0.85rem !important; color: rgba(255,255,255,0.7) !important;">
+            <div class="row align-items-center">
+                <div class="col-md-5 text-center text-md-left mb-2 mb-md-0">
+                    <p style="margin-bottom: 0 !important; font-size: 0.85rem !important; color: rgba(255,255,255,0.7) !important;">
                         &copy;{% now "Y" %} {% trans "Django-Jobs. All rights reserved." %}
                     </p>
+                </div>
+                <div class="col-md-7 text-center text-md-right">
+                    <div style="font-size: 0.82rem; color: rgba(255,255,255,0.65);">
+                        <a href="{% url 'jobs:user-agreement' %}" style="color: rgba(255,255,255,0.8); text-decoration: none; margin: 0 6px;">{% trans "User Agreement" %}</a> &bull;
+                        <a href="{% url 'jobs:privacy-policy' %}" style="color: rgba(255,255,255,0.8); text-decoration: none; margin: 0 6px;">{% trans "Privacy Policy" %}</a> &bull;
+                        <a href="{% url 'jobs:cookie-policy' %}" style="color: rgba(255,255,255,0.8); text-decoration: none; margin: 0 6px;">{% trans "Cookie Policy" %}</a> &bull;
+                        <a href="#" onclick="openCookieConsentBanner(event)" style="color: rgba(255,255,255,0.8); text-decoration: none; margin: 0 6px;">{% trans "Cookie Preferences" %}</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -908,6 +919,82 @@
     })();
 </script>
 {% endif %}
+
+<!-- Interactive Cookie Consent Banner -->
+<div id="ethiojobsCookieBanner" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 99999; background: #0f172a; color: #f8fafc; box-shadow: 0 -8px 30px rgba(0,0,0,0.35); border-top: 1px solid #334155; padding: 18px 0;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8 mb-3 mb-lg-0">
+                <div class="d-flex align-items-start">
+                    <div class="mr-3" style="font-size: 1.8rem; line-height: 1;">
+                        🍪
+                    </div>
+                    <div>
+                        <div class="font-weight-bold mb-1" style="font-size: 1.02rem; color: #ffffff;">
+                            {% trans "We value your privacy & cookie preferences" %}
+                        </div>
+                        <p class="mb-0 small" style="color: #cbd5e1; line-height: 1.5;">
+                            {% trans "We use cookies to ensure you get the best experience on EthioJobs, keep you signed in securely, and improve job vacancy recommendations. By continuing, you agree to our" %}
+                            <a href="{% url 'jobs:cookie-policy' %}" class="text-info font-weight-bold" style="text-decoration: underline;">{% trans "Cookie Policy" %}</a>
+                            {% trans "and" %}
+                            <a href="{% url 'jobs:privacy-policy' %}" class="text-info font-weight-bold" style="text-decoration: underline;">{% trans "Privacy Policy" %}</a>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 text-lg-right d-flex flex-wrap align-items-center justify-content-lg-end justify-content-start" style="gap: 10px;">
+                <button type="button" id="btnRejectOptionalCookies" class="btn btn-outline-light btn-sm px-3 font-weight-600" style="border-radius: 6px; border-color: #64748b; color: #cbd5e1;">
+                    {% trans "Essential Only" %}
+                </button>
+                <button type="button" id="btnAcceptAllCookies" class="btn btn-primary btn-sm px-3 font-weight-bold" style="background: #0a66c2; border-color: #0a66c2; border-radius: 6px; box-shadow: 0 4px 12px rgba(10,102,194,0.35);">
+                    {% trans "Accept All" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openCookieConsentBanner(e) {
+        if (e) e.preventDefault();
+        var banner = document.getElementById('ethiojobsCookieBanner');
+        if (banner) banner.style.display = 'block';
+    }
+
+    (function() {
+        var banner = document.getElementById('ethiojobsCookieBanner');
+        var consent = localStorage.getItem('ethiojobs_cookie_consent');
+        if (!consent && banner) {
+            banner.style.display = 'block';
+        }
+
+        var btnAccept = document.getElementById('btnAcceptAllCookies');
+        if (btnAccept) {
+            btnAccept.addEventListener('click', function() {
+                localStorage.setItem('ethiojobs_cookie_consent', 'all');
+                localStorage.setItem('ethiojobs_cookie_functional', 'true');
+                localStorage.setItem('ethiojobs_cookie_analytics', 'true');
+                if (banner) banner.style.display = 'none';
+                if (typeof toastr !== 'undefined') {
+                    toastr.success('{% trans "Cookie preferences saved." %}');
+                }
+            });
+        }
+
+        var btnEssential = document.getElementById('btnRejectOptionalCookies');
+        if (btnEssential) {
+            btnEssential.addEventListener('click', function() {
+                localStorage.setItem('ethiojobs_cookie_consent', 'essential');
+                localStorage.setItem('ethiojobs_cookie_functional', 'false');
+                localStorage.setItem('ethiojobs_cookie_analytics', 'false');
+                if (banner) banner.style.display = 'none';
+                if (typeof toastr !== 'undefined') {
+                    toastr.info('{% trans "Essential cookies only enabled." %}');
+                }
+            });
+        }
+    })();
+</script>
 
 </body>
 

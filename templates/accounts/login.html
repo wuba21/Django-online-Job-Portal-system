@@ -280,6 +280,12 @@
                                 {% trans "Register as Employer" %} &rarr;
                             </a>
                         </p>
+                        <div class="mt-3 pt-2 text-center" style="font-size: 0.75rem; color: #94a3b8;">
+                            {% trans "Protected by EthioJobs" %} 
+                            <a href="{% url 'jobs:user-agreement' %}" target="_blank" class="text-muted" style="text-decoration: underline;">{% trans "User Agreement" %}</a> &bull;
+                            <a href="{% url 'jobs:privacy-policy' %}" target="_blank" class="text-muted" style="text-decoration: underline;">{% trans "Privacy Policy" %}</a> &bull;
+                            <a href="{% url 'jobs:cookie-policy' %}" target="_blank" class="text-muted" style="text-decoration: underline;">{% trans "Cookie Policy" %}</a>
+                        </div>
                     </div>
 
                 </div>

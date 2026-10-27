@@ -48,6 +48,18 @@ class AboutUsView(TemplateView):
     template_name = "about_us.html"
 
 
+class UserAgreementView(TemplateView):
+    template_name = "legal/user_agreement.html"
+
+
+class PrivacyPolicyView(TemplateView):
+    template_name = "legal/privacy_policy.html"
+
+
+class CookiePolicyView(TemplateView):
+    template_name = "legal/cookie_policy.html"
+
+
 class SalaryCalculatorView(TemplateView):
     template_name = "jobs/salary_calculator.html"
 

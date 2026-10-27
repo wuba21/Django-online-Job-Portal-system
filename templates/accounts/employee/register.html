@@ -268,9 +268,9 @@
                         <div class="mb-4">
                             <p class="small text-muted mb-0" style="font-size: 0.78rem; line-height: 1.45;">
                                 {% trans "By clicking Agree & Join or Continue with Google, you agree to the EthioJobs" %}
-                                <a href="#" class="text-primary font-weight-600">{% trans "User Agreement" %}</a>,
-                                <a href="#" class="text-primary font-weight-600">{% trans "Privacy Policy" %}</a>,
-                                {% trans "and" %} <a href="#" class="text-primary font-weight-600">{% trans "Cookie Policy" %}</a>.
+                                <a href="{% url 'jobs:user-agreement' %}" target="_blank" class="text-primary font-weight-600">{% trans "User Agreement" %}</a>,
+                                <a href="{% url 'jobs:privacy-policy' %}" target="_blank" class="text-primary font-weight-600">{% trans "Privacy Policy" %}</a>,
+                                {% trans "and" %} <a href="{% url 'jobs:cookie-policy' %}" target="_blank" class="text-primary font-weight-600">{% trans "Cookie Policy" %}</a>.
                             </p>
                         </div>
 

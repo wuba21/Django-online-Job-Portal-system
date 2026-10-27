@@ -1,0 +1,330 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "User Agreement & Terms of Service" %} | EthioJobs{% endblock %}
+
+{% block styles %}
+<style>
+  .legal-page-wrapper {
+    background: #f8fafc;
+    min-height: 100vh;
+    padding-bottom: 70px;
+  }
+  .legal-hero {
+    background: linear-gradient(135deg, #0a2540 0%, #0f4c81 60%, #0a66c2 100%);
+    color: #ffffff;
+    padding: 55px 0 75px;
+    position: relative;
+    overflow: hidden;
+  }
+  .legal-hero::after {
+    content: '';
+    position: absolute;
+    right: -10%;
+    bottom: -50px;
+    width: 350px;
+    height: 350px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 50%;
+  }
+  .legal-hero h1 {
+    font-size: 2.3rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+  .legal-hero p {
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.88);
+    max-width: 650px;
+  }
+  .legal-nav-tabs {
+    margin-top: -32px;
+    position: relative;
+    z-index: 10;
+    margin-bottom: 35px;
+  }
+  .legal-tab-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 8px 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    border: 1px solid #e2e8f0;
+  }
+  .legal-tab-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #475569;
+    text-decoration: none !important;
+    transition: all 0.2s ease;
+  }
+  .legal-tab-link:hover {
+    color: #0a66c2;
+    background: #f1f5f9;
+  }
+  .legal-tab-link.active {
+    background: #0a66c2;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(10, 102, 194, 0.25);
+  }
+  .legal-toc-card {
+    position: sticky;
+    top: 90px;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  }
+  .legal-toc-title {
+    font-size: 0.88rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 0.05em;
+    margin-bottom: 14px;
+  }
+  .legal-toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .legal-toc-list li {
+    margin-bottom: 10px;
+  }
+  .legal-toc-list a {
+    color: #334155;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: block;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+  }
+  .legal-toc-list a:hover {
+    background: #f1f5f9;
+    color: #0a66c2;
+    padding-left: 16px;
+  }
+  .legal-content-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    padding: 40px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    line-height: 1.75;
+    color: #334155;
+  }
+  .legal-content-card h2 {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 36px;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f1f5f9;
+    scroll-margin-top: 95px;
+  }
+  .legal-content-card h2:first-of-type {
+    margin-top: 10px;
+  }
+  .legal-content-card h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+  .legal-content-card p, .legal-content-card li {
+    font-size: 0.98rem;
+    color: #475569;
+  }
+  .legal-badge-pill {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #e0f2fe;
+    color: #0369a1;
+    margin-bottom: 16px;
+  }
+  .legal-callout {
+    background: #f8fafc;
+    border-left: 4px solid #0a66c2;
+    padding: 16px 20px;
+    border-radius: 0 10px 10px 0;
+    margin: 22px 0;
+  }
+  .legal-callout.warning {
+    border-left-color: #f59e0b;
+    background: #fffbeb;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="legal-page-wrapper">
+  <!-- Hero Section -->
+  <section class="legal-hero">
+    <div class="container">
+      <span class="legal-badge-pill" style="background: rgba(255,255,255,0.15); color: #ffffff;">
+        <i class="fa fa-gavel mr-1"></i> {% trans "Legal Terms & Compliance" %}
+      </span>
+      <h1>{% trans "User Agreement" %}</h1>
+      <p>{% trans "Welcome to EthioJobs. These terms govern your access to and use of our job portal, mobile web application, candidate talent pool, and recruitment services." %}</p>
+      <div class="small text-white-50 mt-3">
+        <i class="fa fa-calendar-check-o mr-1"></i> {% trans "Last Updated: October 2026" %} &bull; {% trans "Effective immediately for all users" %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Legal Navigation Tabs -->
+  <div class="container legal-nav-tabs">
+    <div class="legal-tab-card">
+      <a href="{% url 'jobs:user-agreement' %}" class="legal-tab-link active">
+        <i class="fa fa-file-text-o mr-2"></i> {% trans "User Agreement" %}
+      </a>
+      <a href="{% url 'jobs:privacy-policy' %}" class="legal-tab-link">
+        <i class="fa fa-shield mr-2"></i> {% trans "Privacy Policy" %}
+      </a>
+      <a href="{% url 'jobs:cookie-policy' %}" class="legal-tab-link">
+        <i class="fa fa-sliders mr-2"></i> {% trans "Cookie Policy & Preferences" %}
+      </a>
+    </div>
+  </div>
+
+  <!-- Main Content Layout -->
+  <div class="container">
+    <div class="row">
+      <!-- Left Column: Table of Contents -->
+      <div class="col-lg-4 d-none d-lg-block">
+        <div class="legal-toc-card">
+          <div class="legal-toc-title">{% trans "Sections in this Agreement" %}</div>
+          <ul class="legal-toc-list">
+            <li><a href="#section-1"><i class="fa fa-angle-right mr-2 text-primary"></i>1. {% trans "Acceptance & Eligibility" %}</a></li>
+            <li><a href="#section-2"><i class="fa fa-angle-right mr-2 text-primary"></i>2. {% trans "User Accounts & Authentication" %}</a></li>
+            <li><a href="#section-3"><i class="fa fa-angle-right mr-2 text-primary"></i>3. {% trans "Job Seeker Rules & Resumes" %}</a></li>
+            <li><a href="#section-4"><i class="fa fa-angle-right mr-2 text-primary"></i>4. {% trans "Employer Verification & Fair Hiring" %}</a></li>
+            <li><a href="#section-5"><i class="fa fa-angle-right mr-2 text-primary"></i>5. {% trans "Prohibited Conduct & Anti-Scam" %}</a></li>
+            <li><a href="#section-6"><i class="fa fa-angle-right mr-2 text-primary"></i>6. {% trans "Intellectual Property" %}</a></li>
+            <li><a href="#section-7"><i class="fa fa-angle-right mr-2 text-primary"></i>7. {% trans "Limitation of Liability" %}</a></li>
+            <li><a href="#section-8"><i class="fa fa-angle-right mr-2 text-primary"></i>8. {% trans "Governing Law & Disputes" %}</a></li>
+            <li><a href="#section-9"><i class="fa fa-angle-right mr-2 text-primary"></i>9. {% trans "Contact & Inquiries" %}</a></li>
+          </ul>
+
+          <div class="mt-4 pt-3 border-top">
+            <div class="small font-weight-bold text-dark mb-1">{% trans "Need quick assistance?" %}</div>
+            <p class="small text-muted mb-2">{% trans "Questions about these terms or company onboarding?" %}</p>
+            <a href="mailto:info@jobportal.com" class="btn btn-sm btn-outline-primary btn-block font-weight-600">
+              <i class="fa fa-envelope-o mr-1"></i> {% trans "Contact Legal Support" %}
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Full Agreement Content -->
+      <div class="col-lg-8">
+        <div class="legal-content-card">
+          
+          <div class="legal-callout">
+            <strong>{% trans "Summary for Busy Professionals:" %}</strong>
+            <p class="mb-0 mt-1 font-size-14">
+              {% trans "EthioJobs connects genuine Ethiopian talent with verified employers. We require genuine Google emails, prohibit recruitment fees charged to job seekers, verify corporate business credentials, and protect your privacy at every step." %}
+            </p>
+          </div>
+
+          <h2 id="section-1">1. {% trans "Acceptance & Eligibility" %}</h2>
+          <p>
+            {% trans "By registering an account, accessing, or using the EthioJobs platform (the 'Platform'), you acknowledge that you have read, understood, and agree to be bound by this User Agreement, along with our" %}
+            <a href="{% url 'jobs:privacy-policy' %}" class="text-primary font-weight-bold">{% trans "Privacy Policy" %}</a>
+            {% trans "and" %}
+            <a href="{% url 'jobs:cookie-policy' %}" class="text-primary font-weight-bold">{% trans "Cookie Policy" %}</a>.
+          </p>
+          <p>
+            {% trans "You must be at least 18 years old, or the legal working age recognized under Ethiopian Labor Proclamations, to create an account and apply for jobs on our Platform." %}
+          </p>
+
+          <h2 id="section-2">2. {% trans "User Accounts & Authentication" %}</h2>
+          <p>{% trans "To maintain platform trust and combat fraudulent activity:" %}</p>
+          <ul>
+            <li><strong>{% trans "Authentic Credentials" %}:</strong> {% trans "Users must provide accurate, current, and verifiable personal information during registration (full legal name, gender, active Ethiopian phone number, and verified Google email address)." %}</li>
+            <li><strong>{% trans "Account Security" %}:</strong> {% trans "You are responsible for safeguarding your password and session credentials. You must immediately notify our team if you detect unauthorized access to your account." %}</li>
+            <li><strong>{% trans "Single Persona" %}:</strong> {% trans "Each candidate may maintain only one active job seeker account. Employers must register under their registered corporate entity." %}</li>
+          </ul>
+
+          <h2 id="section-3">3. {% trans "Job Seeker Rules & Resumes" %}</h2>
+          <p>
+            {% trans "As a job seeker, you retain full ownership of the curriculum vitae (CV), portfolio files, education certificates, and biographical data you upload. By submitting this information, you grant EthioJobs a non-exclusive license to process, parse via our AI ATS matching engines, and present your profile to employers whose job vacancies you apply for." %}
+          </p>
+          <ul>
+            <li>{% trans "You warrant that all educational credentials, employment history, and technical competencies stated in your profile are accurate and truthful." %}</li>
+            <li>{% trans "You may edit your profile or withdraw active job applications at any time from your candidate dashboard." %}</li>
+            <li>{% trans "EthioJobs will never sell your personal contact details to unverified third parties." %}</li>
+          </ul>
+
+          <h2 id="section-4">4. {% trans "Employer Verification & Fair Hiring Standards" %}</h2>
+          <p>
+            {% trans "EthioJobs upholds the highest standards of employment ethics in Ethiopia. Employers publishing job vacancies on our platform must adhere to the following mandatory standards:" %}
+          </p>
+          <div class="legal-callout warning">
+            <strong><i class="fa fa-ban mr-1 text-danger"></i> {% trans "Strict Zero-Fee Policy for Job Seekers:" %}</strong>
+            <p class="mb-0 mt-1">
+              {% trans "Employers and recruiting agencies are strictly prohibited from demanding application fees, interview processing fees, aptitude test charges, or training deposits from job candidates. Any vacancy found charging applicants will be permanently removed and the employer's account will be banned." %}
+            </p>
+          </div>
+          <ul>
+            <li><strong>{% trans "Business Verification" %}:</strong> {% trans "Employers must provide a valid Taxpayer Identification Number (TIN) and Commercial Business License upon request by our administration for official verified badge qualification." %}</li>
+            <li><strong>{% trans "Genuine Vacancies Only" %}:</strong> {% trans "Every posted job must represent an authentic, open employment or internship opportunity with clear responsibilities, location, and compensation transparency." %}</li>
+            <li><strong>{% trans "Non-Discrimination" %}:</strong> {% trans "Employers must adhere to equal employment opportunities regardless of gender, ethnicity, religion, or disability status in accordance with Ethiopian law." %}</li>
+          </ul>
+
+          <h2 id="section-5">5. {% trans "Prohibited Conduct & Anti-Scam Policy" %}</h2>
+          <p>{% trans "You agree not to use the Platform to:" %}</p>
+          <ul>
+            <li>{% trans "Post misleading, fraudulent, multi-level marketing (MLM), or illegal work offers." %}</li>
+            <li>{% trans "Scrape, harvest, or extract candidate contact databases without explicit authorization." %}</li>
+            <li>{% trans "Transmit viruses, spam communications, unsolicited advertising, or defamatory content." %}</li>
+            <li>{% trans "Circumvent authentication or access controls on platform APIs or database systems." %}</li>
+          </ul>
+
+          <h2 id="section-6">6. {% trans "Intellectual Property Rights" %}</h2>
+          <p>
+            {% trans "All website interfaces, branding, software code, logos, and algorithmic recommendation models are the proprietary intellectual property of EthioJobs. You may not copy, reverse-engineer, or distribute platform components without prior written consent." %}
+          </p>
+
+          <h2 id="section-7">7. {% trans "Limitation of Liability" %}</h2>
+          <p>
+            {% trans "While EthioJobs employs rigorous automated checks and administrator review to verify companies and vacancies, we do not guarantee employment, candidate hiring suitability, or specific contract outcomes. We shall not be held liable for indirect, incidental, or consequential damages resulting from your use of the platform or hiring engagements between third-party candidates and employers." %}
+          </p>
+
+          <h2 id="section-8">8. {% trans "Governing Law & Dispute Resolution" %}</h2>
+          <p>
+            {% trans "This Agreement shall be interpreted and governed in accordance with the laws of the Federal Democratic Republic of Ethiopia. Any legal action or dispute arising from this Agreement shall be submitted to the competent courts of law in Addis Ababa or Debre Markos, Ethiopia." %}
+          </p>
+
+          <h2 id="section-9">9. {% trans "Contact & Notices" %}</h2>
+          <p>
+            {% trans "If you have questions regarding this User Agreement or wish to report a compliance violation, please contact our Legal & Trust Operations team at:" %}
+          </p>
+          <div class="p-3 bg-light rounded-lg border">
+            <div><strong>{% trans "EthioJobs Legal & Compliance Operations" %}</strong></div>
+            <div><i class="fa fa-envelope mr-2 text-primary"></i> info@jobportal.com</div>
+            <div><i class="fa fa-phone mr-2 text-primary"></i> +251 93 930 4457</div>
+            <div><i class="fa fa-map-marker mr-2 text-primary"></i> Debre Markos / Addis Ababa, Ethiopia</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,361 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Privacy Policy" %} | EthioJobs{% endblock %}
+
+{% block styles %}
+<style>
+  .legal-page-wrapper {
+    background: #f8fafc;
+    min-height: 100vh;
+    padding-bottom: 70px;
+  }
+  .legal-hero {
+    background: linear-gradient(135deg, #0a2540 0%, #065f46 60%, #057642 100%);
+    color: #ffffff;
+    padding: 55px 0 75px;
+    position: relative;
+    overflow: hidden;
+  }
+  .legal-hero::after {
+    content: '';
+    position: absolute;
+    right: -10%;
+    bottom: -50px;
+    width: 350px;
+    height: 350px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 50%;
+  }
+  .legal-hero h1 {
+    font-size: 2.3rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+  .legal-hero p {
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.88);
+    max-width: 650px;
+  }
+  .legal-nav-tabs {
+    margin-top: -32px;
+    position: relative;
+    z-index: 10;
+    margin-bottom: 35px;
+  }
+  .legal-tab-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 8px 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    border: 1px solid #e2e8f0;
+  }
+  .legal-tab-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #475569;
+    text-decoration: none !important;
+    transition: all 0.2s ease;
+  }
+  .legal-tab-link:hover {
+    color: #057642;
+    background: #f1f5f9;
+  }
+  .legal-tab-link.active {
+    background: #057642;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(5, 118, 66, 0.25);
+  }
+  .legal-toc-card {
+    position: sticky;
+    top: 90px;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  }
+  .legal-toc-title {
+    font-size: 0.88rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 0.05em;
+    margin-bottom: 14px;
+  }
+  .legal-toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .legal-toc-list li {
+    margin-bottom: 10px;
+  }
+  .legal-toc-list a {
+    color: #334155;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: block;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+  }
+  .legal-toc-list a:hover {
+    background: #f1f5f9;
+    color: #057642;
+    padding-left: 16px;
+  }
+  .legal-content-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    padding: 40px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    line-height: 1.75;
+    color: #334155;
+  }
+  .legal-content-card h2 {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 36px;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f1f5f9;
+    scroll-margin-top: 95px;
+  }
+  .legal-content-card h2:first-of-type {
+    margin-top: 10px;
+  }
+  .legal-content-card h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+  .legal-content-card p, .legal-content-card li {
+    font-size: 0.98rem;
+    color: #475569;
+  }
+  .legal-badge-pill {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #dcfce7;
+    color: #166534;
+    margin-bottom: 16px;
+  }
+  .legal-callout {
+    background: #f0fdf4;
+    border-left: 4px solid #057642;
+    padding: 16px 20px;
+    border-radius: 0 10px 10px 0;
+    margin: 22px 0;
+  }
+  .data-grid-table {
+    width: 100%;
+    margin: 20px 0;
+    border-collapse: collapse;
+  }
+  .data-grid-table th {
+    background: #f8fafc;
+    color: #0f172a;
+    font-weight: 600;
+    padding: 12px 14px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.9rem;
+  }
+  .data-grid-table td {
+    padding: 12px 14px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.88rem;
+    color: #475569;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="legal-page-wrapper">
+  <!-- Hero Section -->
+  <section class="legal-hero">
+    <div class="container">
+      <span class="legal-badge-pill" style="background: rgba(255,255,255,0.18); color: #ffffff;">
+        <i class="fa fa-lock mr-1"></i> {% trans "Data Protection & Privacy Standards" %}
+      </span>
+      <h1>{% trans "Privacy Policy" %}</h1>
+      <p>{% trans "Your privacy matters to us. Learn how EthioJobs collects, securely manages, and protects your personal credentials, resume data, and job applications." %}</p>
+      <div class="small text-white-50 mt-3">
+        <i class="fa fa-shield mr-1"></i> {% trans "Compliant with international data protection principles & Ethiopian IT policies" %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Legal Navigation Tabs -->
+  <div class="container legal-nav-tabs">
+    <div class="legal-tab-card">
+      <a href="{% url 'jobs:user-agreement' %}" class="legal-tab-link">
+        <i class="fa fa-file-text-o mr-2"></i> {% trans "User Agreement" %}
+      </a>
+      <a href="{% url 'jobs:privacy-policy' %}" class="legal-tab-link active">
+        <i class="fa fa-shield mr-2"></i> {% trans "Privacy Policy" %}
+      </a>
+      <a href="{% url 'jobs:cookie-policy' %}" class="legal-tab-link">
+        <i class="fa fa-sliders mr-2"></i> {% trans "Cookie Policy & Preferences" %}
+      </a>
+    </div>
+  </div>
+
+  <!-- Main Content Layout -->
+  <div class="container">
+    <div class="row">
+      <!-- Left Column: Table of Contents -->
+      <div class="col-lg-4 d-none d-lg-block">
+        <div class="legal-toc-card">
+          <div class="legal-toc-title">{% trans "Privacy Sections" %}</div>
+          <ul class="legal-toc-list">
+            <li><a href="#section-1"><i class="fa fa-angle-right mr-2 text-success"></i>1. {% trans "Introduction & Scope" %}</a></li>
+            <li><a href="#section-2"><i class="fa fa-angle-right mr-2 text-success"></i>2. {% trans "Information We Collect" %}</a></li>
+            <li><a href="#section-3"><i class="fa fa-angle-right mr-2 text-success"></i>3. {% trans "How We Use Your Data" %}</a></li>
+            <li><a href="#section-4"><i class="fa fa-angle-right mr-2 text-success"></i>4. {% trans "Information Sharing" %}</a></li>
+            <li><a href="#section-5"><i class="fa fa-angle-right mr-2 text-success"></i>5. {% trans "Data Security & Storage" %}</a></li>
+            <li><a href="#section-6"><i class="fa fa-angle-right mr-2 text-success"></i>6. {% trans "Your Privacy Rights" %}</a></li>
+            <li><a href="#section-7"><i class="fa fa-angle-right mr-2 text-success"></i>7. {% trans "Cookies & Tracking" %}</a></li>
+            <li><a href="#section-8"><i class="fa fa-angle-right mr-2 text-success"></i>8. {% trans "Updates & Contact" %}</a></li>
+          </ul>
+
+          <div class="mt-4 pt-3 border-top">
+            <div class="small font-weight-bold text-dark mb-1">{% trans "Data Privacy Officer" %}</div>
+            <p class="small text-muted mb-2">{% trans "For data deletion or profile privacy queries:" %}</p>
+            <a href="mailto:privacy@jobportal.com" class="btn btn-sm btn-outline-success btn-block font-weight-600">
+              <i class="fa fa-envelope-o mr-1"></i> privacy@jobportal.com
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Full Privacy Policy Content -->
+      <div class="col-lg-8">
+        <div class="legal-content-card">
+          
+          <div class="legal-callout">
+            <strong><i class="fa fa-check-circle mr-1 text-success"></i> {% trans "Our Privacy Commitment:" %}</strong>
+            <p class="mb-0 mt-1 font-size-14">
+              {% trans "We never sell your resume or personal details to advertisers. Your CV and contact details are only shared with genuine employers when you voluntarily apply to their posted vacancies." %}
+            </p>
+          </div>
+
+          <h2 id="section-1">1. {% trans "Introduction & Scope" %}</h2>
+          <p>
+            {% trans "EthioJobs ('we', 'us', or 'our') operates the online job portal system accessible via web and mobile interfaces. This Privacy Policy describes how we collect, store, process, and protect your information when you browse our site, register as an applicant or employer, build resumes, or submit job applications." %}
+          </p>
+
+          <h2 id="section-2">2. {% trans "Information We Collect" %}</h2>
+          <p>{% trans "We collect information in the following categories to provide seamless recruitment services:" %}</p>
+
+          <table class="data-grid-table">
+            <thead>
+              <tr>
+                <th>{% trans "Category" %}</th>
+                <th>{% trans "Information Types" %}</th>
+                <th>{% trans "Primary Purpose" %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>{% trans "Account Identification" %}</strong></td>
+                <td>{% trans "Full Name, Verified Google Email address, Ethiopian Phone Number, Gender, and Account Role (Job Seeker / Employer)." %}</td>
+                <td>{% trans "Account creation, multi-factor login authentication, and communication." %}</td>
+              </tr>
+              <tr>
+                <td><strong>{% trans "Professional & Career" %}</strong></td>
+                <td>{% trans "Uploaded Resumes/CVs (PDF/DOCX), Work Experience history, Academic degrees, Technical Skills, and Portfolio links." %}</td>
+                <td>{% trans "Generating recruiter profiles, AI ATS job matching, and employer job reviews." %}</td>
+              </tr>
+              <tr>
+                <td><strong>{% trans "Employer Credentials" %}</strong></td>
+                <td>{% trans "Company Legal Name, TIN number, Commercial Trade License documents, Office location, and Industry category." %}</td>
+                <td>{% trans "Corporate fraud prevention and verified employer badge qualification." %}</td>
+              </tr>
+              <tr>
+                <td><strong>{% trans "Technical & Device" %}</strong></td>
+                <td>{% trans "IP address, browser type, operating system, session tokens, and navigation timestamps." %}</td>
+                <td>{% trans "System security, abuse prevention, and load balancing." %}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2 id="section-3">3. {% trans "How We Use Your Data" %}</h2>
+          <p>{% trans "We utilize the collected information for specific, lawful purposes including:" %}</p>
+          <ul>
+            <li><strong>{% trans "Job Matching & Recommendation" %}:</strong> {% trans "Our automated algorithms analyze your verified skills and desired roles to present tailored job vacancy recommendations on your dashboard." %}</li>
+            <li><strong>{% trans "Application Transmission" %}:</strong> {% trans "When you click 'Apply Now', we format and transmit your application dossier (CV, cover letter, and profile summary) directly to the hiring manager." %}</li>
+            <li><strong>{% trans "Direct Messaging" %}:</strong> {% trans "Facilitating secure, real-time 2-way communication between verified candidates and hiring managers." %}</li>
+            <li><strong>{% trans "Security Auditing" %}:</strong> {% trans "Detecting automated bot registrations, counterfeit job postings, or abusive communication." %}</li>
+          </ul>
+
+          <h2 id="section-4">4. {% trans "Information Sharing & Disclosure" %}</h2>
+          <p>
+            {% trans "We respect candidate confidentiality and enforce strict data boundaries:" %}
+          </p>
+          <ul>
+            <li><strong>{% trans "Hiring Employers" %}:</strong> {% trans "Only employers whose vacancies you specifically apply for receive your full application dossier, including contact number and uploaded CV." %}</li>
+            <li><strong>{% trans "Service Providers" %}:</strong> {% trans "Trusted cloud hosting, transactional email delivery, and SMS notification gateways acting strictly under our data processing instructions." %}</li>
+            <li><strong>{% trans "Legal Compliance" %}:</strong> {% trans "We may disclose information if required to comply with court orders, subpoenas, or lawful government investigations under Ethiopian legislation." %}</li>
+            <li><strong>{% trans "No Data Selling" %}:</strong> {% trans "We do not sell, rent, or trade your personal data to third-party marketing brokers under any circumstances." %}</li>
+          </ul>
+
+          <h2 id="section-5">5. {% trans "Data Security & Storage" %}</h2>
+          <p>
+            {% trans "We employ industry-standard technical and organizational security controls to protect your data, including:" %}
+          </p>
+          <ul>
+            <li>{% trans "256-bit SSL/TLS cryptographic encryption for all data in transit." %}</li>
+            <li>{% trans "Encrypted storage for passwords using PBKDF2 with SHA-256 hashing." %}</li>
+            <li>{% trans "Automated role-based access control preventing candidates from viewing other applicants' private files." %}</li>
+            <li>{% trans "Regular database backups with encrypted archival storage." %}</li>
+          </ul>
+
+          <h2 id="section-6">6. {% trans "Your Privacy Rights & Controls" %}</h2>
+          <p>{% trans "You maintain full autonomy over your personal information on EthioJobs:" %}</p>
+          <ul>
+            <li><strong>{% trans "Access & Edit" %}:</strong> {% trans "You can update your personal contact info, education, skills, and work experience at any time through your Profile Settings." %}</li>
+            <li><strong>{% trans "Withdraw Applications" %}:</strong> {% trans "You may withdraw any pending job application directly from your 'My Applications' dashboard." %}</li>
+            <li><strong>{% trans "Delete Resumes" %}:</strong> {% trans "You have the ability to remove uploaded CV documents or generated resumes from your account repository." %}</li>
+            <li><strong>{% trans "Account Deletion" %}:</strong> {% trans "You can request full account removal and data scrubbing by contacting our privacy team." %}</li>
+          </ul>
+
+          <h2 id="section-7">7. {% trans "Cookies & Local Storage" %}</h2>
+          <p>
+            {% trans "We use necessary session cookies to maintain your login status, manage CSRF protection, and remember your language choice. For complete details and to customize your cookie preferences, please visit our dedicated" %}
+            <a href="{% url 'jobs:cookie-policy' %}" class="text-success font-weight-bold">{% trans "Cookie Policy & Preferences" %}</a>.
+          </p>
+
+          <h2 id="section-8">8. {% trans "Policy Updates & Contact" %}</h2>
+          <p>
+            {% trans "We may update this Privacy Policy from time to time to reflect operational or regulatory improvements. Material updates will be announced via platform notification or email." %}
+          </p>
+          <div class="p-3 bg-light rounded-lg border">
+            <div><strong>{% trans "Data Protection Officer (DPO)" %}</strong></div>
+            <div><i class="fa fa-envelope mr-2 text-success"></i> privacy@jobportal.com / info@jobportal.com</div>
+            <div><i class="fa fa-phone mr-2 text-success"></i> +251 93 930 4457</div>
+            <div><i class="fa fa-building-o mr-2 text-success"></i> EthioJobs Legal & Security Operations &bull; Debre Markos, Ethiopia</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
