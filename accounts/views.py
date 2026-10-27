@@ -349,7 +349,8 @@ class GoogleOneTapLoginView(View):
             from django.urls import reverse
             messages.error(
                 request,
-                "በዚህ የጉግል ኢሜይል የተመዘገበ አካውንት አልተገኘም። እባክዎ አስቀድመው እንደ ሰራተኛ ወይም አሰሪ ድርጅት ይመዝገቡ። (No account found with this Google email. Please register first.)"
+                "በዚህ የጉግል ኢሜይል የተመዘገበ አካውንት አልተገኘም። እባክዎ አስቀድመው ይመዝገቡ። (No account found with this Google email. Please register first.)",
+                extra_tags="not_registered"
             )
             return JsonResponse({
                 "status": "not_registered",

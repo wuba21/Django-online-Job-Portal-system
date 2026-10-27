@@ -4,6 +4,8 @@
     {% trans "Sign In" %} | EthioJobs Professional Network
 {% endblock %}
 
+{% block messages %}{% endblock messages %}
+
 {% block content %}
 <section class="linkedin-auth-section py-4 py-md-5">
     <div class="container">
@@ -153,10 +155,39 @@
                     <!-- Messages / Alerts (e.g. from Social Auth when account is not registered) -->
                     {% if messages %}
                         {% for message in messages %}
-                            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show py-2 px-3 small rounded-lg mb-3">
-                                <button type="button" class="close" data-dismiss="alert">&times;</button>
-                                <i class="fa fa-exclamation-triangle mr-1"></i> {{ message }}
-                            </div>
+                            {% if 'not_registered' in message.tags or 'አልተገኘም' in message|stringformat:"s" or 'No account found' in message|stringformat:"s" %}
+                                <div class="alert border-0 rounded-xl p-3 mb-3 shadow-sm" style="background-color: #fffbeb; border: 1px solid #fde68a !important; color: #78350f;">
+                                    <div class="d-flex align-items-start">
+                                        <div class="mr-2 mt-1" style="color: #d97706; font-size: 1.15rem;">
+                                            <i class="fa fa-exclamation-circle"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="font-weight-bold" style="color: #92400e; font-size: 0.92rem;">
+                                                {% trans "አካውንት አልተገኘም (Account Not Found)" %}
+                                            </div>
+                                            <div class="small mt-1 mb-2" style="color: #78350f; line-height: 1.45;">
+                                                {% trans "በዚህ የጉግል ኢሜይል የተመዘገበ አካውንት የለም። እባክዎ አስቀድመው ይመዝገቡ።" %}
+                                            </div>
+                                            <div class="d-flex flex-wrap gap-2 pt-1" style="gap: 8px;">
+                                                <a href="{% url 'accounts:employee-register' %}" class="btn btn-sm text-white font-weight-bold px-2 py-1 shadow-xs" style="background-color: #0a66c2; border-radius: 6px; font-size: 0.78rem;">
+                                                    <i class="fa fa-user-plus mr-1"></i> {% trans "እንደ ስራ ፈላጊ ይመዝገቡ" %}
+                                                </a>
+                                                <a href="{% url 'accounts:employer-register' %}" class="btn btn-sm btn-outline-secondary font-weight-bold ml-1 bg-white px-2 py-1" style="border-radius: 6px; font-size: 0.78rem; color: #374151;">
+                                                    <i class="fa fa-building mr-1"></i> {% trans "እንደ አሰሪ ድርጅት" %}
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="close ml-2" data-dismiss="alert" aria-label="Close" style="color: #92400e; opacity: 0.75;">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-{% if 'error' in message.tags %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show py-2 px-3 small rounded-lg mb-3 shadow-xs">
+                                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                                    <i class="fa fa-info-circle mr-1"></i> {{ message }}
+                                </div>
+                            {% endif %}
                         {% endfor %}
                     {% endif %}
 

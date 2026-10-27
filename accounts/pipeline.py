@@ -38,7 +38,8 @@ def check_user_exists_for_login(backend, details, user=None, *args, **kwargs):
     if request:
         messages.error(
             request,
-            "በዚህ የጉግል ኢሜይል የተመዘገበ አካውንት አልተገኘም። እባክዎ አስቀድመው እንደ ሰራተኛ ወይም አሰሪ ድርጅት ይመዝገቡ። (No account found with this Google email. Please register first.)"
+            "በዚህ የጉግል ኢሜይል የተመዘገበ አካውንት አልተገኘም። እባክዎ አስቀድመው ይመዝገቡ። (No account found with this Google email. Please register first.)",
+            extra_tags="not_registered"
         )
     return redirect("accounts:login")
 
