@@ -1,94 +1,187 @@
 {% extends 'base.html' %}
 {% load i18n %}
 {% block title %}
-    {{ title }}
+    Sign In | Ethiopian Job Portal
 {% endblock %}
 
 {% block content %}
-<section class="py-5 bg-light-gray">
+<section class="py-5 bg-light-gray" style="min-height: 80vh; display: flex; align-items: center; background: #f8fafc;">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-12 col-md-8 col-lg-6">
-                <div class="card border-0 shadow-sm rounded-lg p-4 bg-white">
-                    <h3 class="heading text-center mb-3">{% trans "Login" %}</h3>
-                    <p class="lead text-center text-muted mb-4" style="font-size: 1rem;">{% trans "Already have an account?" %}</p>
+            <div class="col-12 col-md-8 col-lg-5">
+                <div class="card border-0 shadow-sm rounded-xl p-4 p-md-5 bg-white position-relative overflow-hidden" style="border-radius: 18px; border: 1px solid #e2e8f0 !important;">
                     
-                    {% if form.errors %}
-                        {% for error in form.non_field_errors %}
-                            <div class="alert alert-danger alert-dismissible fade show">
-                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">&times;</button>
-                                <strong>{{ error|escape }}</strong>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                    
-                    <form action="" method="post">
-                        {% csrf_token %}
-                        {% for field in form %}
-                            <div class="form-group mb-3">
-                                <label for="id_{{ field.name }}" class="font-weight-bold text-secondary">{{ field.label }}</label>
-                                {% if field.field.widget.input_type == 'password' %}
-                                    <div class="input-group">
-                                        <input type="password"
-                                               class="form-control"
-                                               name="{{ field.name }}"
-                                               id="id_{{ field.name }}"
-                                               placeholder="{{ field.field.widget.attrs.placeholder }}"
-                                               required>
-                                        <div class="input-group-append">
-                                            <button class="btn btn-outline-secondary toggle-password-btn" type="button" data-target="id_{{ field.name }}" style="border-color: #ced4da;">
-                                                <i class="fa fa-eye"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                {% else %}
-                                    <input type="{{ field.field.widget.input_type }}"
-                                           class="form-control"
-                                           name="{{ field.name }}"
-                                           id="id_{{ field.name }}"
-                                           placeholder="{{ field.field.widget.attrs.placeholder }}"
-                                           required>
-                                {% endif %}
-                                {% for error in field.errors %}
-                                    <div class="alert alert-danger alert-dismissible fade show mt-1">
-                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">&times;</button>
-                                        <strong>{{ error|escape }}</strong>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% endfor %}
+                    <div class="text-center mb-4">
+                        <div class="mx-auto mb-3" style="width: 60px; height: 60px; background: #eff6ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(37,99,235,0.12);">
+                            <i class="fa fa-lock text-primary" style="font-size: 26px;"></i>
+                        </div>
+                        <h3 class="font-weight-bold mb-1" style="color: #0f172a; font-size: 1.55rem; letter-spacing: -0.5px;">
+                            {% trans "Welcome Back" %}
+                        </h3>
+                        <p class="text-muted small mb-0">
+                            {% trans "Log in with your registered Google email or 1-Click Google Sign-In" %}
+                        </p>
+                    </div>
 
+                    <!-- 1-Click Google Sign-In Button -->
+                    <div class="mb-4">
+                        <a href="{% url 'social:begin' 'google-oauth2' %}" 
+                           class="google-auth-btn w-100 text-center">
+                            <div class="google-icon-wrapper">
+                                <svg viewBox="0 0 48 48" width="22px" height="22px">
+                                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                                </svg>
+                            </div>
+                            <span class="font-weight-600">{% trans "Sign in with Google" %}</span>
+                        </a>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="text-center position-relative my-4">
+                        <hr style="border-top: 1px solid #e2e8f0;">
+                        <span class="bg-white px-3 text-muted text-uppercase font-weight-bold" style="position: absolute; top: -11px; left: 50%; transform: translateX(-50%); font-size: 0.72rem; letter-spacing: 0.5px;">
+                            {% trans "OR SIGN IN WITH EMAIL & PASSWORD" %}
+                        </span>
+                    </div>
+
+                    <!-- Non-field Errors -->
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger alert-dismissible fade show rounded-lg mb-3">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {% for error in form.non_field_errors %}
+                                <div><i class="fa fa-exclamation-circle mr-1"></i> {{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Login Form -->
+                    <form action="" method="post" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Email -->
+                        <div class="form-group mb-3">
+                            <label for="id_email" class="font-weight-bold text-dark small">
+                                {% trans "Google Email Address (የጉግል ኢሜይል)" %} <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-white border-right-0 text-muted">
+                                        <i class="fa fa-envelope-o"></i>
+                                    </span>
+                                </div>
+                                <input type="email"
+                                       class="form-control border-left-0"
+                                       name="email"
+                                       id="id_email"
+                                       value="{{ form.email.value|default_if_none:'' }}"
+                                       placeholder="Enter registered Google email (e.g. name@gmail.com)"
+                                       required>
+                            </div>
+                            {% if form.email.errors %}
+                                <div class="text-danger small mt-1 font-weight-500">
+                                    <i class="fa fa-times-circle mr-1"></i> {{ form.email.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Password -->
+                        <div class="form-group mb-3">
+                            <label for="id_password" class="font-weight-bold text-dark small">
+                                {% trans "Password (የይለፍ ቃል)" %} <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-white border-right-0 text-muted">
+                                        <i class="fa fa-lock"></i>
+                                    </span>
+                                </div>
+                                <input type="password"
+                                       class="form-control border-left-0"
+                                       name="password"
+                                       id="id_password"
+                                       placeholder="Enter your password"
+                                       required>
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary toggle-password-btn" type="button" data-target="id_password" style="border-color: #ced4da;">
+                                        <i class="fa fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% if form.password.errors %}
+                                <div class="text-danger small mt-1 font-weight-500">
+                                    <i class="fa fa-times-circle mr-1"></i> {{ form.password.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Submit Button -->
                         <div class="mt-4">
-                            <button type="submit" class="btn btn-primary btn-block py-2 font-weight-bold">
+                            <button type="submit" class="btn btn-primary btn-block py-2 font-weight-bold shadow-sm" style="font-size: 1rem; border-radius: 8px;">
                                 <i class="fa fa-sign-in mr-2"></i>{% trans "Log in" %}
                             </button>
                         </div>
                     </form>
 
-                    <div class="text-center my-3 text-muted position-relative">
-                        <hr>
-                        <span class="bg-white px-2 text-uppercase text-muted" style="position: relative; top: -28px; font-size: 0.75rem;">{% trans "Or login with" %}</span>
+                    <!-- Links to Register -->
+                    <div class="mt-4 pt-3 border-top text-center" style="border-color: #f1f5f9 !important;">
+                        <p class="text-muted small mb-2">
+                            {% trans "Don't have an account yet?" %}
+                        </p>
+                        <div class="d-flex justify-content-center gap-2" style="gap: 12px;">
+                            <a href="{% url 'accounts:employee-register' %}" class="btn btn-sm btn-outline-primary font-weight-bold px-3" style="border-radius: 6px;">
+                                <i class="fa fa-user mr-1"></i> {% trans "Register as Employee" %}
+                            </a>
+                            <a href="{% url 'accounts:employer-register' %}" class="btn btn-sm btn-outline-success font-weight-bold px-3 ml-2" style="border-radius: 6px;">
+                                <i class="fa fa-building mr-1"></i> {% trans "Register as Employer" %}
+                            </a>
+                        </div>
                     </div>
 
-                    <div class="social-login-buttons">
-                        <a href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-block btn-outline-danger mb-2 font-weight-bold" style="white-space: normal; letter-spacing: normal; text-transform: none; word-break: break-word;">
-                            <i class="fa fa-google mr-2"></i>{% trans "Login with Google" %}
-                        </a>
-                        <a href="{% url 'social:begin' 'github' %}" class="btn btn-block btn-outline-dark mb-2 font-weight-bold" style="white-space: normal; letter-spacing: normal; text-transform: none; word-break: break-word;">
-                            <i class="fa fa-github mr-2"></i>{% trans "Login with GitHub" %}
-                        </a>
-                        <a href="{% url 'social:begin' 'facebook' %}" class="btn btn-block btn-outline-primary mb-2 font-weight-bold" style="white-space: normal; letter-spacing: normal; text-transform: none; word-break: break-word;">
-                            <i class="fa fa-facebook-official mr-2"></i>{% trans "Login with Facebook" %}
-                        </a>
-                        <a href="{% url 'social:begin' 'linkedin-oauth2' %}" class="btn btn-block btn-outline-info mb-2 font-weight-bold" style="white-space: normal; letter-spacing: normal; text-transform: none; word-break: break-word;">
-                            <i class="fa fa-linkedin-square mr-2"></i>{% trans "Login with LinkedIn" %}
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<style>
+.font-weight-500 { font-weight: 500; }
+.font-weight-600 { font-weight: 600; }
+
+.google-auth-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    color: #1e293b;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 11px 18px;
+    font-size: 0.98rem;
+    text-decoration: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    transition: all 0.25s ease;
+}
+.google-auth-btn:hover {
+    color: #0f172a;
+    border-color: #4285f4;
+    background: #f8fafc;
+    box-shadow: 0 4px 14px rgba(66, 133, 244, 0.15);
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+.google-icon-wrapper {
+    margin-right: 10px;
+    display: inline-flex;
+    align-items: center;
+}
+.form-control:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+</style>
 {% endblock %}
 
 {% block javascripts %}

@@ -127,6 +127,83 @@ def validate_legitimate_email(email):
     return email
 
 
+def validate_google_email(email):
+    """
+    Strictly validates that the email is a genuine, legitimate Google address (@gmail.com or @googlemail.com).
+    Enforces Google's username rules (6-30 chars, alphanumeric and single dots, not disposable or dummy).
+    """
+    if not email:
+        raise ValidationError("Google email address is required.")
+
+    email = email.strip().lower()
+
+    try:
+        validate_email(email)
+    except ValidationError:
+        raise ValidationError("Please enter a valid email address.")
+
+    if "@" not in email:
+        raise ValidationError("Please enter a valid email address.")
+
+    local_part, domain = email.rsplit("@", 1)
+    local_part = local_part.strip()
+    domain = domain.strip().lower()
+
+    if domain not in ("gmail.com", "googlemail.com"):
+        raise ValidationError(
+            f"Registration requires a genuine Google email address (@gmail.com). '{domain}' is not allowed."
+        )
+
+    # Google username rules: length 6 to 30 characters
+    if len(local_part) < 6:
+        raise ValidationError(
+            "A genuine Google/Gmail username must be at least 6 characters long."
+        )
+    if len(local_part) > 30:
+        raise ValidationError(
+            "A genuine Google/Gmail username cannot exceed 30 characters."
+        )
+
+    # Valid characters: alphanumeric and dots, no leading/trailing dot or consecutive dots
+    if local_part.startswith(".") or local_part.endswith(".") or ".." in local_part:
+        raise ValidationError(
+            "A valid Google/Gmail address cannot start, end, or contain consecutive dots."
+        )
+
+    if not re.match(r'^[a-z0-9]+(\.[a-z0-9]+)*$', local_part):
+        raise ValidationError(
+            "A valid Google/Gmail address can only contain letters (a-z), numbers (0-9), and single dots."
+        )
+
+    # Check for placeholder/dummy names
+    clean_local = re.sub(r'[^a-z0-9]', '', local_part)
+    if clean_local in FAKE_USERNAMES:
+        raise ValidationError(
+            "Please use your real, genuine Google email address, not a dummy or test email."
+        )
+
+    return email
+
+
+def validate_phone_number(phone):
+    """
+    Validates phone numbers (accepts Ethiopian format like +251 9... or 09... or 07..., as well as international formats).
+    Must contain between 9 and 15 digits.
+    """
+    if not phone:
+        raise ValidationError("Phone number is required.")
+
+    phone_str = str(phone).strip()
+    phone_clean = re.sub(r'[\s\-\(\)]', '', phone_str)
+
+    if not re.match(r'^\+?[0-9]{9,15}$', phone_clean):
+        raise ValidationError(
+            "Please enter a valid phone number (e.g. +251 911 234 567 or 0911234567)."
+        )
+
+    return phone_str
+
+
 def validate_secure_password(password, user=None):
     """
     Enforces strong password complexity requirements:

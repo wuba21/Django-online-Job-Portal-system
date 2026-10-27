@@ -1,66 +1,220 @@
 {% extends 'base.html' %}
 {% load i18n %}
 {% block title %}
-    Employer Register
+    Employer Registration | Ethiopian Job Portal
 {% endblock %}
 
 {% block content %}
-<section class="py-5 bg-light-gray" style="min-height: 80vh; display: flex; align-items: center;">
+<section class="py-5 bg-light-gray" style="min-height: 85vh; display: flex; align-items: center; background: #f8fafc;">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-12 col-md-8 col-lg-5">
-                <div class="card border-0 shadow-lg rounded-xl p-4 p-md-5 bg-white text-center position-relative overflow-hidden" style="border-radius: 20px;">
-                    <!-- Decorative Background Glow -->
-                    <div style="position: absolute; top: -50px; right: -50px; width: 140px; height: 140px; background: radial-gradient(circle, rgba(16,185,129,0.15) 0%, rgba(255,255,255,0) 70%); border-radius: 50%;"></div>
-                    <div style="position: absolute; bottom: -50px; left: -50px; width: 140px; height: 140px; background: radial-gradient(circle, rgba(66,133,244,0.12) 0%, rgba(255,255,255,0) 70%); border-radius: 50%;"></div>
-
-                    <!-- Icon / Badge -->
-                    <div class="mx-auto mb-3" style="width: 72px; height: 72px; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(16,185,129,0.15);">
-                        <i class="fa fa-building text-success" style="font-size: 36px;"></i>
+            <div class="col-12 col-md-10 col-lg-7">
+                <div class="card border-0 shadow-sm rounded-xl p-4 p-md-5 bg-white position-relative overflow-hidden" style="border-radius: 18px; border: 1px solid #e2e8f0 !important;">
+                    
+                    <!-- Header -->
+                    <div class="text-center mb-4">
+                        <div class="mx-auto mb-3" style="width: 64px; height: 64px; background: #ecfdf5; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16,185,129,0.15);">
+                            <i class="fa fa-building text-success" style="font-size: 30px;"></i>
+                        </div>
+                        <h3 class="font-weight-bold mb-1" style="color: #0f172a; font-size: 1.6rem; letter-spacing: -0.5px;">
+                            {% trans "Employer & Company Registration" %}
+                        </h3>
+                        <p class="text-muted small mb-0">
+                            {% trans "Register your company or recruitment team with a genuine Google email to post vacancies and discover top candidates." %}
+                        </p>
                     </div>
 
-                    <h3 class="heading font-weight-bold mb-2" style="color: #1e293b; letter-spacing: -0.5px;">
-                        {% trans "Employer Registration" %}
-                    </h3>
-                    <p class="text-muted mb-4" style="font-size: 0.95rem; line-height: 1.5;">
-                        {% trans "Sign up instantly with your Google account. Post vacancies and recruit verified talent with zero hassle." %}
-                    </p>
-
-                    <!-- Animated Google Register Button -->
-                    <a href="{% url 'social:begin' 'google-oauth2' %}?role=employer" 
-                       class="google-auth-btn employer-google-btn mb-3">
-                        <div class="google-icon-wrapper">
-                            <svg viewBox="0 0 48 48" width="24px" height="24px">
-                                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                            </svg>
-                        </div>
-                        <span class="google-btn-text">{% trans "Register Company with Google" %}</span>
-                    </a>
-
-                    <!-- Features Highlights -->
-                    <div class="row mt-4 pt-3 border-top text-left" style="border-color: #f1f5f9 !important;">
-                        <div class="col-12 mb-2 d-flex align-items-center">
-                            <span class="feature-check"><i class="fa fa-check"></i></span>
-                            <span class="small text-muted font-weight-500">{% trans "Instant verified company account" %}</span>
-                        </div>
-                        <div class="col-12 mb-2 d-flex align-items-center">
-                            <span class="feature-check"><i class="fa fa-check"></i></span>
-                            <span class="small text-muted font-weight-500">{% trans "Post unlimited jobs & review applicants" %}</span>
-                        </div>
-                        <div class="col-12 d-flex align-items-center">
-                            <span class="feature-check"><i class="fa fa-check"></i></span>
-                            <span class="small text-muted font-weight-500">{% trans "Access automated CV parser & applicant pool" %}</span>
-                        </div>
+                    <!-- 1-Click Google OAuth Option -->
+                    <div class="mb-4">
+                        <a href="{% url 'social:begin' 'google-oauth2' %}?role=employer" 
+                           class="google-auth-btn employer-btn w-100 text-center">
+                            <div class="google-icon-wrapper">
+                                <svg viewBox="0 0 48 48" width="22px" height="22px">
+                                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                                </svg>
+                            </div>
+                            <span class="font-weight-600">{% trans "Register Company instantly with Google" %}</span>
+                        </a>
                     </div>
 
-                    <div class="mt-4 pt-2">
+                    <!-- Divider -->
+                    <div class="text-center position-relative my-4">
+                        <hr style="border-top: 1px solid #e2e8f0;">
+                        <span class="bg-white px-3 text-muted text-uppercase font-weight-bold" style="position: absolute; top: -11px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; letter-spacing: 0.5px;">
+                            {% trans "OR REGISTER WITH YOUR DETAILS" %}
+                        </span>
+                    </div>
+
+                    <!-- Form Errors Alert -->
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger alert-dismissible fade show rounded-lg mb-3">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {% for error in form.non_field_errors %}
+                                <div><i class="fa fa-exclamation-circle mr-1"></i> {{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Registration Form -->
+                    <form action="" method="post" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Contact Person Full Name (First Name, Last Name) -->
+                        <div class="form-row">
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="id_first_name" class="font-weight-bold text-dark small">
+                                    {% trans "Contact Person First Name" %} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                    <div class="text-danger small mt-1 font-weight-500">
+                                        {{ form.first_name.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="id_last_name" class="font-weight-bold text-dark small">
+                                    {% trans "Contact Person Last Name" %} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                    <div class="text-danger small mt-1 font-weight-500">
+                                        {{ form.last_name.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Company / Organization Name -->
+                        <div class="form-group mb-3">
+                            <label for="id_company_name" class="font-weight-bold text-dark small">
+                                {% trans "Company / Organization Name (የድርጅት ስም)" %} <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-white border-right-0 text-muted">
+                                        <i class="fa fa-building-o"></i>
+                                    </span>
+                                </div>
+                                {{ form.company_name }}
+                            </div>
+                            {% if form.company_name.errors %}
+                                <div class="text-danger small mt-1 font-weight-500">
+                                    {{ form.company_name.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Gender & Phone Row -->
+                        <div class="form-row">
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="id_gender" class="font-weight-bold text-dark small">
+                                    {% trans "Gender (ጾታ)" %} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.gender }}
+                                {% if form.gender.errors %}
+                                    <div class="text-danger small mt-1 font-weight-500">
+                                        {{ form.gender.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="id_phone_number" class="font-weight-bold text-dark small">
+                                    {% trans "Phone Number (ስልክ ቁጥር)" %} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.phone_number }}
+                                {% if form.phone_number.errors %}
+                                    <div class="text-danger small mt-1 font-weight-500">
+                                        {{ form.phone_number.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Company Google Email Field -->
+                        <div class="form-group mb-3">
+                            <label for="id_email" class="font-weight-bold text-dark small d-flex justify-content-between align-items-center">
+                                <span>{% trans "Company Google Email (የጉግል ኢሜይል)" %} <span class="text-danger">*</span></span>
+                                <span class="badge badge-light text-success border" style="font-size: 0.72rem; font-weight: 600;">
+                                    <i class="fa fa-google mr-1"></i> @gmail.com required
+                                </span>
+                            </label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-white border-right-0 text-muted">
+                                        <i class="fa fa-envelope-o"></i>
+                                    </span>
+                                </div>
+                                {{ form.email }}
+                            </div>
+                            <small class="form-text text-muted mt-1">
+                                <i class="fa fa-info-circle text-success mr-1"></i>
+                                {% trans "Must be a genuine Google email so you can log in directly using this email or via 1-Click Google Sign In." %}
+                            </small>
+                            {% if form.email.errors %}
+                                <div class="text-danger small mt-1 font-weight-500">
+                                    <i class="fa fa-times-circle mr-1"></i> {{ form.email.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Passwords Row -->
+                        <div class="form-row">
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="id_password1" class="font-weight-bold text-dark small">
+                                    {% trans "Password (የይለፍ ቃል)" %} <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    {{ form.password1 }}
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary toggle-pwd-btn" type="button" data-target="id_password1" style="border-color: #ced4da;">
+                                            <i class="fa fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                {% if form.password1.errors %}
+                                    <div class="text-danger small mt-1 font-weight-500">
+                                        {{ form.password1.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="id_password2" class="font-weight-bold text-dark small">
+                                    {% trans "Confirm Password (ያረጋግጡ)" %} <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    {{ form.password2 }}
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary toggle-pwd-btn" type="button" data-target="id_password2" style="border-color: #ced4da;">
+                                            <i class="fa fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                {% if form.password2.errors %}
+                                    <div class="text-danger small mt-1 font-weight-500">
+                                        {{ form.password2.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-success btn-block py-2 font-weight-bold shadow-sm" style="font-size: 1rem; border-radius: 8px;">
+                                <i class="fa fa-building mr-2"></i>{% trans "Create Employer Account" %}
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Login Link Footer -->
+                    <div class="mt-4 pt-3 border-top text-center" style="border-color: #f1f5f9 !important;">
                         <p class="text-muted small mb-0">
                             {% trans "Already have an employer account?" %}
                             <a href="{% url 'accounts:login' %}" class="text-success font-weight-bold ml-1">
-                                {% trans "Log in" %}
+                                {% trans "Log in with your Google email" %} &rarr;
                             </a>
                         </p>
                     </div>
@@ -72,70 +226,59 @@
 </section>
 
 <style>
-/* Animated Google Auth Button */
+/* Modern styling */
+.font-weight-500 { font-weight: 500; }
+.font-weight-600 { font-weight: 600; }
+
 .google-auth-btn {
     display: flex;
     align-items: center;
     justify-content: center;
     background: #ffffff;
     color: #1e293b;
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 12px 20px;
-    font-size: 1.05rem;
-    font-weight: 600;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 11px 18px;
+    font-size: 0.98rem;
     text-decoration: none;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    transition: all 0.25s ease;
 }
-
-.google-auth-btn:hover {
+.google-auth-btn.employer-btn:hover {
     color: #0f172a;
     border-color: #10b981;
-    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
-    transform: translateY(-2px);
+    background: #f8fafc;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.18);
     text-decoration: none;
+    transform: translateY(-1px);
 }
-
-.google-auth-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
-}
-
 .google-icon-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 12px;
-    transition: transform 0.3s ease;
-}
-
-.google-auth-btn:hover .google-icon-wrapper {
-    transform: scale(1.15) rotate(5deg);
-}
-
-.google-btn-text {
-    letter-spacing: -0.2px;
-}
-
-/* Feature Check Pills */
-.feature-check {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #dcfce7;
-    color: #16a34a;
+    margin-right: 10px;
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    margin-right: 10px;
-    flex-shrink: 0;
 }
-.font-weight-500 {
-    font-weight: 500;
+.form-control:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
 }
 </style>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    $(document).ready(function() {
+        $('.toggle-pwd-btn').on('click', function() {
+            var targetId = $(this).data('target');
+            var input = $('#' + targetId);
+            var icon = $(this).find('i');
+            if (input.attr('type') === 'password') {
+                input.attr('type', 'text');
+                icon.removeClass('fa-eye').addClass('fa-eye-slash');
+            } else {
+                input.attr('type', 'password');
+                icon.removeClass('fa-eye-slash').addClass('fa-eye');
+            }
+        });
+    });
+</script>
 {% endblock %}

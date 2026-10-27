@@ -31,9 +31,17 @@ class RegisterEmployeeView(CreateView):
             user = form.save(commit=False)
             password = form.cleaned_data.get("password1")
             user.set_password(password)
+            user.first_name = form.cleaned_data.get("first_name", "").strip()
+            user.last_name = form.cleaned_data.get("last_name", "").strip()
+            user.gender = form.cleaned_data.get("gender")
+            user.phone_number = form.cleaned_data.get("phone_number", "").strip()
+            user.role = "employee"
             user.is_active = True
             user.save()
-            messages.success(request, "Account created successfully! Please log in with your email and password.")
+            messages.success(
+                request,
+                f"Employee account registered successfully for {user.first_name} {user.last_name}! Please log in with your Google email ({user.email})."
+            )
             return redirect("accounts:login")
         else:
             messages.error(request, "Please check the form and correct the highlighted errors.")
@@ -60,14 +68,23 @@ class RegisterEmployerView(CreateView):
             user = form.save(commit=False)
             password = form.cleaned_data.get("password1")
             user.set_password(password)
+            user.first_name = form.cleaned_data.get("first_name", "").strip()
+            user.last_name = form.cleaned_data.get("last_name", "").strip()
+            user.gender = form.cleaned_data.get("gender")
+            user.phone_number = form.cleaned_data.get("phone_number", "").strip()
+            user.role = "employer"
             user.is_active = True
             user.save()
+
             # Ensure Company record is created for this employer
             from accounts.models import Company
-            company_name = form.cleaned_data.get("first_name", "Company")
-            company_location = form.cleaned_data.get("last_name", "")
-            Company.objects.get_or_create(user=user, defaults={"name": company_name, "location": company_location})
-            messages.success(request, "Employer account created successfully! Please log in with your email and password.")
+            company_name = form.cleaned_data.get("company_name", "").strip() or f"{user.first_name}'s Company"
+            Company.objects.update_or_create(user=user, defaults={"name": company_name})
+
+            messages.success(
+                request,
+                f"Employer account for '{company_name}' registered successfully! Please log in with your Google email ({user.email})."
+            )
             return redirect("accounts:login")
         else:
             messages.error(request, "Please check the form and correct the highlighted errors.")
