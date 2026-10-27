@@ -109,18 +109,19 @@ class LoginView(FormView):
 
     def _redirect_for_user(self, user):
         """Return the correct URL based on user role."""
+        from django.urls import reverse
         try:
             if "next" in self.request.GET and self.request.GET["next"]:
                 return self.request.GET["next"]
             if user.is_superuser or user.is_staff:
-                return "/analytics-dashboard/"
+                return reverse("jobs:admin-analytics-dashboard")
             if getattr(user, "role", None) == "employer":
                 company = getattr(user, "company", None)
                 if not company or not company.is_license_verified:
-                    return "/en/employer/verify-license/"
-                return "/en/employer/dashboard/"
+                    return reverse("accounts:employer-verify-license")
+                return reverse("jobs:employer-dashboard")
             if getattr(user, "role", None) == "employee":
-                return "/en/applicant/dashboard/"
+                return reverse("jobs:applicant-dashboard")
         except Exception:
             pass
         return self.success_url

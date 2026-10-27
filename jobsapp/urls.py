@@ -108,6 +108,12 @@ urlpatterns = [
             ]
         ),
     ),
+    # Applicant Portal Aliases (ensures /applicant/dashboard/ and /applicant/ never 404)
+    path("applicant/dashboard/", ApplicantDashboardView.as_view(), name="applicant-dashboard-alias"),
+    path("applicant/", ApplicantDashboardView.as_view(), name="applicant-dashboard-alias-short"),
+    path("applicant/my-applications/", EmployeeMyJobsListView.as_view(), name="applicant-my-applications-alias"),
+    path("applicant/favorites/", FavoriteListView.as_view(), name="applicant-favorites-alias"),
+
     # Root level aliases for profile actions
     path("education/add/", add_education, name="root-add-education"),
     path("education/delete/<int:pk>/", delete_education, name="root-delete-education"),
