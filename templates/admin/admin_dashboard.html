@@ -60,8 +60,6 @@
     border: 1px solid #e2e8f0;
 }
 </style>
-<!-- Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -234,60 +232,77 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // 1. Application Status Doughnut Chart
-    const statusCtx = document.getElementById('statusChart').getContext('2d');
-    const statusLabels = [{% for item in status_distribution %}"{{ item.status }}",{% endfor %}];
-    const statusData = [{% for item in status_distribution %}{{ item.count }},{% endfor %}];
-
-    new Chart(statusCtx, {
-        type: 'doughnut',
-        data: {
-            labels: statusLabels.length ? statusLabels : ['No Applications'],
-            datasets: [{
-                data: statusData.length ? statusData : [1],
-                backgroundColor: ['#0284c7', '#16a34a', '#d97706', '#dc2626', '#9333ea'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'bottom' }
-            }
+    function initDashboardCharts() {
+        if (typeof Chart === 'undefined') {
+            setTimeout(initDashboardCharts, 40);
+            return;
         }
-    });
 
-    // 2. Categories Bar Chart
-    const catCtx = document.getElementById('categoryChart').getContext('2d');
-    const catLabels = [{% for item in category_counts %}"{{ item.category }}",{% endfor %}];
-    const catData = [{% for item in category_counts %}{{ item.count }},{% endfor %}];
+        // 1. Application Status Doughnut Chart
+        const statusCanvas = document.getElementById('statusChart');
+        if (statusCanvas) {
+            const statusCtx = statusCanvas.getContext('2d');
+            const statusLabels = [{% for item in status_distribution %}"{{ item.status }}",{% endfor %}];
+            const statusData = [{% for item in status_distribution %}{{ item.count }},{% endfor %}];
 
-    new Chart(catCtx, {
-        type: 'bar',
-        data: {
-            labels: catLabels.length ? catLabels : ['General'],
-            datasets: [{
-                label: 'Jobs Count',
-                data: catData.length ? catData : [0],
-                backgroundColor: '#0d9488',
-                borderRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: { beginAtZero: true, ticks: { precision: 0 } }
-            },
-            plugins: {
-                legend: { display: false }
-            }
+            new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: statusLabels.length ? statusLabels : ['No Applications'],
+                    datasets: [{
+                        data: statusData.length ? statusData : [1],
+                        backgroundColor: ['#0284c7', '#16a34a', '#d97706', '#dc2626', '#9333ea'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
         }
-    });
+
+        // 2. Categories Bar Chart
+        const catCanvas = document.getElementById('categoryChart');
+        if (catCanvas) {
+            const catCtx = catCanvas.getContext('2d');
+            const catLabels = [{% for item in category_counts %}"{{ item.category }}",{% endfor %}];
+            const catData = [{% for item in category_counts %}{{ item.count }},{% endfor %}];
+
+            new Chart(catCtx, {
+                type: 'bar',
+                data: {
+                    labels: catLabels.length ? catLabels : ['General'],
+                    datasets: [{
+                        label: 'Jobs Count',
+                        data: catData.length ? catData : [0],
+                        backgroundColor: '#0d9488',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, ticks: { precision: 0 } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+    }
+    initDashboardCharts();
 });
 </script>
 {% endblock %}
