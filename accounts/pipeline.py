@@ -24,7 +24,8 @@ def check_user_exists_for_login(backend, details, user=None, *args, **kwargs):
         return
 
     # Check if a user with this email already exists in our database
-    email = details.get("email")
+    response = kwargs.get("response") or {}
+    email = details.get("email") or (response.get("email") if isinstance(response, dict) else None)
     if email:
         from accounts.models import User
         if User.objects.filter(email__iexact=email).exists():
@@ -34,13 +35,13 @@ def check_user_exists_for_login(backend, details, user=None, *args, **kwargs):
     # Stop pipeline and redirect to login page with clear error message
     from django.contrib import messages
     from django.shortcuts import redirect
-    request = strategy.request if strategy else None
+    request = getattr(strategy, "request", None) or kwargs.get("request")
+    provider_name = "GitHub" if backend.name == "github" else "Google"
     if request:
-        provider_name = "GitHub" if backend.name == "github" else "Google"
         messages.error(
             request,
             f"በዚህ የ{provider_name} ኢሜይል/አካውንት የተመዘገበ አልተገኘም። እባክዎ አስቀድመው ይመዝገቡ። (No account found with this {provider_name} account. Please register first.)",
-            extra_tags="not_registered"
+            extra_tags=f"not_registered {backend.name}"
         )
     return redirect("accounts:login")
 

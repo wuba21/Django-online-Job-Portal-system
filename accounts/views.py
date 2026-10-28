@@ -350,7 +350,7 @@ class GoogleOneTapLoginView(View):
             messages.error(
                 request,
                 "በዚህ የጉግል ኢሜይል የተመዘገበ አካውንት አልተገኘም። እባክዎ አስቀድመው ይመዝገቡ። (No account found with this Google email. Please register first.)",
-                extra_tags="not_registered"
+                extra_tags="not_registered google"
             )
             return JsonResponse({
                 "status": "not_registered",

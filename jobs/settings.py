@@ -370,6 +370,9 @@ SWAGGER_SETTINGS = {
 LOGIN_URL = reverse_lazy("accounts:login")
 LOGIN_REDIRECT_URL = reverse_lazy("accounts:post-login-redirect")
 LOGOUT_REDIRECT_URL = "/"
+LOGIN_ERROR_URL = reverse_lazy("accounts:login")
+SOCIAL_AUTH_LOGIN_ERROR_URL = reverse_lazy("accounts:login")
+SOCIAL_AUTH_RAISE_EXCEPTIONS = False
 
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",

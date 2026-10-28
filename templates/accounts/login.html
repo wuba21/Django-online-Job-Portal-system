@@ -155,6 +155,16 @@
                             </div>
                             <span class="btn-label font-weight-600">{% trans "Continue with GitHub" %}</span>
                         </a>
+
+                        <!-- Social Login Privacy & Terms Notice -->
+                        <div class="mt-2 text-center">
+                            <small class="text-muted" style="font-size: 0.76rem; line-height: 1.4; display: block;">
+                                {% trans "By continuing with Google or GitHub, you agree to our" %}
+                                <a href="{% url 'jobs:user-agreement' %}" target="_blank" class="text-primary font-weight-600" style="text-decoration: underline;">{% trans "User Agreement" %}</a>,
+                                <a href="{% url 'jobs:privacy-policy' %}" target="_blank" class="text-primary font-weight-600" style="text-decoration: underline;">{% trans "Privacy Policy" %}</a>,
+                                {% trans "and" %} <a href="{% url 'jobs:cookie-policy' %}" target="_blank" class="text-primary font-weight-600" style="text-decoration: underline;">{% trans "Cookie Policy" %}</a>.
+                            </small>
+                        </div>
                     </div>
 
                     <!-- Clean Divider -->
@@ -176,7 +186,11 @@
                                                 {% trans "አካውንት አልተገኘም (Account Not Found)" %}
                                             </div>
                                             <div class="small mt-1 mb-2" style="color: #78350f; line-height: 1.45;">
-                                                {% trans "በዚህ የጉግል ኢሜይል የተመዘገበ አካውንት የለም። እባክዎ አስቀድመው ይመዝገቡ።" %}
+                                                {% if 'github' in message.tags or 'GitHub' in message|stringformat:"s" %}
+                                                    {% trans "በዚህ የ GitHub አካውንት የተመዘገበ አካውንት የለም። እባክዎ አስቀድመው ይመዝገቡ። (No account found with this GitHub account. Please register first.)" %}
+                                                {% else %}
+                                                    {% trans "በዚህ የ Google ኢሜይል የተመዘገበ አካውንት የለም። እባክዎ አስቀድመው ይመዝገቡ። (No account found with this Google email. Please register first.)" %}
+                                                {% endif %}
                                             </div>
                                             <div class="d-flex flex-wrap gap-2 pt-1" style="gap: 8px;">
                                                 <a href="{% url 'accounts:employee-register' %}" class="btn btn-sm text-white font-weight-bold px-2 py-1 shadow-xs" style="background-color: #0a66c2; border-radius: 6px; font-size: 0.78rem;">
