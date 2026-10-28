@@ -105,8 +105,8 @@ def approve_job(request, job_id):
         if job.user.email:
             send_event_email(
                 user_email=job.user.email,
-                subject=f"✅ Job Approved: '{job.title}' is Now Live!",
-                message=f"Hello,\n\nGreat news! Your job posting for '{job.title}' at {job.company_name} has been approved by administrators and is now publicly live on the portal. Candidates can now view and submit applications.\n\nBest regards,\nEthio Job Portal Team",
+                subject=f"Job Approved: '{job.title}' is Now Live",
+                message=f"Hello,\n\nGreat news! Your job posting for '{job.title}' at {job.company_name} has been approved by administrators and is now publicly live on the portal. Candidates can now view and submit applications.\n\nBest regards,\nEthioJobs Team",
                 action_url=request.build_absolute_uri(f"/jobs/{job.id}/"),
                 action_text="View Live Job Listing"
             )
@@ -134,8 +134,8 @@ def set_job_status(request, job_id, status):
                 if job.user.email:
                     send_event_email(
                         user_email=job.user.email,
-                        subject=f"✅ Job Approved: '{job.title}' is Now Live!",
-                        message=f"Hello,\n\nYour job listing '{job.title}' for {job.company_name} has been approved by administrators and is now active on the portal.\n\nBest regards,\nEthio Job Portal Team",
+                        subject=f"Job Approved: '{job.title}' is Now Live",
+                        message=f"Hello,\n\nYour job listing '{job.title}' for {job.company_name} has been approved by administrators and is now active on the portal.\n\nBest regards,\nEthioJobs Team",
                         action_url=request.build_absolute_uri(f"/jobs/{job.id}/"),
                         action_text="View Live Job Listing"
                     )
@@ -435,20 +435,20 @@ def admin_verify_company(request, company_id):
         company.user.save(update_fields=["is_verified"])
         create_notification(
             user=company.user,
-            title="✅ Business License Verified!",
+            title="Business License Verified",
             message=f"Congratulations! The trade license and TIN for '{company.name}' have been verified by platform administrators. Your employer account now displays the official Verified badge.",
             link="/employer/dashboard/"
         )
         if company.user.email:
             send_event_email(
                 user_email=company.user.email,
-                subject=f"✅ Business License Verified: {company.name} is Verified!",
-                message=f"Hello,\n\nGreat news! Your Ethiopian Business License and TIN for '{company.name}' have been reviewed and approved by platform administrators.\n\nYour job postings will now display the verified employer badge to build high trust with candidates.\n\nBest regards,\nEthio Job Portal Team",
+                subject=f"Business License Verified: {company.name} is Verified",
+                message=f"Hello,\n\nGreat news! Your Ethiopian Business License and TIN for '{company.name}' have been reviewed and approved by platform administrators.\n\nYour job postings will now display the verified employer badge to build high trust with candidates.\n\nBest regards,\nEthioJobs Team",
                 action_url=request.build_absolute_uri("/employer/dashboard/"),
                 action_text="Go to Employer Dashboard"
             )
 
-    messages.success(request, f"Company '{company.name}' successfully verified!")
+    messages.success(request, f"Company '{company.name}' successfully verified.")
     referer = request.META.get("HTTP_REFERER")
     if referer:
         return redirect(referer)
@@ -881,7 +881,7 @@ def admin_broadcast_announcements(request):
 
         messages.success(
             request,
-            f"🎉 Broadcast successfully dispatched to {audience_name}! "
+            f"Broadcast successfully dispatched to {audience_name}. "
             f"({in_app_count} In-App Notifications delivered, {email_count} Emails sent)"
         )
         return redirect("jobs:admin-broadcast")

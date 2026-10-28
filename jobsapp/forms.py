@@ -11,6 +11,16 @@ from accounts.models import Company
 from tags.models import Tag
 
 
+def normalize_url_protocol(url_val: str) -> str:
+    """Ensures an entered website or profile URL includes a valid https/http scheme."""
+    if not url_val:
+        return ""
+    url_str = str(url_val).strip()
+    if url_str and not url_str.startswith(("http://", "https://")):
+        return f"https://{url_str}"
+    return url_str
+
+
 class CreateJobForm(forms.ModelForm):
     tags = forms.MultipleChoiceField(required=False)
 
@@ -193,22 +203,13 @@ class ApplicantProfileForm(forms.ModelForm):
         }
 
     def clean_github_link(self):
-        val = self.cleaned_data.get("github_link")
-        if val and not val.startswith(("http://", "https://")):
-            val = "https://" + val
-        return val
+        return normalize_url_protocol(self.cleaned_data.get("github_link"))
 
     def clean_linkedin_link(self):
-        val = self.cleaned_data.get("linkedin_link")
-        if val and not val.startswith(("http://", "https://")):
-            val = "https://" + val
-        return val
+        return normalize_url_protocol(self.cleaned_data.get("linkedin_link"))
 
     def clean_website(self):
-        val = self.cleaned_data.get("website")
-        if val and not val.startswith(("http://", "https://")):
-            val = "https://" + val
-        return val
+        return normalize_url_protocol(self.cleaned_data.get("website"))
 
 
 class EducationForm(forms.ModelForm):
@@ -264,7 +265,4 @@ class CompanyForm(forms.ModelForm):
         }
 
     def clean_website(self):
-        val = self.cleaned_data.get("website")
-        if val and not val.startswith(("http://", "https://")):
-            val = "https://" + val
-        return val
+        return normalize_url_protocol(self.cleaned_data.get("website"))

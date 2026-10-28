@@ -565,21 +565,21 @@ def schedule_interview(request, applicant_id):
         applicant.save()
 
         date_display = applicant.interview_date.strftime("%B %d, %Y at %I:%M %p") if applicant.interview_date else "To be announced"
-        messages.success(request, f"🎉 Interview successfully scheduled with {applicant.user.get_full_name() or applicant.user.email}!")
+        messages.success(request, f"Interview successfully scheduled with {applicant.user.get_full_name() or applicant.user.email}.")
 
         # Send Notifications safely
         try:
             create_notification(
                 user=applicant.user,
-                title=f"📅 Interview Invitation: {applicant.job.title}",
+                title=f"Interview Invitation: {applicant.job.title}",
                 message=f"You have been invited to an interview for '{applicant.job.title}' by {applicant.job.company_name}. Scheduled: {date_display}. Mode/Location: {interview_location}.",
                 link=reverse_lazy("jobs:employee-my-applications")
             )
             if applicant.user.email:
                 send_event_email(
                     user_email=applicant.user.email,
-                    subject=f"📅 Interview Scheduled - '{applicant.job.title}' at {applicant.job.company_name}",
-                    message=f"Congratulations {applicant.user.get_full_name() or 'Candidate'}!\n\nYou have been selected for an interview for the vacancy '{applicant.job.title}' at {applicant.job.company_name}.\n\n📅 Interview Schedule Details:\n• Date & Time: {date_display}\n• Venue / Meeting Link: {interview_location or 'Online / Office'}\n• Additional Notes: {interview_notes or 'Please be ready and on time.'}\n\nPlease check your candidate dashboard for further updates.",
+                    subject=f"Interview Scheduled: '{applicant.job.title}' at {applicant.job.company_name}",
+                    message=f"Congratulations {applicant.user.get_full_name() or 'Candidate'},\n\nYou have been selected for an interview for the vacancy '{applicant.job.title}' at {applicant.job.company_name}.\n\nInterview Schedule Details:\n• Date & Time: {date_display}\n• Venue / Meeting Link: {interview_location or 'Online / Office'}\n• Additional Notes: {interview_notes or 'Please be prepared and on time.'}\n\nPlease check your candidate dashboard for further updates.",
                     action_url=request.build_absolute_uri(reverse_lazy("jobs:employee-my-applications")),
                     action_text="View Interview Details"
                 )

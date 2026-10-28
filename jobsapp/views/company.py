@@ -167,6 +167,6 @@ def add_company_review(request, company_id):
             )
 
         action_msg = "submitted" if created else "updated"
-        messages.success(request, f"🎉 Thank you! Your review has been {action_msg} successfully.")
+        messages.success(request, f"Thank you! Your review has been {action_msg} successfully.")
 
     return redirect("jobs:company-detail", id=company.id)

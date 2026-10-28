@@ -272,13 +272,13 @@ def analyze_resume_authenticity(text, filename=""):
     if not is_valid:
         status = "invalid"
         message = (
-            f"❌ AI Resume Inspection Failed (Score: {score}%): The document lacks essential resume sections "
-            f"(such as Work Experience, Education, or Skills). Please attach a genuine, complete CV."
+            f"Resume inspection notice (Score: {score}%): The document lacks essential resume sections "
+            f"(such as Work Experience, Education, or Skills). Please attach a complete, authentic CV."
         )
     else:
         status = "verified"
         message = (
-            f"✅ AI Verified Resume (Authenticity Score: {score}%): Detected {len(detected_sections)} sections "
+            f"Verified resume (Authenticity Score: {score}%): Detected {len(detected_sections)} sections "
             f"({', '.join(detected_sections[:3])}) and {len(extracted_skills)} professional skills."
         )
 

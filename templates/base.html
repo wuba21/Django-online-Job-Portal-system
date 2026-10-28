@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="robots" content="all,follow">
     <meta name="theme-color" content="#111827">
-    <title>{% block title %} {% endblock %} - {% trans "Online Sra" %}</title>
+    <title>{% block title %}{% trans "EthioJobs" %}{% endblock %} | EthioJobs - {% trans "Career Portal" %}</title>
     <meta name="description" content="{% block meta_description %}Ethiopia's premier job portal — find NGO, Banking, Fresh Graduate and other jobs.{% endblock %}">
 
     <!-- DNS Prefetch for speed -->
@@ -603,11 +603,11 @@
                                 <div aria-labelledby="pages" class="dropdown-menu">
                                     <a href="{% url 'accounts:employee-register' %}"
                                        class="dropdown-item {% if url_name == 'employee-register' %}active{% endif %}">
-                                        <i class="fa fa-user mr-2 text-primary"></i>{% trans "Employee" %}
+                                        <i class="fa fa-user mr-2 text-primary"></i>{% trans "Job Seeker" %}
                                     </a>
                                     <a href="{% url 'accounts:employer-register' %}"
                                        class="dropdown-item {% if url_name == 'employer-register' %}active{% endif %}">
-                                        <i class="fa fa-building-o mr-2 text-success"></i>{% trans "Employers" %}
+                                        <i class="fa fa-building-o mr-2 text-success"></i>{% trans "Employer" %}
                                     </a>
                                 </div>
                             </li>
@@ -654,7 +654,7 @@
             <!-- About Section -->
             <div class="col-lg-3 col-md-6 mb-4">
                 <h4 style="font-size: 1.1rem !important; font-weight: 600 !important; margin-bottom: 20px !important; color: #ffffff !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; position: relative !important; padding-bottom: 10px !important;">
-                    {% trans "About Django-Jobs" %}
+                    {% trans "About EthioJobs" %}
                     <span style="position: absolute !important; left: 0 !important; bottom: 0 !important; width: 40px !important; height: 3px !important; background: #ffffff !important; border-radius: 2px !important;"></span>
                 </h4>
                 <p style="color: rgba(255,255,255,0.85) !important; line-height: 1.6 !important; font-size: 0.9rem !important;">
@@ -669,8 +669,8 @@
                     <span style="position: absolute !important; left: 0 !important; bottom: 0 !important; width: 40px !important; height: 3px !important; background: #ffffff !important; border-radius: 2px !important;"></span>
                 </h4>
                 <p style="color: rgba(255,255,255,0.85) !important; line-height: 1.6 !important; font-size: 0.9rem !important;"><i class="fa fa-envelope" style="margin-right: 8px;"></i> {% trans "Email" %}: info@jobportal.com</p>
-                <p style="color: rgba(255,255,255,0.85) !important; line-height: 1.6 !important; font-size: 0.9rem !important;"><i class="fa fa-phone" style="margin-right: 8px;"></i> {% trans "Phone" %}: +251939304457</p>
-                <p style="color: rgba(255,255,255,0.85) !important; line-height: 1.6 !important; font-size: 0.9rem !important;"><i class="fa fa-map-marker" style="margin-right: 8px;"></i> {% trans "Location" %}: Debre Markos , Ethiopia</p>
+                <p style="color: rgba(255,255,255,0.85) !important; line-height: 1.6 !important; font-size: 0.9rem !important;"><i class="fa fa-phone" style="margin-right: 8px;"></i> {% trans "Phone" %}: +251 939 304 457</p>
+                <p style="color: rgba(255,255,255,0.85) !important; line-height: 1.6 !important; font-size: 0.9rem !important;"><i class="fa fa-map-marker" style="margin-right: 8px;"></i> {% trans "Location" %}: Debre Markos, Ethiopia</p>
             </div>
             
             <!-- Quick Links Section -->
@@ -739,7 +739,7 @@
             <div class="row align-items-center">
                 <div class="col-md-5 text-center text-md-left mb-2 mb-md-0">
                     <p style="margin-bottom: 0 !important; font-size: 0.85rem !important; color: rgba(255,255,255,0.7) !important;">
-                        &copy;{% now "Y" %} {% trans "Django-Jobs. All rights reserved." %}
+                        &copy;{% now "Y" %} {% trans "EthioJobs. All rights reserved." %}
                     </p>
                 </div>
                 <div class="col-md-7 text-center text-md-right">

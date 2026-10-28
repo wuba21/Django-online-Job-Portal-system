@@ -410,8 +410,8 @@ class ApplyJobView(CreateView):
                     if not cv_analysis["is_valid"] and cv_analysis["score"] < 30:
                         messages.error(
                             request,
-                            f"❌ AI Resume Verification Failed: {cv_analysis['message']} "
-                            f"Please upload a genuine, complete Resume/CV document."
+                            f"Resume verification notice: {cv_analysis['message']} "
+                            f"Please upload a complete, authentic Resume or CV document."
                         )
                         return HttpResponseRedirect(reverse_lazy("jobs:jobs-detail", kwargs={"id": job.id}))
                 except Exception:
@@ -529,7 +529,7 @@ class ApplyJobView(CreateView):
 
             invalidate_recommendation_cache(user.id)
 
-            messages.success(request, f"🎉 Successfully applied for '{job.title}'!")
+            messages.success(request, f"Successfully applied for '{job.title}'.")
 
             # Trigger Candidate Notification safely
             try:
@@ -554,7 +554,7 @@ class ApplyJobView(CreateView):
                     if job.user.email:
                         send_event_email(
                             user_email=job.user.email,
-                            subject=f"📩 New Applicant for '{job.title}' - {request.user.get_full_name() or request.user.email}",
+                            subject=f"New Applicant for '{job.title}' - {request.user.get_full_name() or request.user.email}",
                             message=f"Hello,\n\nA new candidate, {request.user.get_full_name() or request.user.email}, has just applied for your vacancy '{job.title}'.\n\nYou can review their CV, experience, qualifications, and respond directly through your employer dashboard.",
                             action_url=request.build_absolute_uri(reverse_lazy("jobs:employer-dashboard-applicants", kwargs={"job_id": job.id})),
                             action_text="View Applicant & Resume"
@@ -567,7 +567,7 @@ class ApplyJobView(CreateView):
                 if request.user.email:
                     send_event_email(
                         user_email=request.user.email,
-                        subject=f"🎉 Application Received - {job.title}",
+                        subject=f"Application Received: {job.title}",
                         message=f"Hello {request.user.get_full_name() or 'Candidate'},\n\nYour application for '{job.title}' at {job.company_name} has been received successfully.\n\nThe employer has been notified and will review your qualifications. You can track your progress and interview updates from your candidate dashboard.",
                         action_url=request.build_absolute_uri(reverse_lazy("jobs:employee-my-applications")),
                         action_text="Track My Applications"
@@ -624,13 +624,13 @@ def create_job_alert(request):
             defaults={"user": user, "keywords": keywords, "is_active": True}
         )
 
-        messages.success(request, f"🎉 Job alert activated for {email}! You will receive notifications when matching vacancies are published.")
+        messages.success(request, f"Job alert activated for {email}. You will receive notifications when matching vacancies are published.")
 
         try:
             send_event_email(
                 user_email=email,
-                subject="🔔 Job Alert Activated - Ethiopian Job Portal",
-                message=f"Hello!\n\nYou have successfully subscribed to job alerts for:\n• Category: {category or 'All Categories'}\n• Location: {location or 'All Locations'}\n\nWe will notify you as soon as new matching vacancies are published by verified employers.",
+                subject="Job Alert Activated - EthioJobs",
+                message=f"Hello,\n\nYou have successfully subscribed to job alerts for:\n• Category: {category or 'All Categories'}\n• Location: {location or 'All Locations'}\n\nWe will notify you as soon as new matching vacancies are published by verified employers.",
                 action_url=request.build_absolute_uri("/"),
                 action_text="Explore Latest Vacancies"
             )

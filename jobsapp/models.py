@@ -345,17 +345,9 @@ class Notification(models.Model):
 
 
 def create_notification(user, title, message, link=None):
-    if user:
-        try:
-            return Notification.objects.create(
-                user=user,
-                title=title,
-                message=message,
-                link=link
-            )
-        except Exception:
-            pass
-    return None
+    """Delegates to authoritative notification generator in jobsapp.utils.notifications."""
+    from jobsapp.utils.notifications import create_notification as _create
+    return _create(user, title, message, link)
 
 
 

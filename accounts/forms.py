@@ -13,14 +13,56 @@ from accounts.validators import (
 GENDER_CHOICES = (("male", "Male"), ("female", "Female"))
 
 
-class EmployeeRegistrationForm(UserCreationForm):
+class BaseRegistrationForm(UserCreationForm):
+    """
+    Base registration form encapsulating common authentication, password complexity,
+    and profile validation across Job Seeker and Employer accounts.
+    """
+    def clean_password1(self):
+        password = self.cleaned_data.get("password1")
+        validate_secure_password(password)
+        return password
+
+    def clean(self):
+        cleaned_data = super().clean()
+        p1 = cleaned_data.get("password1")
+        p2 = cleaned_data.get("password2")
+        if p1 and p2 and p1 != p2:
+            self.add_error("password2", "Passwords do not match.")
+        return cleaned_data
+
+    def clean_gender(self):
+        gender = self.cleaned_data.get("gender")
+        if self.fields.get("gender") and self.fields["gender"].required and not gender:
+            raise forms.ValidationError("Gender is required")
+        return gender
+
+    def clean_phone_number(self):
+        phone = self.cleaned_data.get("phone_number", "").strip()
+        if phone:
+            validate_phone_number(phone)
+        return phone
+
+    def _validate_unique_google_email(self, role_error_msg):
+        email = self.cleaned_data.get("email", "").strip().lower()
+        validate_google_email(email)
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError(role_error_msg)
+        return email
+
+
+class EmployeeRegistrationForm(BaseRegistrationForm):
     first_name = forms.CharField(required=True, label="First Name")
     last_name = forms.CharField(required=True, label="Last Name")
-    gender = forms.ChoiceField(choices=GENDER_CHOICES, required=True, label="Gender")
-    phone_number = forms.CharField(
+    gender = forms.ChoiceField(
+        choices=GENDER_CHOICES,
         required=True,
+        label="Gender",
+        error_messages={"required": "Gender is required"}
+    )
+    phone_number = forms.CharField(
+        required=False,
         label="Phone Number",
-        validators=[validate_phone_number],
         widget=forms.TextInput(attrs={"placeholder": "+251 9XX XXX XXX or 09XXXXXXXX"}),
     )
     email = forms.EmailField(required=True, label="Google Email Address")
@@ -42,35 +84,11 @@ class EmployeeRegistrationForm(UserCreationForm):
             "first_name": {"required": "First name is required", "max_length": "Name is too long"},
             "last_name": {"required": "Last name is required", "max_length": "Last Name is too long"},
             "gender": {"required": "Gender is required"},
-            "phone_number": {"required": "Phone number is required"},
             "email": {"required": "Email is required", "invalid": "Enter a valid email address"},
         }
 
     def clean_email(self):
-        email = self.cleaned_data.get("email", "").strip().lower()
-        validate_google_email(email)
-        if User.objects.filter(email=email).exists():
-            raise forms.ValidationError("An account with this Google email already exists. Please log in.")
-        return email
-
-    def clean_password1(self):
-        password = self.cleaned_data.get("password1")
-        validate_secure_password(password)
-        return password
-
-    def clean(self):
-        cleaned_data = super().clean()
-        p1 = cleaned_data.get("password1")
-        p2 = cleaned_data.get("password2")
-        if p1 and p2 and p1 != p2:
-            self.add_error("password2", "Passwords do not match.")
-        return cleaned_data
-
-    def clean_gender(self):
-        gender = self.cleaned_data.get("gender")
-        if not gender:
-            raise forms.ValidationError("Gender is required")
-        return gender
+        return self._validate_unique_google_email("An account with this Google email already exists. Please log in.")
 
     def save(self, commit=True):
         user = super(UserCreationForm, self).save(commit=False)
@@ -86,15 +104,14 @@ class EmployeeRegistrationForm(UserCreationForm):
         return user
 
 
-class EmployerRegistrationForm(UserCreationForm):
+class EmployerRegistrationForm(BaseRegistrationForm):
     first_name = forms.CharField(required=True, label="Contact Person First Name")
     last_name = forms.CharField(required=True, label="Contact Person Last Name")
-    company_name = forms.CharField(required=True, label="Company / Organization Name")
-    gender = forms.ChoiceField(choices=GENDER_CHOICES, required=True, label="Gender")
+    company_name = forms.CharField(required=False, label="Company / Organization Name")
+    gender = forms.ChoiceField(choices=GENDER_CHOICES, required=False, label="Gender")
     phone_number = forms.CharField(
-        required=True,
+        required=False,
         label="Phone Number",
-        validators=[validate_phone_number],
         widget=forms.TextInput(attrs={"placeholder": "+251 9XX XXX XXX or 09XXXXXXXX"}),
     )
     email = forms.EmailField(required=True, label="Company Google Email")
@@ -116,37 +133,11 @@ class EmployerRegistrationForm(UserCreationForm):
         error_messages = {
             "first_name": {"required": "Contact person first name is required", "max_length": "First name is too long"},
             "last_name": {"required": "Contact person last name is required", "max_length": "Last name is too long"},
-            "company_name": {"required": "Company name is required", "max_length": "Company name is too long"},
-            "gender": {"required": "Gender is required"},
-            "phone_number": {"required": "Phone number is required"},
             "email": {"required": "Email is required", "invalid": "Enter a valid email address"},
         }
 
     def clean_email(self):
-        email = self.cleaned_data.get("email", "").strip().lower()
-        validate_google_email(email)
-        if User.objects.filter(email=email).exists():
-            raise forms.ValidationError("An employer account with this Google email already exists. Please log in.")
-        return email
-
-    def clean_password1(self):
-        password = self.cleaned_data.get("password1")
-        validate_secure_password(password)
-        return password
-
-    def clean(self):
-        cleaned_data = super().clean()
-        p1 = cleaned_data.get("password1")
-        p2 = cleaned_data.get("password2")
-        if p1 and p2 and p1 != p2:
-            self.add_error("password2", "Passwords do not match.")
-        return cleaned_data
-
-    def clean_gender(self):
-        gender = self.cleaned_data.get("gender")
-        if not gender:
-            raise forms.ValidationError("Gender is required")
-        return gender
+        return self._validate_unique_google_email("An employer account with this Google email already exists. Please log in.")
 
     def save(self, commit=True):
         user = super(UserCreationForm, self).save(commit=False)

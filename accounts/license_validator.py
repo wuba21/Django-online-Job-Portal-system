@@ -225,24 +225,24 @@ def validate_tin_structure(tin: str) -> tuple[bool, str]:
     3. Validates prefix codes (Ethiopian tax branches)
     """
     if not tin:
-        return False, "የግብር ከፋይ መለያ ቁጥር (TIN) አልገባም። እባክዎ ባለ 10 አሃዝ TIN ያስገቡ።"
+        return False, "Taxpayer Identification Number (TIN) is required. Please provide a valid 10-digit TIN."
 
     clean_tin = re.sub(r'[^0-9]', '', str(tin).strip())
 
     if len(clean_tin) != 10:
-        return False, f"የግብር ከፋይ መለያ ቁጥር (TIN) ልክ 10 አሃዝ መሆን አለበት (የገባው፦ {len(clean_tin)} አሃዝ)።"
+        return False, f"Taxpayer Identification Number (TIN) must be exactly 10 digits (provided: {len(clean_tin)} digits)."
 
     if clean_tin in DISALLOWED_TIN_SEQUENCES:
-        return False, f"የገባው TIN ቁጥር ({clean_tin}) የውሸት/የሙከራ ቅደም ተከተል ስለሆነ ተቀባይነት የለውም።"
+        return False, f"The provided TIN ({clean_tin}) is an invalid or placeholder sequence."
 
     # Reject repetitive single digits (e.g. 0000000000)
     if len(set(clean_tin)) <= 2:
-        return False, f"የገባው TIN ቁጥር ({clean_tin}) ተቀባይነት የሌለው ተደጋጋሚ አሃዝ ነው።"
+        return False, f"The provided TIN ({clean_tin}) contains invalid repetitive numbers."
 
     # In Ethiopia, valid TIN numbers start with regional tax office identifiers (00 to 09)
     prefix = clean_tin[:2]
     if prefix not in [f"{i:02d}" for i in range(10)]:
-        return False, f"የገባው TIN ቅድመ-ቁጥር ({prefix}) ከኢትዮጵያ ገቢዎች ሚኒስቴር የታክስ ማዕከላት ኮድ ጋር አይዛመድም።"
+        return False, f"The provided TIN prefix ({prefix}) does not match valid Ethiopian Ministry of Revenues branch tax center codes."
 
     return True, clean_tin
 
@@ -674,7 +674,7 @@ def verify_ethiopian_business_license(uploaded_file, tin_input="", company_name=
             "taxpayer_profile": None,
             "stamp_detected": False,
             "reasons": [],
-            "error_message": "የተሰቀለው ሰነድ ባዶ ወይም የተበላሸ ነው። እባክዎ ትክክለኛ የንግድ ፈቃድዎን ይስቀሉ።",
+            "error_message": "The uploaded file is empty or corrupted. Please upload a clear, valid business license document.",
             "source": "Forensic Pre-check"
         }
 
@@ -717,7 +717,7 @@ def verify_ethiopian_business_license(uploaded_file, tin_input="", company_name=
             is_valid = bool(data.get("is_valid", False))
             confidence = int(data.get("confidence", 95 if is_valid else 20))
             stamp_detected = bool(data.get("stamp_detected", False))
-            reasons = data.get("verification_points_am", [])
+            reasons = data.get("verification_points", []) or data.get("verification_points_am", [])
             detected_tin = data.get("detected_tin") or clean_tin
             detected_company = data.get("detected_company_name") or company_name
 
@@ -730,12 +730,12 @@ def verify_ethiopian_business_license(uploaded_file, tin_input="", company_name=
                     "status": "ACTIVE",
                     "tax_centre": "Ministry of Trade & Regional Integration",
                     "region": "Federal / Regional Administration",
-                    "source": "Google Gemini 1.5 Flash Vision AI Verified"
+                    "source": "Google Gemini Multimodal Vision AI Verified"
                 }
                 final_reasons = reasons if reasons else [
-                    "በ Google Gemini 1.5 Flash Vision AI የተረጋገጠ ይፋዊ የንግድ ፈቃድ",
-                    f"በሰነዱ ላይ የተገኘው የTIN ቁጥር ({detected_tin}) ተረጋግጧል",
-                    "ይፋዊ ክብ ማህተም እና የመንግስት የክብር ምልክት በሰነዱ ላይ ተገኝቷል"
+                    "Official business trade license verified via Multimodal Vision AI",
+                    f"TIN number detected on document ({detected_tin}) matches records",
+                    "Official circular seal and national emblem identified on document"
                 ]
                 return {
                     "is_valid": True,
@@ -745,10 +745,10 @@ def verify_ethiopian_business_license(uploaded_file, tin_input="", company_name=
                     "stamp_detected": stamp_detected,
                     "reasons": final_reasons,
                     "error_message": None,
-                    "source": "Google Gemini 1.5 Flash Multimodal Vision AI"
+                    "source": "Google Gemini Multimodal Vision AI"
                 }
             else:
-                rejection_msg = data.get("rejection_reason_am") or "በ Google Gemini 1.5 Flash Vision AI ምርመራ ሰነዱ ትክክለኛ የኢትዮጵያ ንግድ ፈቃድ ሆኖ አልተገኘም። እባክዎ ኦርጅናል የንግድ ፈቃድዎን ይስቀሉ።"
+                rejection_msg = data.get("rejection_reason") or data.get("rejection_reason_am") or "The uploaded document could not be verified as a valid Ethiopian business trade license. Please upload your original trade license."
                 return {
                     "is_valid": False,
                     "confidence": confidence,
@@ -756,8 +756,8 @@ def verify_ethiopian_business_license(uploaded_file, tin_input="", company_name=
                     "taxpayer_profile": None,
                     "stamp_detected": stamp_detected,
                     "reasons": [],
-                    "error_message": f"❌ ማረጋገጫው አልተሳካም፦ {rejection_msg}",
-                    "source": "Google Gemini 1.5 Flash Multimodal Vision AI"
+                    "error_message": f"Verification unsuccessful: {rejection_msg}",
+                    "source": "Google Gemini Multimodal Vision AI"
                 }
 
     # Step 4: Tier 2 Fallback - Forensic Computer Vision & Government Registry Engine
@@ -784,7 +784,7 @@ def verify_ethiopian_business_license(uploaded_file, tin_input="", company_name=
 
     # Reject non-document photos (selfies, dark photos, random wallpapers)
     if not filename.endswith(".pdf") and seal_info.get("seal_confidence", 0) <= 10 and not seal_info.get("has_seal"):
-        reason_msg = seal_info.get("reason") or "የተሰቀለው ፎቶ የንግድ ፈቃድ ሰነድ ባህሪ የለውም።"
+        reason_msg = seal_info.get("reason") or "The uploaded image does not appear to be an official business document."
         return {
             "is_valid": False,
             "confidence": 15,
@@ -792,7 +792,7 @@ def verify_ethiopian_business_license(uploaded_file, tin_input="", company_name=
             "taxpayer_profile": None,
             "stamp_detected": False,
             "reasons": [],
-            "error_message": f"❌ ማረጋገጫው አልተሳካም፦ {reason_msg} እባክዎ ትክክለኛ የንግድ ፈቃድ ሰነድ ይስቀሉ።",
+            "error_message": f"Verification unsuccessful: {reason_msg} Please upload a clear photo or PDF of your official trade license.",
             "source": "Computer Vision Document Forensics"
         }
 
@@ -805,7 +805,7 @@ def verify_ethiopian_business_license(uploaded_file, tin_input="", company_name=
             "taxpayer_profile": None,
             "stamp_detected": seal_info.get("has_seal", False),
             "reasons": [],
-            "error_message": "❌ ማረጋገጫው አልተሳካም፦ የቀረበው ሰነድ 'የግብር ከፋይ ምዝገባ ሰርተፊኬት (TIN Certificate)' እንጂ ህጋዊ 'የንግድ ሥራ ፈቃድ (Trade License)' አይደለም። ክፍት የሥራ ቦታዎችን ለመለጠፍ በንግድና ቀጠናዊ ትስስር ሚኒስቴር ወይም በንግድ ቢሮ የተሰጠውን ህጋዊ የንግድ ሥራ ፈቃድ ይስቀሉ።",
+            "error_message": "Verification notice: The submitted document is a Taxpayer Identification Number (TIN) Registration Certificate, not an official Business Trade License. To post vacancies, please upload the Trade License issued by the Ministry of Trade and Regional Integration or Regional Trade Bureau.",
             "source": "Document Regulatory Classifier"
         }
 
@@ -814,10 +814,10 @@ def verify_ethiopian_business_license(uploaded_file, tin_input="", company_name=
     has_keywords = doc_info["keyword_count"] >= 1
 
     if doc_info["keyword_count"] >= 2:
-        reasons.append(f"የመንግስት ህጋዊ የንግድ ፈቃድ ጽሑፍ ተለይቷል ({', '.join(doc_info['found_keywords'][:2])})")
+        reasons.append(f"Official government trade license headers identified ({', '.join(doc_info['found_keywords'][:2])})")
 
     if has_seal:
-        reasons.append("ይፋዊ ክብ የመንግስት ማህተም እና ማረጋገጫ በሰነዱ ላይ ተገኝቷል")
+        reasons.append("Official circular government seal detected on document")
 
     # If neither seal nor government keywords found -> Reject random file
     if not has_seal and not has_keywords:
@@ -828,30 +828,30 @@ def verify_ethiopian_business_license(uploaded_file, tin_input="", company_name=
             "taxpayer_profile": None,
             "stamp_detected": False,
             "reasons": [],
-            "error_message": "❌ የተሰቀለው ሰነድ ይፋዊ የኢትዮጵያ ንግድ ፈቃድ ምልክት ወይም ክብ ማህተም የለበትም። እባክዎ ግልጽ የሆነ ኦርጅናል የንግድ ፈቃድ ፎቶ ወይም PDF ይስቀሉ።",
+            "error_message": "Verification unsuccessful: The uploaded document does not show an official Ethiopian trade license heading or circular authority seal. Please upload a clear original document.",
             "source": "Computer Vision Document Forensics"
         }
 
     # 4c. Government Registry lookup & Jurisdiction verification
     gov_lookup = query_ministry_of_revenues(clean_tin)
     if gov_lookup.get("found"):
-        reasons.append(f"በገቢዎች ሚኒስቴር የግብር ከፋይ መረጃ ቋት ተረጋግጧል ({gov_lookup['taxpayer_name']} - {gov_lookup['tax_centre']})")
+        reasons.append(f"Verified against Ministry of Revenues registry ({gov_lookup['taxpayer_name']} - {gov_lookup['tax_centre']})")
         taxpayer_profile = gov_lookup
     else:
         tax_centre_names = {
-            "00": "Large Taxpayers Office (ከፍተኛ ግብር ከፋዮች)",
-            "01": "Addis Ababa Revenues Bureau (አዲስ አበባ ገቢዎች ቢሮ)",
-            "02": "Oromia Revenues Bureau (ኦሮሚያ ገቢዎች ቢሮ)",
-            "03": "Amhara Revenues Bureau (አማራ ገቢዎች ቢሮ)",
-            "04": "Dire Dawa Revenues Bureau (ድሬዳዋ ገቢዎች ቢሮ)",
-            "05": "Sidama Revenues Bureau (ሲዳማ ገቢዎች ቢሮ)",
-            "06": "Central Ethiopia Revenues Bureau (ማዕከላዊ ኢትዮጵያ)",
-            "07": "South Ethiopia Revenues Bureau (ደቡብ ኢትዮጵያ)",
-            "08": "Tigray Revenues Bureau (ትግራይ ገቢዎች ቢሮ)",
-            "09": "Afar / Somali Revenues Bureau (አፋር/ሶማሌ ገቢዎች ቢሮ)",
+            "00": "Large Taxpayers Office (LTO)",
+            "01": "Addis Ababa Revenues Bureau",
+            "02": "Oromia Revenues Bureau",
+            "03": "Amhara Revenues Bureau",
+            "04": "Dire Dawa Revenues Bureau",
+            "05": "Sidama Revenues Bureau",
+            "06": "Central Ethiopia Revenues Bureau",
+            "07": "South Ethiopia Revenues Bureau",
+            "08": "Tigray Revenues Bureau",
+            "09": "Afar / Somali Revenues Bureau",
         }
         prefix = clean_tin[:2]
-        tax_centre = tax_centre_names.get(prefix, "Regional Tax Center (የክልል ግብር ቅርንጫፍ)")
+        tax_centre = tax_centre_names.get(prefix, "Regional Tax Center")
         taxpayer_profile = {
             "taxpayer_name": company_name or "Registered Taxpayer Entity",
             "trade_name": company_name,
@@ -861,7 +861,7 @@ def verify_ethiopian_business_license(uploaded_file, tin_input="", company_name=
             "region": "Federal / Regional Administration",
             "source": "Ethiopian Tax Jurisdiction & Document Stamp Match"
         }
-        reasons.append(f"የግብር ከፋይ መለያ ቁጥር (TIN) እና የታክስ ማዕከል ኮድ ተረጋግጧል ({tax_centre})")
+        reasons.append(f"Taxpayer Identification Number (TIN) and tax jurisdiction verified ({tax_centre})")
 
     # 4d. Entity name matching
     if company_name:
@@ -876,7 +876,7 @@ def verify_ethiopian_business_license(uploaded_file, tin_input="", company_name=
         reg_tokens = reg_tokens - stopwords
 
         if comp_tokens and reg_tokens and (comp_tokens & reg_tokens):
-            reasons.append(f"የተመዘገበው ድርጅት ስም ከፈቃዱ ጋር ይዛመዳል ({taxpayer_profile['taxpayer_name']})")
+            reasons.append(f"Registered business name matches license document ({taxpayer_profile['taxpayer_name']})")
 
     confidence = 95 if (has_seal and (has_keywords or gov_lookup.get("found"))) else 85
 

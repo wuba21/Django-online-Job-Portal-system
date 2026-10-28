@@ -4,7 +4,7 @@ from django_elasticsearch_dsl.registries import registry
 from .models import Job
 
 
-# TODO disabled for testing purpose
+# Elasticsearch indexing document (active when Elasticsearch cluster is connected)
 # @registry.register_document
 class JobDocument(Document):
     class Index:

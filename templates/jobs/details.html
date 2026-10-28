@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static i18n %}
 {% load humanize %}
-{% block title %}{{ job.title }} - Details{% endblock %}
+{% block title %}{{ job.title }} | {{ job.company_name }}{% endblock %}
 
 {% block content %}
 <section class="bg-light-gray py-4">
