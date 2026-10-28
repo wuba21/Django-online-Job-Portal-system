@@ -40,7 +40,7 @@ def check_user_exists_for_login(backend, details, user=None, *args, **kwargs):
     if request:
         messages.error(
             request,
-            f"በዚህ የ{provider_name} ኢሜይል/አካውንት የተመዘገበ አልተገኘም። እባክዎ አስቀድመው ይመዝገቡ። (No account found with this {provider_name} account. Please register first.)",
+            f"No account found associated with this {provider_name} account. Please register before logging in.",
             extra_tags=f"not_registered {backend.name}"
         )
     return redirect("accounts:login")

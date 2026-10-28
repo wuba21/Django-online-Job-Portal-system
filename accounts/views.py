@@ -246,7 +246,7 @@ class EmployerLicenseVerifyView(View):
             company.name = company_name
 
         if not uploaded_file:
-            messages.error(request, "እባክዎ ህጋዊ የንግድ ፈቃድዎን (PDF ወይም ፎቶ) ይስቀሉ።")
+            messages.error(request, "Please upload a valid business license document (PDF or image).")
             return render(request, self.template_name, {"company": company})
 
         # Save the uploaded license document
@@ -270,20 +270,20 @@ class EmployerLicenseVerifyView(View):
             company.license_rejection_reason = ""
             company.save()
 
-            reasons_summary = "፣ ".join(result["reasons"])
+            reasons_summary = ", ".join(result.get("reasons", []))
             messages.success(
                 request,
-                f"🎉 የንግድ ፈቃድዎ በ AI በስኬት ተረጋግጧል! (Confidence: {result['confidence']}%) — {reasons_summary}። አሁን ወደ አሰሪ ዳሽቦርድ ገብተው ስራ መለጠፍ ይችላሉ!"
+                f"Business license verified successfully (Confidence: {result['confidence']}%). You can now access your employer dashboard and post jobs."
             )
             return redirect("jobs:employer-dashboard")
         else:
             company.license_status = "rejected"
-            company.license_rejection_reason = result["error_message"] or "የንግድ ፈቃድ ማህተም ወይም TIN አልተገኘም።"
+            company.license_rejection_reason = result["error_message"] or "Official seal or valid TIN number could not be detected."
             company.save()
 
             messages.error(
                 request,
-                f"❌ ማረጋገጫው አልተሳካም (Confidence: {result['confidence']}%)፦ {company.license_rejection_reason}። እባክዎ ኦርጅናል ማህተም እና TIN ቁጥር በግልጽ የሚታይበትን ፈቃድ እንደገና ይስቀሉ።"
+                f"License verification failed (Confidence: {result['confidence']}%): {company.license_rejection_reason}. Please re-upload a clear copy showing the official seal and TIN number."
             )
             return render(request, self.template_name, {"company": company, "result": result})
 
@@ -349,12 +349,12 @@ class GoogleOneTapLoginView(View):
             from django.urls import reverse
             messages.error(
                 request,
-                "በዚህ የጉግል ኢሜይል የተመዘገበ አካውንት አልተገኘም። እባክዎ አስቀድመው ይመዝገቡ። (No account found with this Google email. Please register first.)",
+                "No account found associated with this Google account. Please register before logging in.",
                 extra_tags="not_registered google"
             )
             return JsonResponse({
                 "status": "not_registered",
-                "message": "በዚህ የጉግል ኢሜይል የተመዘገበ አካውንት አልተገኘም። እባክዎ አስቀድመው ይመዝገቡ።",
+                "message": "No account found associated with this Google account. Please register before logging in.",
                 "redirect_url": reverse("accounts:employee-register")
             }, status=403)
         else:

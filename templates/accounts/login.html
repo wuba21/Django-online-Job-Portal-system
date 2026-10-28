@@ -162,55 +162,42 @@
                         <span class="divider-text">{% trans "or" %}</span>
                     </div>
 
-                    <!-- Messages / Alerts (e.g. from Social Auth when account is not registered) -->
+                    <!-- System / Auth Messages -->
                     {% if messages %}
                         {% for message in messages %}
-                            {% if 'not_registered' in message.tags or 'አልተገኘም' in message|stringformat:"s" or 'No account found' in message|stringformat:"s" %}
-                                <div class="alert border-0 rounded-xl p-3 mb-3 shadow-sm" style="background-color: #fffbeb; border: 1px solid #fde68a !important; color: #78350f;">
-                                    <div class="d-flex align-items-start">
-                                        <div class="mr-2 mt-1" style="color: #d97706; font-size: 1.15rem;">
-                                            <i class="fa fa-exclamation-circle"></i>
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <div class="font-weight-bold" style="color: #92400e; font-size: 0.92rem;">
-                                                {% trans "አካውንት አልተገኘም (Account Not Found)" %}
-                                            </div>
-                                            <div class="small mt-1 mb-2" style="color: #78350f; line-height: 1.45;">
-                                                {% if 'github' in message.tags or 'GitHub' in message|stringformat:"s" %}
-                                                    {% trans "በዚህ የ GitHub አካውንት የተመዘገበ አካውንት የለም። እባክዎ አስቀድመው ይመዝገቡ። (No account found with this GitHub account. Please register first.)" %}
-                                                {% else %}
-                                                    {% trans "በዚህ የ Google ኢሜይል የተመዘገበ አካውንት የለም። እባክዎ አስቀድመው ይመዝገቡ። (No account found with this Google email. Please register first.)" %}
-                                                {% endif %}
-                                            </div>
-                                            <div class="d-flex flex-wrap gap-2 pt-1" style="gap: 8px;">
-                                                <a href="{% url 'accounts:employee-register' %}" class="btn btn-sm text-white font-weight-bold px-2 py-1 shadow-xs" style="background-color: #0a66c2; border-radius: 6px; font-size: 0.78rem;">
-                                                    <i class="fa fa-user-plus mr-1"></i> {% trans "እንደ ስራ ፈላጊ ይመዝገቡ" %}
-                                                </a>
-                                                <a href="{% url 'accounts:employer-register' %}" class="btn btn-sm btn-outline-secondary font-weight-bold ml-1 bg-white px-2 py-1" style="border-radius: 6px; font-size: 0.78rem; color: #374151;">
-                                                    <i class="fa fa-building mr-1"></i> {% trans "እንደ አሰሪ ድርጅት" %}
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <button type="button" class="close ml-2" data-dismiss="alert" aria-label="Close" style="color: #92400e; opacity: 0.75;">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
+                            <div class="alert alert-{% if 'error' in message.tags or 'danger' in message.tags or 'not_registered' in message.tags %}danger{% elif 'success' in message.tags %}success{% elif 'warning' in message.tags %}warning{% else %}info{% endif %} alert-dismissible fade show mb-3" role="alert" style="border-radius: 8px; font-size: 0.86rem; padding: 11px 14px; {% if 'error' in message.tags or 'danger' in message.tags or 'not_registered' in message.tags %}background-color: #fef2f2; border: 1px solid #fecaca; color: #991b1b;{% endif %}">
+                                <div class="d-flex align-items-center w-100">
+                                    <i class="fa {% if 'error' in message.tags or 'danger' in message.tags or 'not_registered' in message.tags %}fa-exclamation-circle text-danger{% elif 'success' in message.tags %}fa-check-circle text-success{% else %}fa-info-circle text-info{% endif %} mr-2" style="font-size: 1rem; flex-shrink: 0;"></i>
+                                    <div class="flex-grow-1" style="line-height: 1.45;">
+                                        <span>{{ message }}</span>
+                                        {% if 'not_registered' in message.tags or 'No account found' in message|stringformat:"s" or 'not registered' in message|stringformat:"s" %}
+                                            <a href="{% url 'accounts:employee-register' %}" class="font-weight-bold ml-1" style="color: #0a66c2; text-decoration: underline;">
+                                                {% trans "Join now" %} &rarr;
+                                            </a>
+                                        {% endif %}
                                     </div>
+                                    <button type="button" class="close ml-2" data-dismiss="alert" aria-label="Close" style="color: inherit; opacity: 0.6; font-size: 1.15rem; line-height: 1; padding: 0;">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
                                 </div>
-                            {% else %}
-                                <div class="alert alert-{% if 'error' in message.tags %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show py-2 px-3 small rounded-lg mb-3 shadow-xs">
-                                    <button type="button" class="close" data-dismiss="alert">&times;</button>
-                                    <i class="fa fa-info-circle mr-1"></i> {{ message }}
-                                </div>
-                            {% endif %}
+                            </div>
                         {% endfor %}
                     {% endif %}
 
-                    <!-- Error Messages -->
+                    <!-- Form Validation Errors -->
                     {% if form.non_field_errors %}
-                        <div class="alert alert-danger py-2 px-3 small rounded-lg mb-3">
-                            {% for error in form.non_field_errors %}
-                                <div><i class="fa fa-exclamation-circle mr-1"></i> {{ error }}</div>
-                            {% endfor %}
+                        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert" style="border-radius: 8px; font-size: 0.86rem; padding: 11px 14px; background-color: #fef2f2; border: 1px solid #fecaca; color: #991b1b;">
+                            <div class="d-flex align-items-center w-100">
+                                <i class="fa fa-exclamation-circle text-danger mr-2" style="font-size: 1rem; flex-shrink: 0;"></i>
+                                <div class="flex-grow-1" style="line-height: 1.45;">
+                                    {% for error in form.non_field_errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                                <button type="button" class="close ml-2" data-dismiss="alert" aria-label="Close" style="color: inherit; opacity: 0.6; font-size: 1.15rem; line-height: 1; padding: 0;">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
                         </div>
                     {% endif %}
 
