@@ -36,9 +36,10 @@ def check_user_exists_for_login(backend, details, user=None, *args, **kwargs):
     from django.shortcuts import redirect
     request = strategy.request if strategy else None
     if request:
+        provider_name = "GitHub" if backend.name == "github" else "Google"
         messages.error(
             request,
-            "በዚህ የጉግል ኢሜይል የተመዘገበ አካውንት አልተገኘም። እባክዎ አስቀድመው ይመዝገቡ። (No account found with this Google email. Please register first.)",
+            f"በዚህ የ{provider_name} ኢሜይል/አካውንት የተመዘገበ አልተገኘም። እባክዎ አስቀድመው ይመዝገቡ። (No account found with this {provider_name} account. Please register first.)",
             extra_tags="not_registered"
         )
     return redirect("accounts:login")
@@ -47,32 +48,47 @@ def check_user_exists_for_login(backend, details, user=None, *args, **kwargs):
 def update_user(backend, user, response, *args, **kwargs):
     """
     Social Auth pipeline step:
-    1. Extracts full user profile from Google (first name, last name, avatar picture).
+    1. Extracts full user profile from Google or GitHub (first name, last name, avatar picture).
     2. Marks email verified with timestamp.
     3. Preserves admin privileges and creates company record if employer.
     """
-    if backend.name == "google-oauth2":
+    if backend.name in ("google-oauth2", "github"):
         # 1. Verification flag
         user.is_verified = True
         if not user.email_verified_at:
             user.email_verified_at = timezone.now()
 
-        # 2. Extract full name from Google response if missing
-        first_name = response.get("given_name") or response.get("first_name", "")
-        last_name = response.get("family_name") or response.get("last_name", "")
+        # 2. Extract full name & picture from response if missing
+        first_name = ""
+        last_name = ""
+        picture_url = ""
+
+        if backend.name == "google-oauth2":
+            first_name = response.get("given_name") or response.get("first_name", "")
+            last_name = response.get("family_name") or response.get("last_name", "")
+            picture_url = response.get("picture")
+        elif backend.name == "github":
+            full_name = response.get("name") or ""
+            if full_name:
+                parts = full_name.strip().split(" ", 1)
+                first_name = parts[0]
+                last_name = parts[1] if len(parts) > 1 else ""
+            else:
+                first_name = response.get("login", "")
+                last_name = ""
+            picture_url = response.get("avatar_url")
 
         if not user.first_name and first_name:
             user.first_name = first_name
         if not user.last_name and last_name:
             user.last_name = last_name
 
-        # 3. Extract profile avatar picture from Google if not set
-        picture_url = response.get("picture")
+        # 3. Extract profile avatar picture from social provider if not set
         if picture_url and not user.avatar:
             try:
                 res = requests.get(picture_url, timeout=5)
                 if res.status_code == 200:
-                    filename = f"google_avatar_{user.id or 'temp'}.jpg"
+                    filename = f"{backend.name}_avatar_{user.id or 'temp'}.jpg"
                     user.avatar.save(filename, ContentFile(res.content), save=False)
             except Exception:
                 pass

@@ -49,7 +49,7 @@ class RegisterEmployeeView(CreateView):
             user.save()
             messages.success(
                 request,
-                f"Employee account registered successfully for {user.first_name} {user.last_name}! Please log in with your Google email ({user.email})."
+                f"Employee account registered successfully for {user.first_name} {user.last_name}! Please log in with your email ({user.email}), Google, or GitHub."
             )
             return redirect("accounts:login")
         else:
@@ -101,7 +101,7 @@ class RegisterEmployerView(CreateView):
 
             messages.success(
                 request,
-                f"Employer account for '{company_name}' registered successfully! Please log in with your Google email ({user.email})."
+                f"Employer account for '{company_name}' registered successfully! Please log in with your email ({user.email}), Google, or GitHub."
             )
             return redirect("accounts:login")
         else:
