@@ -420,7 +420,19 @@ def analyze_document_structure(file_bytes: bytes, filename: str) -> dict:
             if extracted_text.strip():
                 has_text = True
         except Exception:
-            pass
+            # Pure Python fallback stream text extractor (works without pypdf)
+            try:
+                # Extract text chunks enclosed in parentheses from PDF content stream
+                raw_matches = re.findall(rb'\(([^\)\\]{2,200})\)', file_bytes)
+                if raw_matches:
+                    extracted_text += " " + " ".join(m.decode("utf-8", errors="ignore") for m in raw_matches)
+                # Decode printable ASCII / Amharic UTF-8 ranges in the raw binary
+                clean_bytes = re.sub(rb'[^\x20-\x7E\xe1\x88-\x8b\x90-\x97]', b' ', file_bytes)
+                extracted_text += " " + clean_bytes.decode("utf-8", errors="ignore")
+                if extracted_text.strip():
+                    has_text = True
+            except Exception:
+                pass
 
     lower_text = extracted_text.lower()
     found_keywords = [kw for kw in ETHIOPIAN_TRADE_LICENSE_KEYWORDS if kw in lower_text]
@@ -629,7 +641,7 @@ def verify_license_with_gemini_vision(
         "}"
     )
 
-    candidate_models = ["gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-3.8-flash", "gemini-flash-latest"]
+    candidate_models = ["gemini-3.5-flash", "gemini-3.1-flash-lite"]
     payload = {
         "contents": [
             {
@@ -656,7 +668,7 @@ def verify_license_with_gemini_vision(
     for model_name in candidate_models:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
         try:
-            response = requests.post(url, json=payload, timeout=14)
+            response = requests.post(url, json=payload, timeout=5)
             if response.status_code == 200:
                 res_data = response.json()
                 candidates = res_data.get("candidates", [])
