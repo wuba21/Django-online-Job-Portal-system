@@ -294,6 +294,37 @@
         .user-profile-dropdown .dropdown-item.text-danger:hover i {
             color: #b91c1c !important;
         }
+
+        /* WCAG AA Accessible Contrast Fixes:
+           Darken primary blue (#2b90d9 -> #206fa6) to achieve >= 4.5:1 contrast with white text.
+           Ensure info/teal badges use dark text (#000000) for compliant contrast. */
+        .btn-primary,
+        a.btn-primary,
+        button.btn-primary {
+            background-color: #206fa6 !important;
+            border-color: #206fa6 !important;
+            color: #ffffff !important;
+        }
+        .btn-primary:hover,
+        .btn-primary:focus,
+        a.btn-primary:hover,
+        a.btn-primary:focus,
+        button.btn-primary:hover,
+        button.btn-primary:focus {
+            background-color: #175480 !important;
+            border-color: #175480 !important;
+            color: #ffffff !important;
+        }
+        .badge-primary {
+            background-color: #206fa6 !important;
+            color: #ffffff !important;
+        }
+        .badge-info,
+        .bg-info {
+            background-color: #17a2b8 !important;
+            color: #000000 !important;
+            font-weight: 600 !important;
+        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
@@ -307,7 +338,7 @@
                 <span class="sr-only">{% trans "Home" %}</span>
             </a>
             <button type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"
+                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Menu"
                     class="navbar-toggler collapsed ml-auto" id="mobileNavbarToggler">
                 <span class="nav-toggle-label mr-2">Menu</span>
                 <span class="nav-toggle-icon">
@@ -556,7 +587,7 @@
         </div>
     </nav>
 </header>
-<div class="flex-grow-1">
+<main class="flex-grow-1" id="main-content" role="main">
     {% block messages %}
     {% if messages %}
         <div class="container mt-3">
@@ -572,7 +603,7 @@
     {% endif %}
     {% endblock messages %}
     {% block content %} {% endblock %}
-</div>
+</main>
 
 
 <footer class="footer" style="background: #1a1a2e !important; color: #ffffff !important; padding: 60px 0 0 0 !important; margin-top: auto !important; margin-bottom: 0 !important;">

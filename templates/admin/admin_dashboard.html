@@ -144,7 +144,7 @@
             <!-- Applications Breakdown Doughnut -->
             <div class="col-lg-6">
                 <div class="chart-card">
-                    <h5 class="fw-bold mb-3" style="color: #0f172a;">{% trans "Application Status Breakdown" %}</h5>
+                    <h2 class="h5 fw-bold mb-3" style="color: #0f172a; font-size: 1.15rem;">{% trans "Application Status Breakdown" %}</h2>
                     <div style="height: 280px; position: relative;">
                         <canvas id="statusChart"></canvas>
                     </div>
@@ -154,7 +154,7 @@
             <!-- Top Categories Bar Chart -->
             <div class="col-lg-6">
                 <div class="chart-card">
-                    <h5 class="fw-bold mb-3" style="color: #0f172a;">{% trans "Top Job Categories" %}</h5>
+                    <h2 class="h5 fw-bold mb-3" style="color: #0f172a; font-size: 1.15rem;">{% trans "Top Job Categories" %}</h2>
                     <div style="height: 280px; position: relative;">
                         <canvas id="categoryChart"></canvas>
                     </div>
@@ -167,7 +167,7 @@
             <!-- Recent Users -->
             <div class="col-lg-6 mb-4">
                 <div class="table-card">
-                    <h5 class="fw-bold mb-3" style="color: #0f172a;">{% trans "Recently Registered Users" %}</h5>
+                    <h2 class="h5 fw-bold mb-3" style="color: #0f172a; font-size: 1.15rem;">{% trans "Recently Registered Users" %}</h2>
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light">
@@ -185,7 +185,7 @@
                                         <div class="small text-muted">{{ user.email }}</div>
                                     </td>
                                     <td>
-                                        <span class="badge {% if user.is_employer %}bg-primary{% else %}bg-info text-dark{% endif %}">
+                                        <span class="badge {% if user.is_employer %}bg-primary{% else %}bg-info text-dark{% endif %}" style="{% if not user.is_employer %}background-color: #17a2b8; color: #000000 !important; font-weight: 600;{% else %}background-color: #206fa6; color: #ffffff !important;{% endif %}">
                                             {{ user.role|capfirst }}
                                         </span>
                                     </td>
@@ -201,7 +201,7 @@
             <!-- Recent Jobs -->
             <div class="col-lg-6 mb-4">
                 <div class="table-card">
-                    <h5 class="fw-bold mb-3" style="color: #0f172a;">{% trans "Recently Posted Jobs" %}</h5>
+                    <h2 class="h5 fw-bold mb-3" style="color: #0f172a; font-size: 1.15rem;">{% trans "Recently Posted Jobs" %}</h2>
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light">

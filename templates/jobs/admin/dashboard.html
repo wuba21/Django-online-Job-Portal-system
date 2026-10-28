@@ -12,7 +12,7 @@
         <div class="row mb-4">
             <div class="col-md-3 mb-3">
                 <div class="card border-0 shadow-sm p-3 text-center border-left border-primary" style="border-left-width: 4px !important;">
-                    <h3 class="font-weight-bold text-primary mb-0">{{ total_users }}</h3>
+                    <div class="h3 font-weight-bold text-primary mb-0">{{ total_users }}</div>
                     <small class="text-muted text-uppercase">Total Users</small>
                     <div class="mt-2 text-muted small">
                         <span>Applicants: <strong>{{ total_applicants }}</strong></span> | 
@@ -22,7 +22,7 @@
             </div>
             <div class="col-md-3 mb-3">
                 <div class="card border-0 shadow-sm p-3 text-center border-left border-success" style="border-left-width: 4px !important;">
-                    <h3 class="font-weight-bold text-success mb-0">{{ total_jobs }}</h3>
+                    <div class="h3 font-weight-bold text-success mb-0">{{ total_jobs }}</div>
                     <small class="text-muted text-uppercase">Total Jobs</small>
                     <div class="mt-2 text-muted small">
                         <span>Active: <strong>{{ active_jobs }}</strong></span> | 
@@ -32,13 +32,13 @@
             </div>
             <div class="col-md-3 mb-3">
                 <div class="card border-0 shadow-sm p-3 text-center border-left border-info" style="border-left-width: 4px !important;">
-                    <h3 class="font-weight-bold text-info mb-0">{{ total_applications }}</h3>
+                    <div class="h3 font-weight-bold text-info mb-0">{{ total_applications }}</div>
                     <small class="text-muted text-uppercase">Total Applications</small>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
                 <div class="card border-0 shadow-sm p-3 text-center border-left border-warning" style="border-left-width: 4px !important;">
-                    <h3 class="font-weight-bold text-warning mb-0">{{ categories.count }}</h3>
+                    <div class="h3 font-weight-bold text-warning mb-0">{{ categories.count }}</div>
                     <small class="text-muted text-uppercase">Job Categories</small>
                 </div>
             </div>
@@ -49,7 +49,7 @@
             <div class="col-lg-7 mb-4">
                 <div class="card border-0 shadow-sm p-3">
                     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap" style="gap: 8px;">
-                        <h5 class="card-title text-dark mb-0"><i class="fa fa-briefcase text-primary mr-1"></i> Job Listings Moderation</h5>
+                        <h2 class="h5 card-title text-dark mb-0"><i class="fa fa-briefcase text-primary mr-1"></i> Job Listings Moderation</h2>
                         <a href="{% url 'jobs:employer-jobs-create' %}" class="btn btn-sm btn-outline-primary font-weight-bold">
                             <i class="fa fa-plus mr-1"></i> Post New Job
                         </a>
@@ -171,7 +171,7 @@
             <div class="col-lg-5 mb-4" id="users-section">
                 <div class="card border-0 shadow-sm p-3">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="card-title text-dark mb-0"><i class="fa fa-users text-info"></i> User Accounts Management</h5>
+                        <h2 class="h5 card-title text-dark mb-0"><i class="fa fa-users text-info"></i> User Accounts Management</h2>
                         <span id="selectedCountBadge" class="badge badge-primary" style="display: none; font-size: 0.78rem;">0 selected</span>
                     </div>
 
@@ -217,12 +217,16 @@
                                             <span class="font-weight-bold d-block text-dark">
                                                  {{ u.get_full_name|default:u.email }}
                                                 {% if u.id == request.user.id %}
-                                                    <span class="badge badge-info ml-1" style="font-size: 0.68rem;">You</span>
+                                                    <span class="badge badge-info ml-1" style="font-size: 0.68rem; color: #000000 !important; font-weight: 600;">You</span>
                                                 {% endif %}
                                             </span>
                                             <small class="text-muted">{{ u.email }}</small>
                                         </td>
-                                        <td class="text-center text-nowrap"><span class="badge badge-secondary">{{ u.role|capfirst }}</span></td>
+                                        <td class="text-center text-nowrap">
+                                            <span class="badge" style="{% if u.is_employer %}background-color: #206fa6; color: #ffffff !important;{% else %}background-color: #17a2b8; color: #000000 !important; font-weight: 600;{% endif %}">
+                                                {{ u.role|capfirst }}
+                                            </span>
+                                        </td>
                                         <td class="text-center text-nowrap">
                                             {% if u.is_active %}
                                                 <span class="badge badge-success status-badge">Active</span>

@@ -132,7 +132,7 @@
                 {% elif not request.user.is_authenticated %}
                     <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary btn-lg shadow-sm px-4 py-3 fw-bold d-block d-md-inline-block"><i class="fa fa-paper-plane mr-1"></i> APPLY NOW</a>
                 {% else %}
-                    <span class="badge badge-info p-3 d-inline-block text-white fw-semibold"><i class="fa fa-info-circle mr-1"></i> Logged in as Employer</span>
+                    <span class="badge badge-info p-3 d-inline-block text-dark fw-semibold" style="color: #000000 !important;"><i class="fa fa-info-circle mr-1"></i> Logged in as Employer</span>
                 {% endif %}
             </div>
         </div>
