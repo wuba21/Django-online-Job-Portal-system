@@ -1,6 +1,9 @@
 import json
+import logging
 import os
 from urllib.parse import urlparse
+
+logger = logging.getLogger(__name__)
 
 from django.contrib.auth.decorators import login_required
 from django.templatetags.static import static
@@ -60,7 +63,7 @@ class ResumeCVCreateView(LoginRequiredMixin, View):
             r = f.save()
             return redirect(reverse_lazy("resume_cv:builder", kwargs={"code": r.code}))
         else:
-            print(f.errors)
+            logger.warning("ResumeCvForm validation failed: %s", f.errors)
             return redirect(reverse_lazy("resume_cv:templates"))
 
 

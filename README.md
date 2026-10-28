@@ -1,491 +1,194 @@
 <div align="center">
 
-<img src="./screenshots/illustration.png" alt="Job Interview" width="300" height="356.5">
+# 🇪🇹 EthioJobs — Enterprise Online Job Portal & ATS Platform
 
-# Django Job Portal
+**A full-featured, production-ready recruitment ecosystem engineered for Ethiopian & African employment markets.**
+
+[![Django](https://img.shields.io/badge/Django-5.1%2B-092E20?logo=django&logoColor=white)](https://www.djangoproject.com/)
+[![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.14-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![i18n](https://img.shields.io/badge/i18n-English%20%7C%20Amharic%20%7C%20Oromo%20%7C%20Tigrinya-success)](locale/)
+[![Security](https://img.shields.io/badge/Security-Hardened%20(OWASP)-green)](jobs/settings.py)
+
+[Live Demo](https://wubante.pythonanywhere.com/) • [Swagger API Docs](https://wubante.pythonanywhere.com/swagger/) • [Features](#-key-features) • [Installation](#-installation--setup) • [Deployment](#-deployment)
 
 </div>
 
-## Django Job Portal
+---
 
-#### An open source online job portal.
+## 📖 Executive Summary
 
-<p align="center">
-    <img alt="forks" src="https://img.shields.io/github/forks/manjurulhoque/django-job-portal?label=Forks&style=social"/>
-    <img alt="stars" src="https://img.shields.io/github/stars/manjurulhoque/django-job-portal?style=social"/>
-    <img alt="watchers" src="https://img.shields.io/github/watchers/manjurulhoque/django-job-portal?style=social"/>
-    <img alt="github Actions" src="https://github.com/manjurulhoque/django-job-portal/workflows/job-portal/badge.svg"/>
-</p>
+**EthioJobs Portal** is a modern, high-performance career platform and Applicant Tracking System (ATS) tailored specifically for emerging markets, regulatory standards, and multilingual workforces. It bridges candidates, companies, and platform administrators with features such as **AI-driven trade license forensics**, **Chapa payments**, **Telegram mini-app notifications**, **live employer-candidate messaging**, and **automated CV generation**.
 
-Live: [Demo](http://djp.manjurulhoque.com/en/)
+---
 
-Used Tech Stack
+## ✨ Key Features
 
-1. Django
-2. Sqlite
+### 1. 🛡️ Regulatory & Trade License Verification (Anti-Fraud)
+- **Ministry of Trade (MoTRI) Compliance**: Required 10-digit TIN and commercial trade license upload for all employer vacancies.
+- **AI-Powered OCR Forensics**: Integrates with Google Gemini 1.5 Flash Vision to inspect official ink stamps, business names, and TIN consistency on PDF and image licenses.
+- **Admin Verification Queue & Audit Trail**: Real-time admin dashboard to review, approve, re-scan, or reject employer credentials with localized feedback.
 
-### Screenshots
+### 2. 🔐 Authentication & Social Auth
+- **Multi-Provider OAuth2**: One-click sign-in with **Google OAuth2** (including Google One-Tap) and **GitHub**.
+- **Fail-Safe Session Architecture**: Custom exception middleware (`CustomSocialAuthExceptionMiddleware`) gracefully handling token expiry, network timeouts, or cancellation without 500 errors.
+- **Role-Based Provisioning**: Dynamic role assignment (Job Seeker / Employee vs Employer / Recruiter) with distinct onboarding paths.
 
-## Home page
-<img src="screenshots/one.png" height="800">
+### 3. 💼 Candidate & Job Seeker Hub
+- **ATS Resume/CV Auto-Builder**: Dynamic HTML5/CSS3 resume generator with real-time preview and one-click PDF export.
+- **AI Profile Parser**: Automatically extracts experience, skills, and education from uploaded CVs.
+- **Application Tracking & Quick Apply**: Real-time status tracker (Applied, Under Review, Interview Scheduled, Offer Made).
+- **Favorites & Job Alerts**: Instant email alerts for newly posted vacancies matching saved criteria.
 
-## Resume template page
-<img src="screenshots/six.png" height="800">
-<img src="screenshots/seven.png" height="800">
+### 4. 🏢 Recruiter & Employer ATS
+- **Vacancy Management**: Complete vacancy lifecycle (Draft, Pending Review, Active, Filled, Expired).
+- **Candidate Evaluation**: Rating systems, candidate notes, interview scheduling, and CSV export for HR departments.
+- **Company Branding Page**: Dedicated public employer directory with employee reviews and location maps.
 
-## Login page
-<img src="screenshots/five.png" width="800" alt="login">
+### 5. 💬 Real-Time Communications
+- **2-Way In-App Messaging**: Direct recruiter-to-candidate messaging with polling-based real-time sync.
+- **Telegram Mini-App (TMA) & Channel Broadcast**: Automated job broadcasting to Telegram channels via Telegram Bot API.
 
-## Add new position as employer
-<img src="screenshots/two.png" width="800" alt="form">
+### 6. 💳 Payments & Monetization
+- **Chapa Payment Gateway Integration**: Native checkout for job posting fees, featured listings, and CV downloads via Telebirr, CBE Birr, and cards.
+- **Automated Webhooks**: Instant transaction verification and invoice generation.
 
-## Job details
-<img src="screenshots/three.png" height="800" alt="details">
+### 7. 🌍 Multilingual (i18n & l10n)
+- Native support for four languages:
+  - 🇬🇧 English (`en`)
+  - 🇪🇹 Amharic (`am` / አማርኛ)
+  - 🇪🇹 Afaan Oromoo (`om`)
+  - 🇪🇹 Tigrinya (`ti` / ትግርኛ)
+- Dynamic language switcher with persistent user session preferences.
 
-## Swagger API
-<img src="screenshots/four.png" height="800">
+---
 
-<a name="local-venv"></a>
-### Local environment
+## 🏗️ Architecture & Tech Stack
 
-#### Install
-
-1. Create a virtual environment
-
-    `virtualenv venv`
-
-    Or
-
-    `python3.11 -m venv venv`
-
-2. Activate it
-
-    `source venv/bin/activate`
-
-3. Clone the repository and install the packages in the virtual env:
-
-    `pip install -r requirements.txt`
-
-4. Add `.env` file.
-
-    `cp .env.dev.sample .env`
-
-5. Add Github client ID and client secret in the `.env` file
-
-#### Run
-
-1. With the venv activate it, execute:
-
-    python manage.py collectstatic
-
-   *Note* : Collect static is not necessary when debug is True (in dev mode)
-
-2. Create initial database:
-
-    `python manage.py migrate`
-
-3. Load demo data (optional):
-
-    `python manage.py loaddata fixtures/app_name_initial_data.json --app app.model_name`
-
-4. Run server:
-
-    `python manage.py runserver`
-
-5. Default django admin credentials:
-
-    `email: admin@admin.com`
-    `password: admin`
-
-#### Run test:
-``python manage.py test``
-
-#### To dump data:
-``python manage.py dumpdata --format=json --indent 4 app_name > app_name/fixtures/app_name_initial_data.json``
-
-![Analytics](https://repobeats.axiom.co/api/embed/2ed66773eb8b3acef70bc808ddc6701253f2fc09.svg "Repobeats analytics image")
-
-Show your support by 🌟 the project!!
-
-# Django Job Portal Testing Series
-
-This repository contains a comprehensive testing guide for the Django Job Portal project. The series covers different aspects of testing in Django REST Framework, from basic to advanced concepts.
-
-## Table of Contents
-
-1. [Introduction to Testing in Django REST Framework: Part 1](#part-1-introduction-to-testing)
-2. [Advanced Testing Techniques: Part 2](#part-2-advanced-testing-techniques)
-3. [Coming Soon: Part 3](#part-3-coming-soon)
-
-## Part 1: Introduction to Testing
-
-### Why Testing Matters
-- Ensuring code reliability
-- Catching bugs early
-- Making refactoring safer
-- Documentation through tests
-- Confidence in deployments
-
-### Types of Tests
-1. **Unit Tests**
-   - Testing individual components
-   - Example: Testing a serializer
-
-2. **Integration Tests**
-   - Testing component interactions
-   - Example: Testing API endpoints
-
-3. **End-to-End Tests**
-   - Testing complete workflows
-   - Example: Testing user registration flow
-
-### Setting Up Your Testing Environment
-
-Add this to your settings:
-
-```python
-REST_FRAMEWORK = {
-    'TEST_REQUEST_DEFAULT_FORMAT': 'json'
-}
+```
+┌────────────────────────────────────────────────────────┐
+│                   Web & Mobile Clients                 │
+│  (Desktop Web, Mobile Web, Telegram WebApp Mini-App)   │
+└───────────────────────────┬────────────────────────────┘
+                            │ HTTPS / WSS
+┌───────────────────────────▼────────────────────────────┐
+│                    Nginx / Reverse Proxy               │
+└───────────────────────────┬────────────────────────────┘
+                            │ WSGI
+┌───────────────────────────▼────────────────────────────┐
+│                  Django Application Core               │
+│                                                        │
+│  ├── accounts/      (Auth, Roles, Company Verification)│
+│  ├── jobsapp/       (Jobs, Search, ATS, Messaging)     │
+│  ├── resume_cv/     (Templates, Auto CV Builder)       │
+│  ├── payments/      (Chapa Gateway Integration)        │
+│  └── jobs/          (Settings, Routing, Middlewares)   │
+└────────┬──────────────────┬──────────────────┬─────────┘
+         │                  │                  │
+┌────────▼─────────┐ ┌──────▼──────┐ ┌─────────▼─────────┐
+│ SQLite/PostgreSQL│ │ Gemini 1.5  │ │ Chapa / Telegram  │
+│ Primary Database │ │ Vision OCR  │ │ External Webhooks │
+└──────────────────┘ └─────────────┘ └───────────────────┘
 ```
 
-### Example: Testing User Registration
+---
 
-```python
-class RegistrationAPITestCase(APITestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.invalid_data = {
-            "email": "invalid-email",
-            "password": "short",  # too short
-            "username": "test",
-        }
-        cls.valid_data = {
-            "email": "test@example.com",
-            "password": "testpass123",
-            "password2": "testpass123",
-            "gender": "male",
-            "role": "employee",
-        }
+## 🚀 Installation & Setup
 
-    def setUp(self):
-        self.url = reverse("accounts.api:register")
+### 1. Prerequisites
+- Python 3.10, 3.11, 3.12, or 3.14
+- Git
+- Virtualenv (`python -m venv venv`)
 
-    def test_registration_success(self):
-        response = self.client.post(self.url, self.valid_data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(response.data["status"])
-        self.assertEqual(response.data["message"], "Successfully registered")
-        self.assertTrue(User.objects.filter(email=self.valid_data["email"]).exists())
-
-    def test_registration_invalid_data(self):
-        response = self.client.post(self.url, self.invalid_data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_registration_duplicate_email(self):
-        User.objects.create_user(
-            email=self.valid_data["email"],
-            password="testpass123",
-            role="employee"
-        )
-        response = self.client.post(self.url, self.valid_data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data["errors"][0]["email"], "A user with that email already exists.")
-        self.assertFalse(response.data["status"])
-```
-
-## Part 2: Advanced Testing Techniques
-
-In Part 1, we covered the basics of testing in Django REST Framework, focusing on simple API endpoints like user registration. In Part 2, we'll explore more advanced testing techniques using our Job Portal project as an example.
-
-### Testing Complex API Views
-
-Let's look at how to test more complex API views that involve multiple models, authentication, and different user roles.
-
-#### Testing Job Search Functionality
-
-```python
-class TestSearchView(TestCase):
-    def setUp(self):
-        self.url = reverse("jobs:search")
-        super().setUp()
-
-    def test_empty_query(self):
-        jobs = Job.objects.filter(title__contains="software")
-        response = self.client.get(self.url + "?position=software")
-        self.assertFalse(b"We have found %a jobs" % str(jobs.count()) in response.content.lower())
-```
-
-This test demonstrates how to:
-- Set up a test class for a specific view
-- Use the `setUp` method to prepare test data
-- Test query parameters in URLs
-- Check response content for specific text
-
-#### Testing Job Details View
-
-```python
-class TestJobDetailsView(TestCase):
-    def test_details(self):
-        response = self.client.get(reverse("jobs:jobs-detail", args=(1,)))
-        self.assertEqual(response.status_code, 404)
-```
-
-This test shows:
-- How to test views that require URL parameters
-- Testing 404 responses for non-existent resources
-- Using the `reverse` function with arguments
-
-### Testing API Views with Authentication
-
-One of the most important aspects of testing API views is handling authentication. Let's look at how to test endpoints that require different user roles.
-
-#### Testing Common API Views
-
-```python
-class TestCommonApiViews(APITestCase):
-    def setUp(self):
-        # Create test data
-        self.categories = CategoryFactory.create_batch(10)
-        self.jobs = JobFactory.create_batch(5)
-        self.user = UserFactory(role="employee")
-
-    def test_categories_list_api_view(self):
-        """Test the categories list API endpoint"""
-        url = reverse("categories:categories-list")
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()), 15)  # job factory creates 5 more categories
-
-    def test_jobs_list_api_view(self):
-        """Test the jobs list API endpoint"""
-        url = reverse("jobs-api:job-list")
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()), 5)
-```
-
-This test class demonstrates:
-- Using factory classes to create test data
-- Testing list endpoints
-- Checking response data structure and content
-- Using docstrings to document test purposes
-
-#### Testing Authentication-Required Endpoints
-
-```python
-def test_apply_job_api_view(self):
-    """Test the apply job API endpoint"""
-    # apply job without authentication
-    url = reverse("jobs-api:apply-job", kwargs={"job_id": self.jobs[0].id})
-    response = self.client.post(url)
-    self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    # apply job with authentication
-    self.client.force_authenticate(user=self.user)
-    response = self.client.post(url, {"job": self.jobs[0].id})
-    self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-    self.assertEqual(response.json()["job"], self.jobs[0].id)
-
-    # test already apply to same job
-    url = reverse("jobs-api:apply-job", kwargs={"job_id": self.jobs[0].id})
-    response = self.client.post(url, {"job": self.jobs[0].id})
-    self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-```
-
-This test shows:
-- Testing endpoints with and without authentication
-- Using `force_authenticate` to simulate logged-in users
-- Testing business logic (preventing duplicate applications)
-- Testing different HTTP status codes
-
-### Testing Role-Based Access Control
-
-In a job portal, different user roles (employer, employee) have different permissions. Let's see how to test this:
-
-```python
-class TestEmployerApiViews(APITestCase):
-    @classmethod
-    def setUpTestData(cls):
-        """Set up test data for all test methods"""
-        cls.employer = UserFactory(role="employer")
-        cls.employee = UserFactory(role="employee")
-        cls.tag = TagFactory()
-        cls.job_data = {
-            "title": "Test Job",
-            "description": "Test Description",
-            "location": "Test Location",
-            "salary": 10000,
-            "type": "1",  # Full time
-            "category": "web-development",
-            "last_date": "2024-12-31",
-            "company_name": "Test Company",
-            "company_description": "A great company to work for",
-            "website": "www.testcompany.com",
-            "tags": [cls.tag.pk],
-        }
-
-    def setUp(self):
-        """Set up test client for each test method"""
-        self.job = JobFactory(user=self.employer)
-        self.client = self.client_class()
-
-    def test_dashboard_api_view(self):
-        """Test the dashboard API endpoint"""
-        # check without authentication
-        url = reverse("jobs-api:employer-dashboard")
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-        # check with authentication
-        self.client.force_authenticate(user=self.employer)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()), 1)
-        self.assertEqual(response.json()[0]["id"], self.job.id)
-```
-
-This test class demonstrates:
-- Using `setUpTestData` for data shared across all tests
-- Testing role-based access control
-- Testing dashboard views
-- Verifying response data matches expected results
-
-### Testing Complex Workflows
-
-Let's look at testing a complete workflow, like applying for a job and checking application status:
-
-```python
-def test_applied_jobs_api_view(self):
-    """Test the applied jobs API endpoint"""
-    # get applied jobs without authentication
-    applied_jobs_url = reverse("jobs-api:applied-jobs")
-    response = self.client.get(applied_jobs_url)
-    self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    # get applied jobs with authentication
-    self.client.force_authenticate(user=self.user)
-    response = self.client.get(applied_jobs_url)
-    self.assertEqual(response.status_code, status.HTTP_200_OK)
-    self.assertEqual(len(response.json()), 0)
-
-    # apply job
-    url = reverse("jobs-api:apply-job", kwargs={"job_id": self.jobs[0].id})
-    response = self.client.post(url, {"job": self.jobs[0].id})
-    self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-    # get applied jobs again
-    response = self.client.get(applied_jobs_url)
-    self.assertEqual(response.status_code, status.HTTP_200_OK)
-    self.assertEqual(len(response.json()), 1)
-    self.assertEqual(response.json()[0]["applicant"]["job"]["id"], self.jobs[0].id)
-```
-
-This test demonstrates:
-- Testing a multi-step workflow
-- Verifying state changes after actions
-- Testing related endpoints that depend on each other
-- Checking response data structure in detail
-
-### Testing Edge Cases and Error Handling
-
-Good tests should also cover edge cases and error handling:
-
-```python
-def test_update_applicant_status_api_view(self):
-    """Test the update applicant status API endpoint"""
-    # apply for the job
-    self.client.force_authenticate(user=self.employee)
-    apply_url = reverse("jobs-api:apply-job", kwargs={"job_id": self.job.id})
-    self.client.post(apply_url, {"job": self.job.id})
-
-    # update applicant status without authentication
-    self.client.logout()
-    url = reverse(
-        "jobs-api:employer-update-applicant-status",
-        kwargs={"applicant_id": self.employee.id, "status_code": 1},
-    )
-    response = self.client.post(url)
-    self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    # check with authentication
-    self.client.force_authenticate(user=self.employer)
-    response = self.client.post(url)
-    self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    url = reverse(
-        "jobs-api:employer-update-applicant-status",
-        kwargs={"applicant_id": self.job.id, "status_code": 10},
-    )
-    response = self.client.post(url)
-    self.assertEqual(response.status_code, status.HTTP_200_OK)
-```
-
-This test shows:
-- Testing authentication changes during a test
-- Testing error responses (404 Not Found)
-- Testing different status codes
-- Testing complex URL patterns with multiple parameters
-
-## Best Practices for Advanced Testing
-
-1. **Use Factory Classes**
-   - Create reusable test data with factory classes
-   - Use `setUpTestData` for data shared across all tests
-   - Use `setUp` for test-specific setup
-
-2. **Test Authentication and Authorization**
-   - Test endpoints with and without authentication
-   - Test different user roles
-   - Test permission boundaries
-
-3. **Test Complete Workflows**
-   - Test multi-step processes
-   - Verify state changes after actions
-   - Test related endpoints that depend on each other
-
-4. **Test Edge Cases and Error Handling**
-   - Test invalid inputs
-   - Test error responses
-   - Test business logic constraints
-
-5. **Write Clear Test Names and Docstrings**
-   - Use descriptive test method names
-   - Add docstrings to explain test purposes
-   - Group related tests in test classes
-
-## Running Tests
-
-Run all tests:
+### 2. Clone the Repository
 ```bash
+git clone https://github.com/wuba21/Django-online-Job-Portal-system.git
+cd Django-online-Job-Portal-system
+```
+
+### 3. Set Up Virtual Environment
+```bash
+# On Linux / macOS:
+python3 -m venv venv
+source venv/bin/activate
+
+# On Windows (PowerShell):
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+```
+
+### 4. Install Dependencies
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### 5. Configure Environment Variables
+```bash
+cp .env.example .env
+```
+Open `.env` and fill in your values (or use defaults for local SQLite development).
+
+### 6. Run Migrations & Compile Translations
+```bash
+python manage.py migrate
+python scripts/compile_translations.py
+```
+
+### 7. Initialize Superuser / Admin
+```bash
+python scripts/setup_admin.py
+```
+
+### 8. Run Development Server
+```bash
+python manage.py runserver
+```
+Visit `http://127.0.0.1:8000/` in your browser.
+
+---
+
+## 🧪 Testing & Verification
+
+Run the comprehensive test suite and system sanity checks:
+```bash
+# Django system integrity check
+python manage.py check
+
+# Run automated tests
 python manage.py test
 ```
 
-Run specific test case:
+---
+
+## 📦 Deployment
+
+### Production Deployment on PythonAnywhere
+
+1. Open your PythonAnywhere Bash Console.
+2. Run the deployment script or single-line updater:
 ```bash
-python manage.py test jobsapp.tests.test_job_api.JobCreationAPITestCase
+cd /home/wubante/Django-online-Job-Portal-system && git pull origin master && python manage.py migrate && python scripts/compile_translations.py && python manage.py collectstatic --noinput && touch /var/www/wubante_pythonanywhere_com_wsgi.py
 ```
 
-Run tests with coverage:
+### Docker Deployment
 ```bash
-coverage run --source='.' manage.py test
-coverage report
+# Development
+docker-compose up -d --build
+
+# Production
+docker-compose -f docker-compose.prod.yml up -d --build
 ```
 
-## Part 3: Coming Soon
+---
 
-In the next part, we'll cover:
-- Testing file uploads for resumes
-- Testing search functionality with complex queries
-- Testing pagination and filtering
-- Testing permissions and authorization in detail
-- Writing test fixtures for complex data setup
-- Mocking external services in tests
+## 🔒 Security Best Practices
+- **Strict Cookie Flags**: `SESSION_COOKIE_SAMESITE = "Lax"`, `CSRF_COOKIE_SAMESITE = "Lax"`, and `HTTPONLY` enabled.
+- **OWASP Hardening**: `X_FRAME_OPTIONS = "DENY"`, `SECURE_CONTENT_TYPE_NOSNIFF`, and HSTS preloading in production.
+- **Zero Secrets in Repo**: All keys (`SECRET_KEY`, `CHAPA_SECRET_KEY`, `GEMINI_API_KEY`) loaded strictly from environment.
+- **Structured 12-Factor Logging**: Consolidated console error streams with timestamps for instant debugging without swallowing exceptions.
 
-## Contributing
+---
 
-Feel free to contribute to this testing guide by submitting pull requests or creating issues.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+## 📄 License
+This project is open-source under the [MIT License](LICENSE).
