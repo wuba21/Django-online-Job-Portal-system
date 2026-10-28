@@ -286,7 +286,7 @@ def query_ministry_of_revenues(tin: str) -> dict:
         "found": False,
         "source": "Ministry of Revenues & Trade Registry",
         "tin": clean_tin,
-        "error": f"የተሰጠው የግብር ከፋይ መለያ ቁጥር (TIN: {clean_tin}) በገቢዎች ሚኒስቴር ወይም በንግድና ቀጠናዊ ትስስር ሚኒስቴር የግብር ከፋዮች መዝገብ ውስጥ አልተገኘም።"
+        "error": f"The provided Taxpayer Identification Number (TIN: {clean_tin}) was not found in the national business registry."
     }
 
 
@@ -342,6 +342,8 @@ ETHIOPIAN_TRADE_LICENSE_KEYWORDS = [
     "business license",
     "commercial business license",
     "commercial registration and business license",
+    "commercial registration certificate",
+    "commercial license",
     "ministry of trade and regional integration",
     "ministry of trade",
     "trade and industry bureau",
@@ -350,23 +352,48 @@ ETHIOPIAN_TRADE_LICENSE_KEYWORDS = [
     "የንግድ ስራ ፈቃድ",
     "የንግድ ፈቃድ",
     "የንግድ ምዝገባና የንግድ ሥራ ፈቃድ",
-    "የንግድና ቀጠናዊ ትስስር ሚኒስቴር",
+    "የንግድনা ቀጠናዊ ትስስር ሚኒስቴር",
     "የንግድና ኢንዱስትሪ ቢሮ",
     "የንግድ ዘርፍ",
     "የንግድ ስም",
 ]
 
-# Keywords that indicate a Taxpayer Registration (TIN) Certificate or VAT certificate (NOT a Trade License!)
+# Keywords that indicate a Taxpayer Registration (TIN) Certificate, tax receipt, or sample (NOT a Trade License!)
 DISALLOWED_CERTIFICATE_KEYWORDS = [
+    # TIN and Taxpayer registration certificates
     "taxpayer registration certificate",
-    "የግብር ከፋይ ምዝገባ ሰርተፊኬት",
-    "የግብር ከፋይነት ምዝገባ",
+    "certificate of taxpayer registration",
+    "taxpayer identification number registration",
+    "tin certificate",
+    "tin registration",
     "taxpayer registration",
     "sole and only registration as a taxpayer",
+    "የግብር ከፋይ ምዝገባ ሰርተፊኬት",
+    "የግብር ከፋይ ምዝገባ የምስክር ወረቀት",
+    "የግብር ከፋይነት ምዝገባ",
+    "የግብር ከፋይ መለያ",
+    # Tax receipts, VAT, and tax clearance
     "የተጨማሪ እሴት ታክስ ምዝገባ ሰርተፊኬት",
     "vat registration certificate",
+    "vat certificate",
     "የታክስ ክሊራንስ",
     "tax clearance",
+    "withholding tax",
+    "tot registration",
+    "turnover tax",
+    "revenue authority",
+    # Sample and dummy templates
+    "sample",
+    "sample page",
+    "dummy",
+    "specimen",
+    "template",
+    "watermark",
+    "lorem ipsum",
+    "test document",
+    "draft",
+    "የናሙና",
+    "ናሙና",
 ]
 
 
@@ -374,7 +401,8 @@ def analyze_document_structure(file_bytes: bytes, filename: str) -> dict:
     """
     Analyzes document dimensions, format, page structure, and extracted text.
     Strictly differentiates between a genuine Trade License (የንግድ ሥራ ፈቃድ)
-    and a mere Taxpayer / TIN Registration Certificate (የግብር ከፋይ ምዝገባ ሰርተፊኬት).
+    and a mere Taxpayer / TIN Registration Certificate (የግብር ከፋይ ምዝገባ ሰርተፊኬት),
+    sample templates, or tax receipts.
     """
     filename_lower = filename.lower()
     extracted_text = ""
@@ -398,8 +426,14 @@ def analyze_document_structure(file_bytes: bytes, filename: str) -> dict:
     found_keywords = [kw for kw in ETHIOPIAN_TRADE_LICENSE_KEYWORDS if kw in lower_text]
     found_disallowed = [kw for kw in DISALLOWED_CERTIFICATE_KEYWORDS if kw in lower_text]
 
-    # If it has TIN certificate keywords and NO trade license keywords, it's explicitly a TIN certificate!
-    is_tin_certificate_only = bool(found_disallowed and len(found_keywords) == 0)
+    # Inspect filename for obvious disallowed keywords
+    filename_disallowed = [
+        kw for kw in ["tin", "tax_reg", "sample", "dummy", "specimen", "template", "vat_cert", "clearance"]
+        if kw in filename_lower
+    ]
+
+    # If it contains TIN certificate or sample keywords and NO trade license keywords, it's explicitly disallowed
+    is_tin_certificate_only = bool(found_disallowed or filename_disallowed) and len(found_keywords) == 0
 
     return {
         "is_pdf": is_pdf,
@@ -408,6 +442,7 @@ def analyze_document_structure(file_bytes: bytes, filename: str) -> dict:
         "found_keywords": found_keywords,
         "keyword_count": len(found_keywords),
         "found_disallowed": found_disallowed,
+        "filename_disallowed": filename_disallowed,
         "is_tin_certificate_only": is_tin_certificate_only,
     }
 
@@ -422,7 +457,6 @@ def analyze_image_and_circular_seal(image: Image.Image) -> dict:
     1. Color distribution: Blue/violet or deep red ink.
     2. Spatial clustering: Concentrated in an imprint area (not dispersed everywhere).
     3. Circular / Radial density: Calculates radial symmetry from centroid.
-       Random colorful photos or landscape images will have high dispersion without radial symmetry.
     """
     img = image.convert("RGB")
     width, height = img.size
@@ -432,7 +466,7 @@ def analyze_image_and_circular_seal(image: Image.Image) -> dict:
     if aspect_ratio > 3.0:
         return {
             "has_seal": False,
-            "reason": "የሰነዱ ገጽታ ቅርጽ ከመደበኛ የንግድ ፈቃድ ወረቀት መጠን ጋር አይዛመድም።",
+            "reason": "The document aspect ratio does not match standard business license dimensions.",
             "seal_confidence": 0,
         }
 
@@ -472,13 +506,12 @@ def analyze_image_and_circular_seal(image: Image.Image) -> dict:
             if is_blue_purple_seal or is_red_seal:
                 seal_points.append((x, y))
 
-    # Real document check: Background should be predominantly paper/white (> 40%)
+    # Real document check: Background should be predominantly paper/white (> 20%)
     paper_ratio = white_background_pixels / max(total_pixels, 1)
     if paper_ratio < 0.20:
-        # Not a document scan, likely a wallpaper, scenic photo, or selfie
         return {
             "has_seal": False,
-            "reason": "የተሰቀለው ፎቶ የሰነድ ወይም የንግድ ፈቃድ ባህሪ የለውም (ከፍተኛ የቀለም ድብልቅ)።",
+            "reason": "The uploaded file does not exhibit paper business document characteristics.",
             "seal_confidence": 10,
         }
 
@@ -486,7 +519,7 @@ def analyze_image_and_circular_seal(image: Image.Image) -> dict:
     if len(seal_points) < 80:
         return {
             "has_seal": False,
-            "reason": "በሰነዱ ላይ ይፋዊ የንግድ ሚኒስቴር ክብ ሰማያዊ ወይም ቀይ ማህተም አልተገኘም።",
+            "reason": "An official circular authority seal in blue or red ink was not detected on the document.",
             "seal_confidence": 15,
         }
 
@@ -502,8 +535,7 @@ def analyze_image_and_circular_seal(image: Image.Image) -> dict:
     variance = sum((d - avg_radius) ** 2 for d in distances) / len(distances)
     std_dev = math.sqrt(variance)
 
-    # For a circular ring stamp, the radius variance is relatively compact
-    # (points form an annulus/circle), whereas random noise or text is widely scattered.
+    # Ring coherence
     ring_coherence = avg_radius / max(std_dev, 1.0)
 
     # Valid seal criteria
@@ -519,7 +551,7 @@ def analyze_image_and_circular_seal(image: Image.Image) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# 5. Multimodal Generative AI Vision Inspection (Google Gemini 1.5 Flash)
+# 5. Multimodal Generative AI Vision Inspection (Google Gemini Flash)
 # ---------------------------------------------------------------------------
 def verify_license_with_gemini_vision(
     file_bytes: bytes,
@@ -529,12 +561,12 @@ def verify_license_with_gemini_vision(
     api_key: str = "",
 ) -> dict:
     """
-    Multimodal Vision AI Analysis using Google Gemini 1.5 Flash.
+    Multimodal Vision AI Analysis using Google Gemini Flash.
     Forensically inspects Ethiopian Trade Licenses / Commercial Registration:
     - Extracts printed 10-digit TIN & compares with submitted TIN
     - Identifies official Ethiopian government headers & Coat of Arms
-    - Detects circular/oval ink seals (ክብ ማህተም) and authorized signatures
-    - Detects whether the file is a genuine trade license vs. fake/irrelevant upload
+    - Detects circular/oval ink seals and authorized signatures
+    - Strictly rejects TIN Registration Certificates, VAT certificates, and sample pages
     - Matches company name against certificate text
     """
     if not api_key:
@@ -560,13 +592,17 @@ def verify_license_with_gemini_vision(
         "(MoTRI / የንግድና ቀጠናዊ ትስስር ሚኒስቴር) or City/Regional Trade & Industry Bureau (የንግድና ኢንዱስትሪ ቢሮ).\n\n"
         "STRICT DOCUMENT DISTINCTION THAT MUST BE ENFORCED:\n"
         "1. TAXPAYER REGISTRATION CERTIFICATE / የግብር ከፋይ ምዝገባ ሰርተፊኬት (TIN Certificate) or VAT Certificate:\n"
-        "   - Issued by Ministry of Revenues (MoR) or Regional Revenues Authority (ገቢዎች ባለስልጣን).\n"
+        "   - Issued by Ministry of Revenues (MoR) or Regional Revenues Authority.\n"
         "   - THIS IS ONLY A TAX REGISTRATION NUMBER DOCUMENT. IT IS NOT A TRADE LICENSE!\n"
         "   - Any individual or non-operating entity can obtain a TIN Certificate, but it DOES NOT legally authorize them to conduct trade, hire, or operate a business.\n"
-        "   - If the uploaded document is a Taxpayer Registration Certificate (የግብር ከፋይ ምዝገባ ሰርተፊኬት) or VAT Certificate, "
-        "YOU MUST SET is_valid = false and confidence >= 95, with rejection_reason_am = "
-        "'የቀረበው ሰነድ የግብር ከፋይ ምዝገባ ሰርተፊኬት (TIN Certificate) እንጂ ህጋዊ የንግድ ሥራ ፈቃድ (Trade License) ስላልሆነ ተቀባይነት የለውም። እባክዎ በንግድና ቀጠናዊ ትስስር ሚኒስቴር ወይም በንግድ ቢሮ የተሰጠውን ህጋዊ የንግድ ሥራ ፈቃድ ይስቀሉ።'\n\n"
-        "2. COMMERCIAL BUSINESS LICENSE / TRADE LICENSE (የንግድ ሥራ ፈቃድ):\n"
+        "   - If the uploaded document is a Taxpayer Registration Certificate (የግብር ከፋይ ምዝገባ ሰርተፊኬት), TIN slip, or VAT Certificate, "
+        "YOU MUST SET is_valid = false and confidence >= 95, with rejection_reason = "
+        "'The uploaded document is a Taxpayer Registration Certificate (TIN Certificate), not an official Commercial Business Trade License. Please upload the Trade License issued by the Ministry of Trade and Regional Integration or Regional Trade Bureau.'\n\n"
+        "2. SAMPLE / DUMMY / TEMPLATE / DRAFT DOCUMENTS:\n"
+        "   - If the document contains watermarks like 'SAMPLE', 'SPECIMEN', 'DUMMY', 'LOREM IPSUM', or empty template fields, "
+        "YOU MUST SET is_valid = false and confidence >= 95, with rejection_reason = "
+        "'The uploaded document appears to be a sample or uncertified template. Please upload your original, official Commercial Business Trade License.'\n\n"
+        "3. COMMERCIAL BUSINESS LICENSE / TRADE LICENSE (የንግድ ሥራ ፈቃድ):\n"
         "   - Features official title 'የንግድ ሥራ ፈቃድ' or 'Commercial Business License / Trade License'.\n"
         "   - Issued by the Ministry of Trade & Regional Integration or Regional Trade Bureau.\n"
         "   - Specifies the Business Sector (የንግድ ዘርፍ), License Number (የፈቃድ ቁጥር), and Taxpayer TIN (የግብር ከፋይ መለያ ቁጥር).\n"
@@ -574,27 +610,26 @@ def verify_license_with_gemini_vision(
         f"Applicant's Declared TIN: \"{tin_input}\"\n"
         f"Applicant's Declared Company Name: \"{company_name}\"\n\n"
         "MATCHING AND FORENSIC VERIFICATION CRITERIA:\n"
-        "- Locate the 10-digit TIN (የግብር ከፋይ መለያ ቁጥር) printed on the Trade License. Compare with declared TIN: \"{tin_input}\". "
-        "If they do not match, set is_valid = false.\n"
-        "- Detect official circular/oval ink stamp (ክብ ማህተም) and authorized signature.\n"
-        "- Verify document authenticity (reject random photos, selfies, CVs, receipts, ID cards, blank/fabricated sheets).\n\n"
-        "Respond with ONLY a valid JSON object matching this schema:\n"
+        "- Locate the 10-digit TIN printed on the Trade License. Compare with declared TIN: \"{tin_input}\". If they do not match, set is_valid = false.\n"
+        "- Detect official circular/oval ink stamp and authorized signature.\n"
+        "- Verify document authenticity (reject random photos, selfies, CVs, receipts, ID cards, blank sheets).\n\n"
+        "Respond with ONLY a valid JSON object matching this schema with all messages in clear professional English:\n"
         "{\n"
         '  "is_valid": true or false,\n'
         '  "confidence": integer between 0 and 100,\n'
-        '  "document_type": "Trade License / Taxpayer Registration Certificate / Other",\n'
+        '  "document_type": "Trade License / Taxpayer Registration Certificate / Sample Template / Other",\n'
         '  "stamp_detected": true or false,\n'
         '  "stamp_description": "description of seal found",\n'
         '  "signature_detected": true or false,\n'
         '  "detected_tin": "10-digit TIN read from document, or null",\n'
         '  "tin_matches": true or false,\n'
         '  "detected_company_name": "company or trade name read from doc, or null",\n'
-        '  "rejection_reason_am": "Clear explanation in Amharic if rejected, or null if approved",\n'
-        '  "verification_points_am": ["list of Amharic bullet points summarizing key findings"]\n'
+        '  "rejection_reason": "Clear explanation in English if rejected, or null if approved",\n'
+        '  "verification_points": ["list of English bullet points summarizing key findings"]\n'
         "}"
     )
 
-    candidate_models = ["gemini-flash-latest", "gemini-2.5-flash", "gemini-1.5-flash"]
+    candidate_models = ["gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-3.8-flash", "gemini-flash-latest"]
     payload = {
         "contents": [
             {
@@ -621,7 +656,7 @@ def verify_license_with_gemini_vision(
     for model_name in candidate_models:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
         try:
-            response = requests.post(url, json=payload, timeout=25)
+            response = requests.post(url, json=payload, timeout=14)
             if response.status_code == 200:
                 res_data = response.json()
                 candidates = res_data.get("candidates", [])
@@ -635,9 +670,11 @@ def verify_license_with_gemini_vision(
                     if clean_json_str.endswith("```"):
                         clean_json_str = clean_json_str[:-3]
                     parsed = json.loads(clean_json_str.strip())
-                    return {"success": True, "data": parsed, "model": model_name}
+                    if isinstance(parsed, list) and parsed:
+                        parsed = parsed[0]
+                    if isinstance(parsed, dict):
+                        return {"success": True, "data": parsed, "model": model_name}
             elif response.status_code in (404, 429, 500, 503):
-                # Try next model candidate if model is busy, unavailable, rate-limited or not found
                 last_error = f"Model {model_name} returned HTTP {response.status_code}"
                 continue
             else:
@@ -657,13 +694,21 @@ def verify_license_with_gemini_vision(
 def verify_ethiopian_business_license(uploaded_file, tin_input="", company_name="") -> dict:
     """
     Main verification pipeline with dual-tiered architecture:
-    Tier 1: Google Gemini 1.5 Flash Multimodal Vision AI (if GEMINI_API_KEY is configured)
+    Tier 1: Google Gemini Multimodal Vision AI (if GEMINI_API_KEY is configured)
     Tier 2: Enhanced Forensic Computer Vision & Government Registry Engine (Fallback)
     """
-    uploaded_file.seek(0)
+    try:
+        uploaded_file.seek(0)
+    except Exception:
+        pass
+
     filename = getattr(uploaded_file, "name", "").lower()
     file_bytes = uploaded_file.read()
-    uploaded_file.seek(0)
+
+    try:
+        uploaded_file.seek(0)
+    except Exception:
+        pass
 
     # Step 1: Reject empty or trivial files
     if len(file_bytes) < 512:
@@ -694,7 +739,7 @@ def verify_ethiopian_business_license(uploaded_file, tin_input="", company_name=
 
     clean_tin = tin_or_msg
 
-    # Step 3: Check if Google Gemini 1.5 Flash Vision AI is configured
+    # Step 3: Check if Google Gemini Vision AI is configured
     gemini_api_key = ""
     try:
         if settings.configured:
@@ -713,13 +758,38 @@ def verify_ethiopian_business_license(uploaded_file, tin_input="", company_name=
             api_key=gemini_api_key.strip(),
         )
         if gemini_res.get("success"):
-            data = gemini_res["data"]
+            data = gemini_res.get("data", {})
+            if isinstance(data, list) and data:
+                data = data[0]
+            if not isinstance(data, dict):
+                data = {}
+
             is_valid = bool(data.get("is_valid", False))
-            confidence = int(data.get("confidence", 95 if is_valid else 20))
+
+            # Safe confidence parsing
+            raw_conf = data.get("confidence", 95 if is_valid else 20)
+            try:
+                if isinstance(raw_conf, str):
+                    digits = re.sub(r'[^0-9]', '', raw_conf)
+                    confidence = int(digits) if digits else (95 if is_valid else 20)
+                else:
+                    confidence = int(raw_conf)
+            except Exception:
+                confidence = 95 if is_valid else 20
+            confidence = max(0, min(100, confidence))
+
             stamp_detected = bool(data.get("stamp_detected", False))
-            reasons = data.get("verification_points", []) or data.get("verification_points_am", [])
-            detected_tin = data.get("detected_tin") or clean_tin
-            detected_company = data.get("detected_company_name") or company_name
+
+            # Safe reasons parsing (must be list of clean strings)
+            raw_reasons = data.get("verification_points") or data.get("verification_points_am") or []
+            if isinstance(raw_reasons, list):
+                reasons = [str(r).strip() for r in raw_reasons if r and isinstance(r, (str, int, float))]
+            else:
+                reasons = []
+
+            detected_tin = str(data.get("detected_tin") or clean_tin).strip()
+            detected_company = str(data.get("detected_company_name") or company_name).strip()
+            doc_type = str(data.get("document_type") or "").strip()
 
             if is_valid:
                 gov_lookup = query_ministry_of_revenues(clean_tin)
@@ -734,8 +804,8 @@ def verify_ethiopian_business_license(uploaded_file, tin_input="", company_name=
                 }
                 final_reasons = reasons if reasons else [
                     "Official business trade license verified via Multimodal Vision AI",
-                    f"TIN number detected on document ({detected_tin}) matches records",
-                    "Official circular seal and national emblem identified on document"
+                    f"TIN number detected on document ({detected_tin}) matches declared records",
+                    "Official circular authority seal and national emblem identified on document"
                 ]
                 return {
                     "is_valid": True,
@@ -748,7 +818,14 @@ def verify_ethiopian_business_license(uploaded_file, tin_input="", company_name=
                     "source": "Google Gemini Multimodal Vision AI"
                 }
             else:
-                rejection_msg = data.get("rejection_reason") or data.get("rejection_reason_am") or "The uploaded document could not be verified as a valid Ethiopian business trade license. Please upload your original trade license."
+                rejection_msg = data.get("rejection_reason") or data.get("rejection_reason_am")
+                if not rejection_msg:
+                    if "tin" in doc_type.lower():
+                        rejection_msg = "The uploaded document is a Taxpayer Registration Certificate (TIN Certificate), not an official Commercial Business Trade License. Please upload your Trade License issued by the Ministry of Trade and Regional Integration."
+                    elif "sample" in doc_type.lower() or "template" in doc_type.lower():
+                        rejection_msg = "The uploaded document appears to be a sample or template. Please upload your authentic, official Commercial Business Trade License."
+                    else:
+                        rejection_msg = "The uploaded document could not be verified as an official Ethiopian Commercial Business Trade License. Please upload a clear original Trade License."
                 return {
                     "is_valid": False,
                     "confidence": confidence,
@@ -756,14 +833,14 @@ def verify_ethiopian_business_license(uploaded_file, tin_input="", company_name=
                     "taxpayer_profile": None,
                     "stamp_detected": stamp_detected,
                     "reasons": [],
-                    "error_message": f"Verification unsuccessful: {rejection_msg}",
+                    "error_message": rejection_msg,
                     "source": "Google Gemini Multimodal Vision AI"
                 }
 
     # Step 4: Tier 2 Fallback - Forensic Computer Vision & Government Registry Engine
     reasons = []
 
-    # 4a. Document Structure & Anti-spoofing
+    # 4a. Document Structure & Disallowed Check
     doc_info = analyze_document_structure(file_bytes, filename)
     seal_info = {"has_seal": False, "seal_confidence": 0}
 
@@ -782,7 +859,20 @@ def verify_ethiopian_business_license(uploaded_file, tin_input="", company_name=
     except Exception:
         pass
 
-    # Reject non-document photos (selfies, dark photos, random wallpapers)
+    # 4b. Explicitly reject Taxpayer (TIN) Registration Certificates, sample pages, or tax receipts
+    if doc_info.get("is_tin_certificate_only") or doc_info.get("found_disallowed"):
+        return {
+            "is_valid": False,
+            "confidence": 95,
+            "tin_number": clean_tin,
+            "taxpayer_profile": None,
+            "stamp_detected": seal_info.get("has_seal", False),
+            "reasons": [],
+            "error_message": "Verification notice: The submitted document is identified as a Taxpayer Registration Certificate (TIN Certificate), sample document, or tax receipt. To operate as an employer and post vacancies, you must upload an authentic Commercial Business Trade License (የንግድ ሥራ ፈቃድ) issued by the Ministry of Trade and Regional Integration.",
+            "source": "Document Regulatory Classifier"
+        }
+
+    # Reject non-document photos (selfies, wallpapers, dark or extreme photos)
     if not filename.endswith(".pdf") and seal_info.get("seal_confidence", 0) <= 10 and not seal_info.get("has_seal"):
         reason_msg = seal_info.get("reason") or "The uploaded image does not appear to be an official business document."
         return {
@@ -792,45 +882,45 @@ def verify_ethiopian_business_license(uploaded_file, tin_input="", company_name=
             "taxpayer_profile": None,
             "stamp_detected": False,
             "reasons": [],
-            "error_message": f"Verification unsuccessful: {reason_msg} Please upload a clear photo or PDF of your official trade license.",
+            "error_message": f"Verification unsuccessful: {reason_msg} Please upload a clear photo or PDF of your official Commercial Business Trade License.",
             "source": "Computer Vision Document Forensics"
         }
 
-    # 4b. Explicitly reject Taxpayer (TIN) Registration Certificates or VAT certificates
-    if doc_info.get("is_tin_certificate_only"):
-        return {
-            "is_valid": False,
-            "confidence": 95,
-            "tin_number": clean_tin,
-            "taxpayer_profile": None,
-            "stamp_detected": seal_info.get("has_seal", False),
-            "reasons": [],
-            "error_message": "Verification notice: The submitted document is a Taxpayer Identification Number (TIN) Registration Certificate, not an official Business Trade License. To post vacancies, please upload the Trade License issued by the Ministry of Trade and Regional Integration or Regional Trade Bureau.",
-            "source": "Document Regulatory Classifier"
-        }
-
-    # 4c. Seal & Keyword verification
     has_seal = seal_info.get("has_seal", False)
     has_keywords = doc_info["keyword_count"] >= 1
+
+    # CRITICAL REGULATORY RULE:
+    # A document CANNOT be approved without explicit Commercial Business License headings/keywords!
+    # A stamp alone (present on TIN certs, sample pages, receipts) is NEVER sufficient.
+    if not has_keywords:
+        return {
+            "is_valid": False,
+            "confidence": 25,
+            "tin_number": clean_tin,
+            "taxpayer_profile": None,
+            "stamp_detected": has_seal,
+            "reasons": [],
+            "error_message": "Verification unsuccessful: The uploaded document does not contain required Commercial Business Trade License headings (የንግድ ሥራ ፈቃድ). Taxpayer registration sheets (TIN certificates), sample templates, or receipts are strictly not accepted. Please upload an official Trade License issued by the Ministry of Trade and Regional Integration.",
+            "source": "Computer Vision Document Forensics"
+        }
+
+    if not has_seal:
+        return {
+            "is_valid": False,
+            "confidence": 40,
+            "tin_number": clean_tin,
+            "taxpayer_profile": None,
+            "stamp_detected": False,
+            "reasons": [],
+            "error_message": "Verification unsuccessful: The official circular authority stamp or seal could not be verified on the document. Please upload a clear original Trade License showing the circular stamp and authorized signature.",
+            "source": "Computer Vision Document Forensics"
+        }
 
     if doc_info["keyword_count"] >= 2:
         reasons.append(f"Official government trade license headers identified ({', '.join(doc_info['found_keywords'][:2])})")
 
     if has_seal:
         reasons.append("Official circular government seal detected on document")
-
-    # If neither seal nor government keywords found -> Reject random file
-    if not has_seal and not has_keywords:
-        return {
-            "is_valid": False,
-            "confidence": 20,
-            "tin_number": clean_tin,
-            "taxpayer_profile": None,
-            "stamp_detected": False,
-            "reasons": [],
-            "error_message": "Verification unsuccessful: The uploaded document does not show an official Ethiopian trade license heading or circular authority seal. Please upload a clear original document.",
-            "source": "Computer Vision Document Forensics"
-        }
 
     # 4c. Government Registry lookup & Jurisdiction verification
     gov_lookup = query_ministry_of_revenues(clean_tin)

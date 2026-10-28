@@ -12,11 +12,11 @@
                     <span class="text-muted mr-1">{{ company.name }}</span>
                     {% if company.is_license_verified %}
                         <span class="badge badge-success px-2 py-1 shadow-sm" style="font-size: 0.78rem;">
-                            <i class="fa fa-check-circle mr-1"></i> {% trans "ህጋዊ የንግድ ፈቃድ የተረጋገጠ (Verified)" %}
+                            <i class="fa fa-check-circle mr-1"></i> {% trans "Business License Verified" %}
                         </span>
                     {% else %}
                         <a href="{% url 'accounts:employer-verify-license' %}" class="badge badge-warning px-2 py-1 text-dark text-decoration-none">
-                            <i class="fa fa-shield mr-1"></i> {% trans "ፈቃድ አረጋግጥ (Verify License)" %}
+                            <i class="fa fa-shield mr-1"></i> {% trans "Verify Business License" %}
                         </a>
                     {% endif %}
                 </div>

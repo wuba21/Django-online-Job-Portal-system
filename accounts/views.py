@@ -229,9 +229,12 @@ class EmployerLicenseVerifyView(View):
         return render(request, self.template_name, {"company": company})
 
     def post(self, request, *args, **kwargs):
+        import logging
         from accounts.models import Company
         from accounts.license_validator import verify_ethiopian_business_license
         from django.utils import timezone
+
+        logger = logging.getLogger(__name__)
 
         company, _ = Company.objects.get_or_create(
             user=request.user,
@@ -249,43 +252,74 @@ class EmployerLicenseVerifyView(View):
             messages.error(request, "Please upload a valid business license document (PDF or image).")
             return render(request, self.template_name, {"company": company})
 
-        # Save the uploaded license document
-        company.license_document = uploaded_file
-        company.tin_number = tin_number
+        # File validation: max size 10MB, allowed extensions
+        allowed_extensions = (".pdf", ".png", ".jpg", ".jpeg", ".webp")
+        fname = getattr(uploaded_file, "name", "").lower()
+        if not any(fname.endswith(ext) for ext in allowed_extensions):
+            messages.error(request, "Unsupported file format. Please upload a PDF, JPG, or PNG document.")
+            return render(request, self.template_name, {"company": company})
 
-        # Run AI Verification Engine with Government Registry cross-check
-        result = verify_ethiopian_business_license(
-            uploaded_file,
-            tin_input=tin_number,
-            company_name=company.name
-        )
+        if uploaded_file.size > 10 * 1024 * 1024:
+            messages.error(request, "The uploaded file is too large. Maximum file size is 10 MB.")
+            return render(request, self.template_name, {"company": company})
 
-        company.license_ai_confidence = result["confidence"]
-        if result["tin_number"]:
-            company.tin_number = result["tin_number"]
-
-        if result["is_valid"]:
-            company.license_status = "verified"
-            company.license_verified_at = timezone.now()
-            company.license_rejection_reason = ""
-            company.save()
-
-            reasons_summary = ", ".join(result.get("reasons", []))
-            messages.success(
-                request,
-                f"Business license verified successfully (Confidence: {result['confidence']}%). You can now access your employer dashboard and post jobs."
+        try:
+            # Run AI Verification Engine with Government Registry cross-check
+            result = verify_ethiopian_business_license(
+                uploaded_file,
+                tin_input=tin_number,
+                company_name=company.name
             )
-            return redirect("jobs:employer-dashboard")
-        else:
-            company.license_status = "rejected"
-            company.license_rejection_reason = result["error_message"] or "Official seal or valid TIN number could not be detected."
-            company.save()
 
+            # Ensure file pointer is reset before saving to model
+            try:
+                uploaded_file.seek(0)
+            except Exception:
+                pass
+
+            company.license_document = uploaded_file
+            if tin_number:
+                company.tin_number = tin_number
+
+            raw_confidence = result.get("confidence", 0)
+            try:
+                company.license_ai_confidence = int(raw_confidence)
+            except Exception:
+                company.license_ai_confidence = 0
+
+            if result.get("tin_number"):
+                company.tin_number = str(result["tin_number"])
+
+            if result.get("is_valid"):
+                company.license_status = "verified"
+                company.license_verified_at = timezone.now()
+                company.license_rejection_reason = ""
+                company.save()
+
+                messages.success(
+                    request,
+                    f"Business license verified successfully (Confidence: {company.license_ai_confidence}%). You can now access your employer dashboard and post jobs."
+                )
+                return redirect("jobs:employer-dashboard")
+            else:
+                company.license_status = "rejected"
+                rejection_msg = str(result.get("error_message") or "Official seal, Trade License heading, or valid TIN could not be verified.")
+                company.license_rejection_reason = rejection_msg
+                company.save()
+
+                messages.error(
+                    request,
+                    f"License verification failed (Confidence: {company.license_ai_confidence}%): {rejection_msg}"
+                )
+                return render(request, self.template_name, {"company": company, "result": result})
+
+        except Exception as e:
+            logger.exception("License verification encountered an error: %s", e)
             messages.error(
                 request,
-                f"License verification failed (Confidence: {result['confidence']}%): {company.license_rejection_reason}. Please re-upload a clear copy showing the official seal and TIN number."
+                "An unexpected error occurred while processing your document. Please verify the file is a clear, uncorrupted PDF or image (PNG/JPG) under 10MB and try again."
             )
-            return render(request, self.template_name, {"company": company, "result": result})
+            return render(request, self.template_name, {"company": company})
 
 
 @method_decorator(csrf_exempt, name="dispatch")
