@@ -129,7 +129,18 @@ class CustomSocialAuthExceptionMiddleware:
                 f"Please sign in with your email or password."
             )
             message_tag = "warning"
-        elif isinstance(exception, (AuthFailed, AuthTokenError)):
+        elif isinstance(exception, AuthFailed):
+            err_text = str(exception)
+            if "no account found" in err_text.lower() or "register first" in err_text.lower() or "አልተገኘም" in err_text:
+                friendly_message = err_text
+                message_tag = "not_registered"
+            else:
+                friendly_message = (
+                    f"Unable to verify {provider_display} credentials. "
+                    f"Please try again or log in with your email."
+                )
+                message_tag = "danger"
+        elif isinstance(exception, AuthTokenError):
             friendly_message = (
                 f"Unable to verify {provider_display} credentials. "
                 f"Please try again or log in with your email."
@@ -159,6 +170,8 @@ class CustomSocialAuthExceptionMiddleware:
                     messages.info(request, friendly_message, extra_tags=f"social-auth {backend_name}")
                 elif message_tag == "warning":
                     messages.warning(request, friendly_message, extra_tags=f"social-auth {backend_name}")
+                elif message_tag == "not_registered":
+                    messages.error(request, friendly_message, extra_tags=f"not_registered social-auth {backend_name}")
                 else:
                     messages.error(request, friendly_message, extra_tags=f"social-auth {backend_name}")
             except Exception:

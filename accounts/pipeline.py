@@ -3,14 +3,35 @@ from django.core.files.base import ContentFile
 from django.utils import timezone
 
 
+from social_core.exceptions import AuthFailed
+from django.contrib.auth import get_user_model
+
+
 def check_user_exists_for_login(backend, details, user=None, *args, **kwargs):
     """
-    LinkedIn-style seamless social authentication:
-    - If account exists, links and signs the user in immediately.
-    - If account is new, permits seamless creation (Job Seeker by default, or Employer if requested)
-      without blocking or presenting bulky error messages.
+    Enforces registration verification:
+    Checks if the user's email already exists in the database.
+    - If account exists: allows login to proceed seamlessly.
+    - If account does NOT exist: prevents 1-click auto-registration and instructs
+      the user to complete registration first.
     """
-    return None
+    if user:
+        return {"user": user}
+
+    email = details.get("email")
+    if not email:
+        raise AuthFailed("No email address provided by your social provider. Please register manually.")
+
+    email_clean = email.lower().strip()
+    User = get_user_model()
+    existing_user = User.objects.filter(email__iexact=email_clean).first()
+
+    if not existing_user:
+        raise AuthFailed(
+            f"No account found with this email ({email_clean}). Please register first / በዚህ ኢሜይል የተመዘገበ አካውንት የለም፤ እባክዎ መጀመሪያ ይመዝገቡ።"
+        )
+
+    return {"user": existing_user}
 
 
 

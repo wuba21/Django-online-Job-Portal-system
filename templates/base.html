@@ -858,8 +858,12 @@
             })
             .then(res => res.json())
             .then(data => {
-                if (data.status === "success" || data.redirect_url) {
-                    window.location.href = data.redirect_url || window.location.href;
+                if (data.status === "success" && data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else if (data.status === "unregistered") {
+                    if (data.redirect_url) {
+                        window.location.href = data.redirect_url;
+                    }
                 }
             })
             .catch(err => console.warn("Google One Tap notice:", err));

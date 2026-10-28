@@ -376,22 +376,16 @@ class GoogleOneTapLoginView(View):
         admin_emails = ["wubantetilahun@gmail.com", "wubante19@gmail.com", "admin@admin.com"]
         is_admin = email in admin_emails
 
-        user = User.objects.filter(email=email).first()
+        user = User.objects.filter(email__iexact=email).first()
         if not user:
-            # Seamless user registration via Google One Tap (Job Seeker by default)
-            user = User.objects.create_user(
-                email=email,
-                role="employee",
-                first_name=first_name,
-                last_name=last_name,
-                is_active=True,
-            )
-            user.is_verified = True
-            user.email_verified_at = timezone.now()
-            if is_admin:
-                user.is_staff = True
-                user.is_superuser = True
-            user.save()
+            from django.urls import reverse
+            from urllib.parse import quote
+            register_url = reverse("accounts:employee-register")
+            return JsonResponse({
+                "status": "unregistered",
+                "message": f"No account found for {email}. Please register first / በዚህ ኢሜይል የተመዘገበ አካውንት የለም፤ እባክዎ መጀመሪያ ይመዝገቡ።",
+                "redirect_url": f"{register_url}?email={quote(email)}&first_name={quote(first_name)}&last_name={quote(last_name)}"
+            }, status=403)
         else:
             updated = False
             if not user.first_name and first_name:
