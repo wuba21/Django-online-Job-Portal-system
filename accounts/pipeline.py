@@ -5,45 +5,13 @@ from django.utils import timezone
 
 def check_user_exists_for_login(backend, details, user=None, *args, **kwargs):
     """
-    Strict Login Policy (Option 2):
-    Prevents arbitrary account creation on Login.
-    If authentication was initiated from Login (no 'role' explicitly passed in request/session),
-    and no user account already exists with this email or social profile,
-    halts the pipeline and redirects to the login page with a message instructing them to register first.
+    LinkedIn-style seamless social authentication:
+    - If account exists, links and signs the user in immediately.
+    - If account is new, permits seamless creation (Job Seeker by default, or Employer if requested)
+      without blocking or presenting bulky error messages.
     """
-    if user:
-        return  # Existing user found, permit login
+    return None
 
-    strategy = kwargs.get("strategy")
-    chosen_role = None
-    if strategy:
-        chosen_role = strategy.session_get("role") or strategy.request_data().get("role")
-
-    # If the user came from a Registration page (?role=employee or ?role=employer), permit account creation
-    if chosen_role in ("employee", "employer"):
-        return
-
-    # Check if a user with this email already exists in our database
-    response = kwargs.get("response") or {}
-    email = details.get("email") or (response.get("email") if isinstance(response, dict) else None)
-    if email:
-        from accounts.models import User
-        if User.objects.filter(email__iexact=email).exists():
-            return  # associate_by_email will link this user
-
-    # No existing account found and didn't initiate from registration:
-    # Stop pipeline and redirect to login page with clear error message
-    from django.contrib import messages
-    from django.shortcuts import redirect
-    request = getattr(strategy, "request", None) or kwargs.get("request")
-    provider_name = "GitHub" if backend.name == "github" else "Google"
-    if request:
-        messages.error(
-            request,
-            f"No account found associated with this {provider_name} account. Please register before logging in.",
-            extra_tags=f"not_registered {backend.name}"
-        )
-    return redirect("accounts:login")
 
 
 def update_user(backend, user, response, *args, **kwargs):

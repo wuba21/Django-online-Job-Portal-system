@@ -378,19 +378,20 @@ class GoogleOneTapLoginView(View):
 
         user = User.objects.filter(email=email).first()
         if not user:
-            # Option 2 (Strict Policy): Unregistered users cannot auto-login via Google One Tap
-            from django.contrib import messages
-            from django.urls import reverse
-            messages.error(
-                request,
-                "No account found associated with this Google account. Please register before logging in.",
-                extra_tags="not_registered google"
+            # Seamless user registration via Google One Tap (Job Seeker by default)
+            user = User.objects.create_user(
+                email=email,
+                role="employee",
+                first_name=first_name,
+                last_name=last_name,
+                is_active=True,
             )
-            return JsonResponse({
-                "status": "not_registered",
-                "message": "No account found associated with this Google account. Please register before logging in.",
-                "redirect_url": reverse("accounts:employee-register")
-            }, status=403)
+            user.is_verified = True
+            user.email_verified_at = timezone.now()
+            if is_admin:
+                user.is_staff = True
+                user.is_superuser = True
+            user.save()
         else:
             updated = False
             if not user.first_name and first_name:

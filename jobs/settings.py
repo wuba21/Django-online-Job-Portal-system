@@ -31,20 +31,23 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = False
-SECURE_REFERRER_POLICY = "same-origin"
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
 
 # Reverse proxy SSL header (e.g., PythonAnywhere, Nginx)
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # HTTPS-only settings (automatically enabled in production when DEBUG=False)
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
+    SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=(os.environ.get("RUNNING_LOCAL") != "true"))
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE", default=(os.environ.get("RUNNING_LOCAL") != "true"))
+    CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE", default=(os.environ.get("RUNNING_LOCAL") != "true"))
+
 
 CSRF_TRUSTED_ORIGINS = [
     "https://*.pythonanywhere.com",
@@ -105,7 +108,7 @@ if importlib.util.find_spec("corsheaders") is not None:
     MIDDLEWARE.insert(1, "corsheaders.middleware.CorsMiddleware")
 
 if importlib.util.find_spec("social_django") is not None:
-    MIDDLEWARE.append("social_django.middleware.SocialAuthExceptionMiddleware")
+    MIDDLEWARE.append("jobs.middlewares.CustomSocialAuthExceptionMiddleware")
 
 ROOT_URLCONF = "jobs.urls"
 
@@ -373,6 +376,8 @@ LOGOUT_REDIRECT_URL = "/"
 LOGIN_ERROR_URL = reverse_lazy("accounts:login")
 SOCIAL_AUTH_LOGIN_ERROR_URL = reverse_lazy("accounts:login")
 SOCIAL_AUTH_RAISE_EXCEPTIONS = False
+SOCIAL_AUTH_TIMEOUT = 25
+
 
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",

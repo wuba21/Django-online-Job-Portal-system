@@ -157,7 +157,7 @@ class EmployerRegistrationForm(BaseRegistrationForm):
 
 
 class UserLoginForm(forms.Form):
-    email = forms.EmailField(label="Google Email Address")
+    email = forms.EmailField(label="Email Address")
     password = forms.CharField(label="Password", strip=False, widget=forms.PasswordInput)
 
     def __init__(self, *args, **kwargs):
@@ -165,7 +165,7 @@ class UserLoginForm(forms.Form):
         self.user = None
         self.fields["email"].widget.attrs.update({
             "class": "form-control",
-            "placeholder": "Enter your Google email (e.g. name@gmail.com)",
+            "placeholder": "Enter your email address",
             "autocomplete": "email",
         })
         self.fields["password"].widget.attrs.update({

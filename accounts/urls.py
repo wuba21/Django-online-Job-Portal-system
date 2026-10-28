@@ -19,6 +19,7 @@ urlpatterns = [
     path("employee/profile/update/", EditProfileView.as_view(), name="employee-profile-update"),
     path("employer/profile/update/", EmployerProfileEditView.as_view(), name="employer-profile-update"),
     path("post-login-redirect/", LoginRedirectRouteView.as_view(), name="post-login-redirect"),
+    path("accounts/post-login-redirect/", LoginRedirectRouteView.as_view(), name="accounts-post-login-redirect-alias"),
     path("employer/verify-license/", EmployerLicenseVerifyView.as_view(), name="employer-verify-license"),
     path("google-one-tap-login/", GoogleOneTapLoginView.as_view(), name="google-one-tap-login"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
