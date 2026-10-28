@@ -51,6 +51,8 @@ if not DEBUG:
 CSRF_TRUSTED_ORIGINS = [
     "https://*.pythonanywhere.com",
     "https://wubante.pythonanywhere.com",
+    "https://ethiojobsportal.com",
+    "https://www.ethiojobsportal.com",
     "http://127.0.0.1",
     "http://localhost",
 ]
@@ -255,8 +257,17 @@ else:
     CORS_ALLOWED_ORIGINS = [
         "https://wubante.pythonanywhere.com",
         "https://wuba21.pythonanywhere.com",
+        "https://ethiojobsportal.com",
+        "https://www.ethiojobsportal.com",
     ]
-    ALLOWED_HOSTS = ["wubante.pythonanywhere.com", "wuba21.pythonanywhere.com", "*.pythonanywhere.com", "testserver"]
+    ALLOWED_HOSTS = [
+        "wubante.pythonanywhere.com",
+        "wuba21.pythonanywhere.com",
+        "*.pythonanywhere.com",
+        "ethiojobsportal.com",
+        "www.ethiojobsportal.com",
+        "testserver",
+    ]
 
 CORS_ALLOW_METHODS = ("DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT")
 
