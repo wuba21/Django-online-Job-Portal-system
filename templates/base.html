@@ -64,262 +64,18 @@
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script><![endif]-->
 
     <style>
-        /* PERMANENT FIXED Sleek Dark Navy Navbar */
+        /* ==========================================================================
+           CRITICAL NAVBAR & LAYOUT (Above-Fold Render)
+           ========================================================================== */
+        body { margin: 0; }
         header.header, .navbar {
             background-color: #111827 !important;
             background: #111827 !important;
             border-bottom: 1px solid rgba(255,255,255,0.08) !important;
         }
-        /* Critical above-fold render ΓÇö prevent layout shift */
-        body { margin: 0; }
         .navbar-brand img { height: 42px; width: auto; }
 
-        /* Instant Smooth Dropdown on Hover for Desktop */
-        @media (min-width: 992px) {
-            .navbar .nav-item.dropdown:hover > .dropdown-menu {
-                display: block !important;
-                margin-top: 0 !important;
-                animation: navDropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            }
-            /* Seamless bridge between toggle and menu to prevent flicker */
-            .navbar .nav-item.dropdown > .dropdown-menu::before {
-                content: "";
-                position: absolute;
-                top: -10px;
-                left: 0;
-                right: 0;
-                height: 10px;
-                background: transparent;
-            }
-        }
-        @keyframes navDropdownFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(6px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Mobile Dropdown Fix: Accordion Vertical Flow (Never Float or Overflow) */
-        @media (max-width: 991.98px) {
-            .navbar .navbar-nav {
-                width: 100% !important;
-            }
-            .navbar .nav-item {
-                width: 100% !important;
-                display: block !important;
-            }
-            .navbar .nav-item.dropdown {
-                display: block !important;
-                width: 100% !important;
-            }
-            .navbar .nav-link {
-                display: flex !important;
-                align-items: center !important;
-                width: 100% !important;
-            }
-            .navbar-nav .nav-link.dropdown-toggle::after {
-                margin-left: auto !important;
-            }
-            .navbar-nav .dropdown-menu {
-                position: static !important;
-                float: none !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                box-shadow: none !important;
-                margin: 6px 0 10px 0 !important;
-                padding: 6px !important;
-                background: #ffffff !important;
-                border: 1px solid #e2e8f0 !important;
-                border-radius: 12px !important;
-                transform: none !important;
-                right: auto !important;
-                left: auto !important;
-            }
-            .navbar-nav .dropdown-menu.dropdown-menu-right {
-                right: auto !important;
-                left: auto !important;
-            }
-            .navbar-nav .dropdown-menu .dropdown-item {
-                display: flex !important;
-                align-items: center !important;
-                width: 100% !important;
-                padding: 10px 14px !important;
-                border-radius: 6px !important;
-                color: #1e293b !important;
-                font-size: 0.9rem !important;
-                white-space: normal !important;
-            }
-            .navbar-nav .dropdown-menu .dropdown-item:hover,
-            .navbar-nav .dropdown-menu .dropdown-item:focus {
-                background: #f0f7ff !important;
-                color: #0a66c2 !important;
-            }
-            .navbar-nav .dropdown-menu .dropdown-item.active {
-                background: #eff6ff !important;
-                color: #1d4ed8 !important;
-            }
-        }
-
-        /* Mobile: Force chrome-menu white - override dark navbar */
-        @media (max-width: 991.98px) {
-            .navbar-nav .dropdown-menu.chrome-menu,
-            .navbar-nav .dropdown-menu.chrome-user-menu {
-                background: #ffffff !important;
-                background-color: #ffffff !important;
-                border: 1px solid #e2e8f0 !important;
-            }
-            .chrome-menu .chrome-item,
-            .chrome-menu ul {
-                background: transparent !important;
-            }
-            .chrome-menu .chrome-link {
-                color: #1e293b !important;
-                background: transparent !important;
-            }
-            .chrome-menu .chrome-flyout {
-                background: #f8fafc !important;
-                background-color: #f8fafc !important;
-            }
-        }
-
-        /* User Profile Dropdown Styling (Universal - Desktop & Mobile) */
-        .user-profile-dropdown,
-        .user-profile-dropdown * {
-            text-transform: none !important;
-            letter-spacing: normal !important;
-            box-sizing: border-box !important;
-        }
-
-        .user-profile-dropdown,
-        .navbar-nav .user-profile-dropdown,
-        .navbar-nav .dropdown-menu.user-profile-dropdown {
-            background: #ffffff !important;
-            border: 1px solid #e2e8f0 !important;
-            border-radius: 14px !important;
-            overflow: hidden !important;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12) !important;
-            padding: 0 !important;
-            min-width: 300px !important;
-            max-width: 330px !important;
-        }
-
-        .user-profile-dropdown .user-dropdown-header {
-            padding: 16px 18px 14px 18px !important;
-            background: #ffffff !important;
-            border-bottom: 1px solid #f1f5f9 !important;
-        }
-
-        .user-profile-dropdown .user-name {
-            color: #0f172a !important;
-            font-weight: 700 !important;
-            font-size: 15px !important;
-        }
-
-        .user-profile-dropdown .user-email {
-            color: #64748b !important;
-            font-size: 12.5px !important;
-        }
-
-        .user-profile-dropdown .profile-action-btn {
-            border: 1.5px solid #0a66c2 !important;
-            color: #0a66c2 !important;
-            background: #ffffff !important;
-            border-radius: 20px !important;
-            font-size: 13px !important;
-            font-weight: 600 !important;
-            padding: 5px 14px !important;
-            text-decoration: none !important;
-            transition: all 0.15s ease !important;
-            display: block !important;
-            text-align: center !important;
-            margin-top: 10px !important;
-        }
-
-        .user-profile-dropdown .profile-action-btn:hover {
-            background: #f0f7ff !important;
-            border-color: #004182 !important;
-            color: #004182 !important;
-        }
-
-        .user-profile-dropdown .user-dropdown-body {
-            padding: 6px 0 !important;
-            background: #ffffff !important;
-        }
-
-        /* 100% Guaranteed High-Contrast Dark Text for ALL menu items on Desktop AND Mobile */
-        .user-profile-dropdown .dropdown-item,
-        .navbar-nav .user-profile-dropdown .dropdown-item,
-        .navbar-nav .dropdown-menu.user-profile-dropdown .dropdown-item,
-        .user-profile-dropdown .user-dropdown-body .dropdown-item,
-        .navbar-nav .user-profile-dropdown .user-dropdown-body .dropdown-item {
-            color: #1e293b !important; /* Bold Charcoal / Slate - 100% visible */
-            font-size: 14px !important;
-            font-weight: 500 !important;
-            padding: 10px 20px !important;
-            display: flex !important;
-            align-items: center !important;
-            background: transparent !important;
-            text-decoration: none !important;
-            transition: background 0.15s ease, color 0.15s ease !important;
-        }
-
-        .user-profile-dropdown .dropdown-item:hover,
-        .navbar-nav .user-profile-dropdown .dropdown-item:hover,
-        .navbar-nav .dropdown-menu.user-profile-dropdown .dropdown-item:hover,
-        .user-profile-dropdown .user-dropdown-body .dropdown-item:hover,
-        .navbar-nav .user-profile-dropdown .user-dropdown-body .dropdown-item:hover {
-            background: #f8fafc !important;
-            color: #0a66c2 !important;
-        }
-
-        /* Icons inside profile dropdown */
-        .user-profile-dropdown .dropdown-item i,
-        .navbar-nav .user-profile-dropdown .dropdown-item i,
-        .user-profile-dropdown .user-dropdown-body .dropdown-item i {
-            width: 22px !important;
-            text-align: center !important;
-            color: #475569 !important; /* Visible dark-slate icons */
-            font-size: 14px !important;
-            margin-right: 8px !important;
-            transition: color 0.15s ease !important;
-        }
-
-        .user-profile-dropdown .dropdown-item:hover i,
-        .navbar-nav .user-profile-dropdown .dropdown-item:hover i,
-        .user-profile-dropdown .user-dropdown-body .dropdown-item:hover i {
-            color: #0a66c2 !important;
-        }
-
-        /* Dividers inside profile dropdown */
-        .user-profile-dropdown .dropdown-divider {
-            margin: 4px 0 !important;
-            border-top: 1px solid #f1f5f9 !important;
-        }
-
-        /* Logout button inside profile dropdown */
-        .user-profile-dropdown .dropdown-item.text-danger,
-        .navbar-nav .user-profile-dropdown .dropdown-item.text-danger {
-            color: #dc2626 !important;
-        }
-        .user-profile-dropdown .dropdown-item.text-danger i,
-        .navbar-nav .user-profile-dropdown .dropdown-item.text-danger i {
-            color: #dc2626 !important;
-        }
-        .user-profile-dropdown .dropdown-item.text-danger:hover {
-            background: #fef2f2 !important;
-            color: #b91c1c !important;
-        }
-        .user-profile-dropdown .dropdown-item.text-danger:hover i {
-            color: #b91c1c !important;
-        }
-
-        /* WCAG AA Accessible Contrast Fixes:
-           Darken primary blue (#2b90d9 -> #206fa6) to achieve >= 4.5:1 contrast with white text.
-           Ensure info/teal badges use dark text (#000000) for compliant contrast. */
+        /* WCAG AA Accessible Contrast Fixes */
         .btn-primary,
         a.btn-primary,
         button.btn-primary {
@@ -387,302 +143,410 @@
             opacity: 1 !important;
         }
 
+        /* ==========================================================================
+           MODERN UNIFIED DROPDOWN NAVIGATION SYSTEM
+           Applies to Profile Menu, Jobs Menu, Nested Flyouts, and Universal Dropdowns
+           ========================================================================== */
 
-        /* ── Chrome User Dropdown extra styles ── */
-        .chrome-user-menu {
-            min-width: 250px !important;
-            max-width: 280px !important;
+        /* 1. Reset & Normalization for all Dropdown Menus (Kills uppercase & spacing bugs) */
+        .navbar .dropdown-menu,
+        .navbar .dropdown-menu *,
+        .chrome-menu,
+        .chrome-menu *,
+        .dropdown-menu,
+        .dropdown-menu * {
+            text-transform: none !important;
+            letter-spacing: normal !important;
+            box-sizing: border-box !important;
         }
-        .chrome-user-header {
-            display: flex !important;
-            align-items: center !important;
-            padding: 16px 14px 14px !important;
-            list-style: none !important;
-            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%) !important;
-            border-radius: 10px 10px 0 0 !important;
-            margin-bottom: 4px !important;
-        }
-        .chrome-user-avatar {
-            width: 46px; height: 46px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 2.5px solid rgba(255,255,255,0.5);
-            margin-right: 12px;
-            flex-shrink: 0;
-            background: #dbeafe;
-        }
-        .chrome-user-avatar img { width:100%;height:100%;object-fit:cover;display:block; }
-        .chrome-user-name {
-            color: #ffffff !important;
-            font-size: 13.5px;
-            font-weight: 700;
-            text-transform: capitalize;
-            line-height: 1.3;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 165px;
-        }
-        .chrome-user-email {
-            color: rgba(255,255,255,0.75) !important;
-            font-size: 11.5px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 165px;
-        }
-        .chrome-user-edit-row {
-            padding: 0 10px 8px !important;
-            list-style: none !important;
-        }
-        .chrome-user-edit-btn {
-            display: block;
-            text-align: center;
-            background: rgba(255,255,255,0.15) !important;
-            color: #ffffff !important;
-            border: 1.5px solid rgba(255,255,255,0.45) !important;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            padding: 6px 0;
-            text-decoration: none !important;
-            transition: background 0.15s;
-        }
-        .chrome-user-edit-btn:hover {
-            background: rgba(255,255,255,0.28) !important;
-            color: #ffffff !important;
-            text-decoration: none !important;
-        }
-        .chrome-badge {
-            background: #dc2626;
-            color: #fff;
-            font-size: 10px;
-            font-weight: 700;
-            border-radius: 10px;
-            padding: 1px 6px;
-            min-width: 18px;
-            text-align: center;
-        }
-        .chrome-logout:hover {
-            background: #fef2f2 !important;
-            color: #b91c1c !important;
-        }
-        .chrome-logout .chrome-label { color: #dc2626 !important; }
-        .chrome-logout:hover .chrome-label { color: #b91c1c !important; }
 
-        /* ========== Chrome-Style Flyout Dropdown ========== */
-        .chrome-menu {
+        /* 2. Base Floating Dropdown Surface */
+        .navbar .dropdown-menu,
+        .chrome-menu,
+        .dropdown-menu {
             background: #ffffff !important;
+            background-color: #ffffff !important;
             border: 1px solid #e2e8f0 !important;
             border-radius: 12px !important;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+            box-shadow: 0 14px 35px -4px rgba(15, 23, 42, 0.12), 0 4px 12px -2px rgba(15, 23, 42, 0.06) !important;
             padding: 6px 0 !important;
-            min-width: 220px !important;
+            margin-top: 0 !important;
             list-style: none !important;
+            z-index: 1000 !important;
         }
-        .chrome-item {
-            position: relative;
-            list-style: none !important;
-        }
-        .chrome-link {
+
+        /* Standard Generic Dropdown Items (e.g. Language Selector, Admin exports) */
+        .dropdown-menu .dropdown-item {
             display: flex !important;
             align-items: center !important;
-            padding: 9px 14px !important;
+            padding: 8px 14px !important;
+            margin: 1px 6px !important;
+            border-radius: 6px !important;
             color: #1e293b !important;
             font-size: 13.5px !important;
             font-weight: 500 !important;
             text-decoration: none !important;
-            border-radius: 6px !important;
-            margin: 1px 4px !important;
-            transition: background 0.12s !important;
-            cursor: pointer;
+            transition: all 0.15s ease !important;
+            background: transparent !important;
+            width: auto !important;
+        }
+        .dropdown-menu .dropdown-item:hover,
+        .dropdown-menu .dropdown-item:focus {
+            background-color: #f1f5f9 !important;
+            color: #0a66c2 !important;
+        }
+        .dropdown-menu .dropdown-item.active {
+            background-color: #eff6ff !important;
+            color: #1d4ed8 !important;
+            font-weight: 600 !important;
+        }
+        .dropdown-menu .dropdown-divider {
+            height: 1px !important;
+            background: #e2e8f0 !important;
+            border: none !important;
+            margin: 6px 10px !important;
+        }
+
+        /* 3. Dropdown Menu Widths */
+        .chrome-menu {
+            min-width: 230px !important;
+        }
+        .chrome-user-menu {
+            min-width: 275px !important;
+            max-width: 300px !important;
+            padding: 0 0 6px 0 !important;
+        }
+
+        /* 4. Profile Dropdown Header Card */
+        .chrome-user-header {
+            display: flex !important;
+            align-items: center !important;
+            padding: 14px 16px 10px 16px !important;
+            list-style: none !important;
+            gap: 12px !important;
+            background: #ffffff !important;
+            border-radius: 12px 12px 0 0 !important;
+        }
+        .chrome-user-avatar {
+            width: 46px !important;
+            height: 46px !important;
+            min-width: 46px !important;
+            border-radius: 50% !important;
+            overflow: hidden !important;
+            border: 2px solid #e2e8f0 !important;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06) !important;
+            flex-shrink: 0 !important;
+            background: #f8fafc !important;
+        }
+        .chrome-user-avatar img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            display: block !important;
+        }
+        .chrome-user-info {
+            flex: 1 !important;
+            min-width: 0 !important;
+        }
+        .chrome-user-name {
+            color: #0f172a !important;
+            font-size: 14px !important;
+            font-weight: 700 !important;
+            line-height: 1.3 !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            text-transform: capitalize !important;
+        }
+        .chrome-user-email {
+            color: #64748b !important;
+            font-size: 11.5px !important;
+            line-height: 1.3 !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            margin-top: 1px !important;
+        }
+        .chrome-user-edit-row {
+            padding: 0 14px 8px 14px !important;
+            list-style: none !important;
+        }
+        .chrome-user-edit-btn {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 6px !important;
+            width: 100% !important;
+            background: #f8fafc !important;
+            color: #0a66c2 !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 20px !important;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            padding: 6px 14px !important;
+            text-decoration: none !important;
+            transition: all 0.2s ease !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+        }
+        .chrome-user-edit-btn:hover {
+            background: #0a66c2 !important;
+            color: #ffffff !important;
+            border-color: #0a66c2 !important;
+            text-decoration: none !important;
+            box-shadow: 0 2px 6px rgba(10, 102, 194, 0.3) !important;
+        }
+
+        /* 5. Chrome Menu Navigation Items */
+        .chrome-item {
+            position: relative !important;
+            list-style: none !important;
+            margin: 1px 0 !important;
+            padding: 0 6px !important;
+        }
+        .chrome-link {
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            padding: 8px 10px !important;
+            color: #1e293b !important;
+            font-size: 13.5px !important;
+            font-weight: 500 !important;
+            text-decoration: none !important;
+            border-radius: 8px !important;
+            transition: background 0.15s ease, color 0.15s ease !important;
+            cursor: pointer !important;
+            background: transparent !important;
+            width: 100% !important;
         }
         .chrome-link:hover,
         .chrome-item.has-flyout:hover > .chrome-link {
-            background: #f0f7ff !important;
+            background: #f1f5f9 !important;
             color: #0a66c2 !important;
             text-decoration: none !important;
         }
         .chrome-link.active {
             background: #eff6ff !important;
             color: #1d4ed8 !important;
+            font-weight: 600 !important;
         }
         .chrome-icon {
-            width: 28px; height: 28px;
-            border-radius: 6px;
-            display: inline-flex; align-items: center; justify-content: center;
-            font-size: 12px;
-            margin-right: 10px;
-            flex-shrink: 0;
+            width: 30px !important;
+            height: 30px !important;
+            min-width: 30px !important;
+            border-radius: 8px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 13px !important;
+            flex-shrink: 0 !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
         }
-        .chrome-label { flex: 1; }
-        .chrome-arrow {
-            font-size: 10px !important;
-            color: #94a3b8 !important;
+        .chrome-label {
+            flex: 1 !important;
+            color: #1e293b !important;
+            font-size: 13.5px !important;
+            font-weight: 500 !important;
+            white-space: nowrap !important;
+            transition: color 0.15s ease !important;
+        }
+        .chrome-link:hover .chrome-label,
+        .chrome-item.has-flyout:hover > .chrome-link .chrome-label {
+            color: #0a66c2 !important;
+        }
+        .chrome-link.active .chrome-label {
+            color: #1d4ed8 !important;
+            font-weight: 600 !important;
+        }
+        .chrome-badge {
+            background: #ef4444 !important;
+            color: #ffffff !important;
+            font-size: 10.5px !important;
+            font-weight: 700 !important;
+            border-radius: 10px !important;
+            padding: 1px 7px !important;
+            min-width: 18px !important;
+            text-align: center !important;
             margin-left: auto !important;
         }
         .chrome-divider {
             height: 1px !important;
-            background: #f1f5f9 !important;
-            margin: 5px 8px !important;
+            background: #e2e8f0 !important;
+            margin: 6px 10px !important;
             list-style: none !important;
         }
+        .chrome-arrow {
+            font-size: 11px !important;
+            color: #94a3b8 !important;
+            margin-left: auto !important;
+            transition: transform 0.15s ease, color 0.15s ease !important;
+        }
+        .chrome-item.has-flyout:hover > .chrome-link .chrome-arrow {
+            transform: translateX(2px) !important;
+            color: #0a66c2 !important;
+        }
 
-        /* Flyout sub-panel */
-        .chrome-flyout {
-            display: none;
-            position: absolute;
-            top: -6px;
-            left: 100%;
-            min-width: 210px;
-            background: #ffffff !important;
-            border: 1px solid #e2e8f0 !important;
-            border-radius: 12px !important;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
-            padding: 6px 0 !important;
-            list-style: none !important;
-            z-index: 10000;
-            /* subtle slide-in */
-            animation: chromeFlyIn 0.15s cubic-bezier(0.16,1,0.3,1) forwards;
+        /* Red Accent for Logout */
+        .chrome-logout .chrome-icon {
+            background: #fef2f2 !important;
+            color: #dc2626 !important;
+        }
+        .chrome-logout .chrome-label {
+            color: #dc2626 !important;
+            font-weight: 600 !important;
+        }
+        .chrome-logout:hover {
+            background: #fef2f2 !important;
+        }
+        .chrome-logout:hover .chrome-label {
+            color: #b91c1c !important;
+        }
+
+        /* 6. Chrome-Style Nested Flyout Submenu (Right Slide-out on Desktop) */
+        @media (min-width: 992px) {
+            .navbar .nav-item.dropdown:hover > .dropdown-menu {
+                display: block !important;
+                margin-top: 0 !important;
+                animation: navDropdownFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+            }
+            .navbar .nav-item.dropdown > .dropdown-menu::before {
+                content: "";
+                position: absolute;
+                top: -12px;
+                left: 0;
+                right: 0;
+                height: 12px;
+                background: transparent;
+            }
+
+            /* Flyout Submenu container */
+            .chrome-flyout {
+                display: none;
+                position: absolute !important;
+                top: -6px !important;
+                left: calc(100% - 2px) !important;
+                min-width: 220px !important;
+                background: #ffffff !important;
+                background-color: #ffffff !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 12px !important;
+                box-shadow: 0 14px 35px -4px rgba(15, 23, 42, 0.15), 0 4px 12px -2px rgba(15, 23, 42, 0.08) !important;
+                padding: 6px 0 !important;
+                list-style: none !important;
+                z-index: 10050 !important;
+                animation: chromeFlyIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+            }
+            /* Seamless Bridge between Parent Item and Submenu to prevent premature closing */
+            .chrome-flyout::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: -14px;
+                width: 16px;
+                height: 100%;
+                background: transparent;
+            }
+            .chrome-item.has-flyout:hover > .chrome-flyout {
+                display: block !important;
+            }
+            .chrome-flyout-item {
+                list-style: none !important;
+                margin: 1px 0 !important;
+                padding: 0 6px !important;
+            }
+            .chrome-flyout-link {
+                display: flex !important;
+                align-items: center !important;
+                gap: 10px !important;
+                padding: 8px 12px !important;
+                color: #1e293b !important;
+                font-size: 13.5px !important;
+                font-weight: 500 !important;
+                text-decoration: none !important;
+                border-radius: 6px !important;
+                transition: background 0.15s ease, color 0.15s ease !important;
+            }
+            .chrome-flyout-link:hover {
+                background: #f1f5f9 !important;
+                color: #0a66c2 !important;
+                text-decoration: none !important;
+            }
+            .chrome-flyout-link.active {
+                background: #eff6ff !important;
+                color: #1d4ed8 !important;
+                font-weight: 600 !important;
+            }
+            .chrome-flyout-divider {
+                height: 1px !important;
+                background: #e2e8f0 !important;
+                margin: 5px 10px !important;
+                list-style: none !important;
+            }
+        }
+
+        @keyframes navDropdownFadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
         @keyframes chromeFlyIn {
             from { opacity: 0; transform: translateX(-6px); }
             to   { opacity: 1; transform: translateX(0); }
         }
-        .chrome-item.has-flyout:hover > .chrome-flyout {
-            display: block;
-        }
-        .chrome-flyout-item { list-style: none !important; }
-        .chrome-flyout-link {
-            display: flex !important;
-            align-items: center !important;
-            padding: 9px 14px !important;
-            color: #1e293b !important;
-            font-size: 13.5px !important;
-            font-weight: 500 !important;
-            text-decoration: none !important;
-            border-radius: 6px !important;
-            margin: 1px 4px !important;
-            transition: background 0.12s !important;
-        }
-        .chrome-flyout-link:hover {
-            background: #f0f7ff !important;
-            color: #0a66c2 !important;
-            text-decoration: none !important;
-        }
-        .chrome-flyout-link.active {
-            background: #eff6ff !important;
-            color: #1d4ed8 !important;
-        }
-        .chrome-flyout-divider {
-            height: 1px !important;
-            background: #f1f5f9 !important;
-            margin: 5px 8px !important;
-            list-style: none !important;
-        }
 
-        /* On mobile — accordion flat list, white bg */
+        /* 7. Mobile Responsive System (< 992px) */
         @media (max-width: 991.98px) {
-            .chrome-menu {
-                background: #ffffff !important;
-                border: 1px solid #e2e8f0 !important;
-                border-radius: 10px !important;
-                box-shadow: 0 2px 12px rgba(0,0,0,0.08) !important;
-                margin: 6px 0 10px !important;
+            /* Force all dropdown menus in mobile drawer to be clean floating white cards */
+            .navbar-collapse .dropdown-menu,
+            .navbar-nav .dropdown-menu,
+            .chrome-menu,
+            .chrome-user-menu {
+                position: static !important;
+                float: none !important;
                 width: 100% !important;
+                max-width: 100% !important;
+                background: #ffffff !important;
+                background-color: #ffffff !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 12px !important;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+                margin: 8px 0 12px 0 !important;
+                padding: 8px 6px !important;
+                transform: none !important;
             }
-            .chrome-link {
+            .chrome-user-header {
+                border-radius: 10px 10px 0 0 !important;
+                padding: 12px 14px 8px !important;
+            }
+            .chrome-user-edit-row {
+                padding: 0 8px 8px !important;
+            }
+            .chrome-link,
+            .chrome-label {
                 color: #1e293b !important;
             }
-            .chrome-link:hover {
-                background: #f0f7ff !important;
-                color: #0a66c2 !important;
-            }
+            /* Submenu transforms into a clean accordion on mobile */
             .chrome-flyout {
                 display: block !important;
                 position: static !important;
                 box-shadow: none !important;
                 border: none !important;
-                border-left: 2px solid #e2e8f0 !important;
+                border-left: 2px solid #cbd5e1 !important;
                 background: #f8fafc !important;
-                padding: 4px 0 4px 14px !important;
+                margin: 4px 6px 8px 24px !important;
+                border-radius: 0 8px 8px 0 !important;
+                padding: 4px 0 !important;
                 animation: none !important;
-                border-radius: 0 !important;
+            }
+            .chrome-arrow {
+                display: none !important;
             }
             .chrome-flyout-link {
                 color: #334155 !important;
                 font-size: 13px !important;
+                padding: 7px 10px !important;
             }
             .chrome-flyout-link:hover {
                 color: #0a66c2 !important;
-                background: #eff6ff !important;
-            }
-            .chrome-arrow { display: none !important; }
-            .chrome-user-menu {
-                min-width: 100% !important;
-                max-width: 100% !important;
-            }
-            .chrome-user-header {
-                border-radius: 8px 8px 0 0 !important;
-            }
-            .chrome-user-edit-row {
-                padding: 0 10px 10px !important;
-            }
-        }
-
-        /* ============================================================
-           NUCLEAR MOBILE DROPDOWN WHITE FIX
-           Must come LAST to override navbar #111827 inheritance
-           ============================================================ */
-        @media (max-width: 991.98px) {
-            /* ALL dropdowns inside mobile navbar must be white */
-            header.header .navbar .navbar-collapse .dropdown-menu,
-            header.header .navbar .navbar-nav .dropdown-menu,
-            .navbar-collapse .dropdown-menu,
-            .navbar-nav .dropdown-menu.chrome-menu,
-            .navbar-nav .dropdown-menu.chrome-user-menu,
-            ul.chrome-menu,
-            ul.chrome-user-menu {
-                background: #ffffff !important;
-                background-color: #ffffff !important;
-                color: #1e293b !important;
-            }
-            /* All direct children must also be white, not inherit dark */
-            .navbar-nav .dropdown-menu.chrome-menu > li,
-            .navbar-nav .dropdown-menu.chrome-user-menu > li {
-                background: transparent !important;
-                color: #1e293b !important;
-            }
-            /* chrome-link text must be dark and visible */
-            .navbar-collapse .chrome-link,
-            .navbar-nav .chrome-link {
-                color: #1e293b !important;
-                background: transparent !important;
-            }
-            .navbar-collapse .chrome-link:hover,
-            .navbar-nav .chrome-link:hover {
-                background: #f0f7ff !important;
-                color: #0a66c2 !important;
-            }
-            /* Labels inside chrome-link */
-            .navbar-collapse .chrome-label,
-            .navbar-nav .chrome-label {
-                color: #1e293b !important;
-            }
-            /* flyout on mobile = accordion light bg */
-            .navbar-collapse .chrome-flyout,
-            .navbar-nav .chrome-flyout {
-                background: #f8fafc !important;
-                background-color: #f8fafc !important;
-            }
-            .navbar-collapse .chrome-flyout-link,
-            .navbar-nav .chrome-flyout-link {
-                color: #334155 !important;
-            }
-            /* Logout must be red */
-            .navbar-collapse .chrome-logout .chrome-label,
-            .navbar-nav .chrome-logout .chrome-label {
-                color: #dc2626 !important;
+                background: #e2e8f0 !important;
             }
         }
     </style>
@@ -881,8 +745,7 @@
                                         </div>
                                     </li>
                                     <li class="chrome-user-edit-row">
-                                        <a href="{% if request.user.role == 'employer' %}{% url 'accounts:employer-profile-update' %}{% else %}{% url 'accounts:employee-profile-update' %}{% endif %}" class="chrome-user-edit-btn">
-                                            {% trans "View & Edit Profile" %}
+                                        <a href="{% if request.user.role == 'employer' %}{% url 'accounts:employer-profile-update' %}{% else %}{% url 'accounts:employee-profile-update' %}{% endif %}" class="chrome-user-edit-btn"><i class="fa fa-pencil-square-o mr-1"></i>{% trans "View & Edit Profile" %}
                                         </a>
                                     </li>
                                     <li class="chrome-divider"></li>
@@ -1186,28 +1049,57 @@
 {% block javascripts %}{% endblock %}
 
 <script type="text/javascript">
-    // Instant Hover Activation for Navbar Dropdowns on Desktop
+    // Modern Universal Dropdown Controller (Hover, Click, Touch, Outside-Click & Escape key)
     $(function() {
-        function setupNavbarHover() {
+        var hoverTimeout;
+
+        function setupNavbarDropdowns() {
             if (window.innerWidth >= 992) {
+                // Desktop: Smooth Hover with Debounce
                 $('.navbar .nav-item.dropdown').off('mouseenter mouseleave').hover(
                     function() {
-                        $(this).addClass('show');
-                        $(this).children('.dropdown-menu').addClass('show');
-                        $(this).children('.dropdown-toggle').attr('aria-expanded', 'true');
+                        var $el = $(this);
+                        clearTimeout(hoverTimeout);
+                        $('.navbar .nav-item.dropdown').not($el).removeClass('show').children('.dropdown-menu').removeClass('show');
+                        $el.addClass('show');
+                        $el.children('.dropdown-menu').addClass('show');
+                        $el.children('.dropdown-toggle').attr('aria-expanded', 'true');
                     },
                     function() {
-                        $(this).removeClass('show');
-                        $(this).children('.dropdown-menu').removeClass('show');
-                        $(this).children('.dropdown-toggle').attr('aria-expanded', 'false');
+                        var $el = $(this);
+                        hoverTimeout = setTimeout(function() {
+                            $el.removeClass('show');
+                            $el.children('.dropdown-menu').removeClass('show');
+                            $el.children('.dropdown-toggle').attr('aria-expanded', 'false');
+                        }, 120);
                     }
                 );
             } else {
+                // Mobile: Disable desktop hover events, rely on Bootstrap click toggle
                 $('.navbar .nav-item.dropdown').off('mouseenter mouseleave');
             }
         }
-        setupNavbarHover();
-        $(window).on('resize', setupNavbarHover);
+
+        setupNavbarDropdowns();
+        $(window).on('resize', setupNavbarDropdowns);
+
+        // Keyboard Accessibility: Close dropdowns when pressing ESC key
+        $(document).on('keydown', function(e) {
+            if (e.key === 'Escape' || e.keyCode === 27) {
+                $('.navbar .nav-item.dropdown.show').removeClass('show').children('.dropdown-menu').removeClass('show');
+                $('.dropdown.show').removeClass('show').children('.dropdown-menu').removeClass('show');
+                $('.dropdown-toggle').attr('aria-expanded', 'false');
+            }
+        });
+
+        // Close open dropdowns when clicking outside
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.dropdown').length) {
+                $('.navbar .nav-item.dropdown.show').removeClass('show').children('.dropdown-menu').removeClass('show');
+                $('.dropdown.show').removeClass('show').children('.dropdown-menu').removeClass('show');
+                $('.dropdown-toggle').attr('aria-expanded', 'false');
+            }
+        });
     });
 </script>
 
