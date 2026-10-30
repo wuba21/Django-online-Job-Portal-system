@@ -445,6 +445,23 @@
                 height: 100%;
                 background: transparent;
             }
+
+            /* Profile Dropdown: Flyouts slide out to the LEFT side (towards page center) */
+            .chrome-user-menu .chrome-flyout {
+                left: auto !important;
+                right: calc(100% - 2px) !important;
+                animation: chromeFlyInLeft 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+            }
+            .chrome-user-menu .chrome-flyout::before {
+                left: auto !important;
+                right: -14px !important;
+            }
+            .chrome-user-menu .chrome-item.has-flyout > .chrome-link .chrome-arrow {
+                transform: rotate(180deg) !important;
+            }
+            .chrome-user-menu .chrome-item.has-flyout:hover > .chrome-link .chrome-arrow {
+                transform: rotate(180deg) translateX(2px) !important;
+            }
             .chrome-item.has-flyout:hover > .chrome-flyout {
                 display: block !important;
             }
@@ -489,6 +506,10 @@
         }
         @keyframes chromeFlyIn {
             from { opacity: 0; transform: translateX(-6px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes chromeFlyInLeft {
+            from { opacity: 0; transform: translateX(6px); }
             to   { opacity: 1; transform: translateX(0); }
         }
 
@@ -1139,14 +1160,12 @@
                     }
                 );
 
-                // Smart positioning for Chrome Flyout Submenus
-                $('.chrome-item.has-flyout').off('mouseenter').on('mouseenter', function() {
+                // Smart auto-flip for general flyouts (Jobs menu flips left if reaching screen edge)
+                $('#jobsDropdown + .chrome-menu .chrome-item.has-flyout').off('mouseenter').on('mouseenter', function() {
                     var $flyout = $(this).children('.chrome-flyout');
                     if ($flyout.length) {
-                        // Default to right side
                         $flyout.css({ left: 'calc(100% - 2px)', right: 'auto' });
                         var rect = $flyout[0].getBoundingClientRect();
-                        // If it would go past the viewport edge, flip to the left!
                         if (rect.right > (window.innerWidth - 15)) {
                             $flyout.css({ left: 'auto', right: 'calc(100% - 2px)' });
                         }
