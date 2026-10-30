@@ -132,8 +132,8 @@
                 box-shadow: none !important;
                 margin: 6px 0 10px 0 !important;
                 padding: 6px !important;
-                background: rgba(255, 255, 255, 0.04) !important;
-                border: 1px solid rgba(255, 255, 255, 0.08) !important;
+                background: #ffffff !important;
+                border: 1px solid #e2e8f0 !important;
                 border-radius: 12px !important;
                 transform: none !important;
                 right: auto !important;
@@ -149,7 +149,7 @@
                 width: 100% !important;
                 padding: 10px 14px !important;
                 border-radius: 6px !important;
-                color: #cbd5e1 !important;
+                color: #1e293b !important;
                 font-size: 0.9rem !important;
                 white-space: normal !important;
             }
@@ -303,7 +303,7 @@
         button.btn-primary {
             background-color: #206fa6 !important;
             border-color: #206fa6 !important;
-            color: #0a66c2 !important;
+            color: #ffffff !important;
         }
         .btn-primary:hover,
         .btn-primary:focus,
@@ -313,11 +313,11 @@
         button.btn-primary:focus {
             background-color: #175480 !important;
             border-color: #175480 !important;
-            color: #0a66c2 !important;
+            color: #ffffff !important;
         }
         .badge-primary {
             background-color: #206fa6 !important;
-            color: #0a66c2 !important;
+            color: #ffffff !important;
         }
         .badge-info,
         .bg-info {
@@ -374,21 +374,24 @@
         .chrome-user-header {
             display: flex !important;
             align-items: center !important;
-            padding: 14px 14px 10px !important;
+            padding: 16px 14px 14px !important;
             list-style: none !important;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%) !important;
+            border-radius: 10px 10px 0 0 !important;
+            margin-bottom: 4px !important;
         }
         .chrome-user-avatar {
-            width: 44px; height: 44px;
+            width: 46px; height: 46px;
             border-radius: 50%;
             overflow: hidden;
-            border: 2px solid #e2e8f0;
+            border: 2.5px solid rgba(255,255,255,0.5);
             margin-right: 12px;
             flex-shrink: 0;
-            background: #f8fafc;
+            background: #dbeafe;
         }
         .chrome-user-avatar img { width:100%;height:100%;object-fit:cover;display:block; }
         .chrome-user-name {
-            color: #0f172a;
+            color: #ffffff !important;
             font-size: 13.5px;
             font-weight: 700;
             text-transform: capitalize;
@@ -399,7 +402,7 @@
             max-width: 165px;
         }
         .chrome-user-email {
-            color: #64748b;
+            color: rgba(255,255,255,0.75) !important;
             font-size: 11.5px;
             white-space: nowrap;
             overflow: hidden;
@@ -413,18 +416,19 @@
         .chrome-user-edit-btn {
             display: block;
             text-align: center;
-            background: #eff6ff;
-            color: #1d4ed8 !important;
-            border: 1px solid #bfdbfe;
+            background: rgba(255,255,255,0.15) !important;
+            color: #ffffff !important;
+            border: 1.5px solid rgba(255,255,255,0.45) !important;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 700;
-            padding: 5px 0;
+            padding: 6px 0;
             text-decoration: none !important;
             transition: background 0.15s;
         }
         .chrome-user-edit-btn:hover {
-            background: #dbeafe !important;
+            background: rgba(255,255,255,0.28) !important;
+            color: #ffffff !important;
             text-decoration: none !important;
         }
         .chrome-badge {
@@ -555,23 +559,53 @@
             list-style: none !important;
         }
 
-        /* On mobile — hide flyout, show as flat list */
+        /* On mobile — accordion flat list, white bg */
         @media (max-width: 991.98px) {
             .chrome-menu {
-                background: rgba(255,255,255,0.06) !important;
-                border: 1px solid rgba(255,255,255,0.1) !important;
+                background: #ffffff !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 10px !important;
+                box-shadow: 0 2px 12px rgba(0,0,0,0.08) !important;
+                margin: 6px 0 10px !important;
+                width: 100% !important;
             }
-            .chrome-link { color: #cbd5e1 !important; }
+            .chrome-link {
+                color: #1e293b !important;
+            }
+            .chrome-link:hover {
+                background: #f0f7ff !important;
+                color: #0a66c2 !important;
+            }
             .chrome-flyout {
                 display: block !important;
                 position: static !important;
                 box-shadow: none !important;
                 border: none !important;
-                background: transparent !important;
-                padding: 0 0 0 20px !important;
+                border-left: 2px solid #e2e8f0 !important;
+                background: #f8fafc !important;
+                padding: 4px 0 4px 14px !important;
                 animation: none !important;
+                border-radius: 0 !important;
+            }
+            .chrome-flyout-link {
+                color: #334155 !important;
+                font-size: 13px !important;
+            }
+            .chrome-flyout-link:hover {
+                color: #0a66c2 !important;
+                background: #eff6ff !important;
             }
             .chrome-arrow { display: none !important; }
+            .chrome-user-menu {
+                min-width: 100% !important;
+                max-width: 100% !important;
+            }
+            .chrome-user-header {
+                border-radius: 8px 8px 0 0 !important;
+            }
+            .chrome-user-edit-row {
+                padding: 0 10px 10px !important;
+            }
         }
     </style>
 </head>
