@@ -629,6 +629,62 @@
                 padding: 0 10px 10px !important;
             }
         }
+
+        /* ============================================================
+           NUCLEAR MOBILE DROPDOWN WHITE FIX
+           Must come LAST to override navbar #111827 inheritance
+           ============================================================ */
+        @media (max-width: 991.98px) {
+            /* ALL dropdowns inside mobile navbar must be white */
+            header.header .navbar .navbar-collapse .dropdown-menu,
+            header.header .navbar .navbar-nav .dropdown-menu,
+            .navbar-collapse .dropdown-menu,
+            .navbar-nav .dropdown-menu.chrome-menu,
+            .navbar-nav .dropdown-menu.chrome-user-menu,
+            ul.chrome-menu,
+            ul.chrome-user-menu {
+                background: #ffffff !important;
+                background-color: #ffffff !important;
+                color: #1e293b !important;
+            }
+            /* All direct children must also be white, not inherit dark */
+            .navbar-nav .dropdown-menu.chrome-menu > li,
+            .navbar-nav .dropdown-menu.chrome-user-menu > li {
+                background: transparent !important;
+                color: #1e293b !important;
+            }
+            /* chrome-link text must be dark and visible */
+            .navbar-collapse .chrome-link,
+            .navbar-nav .chrome-link {
+                color: #1e293b !important;
+                background: transparent !important;
+            }
+            .navbar-collapse .chrome-link:hover,
+            .navbar-nav .chrome-link:hover {
+                background: #f0f7ff !important;
+                color: #0a66c2 !important;
+            }
+            /* Labels inside chrome-link */
+            .navbar-collapse .chrome-label,
+            .navbar-nav .chrome-label {
+                color: #1e293b !important;
+            }
+            /* flyout on mobile = accordion light bg */
+            .navbar-collapse .chrome-flyout,
+            .navbar-nav .chrome-flyout {
+                background: #f8fafc !important;
+                background-color: #f8fafc !important;
+            }
+            .navbar-collapse .chrome-flyout-link,
+            .navbar-nav .chrome-flyout-link {
+                color: #334155 !important;
+            }
+            /* Logout must be red */
+            .navbar-collapse .chrome-logout .chrome-label,
+            .navbar-nav .chrome-logout .chrome-label {
+                color: #dc2626 !important;
+            }
+        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
