@@ -771,22 +771,40 @@
                                                 <span class="chrome-badge nav-unread-notifications-badge" style="{% if not unread_notifications_count %}display:none;{% endif %}">{{ unread_notifications_count|default:"" }}</span>
                                             </a>
                                         </li>
-                                        <li class="chrome-item">
-                                            <a href="{% url 'jobs:employer-all-applicants' %}" class="chrome-link {% if url_name == 'employer-all-applicants' %}active{% endif %}">
-                                                <span class="chrome-icon" style="background:#f0fdf4;color:#16a34a;"><i class="fa fa-users"></i></span>
-                                                <span class="chrome-label">{% trans "Applicants" %}</span>
+                                        <li class="chrome-divider"></li>
+
+                                        <!-- Hiring & Jobs (Chrome flyout submenu) -->
+                                        <li class="chrome-item has-flyout">
+                                            <a href="{% url 'jobs:employer-all-applicants' %}" class="chrome-link">
+                                                <span class="chrome-icon" style="background:#f0fdf4;color:#16a34a;"><i class="fa fa-briefcase"></i></span>
+                                                <span class="chrome-label">{% trans "Hiring & Jobs" %}</span>
+                                                <i class="fa fa-chevron-right chrome-arrow"></i>
                                             </a>
-                                        </li>
-                                        <li class="chrome-item">
-                                            <a href="{% url 'jobs:employer-jobs-create' %}" class="chrome-link {% if url_name == 'employer-jobs-create' %}active{% endif %}">
-                                                <span class="chrome-icon" style="background:#f0fdf4;color:#16a34a;"><i class="fa fa-plus-circle"></i></span>
-                                                <span class="chrome-label">{% trans "Post a New Job" %}</span>
-                                            </a>
+                                            <ul class="chrome-flyout">
+                                                <li class="chrome-flyout-item">
+                                                    <a href="{% url 'jobs:employer-jobs-create' %}" class="chrome-flyout-link">
+                                                        <span class="chrome-icon" style="background:#f0fdf4;color:#16a34a;"><i class="fa fa-plus-circle"></i></span>
+                                                        <span>{% trans "Post a New Job" %}</span>
+                                                    </a>
+                                                </li>
+                                                <li class="chrome-flyout-item">
+                                                    <a href="{% url 'jobs:employer-all-applicants' %}" class="chrome-flyout-link">
+                                                        <span class="chrome-icon" style="background:#eff6ff;color:#2563eb;"><i class="fa fa-users"></i></span>
+                                                        <span>{% trans "Manage Applicants" %}</span>
+                                                    </a>
+                                                </li>
+                                                <li class="chrome-flyout-item">
+                                                    <a href="{% url 'jobs:employer-dashboard' %}" class="chrome-flyout-link">
+                                                        <span class="chrome-icon" style="background:#faf5ff;color:#7c3aed;"><i class="fa fa-list-alt"></i></span>
+                                                        <span>{% trans "My Job Listings" %}</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
                                         </li>
                                         <li class="chrome-item">
                                             <a href="{% url 'accounts:employer-profile-update' %}" class="chrome-link {% if url_name == 'employer-profile-update' %}active{% endif %}">
                                                 <span class="chrome-icon" style="background:#f8fafc;color:#475569;"><i class="fa fa-building"></i></span>
-                                                <span class="chrome-label">{% trans "Edit Profile" %}</span>
+                                                <span class="chrome-label">{% trans "Company Profile" %}</span>
                                             </a>
                                         </li>
                                     {% else %}
@@ -794,12 +812,6 @@
                                             <a href="{% url 'jobs:applicant-dashboard' %}" class="chrome-link {% if url_name == 'applicant-dashboard' %}active{% endif %}">
                                                 <span class="chrome-icon" style="background:#eff6ff;color:#2563eb;"><i class="fa fa-tachometer"></i></span>
                                                 <span class="chrome-label">{% trans "Dashboard" %}</span>
-                                            </a>
-                                        </li>
-                                        <li class="chrome-item">
-                                            <a href="{% url 'jobs:employee-recommended-jobs' %}" class="chrome-link {% if url_name == 'employee-recommended-jobs' or url_name == 'recommended-jobs' %}active{% endif %}">
-                                                <span class="chrome-icon" style="background:#fffbeb;color:#d97706;"><i class="fa fa-bolt"></i></span>
-                                                <span class="chrome-label">{% trans "Recommended Jobs" %}</span>
                                             </a>
                                         </li>
                                         <li class="chrome-item">
@@ -816,30 +828,66 @@
                                                 <span class="chrome-badge nav-unread-notifications-badge" style="{% if not unread_notifications_count %}display:none;{% endif %}">{{ unread_notifications_count|default:"" }}</span>
                                             </a>
                                         </li>
-                                        <li class="chrome-item">
-                                            <a href="{% url 'jobs:employee-favorites' %}" class="chrome-link {% if url_name == 'employee-favorites' %}active{% endif %}">
-                                                <span class="chrome-icon" style="background:#fdf2f8;color:#db2777;"><i class="fa fa-heart"></i></span>
-                                                <span class="chrome-label">{% trans "Favorites" %}</span>
-                                            </a>
-                                        </li>
-                                        <li class="chrome-item">
-                                            <a href="{% url 'jobs:employee-my-applications' %}" class="chrome-link {% if url_name == 'employee-my-applications' %}active{% endif %}">
+                                        <li class="chrome-divider"></li>
+
+                                        <!-- My Job Activity (Chrome flyout submenu) -->
+                                        <li class="chrome-item has-flyout">
+                                            <a href="{% url 'jobs:employee-recommended-jobs' %}" class="chrome-link">
                                                 <span class="chrome-icon" style="background:#f0fdf4;color:#16a34a;"><i class="fa fa-briefcase"></i></span>
-                                                <span class="chrome-label">{% trans "My Applications" %}</span>
+                                                <span class="chrome-label">{% trans "My Job Activity" %}</span>
+                                                <i class="fa fa-chevron-right chrome-arrow"></i>
                                             </a>
+                                            <ul class="chrome-flyout">
+                                                <li class="chrome-flyout-item">
+                                                    <a href="{% url 'jobs:employee-recommended-jobs' %}" class="chrome-flyout-link">
+                                                        <span class="chrome-icon" style="background:#fffbeb;color:#d97706;"><i class="fa fa-bolt"></i></span>
+                                                        <span>{% trans "Recommended Jobs" %}</span>
+                                                    </a>
+                                                </li>
+                                                <li class="chrome-flyout-item">
+                                                    <a href="{% url 'jobs:employee-my-applications' %}" class="chrome-flyout-link">
+                                                        <span class="chrome-icon" style="background:#f0fdf4;color:#16a34a;"><i class="fa fa-check-circle"></i></span>
+                                                        <span>{% trans "My Applications" %}</span>
+                                                    </a>
+                                                </li>
+                                                <li class="chrome-flyout-item">
+                                                    <a href="{% url 'jobs:employee-favorites' %}" class="chrome-flyout-link">
+                                                        <span class="chrome-icon" style="background:#fdf2f8;color:#db2777;"><i class="fa fa-heart"></i></span>
+                                                        <span>{% trans "Favorite Jobs" %}</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
                                         </li>
-                                        <li class="chrome-item">
-                                            <a href="{% url 'resume_cv:auto_builder' %}" class="chrome-link {% if url_name == 'auto_builder' %}active{% endif %}">
+
+                                        <!-- Resume & Tools (Chrome flyout submenu) -->
+                                        <li class="chrome-item has-flyout">
+                                            <a href="{% url 'resume_cv:resumes' %}" class="chrome-link">
                                                 <span class="chrome-icon" style="background:#faf5ff;color:#7c3aed;"><i class="fa fa-magic"></i></span>
-                                                <span class="chrome-label">{% trans "Auto CV Builder" %}</span>
+                                                <span class="chrome-label">{% trans "Resume & Tools" %}</span>
+                                                <i class="fa fa-chevron-right chrome-arrow"></i>
                                             </a>
+                                            <ul class="chrome-flyout">
+                                                <li class="chrome-flyout-item">
+                                                    <a href="{% url 'resume_cv:auto_builder' %}" class="chrome-flyout-link">
+                                                        <span class="chrome-icon" style="background:#faf5ff;color:#7c3aed;"><i class="fa fa-magic"></i></span>
+                                                        <span>{% trans "Auto CV Builder" %}</span>
+                                                    </a>
+                                                </li>
+                                                <li class="chrome-flyout-item">
+                                                    <a href="{% url 'resume_cv:resumes' %}" class="chrome-flyout-link">
+                                                        <span class="chrome-icon" style="background:#f8fafc;color:#475569;"><i class="fa fa-file-text"></i></span>
+                                                        <span>{% trans "My Resumes" %}</span>
+                                                    </a>
+                                                </li>
+                                                <li class="chrome-flyout-item">
+                                                    <a href="{% url 'resume_cv:templates' %}" class="chrome-flyout-link">
+                                                        <span class="chrome-icon" style="background:#eff6ff;color:#2563eb;"><i class="fa fa-file-text-o"></i></span>
+                                                        <span>{% trans "CV Templates" %}</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
                                         </li>
-                                        <li class="chrome-item">
-                                            <a href="{% url 'resume_cv:resumes' %}" class="chrome-link {% if url_name == 'resumes' %}active{% endif %}">
-                                                <span class="chrome-icon" style="background:#f8fafc;color:#475569;"><i class="fa fa-file-text"></i></span>
-                                                <span class="chrome-label">{% trans "My Resumes" %}</span>
-                                            </a>
-                                        </li>
+
                                         <li class="chrome-item">
                                             <a href="{% url 'accounts:employee-profile-update' %}" class="chrome-link {% if url_name == 'employee-profile-update' %}active{% endif %}">
                                                 <span class="chrome-icon" style="background:#f8fafc;color:#475569;"><i class="fa fa-user"></i></span>
@@ -850,17 +898,33 @@
 
                                     {% if request.user.is_staff or request.user.is_superuser %}
                                         <li class="chrome-divider"></li>
-                                        <li class="chrome-item">
-                                            <a href="{% url 'jobs:admin-analytics-dashboard' %}" class="chrome-link">
-                                                <span class="chrome-icon" style="background:#f0f9ff;color:#0284c7;"><i class="fa fa-bar-chart"></i></span>
-                                                <span class="chrome-label">System Analytics</span>
-                                            </a>
-                                        </li>
-                                        <li class="chrome-item">
+                                        <!-- Admin Tools (Chrome flyout submenu) -->
+                                        <li class="chrome-item has-flyout">
                                             <a href="{% url 'jobs:admin-dashboard' %}" class="chrome-link">
                                                 <span class="chrome-icon" style="background:#fffbeb;color:#d97706;"><i class="fa fa-shield"></i></span>
-                                                <span class="chrome-label">Admin Panel</span>
+                                                <span class="chrome-label">Admin Tools</span>
+                                                <i class="fa fa-chevron-right chrome-arrow"></i>
                                             </a>
+                                            <ul class="chrome-flyout">
+                                                <li class="chrome-flyout-item">
+                                                    <a href="{% url 'jobs:admin-dashboard' %}" class="chrome-flyout-link">
+                                                        <span class="chrome-icon" style="background:#eff6ff;color:#2563eb;"><i class="fa fa-tachometer"></i></span>
+                                                        <span>Control Center</span>
+                                                    </a>
+                                                </li>
+                                                <li class="chrome-flyout-item">
+                                                    <a href="{% url 'jobs:admin-analytics-dashboard' %}" class="chrome-flyout-link">
+                                                        <span class="chrome-icon" style="background:#f0f9ff;color:#0284c7;"><i class="fa fa-bar-chart"></i></span>
+                                                        <span>System Analytics</span>
+                                                    </a>
+                                                </li>
+                                                <li class="chrome-flyout-item">
+                                                    <a href="/admin/" target="_blank" class="chrome-flyout-link">
+                                                        <span class="chrome-icon" style="background:#f8fafc;color:#475569;"><i class="fa fa-cogs"></i></span>
+                                                        <span>Django Admin</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
                                         </li>
                                     {% endif %}
 
@@ -1074,9 +1138,24 @@
                         }, 120);
                     }
                 );
+
+                // Smart positioning for Chrome Flyout Submenus
+                $('.chrome-item.has-flyout').off('mouseenter').on('mouseenter', function() {
+                    var $flyout = $(this).children('.chrome-flyout');
+                    if ($flyout.length) {
+                        // Default to right side
+                        $flyout.css({ left: 'calc(100% - 2px)', right: 'auto' });
+                        var rect = $flyout[0].getBoundingClientRect();
+                        // If it would go past the viewport edge, flip to the left!
+                        if (rect.right > (window.innerWidth - 15)) {
+                            $flyout.css({ left: 'auto', right: 'calc(100% - 2px)' });
+                        }
+                    }
+                });
             } else {
                 // Mobile: Disable desktop hover events, rely on Bootstrap click toggle
                 $('.navbar .nav-item.dropdown').off('mouseenter mouseleave');
+                $('.chrome-item.has-flyout').off('mouseenter');
             }
         }
 
