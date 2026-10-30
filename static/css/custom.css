@@ -958,3 +958,37 @@ a.btn {
     display: inline-block !important;
     line-height: 1.3 !important;
 }
+
+
+/* ============================================================
+   FINAL OVERRIDE — Chrome dropdown menus MUST be white
+   Placed at end of file to win CSS cascade
+   ============================================================ */
+.navbar .dropdown-menu.chrome-menu,
+.navbar .dropdown-menu.chrome-user-menu,
+ul.dropdown-menu.chrome-menu {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+}
+
+@media (max-width: 991.98px) {
+    .navbar .dropdown-menu.chrome-menu,
+    .navbar .dropdown-menu.chrome-user-menu {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.10) !important;
+    }
+    .navbar .dropdown-menu.chrome-menu .chrome-link,
+    .navbar .dropdown-menu.chrome-user-menu .chrome-link {
+        color: #1e293b !important;
+    }
+    .navbar .dropdown-menu.chrome-menu .chrome-label,
+    .navbar .dropdown-menu.chrome-user-menu .chrome-label {
+        color: #1e293b !important;
+    }
+    .navbar .dropdown-menu.chrome-menu .chrome-link:hover .chrome-label,
+    .navbar .dropdown-menu.chrome-user-menu .chrome-link:hover .chrome-label {
+        color: #0a66c2 !important;
+    }
+}
