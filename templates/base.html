@@ -456,143 +456,31 @@
                             </a>
                         </li>
                         {% if request.user.is_authenticated %}
-                            <li class="nav-item dropdown">
-                                <a id="clientZone" href="#" data-toggle="dropdown"
-                                   aria-haspopup="true" aria-expanded="false"
-                                   class="nav-link dropdown-toggle has-img d-flex align-items-center">
-                                    <div class="client-menu-image mr-2" style="width: 32px; height: 32px; min-width: 32px; border-radius: 50% !important; overflow: hidden !important; border: 1.5px solid rgba(255,255,255,0.3); background: #ffffff;">
+                            <!-- Avatar trigger for slide-in sidebar -->
+                            <li class="nav-item">
+                                <a href="#" id="userSidebarToggle"
+                                   onclick="openUserSidebar(event)"
+                                   class="nav-link has-img d-flex align-items-center"
+                                   title="{% trans 'My Account' %}"
+                                   style="cursor:pointer;">
+                                    <div class="client-menu-image mr-2" style="width:32px;height:32px;min-width:32px;border-radius:50%;overflow:hidden;border:1.5px solid rgba(255,255,255,0.3);background:#fff;transition:border-color .2s,box-shadow .2s;">
                                         {% if request.user.role == 'employer' %}
                                             {% if request.user.company.logo %}
-                                                <img src="{{ request.user.company.logo.url }}" alt="company logo" style="width: 100% !important; height: 100% !important; border-radius: 50% !important; object-fit: cover !important; display: block;">
+                                                <img src="{{ request.user.company.logo.url }}" alt="logo" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">
                                             {% else %}
-                                                <img src="{% static 'img/company-1.png' %}" alt="company avatar" style="width: 100% !important; height: 100% !important; border-radius: 50% !important; object-fit: cover !important; display: block;">
+                                                <img src="{% static 'img/company-1.png' %}" alt="avatar" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">
                                             {% endif %}
                                         {% else %}
                                             {% if request.user.avatar %}
-                                                <img src="{{ request.user.avatar.url }}" alt="user avatar" style="width: 100% !important; height: 100% !important; border-radius: 50% !important; object-fit: cover !important; display: block;">
+                                                <img src="{{ request.user.avatar.url }}" alt="avatar" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">
                                             {% else %}
-                                                <img src="{% static 'img/avatar.png' %}" alt="user avatar" style="width: 100% !important; height: 100% !important; border-radius: 50% !important; object-fit: cover !important; display: block;">
+                                                <img src="{% static 'img/avatar.png' %}" alt="avatar" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">
                                             {% endif %}
                                         {% endif %}
                                     </div>
-                                    <span style="font-size: 13.5px; font-weight: 500; text-transform: capitalize !important;">{{ request.user.first_name|default:request.user.email }}</span>
+                                    <span style="font-size:13.5px;font-weight:500;text-transform:capitalize;">{{ request.user.first_name|default:request.user.email }}</span>
+                                    <i class="fa fa-angle-down ml-1" style="font-size:11px;opacity:.65;margin-left:4px;"></i>
                                 </a>
-                                <div aria-labelledby="clientZone" class="dropdown-menu dropdown-menu-right user-profile-dropdown">
-                                    <!-- User Profile Header Card (LinkedIn Standard) -->
-                                    <div class="user-dropdown-header">
-                                        <div class="d-flex align-items-center">
-                                            <div style="width: 52px; height: 52px; min-width: 52px; max-width: 52px; border-radius: 50% !important; overflow: hidden !important; border: 2px solid #e2e8f0; margin-right: 14px; flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.06); background: #ffffff;">
-                                                {% if request.user.role == 'employer' %}
-                                                    {% if request.user.company.logo %}
-                                                        <img src="{{ request.user.company.logo.url }}" alt="Logo" style="width: 100% !important; height: 100% !important; border-radius: 50% !important; object-fit: cover !important; display: block;">
-                                                    {% else %}
-                                                        <img src="{% static 'img/company-1.png' %}" alt="Avatar" style="width: 100% !important; height: 100% !important; border-radius: 50% !important; object-fit: cover !important; display: block;">
-                                                    {% endif %}
-                                                {% else %}
-                                                    {% if request.user.avatar %}
-                                                        <img src="{{ request.user.avatar.url }}" alt="Avatar" style="width: 100% !important; height: 100% !important; border-radius: 50% !important; object-fit: cover !important; display: block;">
-                                                    {% else %}
-                                                        <img src="{% static 'img/avatar.png' %}" alt="Avatar" style="width: 100% !important; height: 100% !important; border-radius: 50% !important; object-fit: cover !important; display: block;">
-                                                    {% endif %}
-                                                {% endif %}
-                                            </div>
-                                            <div class="overflow-hidden" style="min-width: 0; flex: 1;">
-                                                <div class="user-name text-truncate" style="font-size: 15px; font-weight: 700; line-height: 1.25; text-transform: capitalize !important;">
-                                                    {{ request.user.get_full_name|default:request.user.first_name|default:request.user.email }}
-                                                </div>
-                                                <div class="user-email text-truncate" style="font-size: 12.5px; margin-top: 2px; text-transform: lowercase !important;" title="{{ request.user.email }}">
-                                                    {{ request.user.email|lower }}
-                                                </div>
-                                                <div class="mt-1 d-flex align-items-center">
-                                                    {% if request.user.role == 'employer' %}
-                                                        <span style="display: inline-flex; align-items: center; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; border-radius: 12px; font-size: 11px; font-weight: 600; padding: 2px 8px; text-transform: none !important; letter-spacing: normal;">
-                                                            <i class="fa fa-building-o mr-1"></i>{% trans "Employer" %}{% if request.user.is_verified %} • <i class="fa fa-check-circle text-success ml-1" title="{% trans 'Verified' %}"></i>{% endif %}
-                                                        </span>
-                                                    {% else %}
-                                                        <span style="display: inline-flex; align-items: center; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 12px; font-size: 11px; font-weight: 600; padding: 2px 8px; text-transform: none !important; letter-spacing: normal;">
-                                                            <i class="fa fa-user-circle-o mr-1"></i>{% trans "Job Seeker" %}{% if request.user.is_verified %} • <i class="fa fa-check-circle text-primary ml-1" title="{% trans 'Verified' %}"></i>{% endif %}
-                                                        </span>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="mt-3">
-                                            <a href="{% if request.user.role == 'employer' %}{% url 'accounts:employer-profile-update' %}{% else %}{% url 'accounts:employee-profile-update' %}{% endif %}" 
-                                               class="profile-action-btn">
-                                                {% trans "View & Edit Profile" %}
-                                            </a>
-                                        </div>
-                                    </div>
-
-                                    <div class="user-dropdown-body py-1">
-                                        {% if request.user.role == 'employer' %}
-                                            <a href="{% url 'jobs:employer-dashboard' %}" class="dropdown-item {% if url_name == 'employer-dashboard' %}active{% endif %}">
-                                                <i class="fa fa-tachometer mr-2"></i> {% trans "Dashboard" %}
-                                            </a>
-                                            <a href="{% url 'jobs:inbox' %}" class="dropdown-item {% if url_name == 'inbox' %}active{% endif %} d-flex align-items-center justify-content-between">
-                                                <span><i class="fa fa-comments mr-2 text-info"></i> {% trans "Messages" %}</span>
-                                                <span class="badge badge-danger badge-pill nav-unread-messages-badge" style="{% if not unread_messages_count %}display: none;{% endif %}">{{ unread_messages_count|default:"" }}</span>
-                                            </a>
-                                            <a href="{% url 'jobs:notifications' %}" class="dropdown-item {% if url_name == 'notifications' %}active{% endif %} d-flex align-items-center justify-content-between">
-                                                <span><i class="fa fa-bell mr-2"></i> {% trans "Notifications" %}</span>
-                                                <span class="badge badge-danger badge-pill nav-unread-notifications-badge" style="{% if not unread_notifications_count %}display: none;{% endif %}">{{ unread_notifications_count|default:"" }}</span>
-                                            </a>
-                                            <a href="{% url 'jobs:employer-all-applicants' %}" class="dropdown-item {% if url_name == 'employer-all-applicants' %}active{% endif %}">
-                                                <i class="fa fa-users mr-2"></i> {% trans "Applicants" %}
-                                            </a>
-                                            <a href="{% url 'jobs:employer-jobs-create' %}" class="dropdown-item {% if url_name == 'employer-jobs-create' %}active{% endif %}">
-                                                <i class="fa fa-plus mr-2"></i> {% trans "Post a new job" %}
-                                            </a>
-                                            <a href="{% url 'accounts:employer-profile-update' %}" class="dropdown-item {% if url_name == 'employer-profile-update' %}active{% endif %}">
-                                                <i class="fa fa-building mr-2"></i> {% trans "Edit Profile" %}
-                                            </a>
-                                        {% else %}
-                                            <a href="{% url 'jobs:applicant-dashboard' %}" class="dropdown-item {% if url_name == 'applicant-dashboard' %}active{% endif %}">
-                                                <i class="fa fa-tachometer mr-2"></i> {% trans "Dashboard" %}
-                                            </a>
-                                            <a href="{% url 'jobs:employee-recommended-jobs' %}" class="dropdown-item {% if url_name == 'employee-recommended-jobs' or url_name == 'recommended-jobs' %}active{% endif %}">
-                                                <i class="fa fa-bolt mr-2 text-warning"></i> {% trans "Recommended Jobs" %}
-                                            </a>
-                                            <a href="{% url 'jobs:inbox' %}" class="dropdown-item {% if url_name == 'inbox' %}active{% endif %} d-flex align-items-center justify-content-between">
-                                                <span><i class="fa fa-comments mr-2 text-info"></i> {% trans "Messages" %}</span>
-                                                <span class="badge badge-danger badge-pill nav-unread-messages-badge" style="{% if not unread_messages_count %}display: none;{% endif %}">{{ unread_messages_count|default:"" }}</span>
-                                            </a>
-                                            <a href="{% url 'jobs:notifications' %}" class="dropdown-item {% if url_name == 'notifications' %}active{% endif %} d-flex align-items-center justify-content-between">
-                                                <span><i class="fa fa-bell mr-2"></i> {% trans "Notifications" %}</span>
-                                                <span class="badge badge-danger badge-pill nav-unread-notifications-badge" style="{% if not unread_notifications_count %}display: none;{% endif %}">{{ unread_notifications_count|default:"" }}</span>
-                                            </a>
-                                            <a href="{% url 'jobs:employee-favorites' %}" class="dropdown-item {% if url_name == 'employee-favorites' %}active{% endif %}">
-                                                <i class="fa fa-heart mr-2"></i> {% trans "Favorites" %}
-                                            </a>
-                                            <a href="{% url 'jobs:employee-my-applications' %}" class="dropdown-item {% if url_name == 'employee-my-applications' %}active{% endif %}">
-                                                <i class="fa fa-briefcase mr-2"></i> {% trans "My Applications" %}
-                                            </a>
-                                            <a href="{% url 'resume_cv:auto_builder' %}" class="dropdown-item {% if url_name == 'auto_builder' %}active{% endif %}">
-                                                <i class="fa fa-magic mr-2"></i> {% trans "Auto CV Builder" %}
-                                            </a>
-                                            <a href="{% url 'resume_cv:resumes' %}" class="dropdown-item {% if url_name == 'resumes' %}active{% endif %}">
-                                                <i class="fa fa-file-text mr-2"></i> {% trans "My Resumes" %}
-                                            </a>
-                                            <a href="{% url 'accounts:employee-profile-update' %}" class="dropdown-item {% if url_name == 'employee-profile-update' %}active{% endif %}">
-                                                <i class="fa fa-user mr-2"></i> {% trans "Edit Profile" %}
-                                            </a>
-                                        {% endif %}
-
-                                        {% if request.user.is_staff or request.user.is_superuser %}
-                                            <div class="dropdown-divider"></div>
-                                            <a href="{% url 'jobs:admin-analytics-dashboard' %}" class="dropdown-item text-info">
-                                                <i class="fa fa-bar-chart mr-2"></i> System Analytics
-                                            </a>
-                                            <a href="{% url 'jobs:admin-dashboard' %}" class="dropdown-item text-warning">
-                                                <i class="fa fa-shield mr-2"></i> Admin Panel
-                                            </a>
-                                        {% endif %}
-                                        <div class="dropdown-divider"></div>
-                                        <a href="{% url 'accounts:logout' %}" class="dropdown-item text-danger">
-                                            <i class="fa fa-sign-out mr-2"></i> {% trans "Logout" %}
-                                        </a>
-                                    </div>
-                                </div>
                             </li>
                         {% else %}
                             <li class="nav-item dropdown {% if url_name == 'employee-register' or url_name == 'employer-register' %}active{% endif %}">
@@ -1070,6 +958,282 @@
             });
         }
     })();
+</script>
+
+
+<!-- ========== SLIDE-IN USER SIDEBAR PANEL ========== -->
+<!-- Dark overlay -->
+<div id="userSidebarOverlay" onclick="closeUserSidebar()"></div>
+
+<!-- Sidebar panel -->
+<div id="userSidebarPanel">
+
+    <!-- Header -->
+    <div class="usb-header">
+        <button class="usb-close-btn" onclick="closeUserSidebar()" aria-label="Close">&#x2715;</button>
+        <div class="usb-avatar-wrap">
+            {% if request.user.is_authenticated %}
+                {% if request.user.role == 'employer' %}
+                    {% if request.user.company.logo %}
+                        <img src="{{ request.user.company.logo.url }}" alt="logo">
+                    {% else %}
+                        <img src="{% static 'img/company-1.png' %}" alt="avatar">
+                    {% endif %}
+                {% else %}
+                    {% if request.user.avatar %}
+                        <img src="{{ request.user.avatar.url }}" alt="avatar">
+                    {% else %}
+                        <img src="{% static 'img/avatar.png' %}" alt="avatar">
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        </div>
+        {% if request.user.is_authenticated %}
+        <p class="usb-name">{{ request.user.get_full_name|default:request.user.first_name|default:request.user.email }}</p>
+        <p class="usb-email">{{ request.user.email|lower }}</p>
+        <span class="usb-role-badge">
+            {% if request.user.role == 'employer' %}
+                <i class="fa fa-building-o mr-1"></i>{% trans "Employer" %}{% if request.user.is_verified %}&nbsp;&#10003;{% endif %}
+            {% else %}
+                <i class="fa fa-user-circle-o mr-1"></i>{% trans "Job Seeker" %}{% if request.user.is_verified %}&nbsp;&#10003;{% endif %}
+            {% endif %}
+        </span>
+        <a href="{% if request.user.role == 'employer' %}{% url 'accounts:employer-profile-update' %}{% else %}{% url 'accounts:employee-profile-update' %}{% endif %}" class="usb-edit-btn">
+            {% trans "View &amp; Edit Profile" %}
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Body / menu -->
+    <div class="usb-body">
+        {% if request.user.is_authenticated %}
+        {% with request.resolver_match.url_name as url_name %}
+
+        {% if request.user.role == 'employer' %}
+            <!-- EMPLOYER menu -->
+            <a href="{% url 'jobs:employer-dashboard' %}" class="usb-item {% if url_name == 'employer-dashboard' %}active{% endif %}">
+                <span class="usb-icon" style="background:#eff6ff;color:#2563eb;"><i class="fa fa-tachometer"></i></span>
+                <span class="usb-label">{% trans "Dashboard" %}</span>
+            </a>
+            <a href="{% url 'jobs:inbox' %}" class="usb-item {% if url_name == 'inbox' %}active{% endif %}">
+                <span class="usb-icon" style="background:#f0f9ff;color:#0284c7;"><i class="fa fa-comments"></i></span>
+                <span class="usb-label">{% trans "Messages" %}</span>
+                <span class="usb-badge nav-unread-messages-badge" style="{% if not unread_messages_count %}display:none;{% endif %}">{{ unread_messages_count|default:"" }}</span>
+            </a>
+            <a href="{% url 'jobs:notifications' %}" class="usb-item {% if url_name == 'notifications' %}active{% endif %}">
+                <span class="usb-icon" style="background:#fff7ed;color:#ea580c;"><i class="fa fa-bell"></i></span>
+                <span class="usb-label">{% trans "Notifications" %}</span>
+                <span class="usb-badge nav-unread-notifications-badge" style="{% if not unread_notifications_count %}display:none;{% endif %}">{{ unread_notifications_count|default:"" }}</span>
+            </a>
+            <a href="{% url 'jobs:employer-all-applicants' %}" class="usb-item {% if url_name == 'employer-all-applicants' %}active{% endif %}">
+                <span class="usb-icon" style="background:#f0fdf4;color:#16a34a;"><i class="fa fa-users"></i></span>
+                <span class="usb-label">{% trans "Applicants" %}</span>
+            </a>
+            <a href="{% url 'jobs:employer-jobs-create' %}" class="usb-item {% if url_name == 'employer-jobs-create' %}active{% endif %}">
+                <span class="usb-icon" style="background:#ecfdf5;color:#059669;"><i class="fa fa-plus-circle"></i></span>
+                <span class="usb-label">{% trans "Post a New Job" %}</span>
+            </a>
+            <a href="{% url 'accounts:employer-profile-update' %}" class="usb-item {% if url_name == 'employer-profile-update' %}active{% endif %}">
+                <span class="usb-icon" style="background:#f8fafc;color:#475569;"><i class="fa fa-building"></i></span>
+                <span class="usb-label">{% trans "Edit Profile" %}</span>
+            </a>
+
+        {% else %}
+            <!-- EMPLOYEE menu -->
+            <a href="{% url 'jobs:applicant-dashboard' %}" class="usb-item {% if url_name == 'applicant-dashboard' %}active{% endif %}">
+                <span class="usb-icon" style="background:#eff6ff;color:#2563eb;"><i class="fa fa-tachometer"></i></span>
+                <span class="usb-label">{% trans "Dashboard" %}</span>
+            </a>
+            <a href="{% url 'jobs:employee-recommended-jobs' %}" class="usb-item {% if url_name == 'employee-recommended-jobs' or url_name == 'recommended-jobs' %}active{% endif %}">
+                <span class="usb-icon" style="background:#fffbeb;color:#d97706;"><i class="fa fa-bolt"></i></span>
+                <span class="usb-label">{% trans "Recommended Jobs" %}</span>
+            </a>
+            <a href="{% url 'jobs:inbox' %}" class="usb-item {% if url_name == 'inbox' %}active{% endif %}">
+                <span class="usb-icon" style="background:#f0f9ff;color:#0284c7;"><i class="fa fa-comments"></i></span>
+                <span class="usb-label">{% trans "Messages" %}</span>
+                <span class="usb-badge nav-unread-messages-badge" style="{% if not unread_messages_count %}display:none;{% endif %}">{{ unread_messages_count|default:"" }}</span>
+            </a>
+            <a href="{% url 'jobs:notifications' %}" class="usb-item {% if url_name == 'notifications' %}active{% endif %}">
+                <span class="usb-icon" style="background:#fff7ed;color:#ea580c;"><i class="fa fa-bell"></i></span>
+                <span class="usb-label">{% trans "Notifications" %}</span>
+                <span class="usb-badge nav-unread-notifications-badge" style="{% if not unread_notifications_count %}display:none;{% endif %}">{{ unread_notifications_count|default:"" }}</span>
+            </a>
+            <a href="{% url 'jobs:employee-favorites' %}" class="usb-item {% if url_name == 'employee-favorites' %}active{% endif %}">
+                <span class="usb-icon" style="background:#fdf2f8;color:#db2777;"><i class="fa fa-heart"></i></span>
+                <span class="usb-label">{% trans "Favorites" %}</span>
+            </a>
+            <a href="{% url 'jobs:employee-my-applications' %}" class="usb-item {% if url_name == 'employee-my-applications' %}active{% endif %}">
+                <span class="usb-icon" style="background:#f0fdf4;color:#16a34a;"><i class="fa fa-briefcase"></i></span>
+                <span class="usb-label">{% trans "My Applications" %}</span>
+            </a>
+            <a href="{% url 'resume_cv:auto_builder' %}" class="usb-item {% if url_name == 'auto_builder' %}active{% endif %}">
+                <span class="usb-icon" style="background:#faf5ff;color:#7c3aed;"><i class="fa fa-magic"></i></span>
+                <span class="usb-label">{% trans "Auto CV Builder" %}</span>
+            </a>
+            <a href="{% url 'resume_cv:resumes' %}" class="usb-item {% if url_name == 'resumes' %}active{% endif %}">
+                <span class="usb-icon" style="background:#f8fafc;color:#475569;"><i class="fa fa-file-text"></i></span>
+                <span class="usb-label">{% trans "My Resumes" %}</span>
+            </a>
+            <a href="{% url 'accounts:employee-profile-update' %}" class="usb-item {% if url_name == 'employee-profile-update' %}active{% endif %}">
+                <span class="usb-icon" style="background:#f8fafc;color:#475569;"><i class="fa fa-user"></i></span>
+                <span class="usb-label">{% trans "Edit Profile" %}</span>
+            </a>
+        {% endif %}
+
+        {% if request.user.is_staff or request.user.is_superuser %}
+            <div class="usb-divider"></div>
+            <div class="usb-section-label">{% trans "Admin" %}</div>
+            <a href="{% url 'jobs:admin-analytics-dashboard' %}" class="usb-item">
+                <span class="usb-icon" style="background:#f0f9ff;color:#0369a1;"><i class="fa fa-bar-chart"></i></span>
+                <span class="usb-label">System Analytics</span>
+            </a>
+            <a href="{% url 'jobs:admin-dashboard' %}" class="usb-item">
+                <span class="usb-icon" style="background:#fffbeb;color:#b45309;"><i class="fa fa-shield"></i></span>
+                <span class="usb-label">Admin Panel</span>
+            </a>
+        {% endif %}
+
+        <div class="usb-divider"></div>
+        <a href="{% url 'accounts:logout' %}" class="usb-item danger">
+            <span class="usb-icon" style="background:#fef2f2;color:#dc2626;"><i class="fa fa-sign-out"></i></span>
+            <span class="usb-label">{% trans "Logout" %}</span>
+        </a>
+
+        {% endwith %}
+        {% endif %}
+    </div><!-- /usb-body -->
+</div><!-- /userSidebarPanel -->
+<!-- ========== END SIDEBAR ========== -->
+
+<style>
+/* ── Sidebar Overlay ── */
+#userSidebarOverlay {
+    display:none;
+    position:fixed;top:0;left:0;right:0;bottom:0;
+    z-index:9998;
+    background:rgba(15,23,42,.45);
+    backdrop-filter:blur(2px);
+}
+/* ── Sidebar Panel ── */
+#userSidebarPanel {
+    position:fixed;top:0;right:0;
+    width:290px;height:100vh;
+    z-index:9999;
+    background:#fff;
+    box-shadow:-6px 0 36px rgba(0,0,0,.16);
+    transform:translateX(100%);
+    transition:transform .3s cubic-bezier(.16,1,.3,1);
+    display:flex;flex-direction:column;overflow:hidden;
+}
+#userSidebarPanel.open { transform:translateX(0); }
+/* header */
+.usb-header {
+    background:linear-gradient(135deg,#1e3a5f,#2563eb);
+    padding:20px 18px 16px;flex-shrink:0;position:relative;
+}
+.usb-close-btn {
+    position:absolute;top:12px;right:14px;
+    background:rgba(255,255,255,.18);border:none;color:#fff;
+    width:28px;height:28px;border-radius:50%;font-size:15px;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:background .15s;
+}
+.usb-close-btn:hover { background:rgba(255,255,255,.32); }
+.usb-avatar-wrap {
+    width:58px;height:58px;border-radius:50%;overflow:hidden;
+    border:3px solid rgba(255,255,255,.5);margin-bottom:10px;background:#fff;
+}
+.usb-avatar-wrap img { width:100%;height:100%;object-fit:cover;display:block; }
+.usb-name {
+    color:#fff;font-size:15.5px;font-weight:700;line-height:1.25;
+    text-transform:capitalize;margin:0 0 2px;
+}
+.usb-email {
+    color:rgba(255,255,255,.75);font-size:12px;margin:0 0 8px;
+    word-break:break-all;
+}
+.usb-role-badge {
+    display:inline-flex;align-items:center;
+    background:rgba(255,255,255,.18);color:#fff;
+    border-radius:20px;font-size:11px;font-weight:600;
+    padding:2px 10px;margin-bottom:12px;
+}
+.usb-edit-btn {
+    display:block;text-align:center;
+    background:rgba(255,255,255,.15);color:#fff;
+    border:1.5px solid rgba(255,255,255,.4);border-radius:20px;
+    font-size:12.5px;font-weight:600;padding:6px 0;
+    text-decoration:none;transition:background .15s;
+}
+.usb-edit-btn:hover { background:rgba(255,255,255,.3);color:#fff;text-decoration:none; }
+/* body */
+.usb-body { flex:1;overflow-y:auto;padding:6px 0;background:#fff; }
+.usb-body::-webkit-scrollbar { width:4px; }
+.usb-body::-webkit-scrollbar-thumb { background:#e2e8f0;border-radius:4px; }
+.usb-section-label {
+    font-size:10px;font-weight:700;color:#94a3b8;
+    text-transform:uppercase;letter-spacing:.07em;padding:8px 18px 2px;
+}
+.usb-item {
+    display:flex;align-items:center;
+    padding:10px 18px;
+    color:#1e293b;font-size:14px;font-weight:500;
+    text-decoration:none;
+    transition:background .13s,color .13s,transform .1s;
+    border-left:3px solid transparent;
+}
+.usb-item:hover {
+    background:#f0f7ff;color:#0a66c2;
+    text-decoration:none;
+    transform:translateX(3px);
+}
+.usb-item.active {
+    background:#eff6ff;color:#1d4ed8;font-weight:600;
+    border-left-color:#2563eb;
+}
+.usb-icon {
+    width:32px;height:32px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    margin-right:12px;font-size:14px;flex-shrink:0;
+    transition:transform .13s;
+}
+.usb-item:hover .usb-icon { transform:scale(1.1); }
+.usb-label { flex:1; }
+.usb-badge {
+    background:#dc2626;color:#fff;
+    font-size:10px;font-weight:700;border-radius:10px;
+    padding:1px 6px;min-width:18px;text-align:center;
+}
+.usb-divider { height:1px;background:#f1f5f9;margin:5px 0; }
+.usb-item.danger { color:#dc2626; }
+.usb-item.danger:hover { background:#fef2f2;color:#b91c1c; }
+/* Navbar avatar hover glow */
+#userSidebarToggle .client-menu-image:hover,
+#userSidebarToggle:hover .client-menu-image {
+    border-color:rgba(255,255,255,.8)!important;
+    box-shadow:0 0 0 2px rgba(37,99,235,.45)!important;
+}
+</style>
+
+<script>
+function openUserSidebar(e) {
+    if (e) e.preventDefault();
+    document.getElementById('userSidebarPanel').classList.add('open');
+    var ov = document.getElementById('userSidebarOverlay');
+    ov.style.display = 'block';
+    // prevent body scroll
+    document.body.style.overflow = 'hidden';
+}
+function closeUserSidebar() {
+    document.getElementById('userSidebarPanel').classList.remove('open');
+    var ov = document.getElementById('userSidebarOverlay');
+    ov.style.display = 'none';
+    document.body.style.overflow = '';
+}
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeUserSidebar();
+});
 </script>
 
 </body>
