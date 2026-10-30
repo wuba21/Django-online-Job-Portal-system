@@ -364,6 +364,136 @@
         .alert .close:hover {
             opacity: 1 !important;
         }
+
+        /* ========== Chrome-Style Flyout Dropdown ========== */
+        .chrome-menu {
+            background: #292929 !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+            border-radius: 10px !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.45) !important;
+            padding: 6px 0 !important;
+            min-width: 220px !important;
+            list-style: none !important;
+        }
+        .chrome-item {
+            position: relative;
+            list-style: none !important;
+        }
+        .chrome-link {
+            display: flex !important;
+            align-items: center !important;
+            padding: 9px 14px !important;
+            color: #e8eaed !important;
+            font-size: 13.5px !important;
+            font-weight: 400 !important;
+            text-decoration: none !important;
+            border-radius: 6px !important;
+            margin: 1px 4px !important;
+            transition: background 0.12s !important;
+            cursor: pointer;
+        }
+        .chrome-link:hover,
+        .chrome-item.has-flyout:hover > .chrome-link {
+            background: rgba(255,255,255,0.1) !important;
+            color: #ffffff !important;
+            text-decoration: none !important;
+        }
+        .chrome-link.active {
+            background: rgba(138,180,248,0.15) !important;
+            color: #8ab4f8 !important;
+        }
+        .chrome-icon {
+            width: 28px; height: 28px;
+            border-radius: 6px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 12px;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        .chrome-label { flex: 1; }
+        .chrome-arrow {
+            font-size: 10px !important;
+            color: rgba(255,255,255,0.45) !important;
+            margin-left: auto !important;
+        }
+        .chrome-divider {
+            height: 1px !important;
+            background: rgba(255,255,255,0.12) !important;
+            margin: 5px 8px !important;
+            list-style: none !important;
+        }
+
+        /* Flyout sub-panel */
+        .chrome-flyout {
+            display: none;
+            position: absolute;
+            top: -6px;
+            left: 100%;
+            min-width: 210px;
+            background: #292929 !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+            border-radius: 10px !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.45) !important;
+            padding: 6px 0 !important;
+            list-style: none !important;
+            z-index: 10000;
+            /* subtle slide-in */
+            animation: chromeFlyIn 0.15s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+        @keyframes chromeFlyIn {
+            from { opacity: 0; transform: translateX(-6px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        .chrome-item.has-flyout:hover > .chrome-flyout {
+            display: block;
+        }
+        .chrome-flyout-item { list-style: none !important; }
+        .chrome-flyout-link {
+            display: flex !important;
+            align-items: center !important;
+            padding: 9px 14px !important;
+            color: #e8eaed !important;
+            font-size: 13.5px !important;
+            font-weight: 400 !important;
+            text-decoration: none !important;
+            border-radius: 6px !important;
+            margin: 1px 4px !important;
+            transition: background 0.12s !important;
+        }
+        .chrome-flyout-link:hover {
+            background: rgba(255,255,255,0.1) !important;
+            color: #ffffff !important;
+            text-decoration: none !important;
+        }
+        .chrome-flyout-link.active {
+            background: rgba(138,180,248,0.15) !important;
+            color: #8ab4f8 !important;
+        }
+        .chrome-flyout-divider {
+            height: 1px !important;
+            background: rgba(255,255,255,0.12) !important;
+            margin: 5px 8px !important;
+            list-style: none !important;
+        }
+
+        /* On mobile — hide flyout, show as flat list */
+        @media (max-width: 991.98px) {
+            .chrome-menu {
+                background: rgba(255,255,255,0.04) !important;
+                border: 1px solid rgba(255,255,255,0.08) !important;
+            }
+            .chrome-link { color: #cbd5e1 !important; }
+            .chrome-flyout {
+                display: block !important;
+                position: static !important;
+                box-shadow: none !important;
+                border: none !important;
+                background: transparent !important;
+                padding: 0 0 0 20px !important;
+                animation: none !important;
+            }
+            .chrome-arrow { display: none !important; }
+        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
@@ -394,56 +524,114 @@
                                 <i class="fa fa-home nav-icon"></i><span>{% trans "Home" %}</span>
                             </a>
                         </li>
-                        <!-- Jobs Dropdown -->
+                        <!-- Jobs Dropdown — Chrome-style flyout submenus -->
                         <li class="nav-item dropdown {% if url_name == 'jobs' or url_name == 'search' or url_name == 'salary-calculator' or url_name == 'templates' or url_name == 'pricing' %}active{% endif %}">
                             <a href="#" class="nav-link dropdown-toggle" id="jobsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fa fa-briefcase nav-icon"></i><span>{% trans "Jobs" %}</span>
                             </a>
-                            <div class="dropdown-menu" aria-labelledby="jobsDropdown" style="min-width:220px; border-radius:10px; box-shadow:0 8px 30px rgba(0,0,0,0.15); border:none; overflow:hidden; padding:0;">
-                                <div style="background:linear-gradient(135deg,#1e3a5f,#2563eb); padding:12px 16px;">
-                                    <small style="color:rgba(255,255,255,0.75); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:600;">{% trans "Browse by Category" %}</small>
-                                </div>
-                                <a href="{% url 'jobs:jobs' %}" class="dropdown-item py-2" style="font-weight:500;">
-                                    <i class="fa fa-th-large mr-2 text-primary"></i>{% trans "All Jobs" %}
-                                </a>
-                                <div class="dropdown-divider my-0"></div>
-                                <a href="{% url 'jobs:search' %}?category=NGO&position=NGO" class="dropdown-item py-2">
-                                    <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:#16a34a;border-radius:5px;margin-right:8px;">
-                                        <i class="fa fa-globe" style="color:#fff;font-size:12px;"></i>
-                                    </span>
-                                    <strong>{% trans "NGO Jobs" %}</strong>
-                                </a>
-                                <a href="{% url 'jobs:search' %}?category=Fresh+Graduate&position=Fresh+Graduate" class="dropdown-item py-2">
-                                    <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:#7c3aed;border-radius:5px;margin-right:8px;">
-                                        <i class="fa fa-graduation-cap" style="color:#fff;font-size:12px;"></i>
-                                    </span>
-                                    <strong>{% trans "Fresh Graduate" %}</strong>
-                                </a>
-                                <a href="{% url 'jobs:search' %}?category=Banking&position=Banking" class="dropdown-item py-2">
-                                    <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:#0891b2;border-radius:5px;margin-right:8px;">
-                                        <i class="fa fa-bank" style="color:#fff;font-size:12px;"></i>
-                                    </span>
-                                    <strong>{% trans "Banking Jobs" %}</strong>
-                                </a>
-                                <div class="dropdown-divider my-0"></div>
-                                <a href="{% url 'jobs:search' %}" class="dropdown-item py-2 text-muted" style="font-size:0.85rem;">
-                                    <i class="fa fa-search mr-2"></i>{% trans "Advanced Search" %}
-                                </a>
+                            <ul class="dropdown-menu chrome-menu" aria-labelledby="jobsDropdown">
 
-                                <!-- Career Services & Tools Section -->
-                                <div style="background:rgba(255,255,255,0.04); padding:8px 16px; border-top:1px solid rgba(255,255,255,0.08);">
-                                    <small style="color:rgba(255,255,255,0.55); font-size:0.7rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:600;">{% trans "Career Services & Tools" %}</small>
-                                </div>
-                                <a href="{% url 'resume_cv:templates' %}" class="dropdown-item py-2 {% if url_name == 'templates' %}active{% endif %}">
-                                    <i class="fa fa-file-text-o mr-2 text-info"></i>{% trans "Create Resume / CV" %}
-                                </a>
-                                <a href="{% url 'jobs:salary-calculator' %}" class="dropdown-item py-2 {% if url_name == 'salary-calculator' %}active{% endif %}">
-                                    <i class="fa fa-calculator mr-2 text-success"></i>{% trans "Salary Calculator" %}
-                                </a>
-                                <a href="{% url 'payments:pricing' %}" class="dropdown-item py-2 {% if url_name == 'pricing' %}active{% endif %}">
-                                    <i class="fa fa-diamond mr-2 text-warning"></i>{% trans "Pricing & VIP" %}
-                                </a>
-                            </div>
+                                <!-- Item: All Jobs (direct link) -->
+                                <li class="chrome-item">
+                                    <a href="{% url 'jobs:jobs' %}" class="chrome-link {% if url_name == 'jobs' %}active{% endif %}">
+                                        <span class="chrome-icon" style="background:#eff6ff;color:#2563eb;"><i class="fa fa-th-large"></i></span>
+                                        <span class="chrome-label">{% trans "All Jobs" %}</span>
+                                    </a>
+                                </li>
+
+                                <!-- Item: Job Categories → flyout -->
+                                <li class="chrome-item has-flyout">
+                                    <a href="{% url 'jobs:search' %}" class="chrome-link">
+                                        <span class="chrome-icon" style="background:#f0fdf4;color:#16a34a;"><i class="fa fa-list-ul"></i></span>
+                                        <span class="chrome-label">{% trans "Job Categories" %}</span>
+                                        <i class="fa fa-chevron-right chrome-arrow"></i>
+                                    </a>
+                                    <!-- Flyout sub-panel -->
+                                    <ul class="chrome-flyout">
+                                        <li class="chrome-flyout-item">
+                                            <a href="{% url 'jobs:search' %}?category=NGO&position=NGO" class="chrome-flyout-link">
+                                                <span class="chrome-icon" style="background:#f0fdf4;color:#16a34a;"><i class="fa fa-globe"></i></span>
+                                                <span>{% trans "NGO Jobs" %}</span>
+                                            </a>
+                                        </li>
+                                        <li class="chrome-flyout-item">
+                                            <a href="{% url 'jobs:search' %}?category=Fresh+Graduate&position=Fresh+Graduate" class="chrome-flyout-link">
+                                                <span class="chrome-icon" style="background:#faf5ff;color:#7c3aed;"><i class="fa fa-graduation-cap"></i></span>
+                                                <span>{% trans "Fresh Graduate" %}</span>
+                                            </a>
+                                        </li>
+                                        <li class="chrome-flyout-item">
+                                            <a href="{% url 'jobs:search' %}?category=Banking&position=Banking" class="chrome-flyout-link">
+                                                <span class="chrome-icon" style="background:#f0f9ff;color:#0891b2;"><i class="fa fa-bank"></i></span>
+                                                <span>{% trans "Banking Jobs" %}</span>
+                                            </a>
+                                        </li>
+                                        <li class="chrome-flyout-item">
+                                            <a href="{% url 'jobs:search' %}?category=Health&position=Health" class="chrome-flyout-link">
+                                                <span class="chrome-icon" style="background:#fff1f2;color:#e11d48;"><i class="fa fa-heartbeat"></i></span>
+                                                <span>{% trans "Health Jobs" %}</span>
+                                            </a>
+                                        </li>
+                                        <li class="chrome-flyout-item">
+                                            <a href="{% url 'jobs:search' %}?category=IT&position=IT" class="chrome-flyout-link">
+                                                <span class="chrome-icon" style="background:#fff7ed;color:#ea580c;"><i class="fa fa-code"></i></span>
+                                                <span>{% trans "IT & Tech Jobs" %}</span>
+                                            </a>
+                                        </li>
+                                        <li class="chrome-flyout-item">
+                                            <a href="{% url 'jobs:search' %}?category=Education&position=Education" class="chrome-flyout-link">
+                                                <span class="chrome-icon" style="background:#fffbeb;color:#d97706;"><i class="fa fa-book"></i></span>
+                                                <span>{% trans "Education Jobs" %}</span>
+                                            </a>
+                                        </li>
+                                        <li class="chrome-flyout-divider"></li>
+                                        <li class="chrome-flyout-item">
+                                            <a href="{% url 'jobs:search' %}" class="chrome-flyout-link">
+                                                <span class="chrome-icon" style="background:#f8fafc;color:#475569;"><i class="fa fa-search"></i></span>
+                                                <span>{% trans "Advanced Search" %}</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+
+                                <li class="chrome-divider"></li>
+
+                                <!-- Item: Career Tools → flyout -->
+                                <li class="chrome-item has-flyout">
+                                    <a href="#" class="chrome-link">
+                                        <span class="chrome-icon" style="background:#faf5ff;color:#7c3aed;"><i class="fa fa-magic"></i></span>
+                                        <span class="chrome-label">{% trans "Career Tools" %}</span>
+                                        <i class="fa fa-chevron-right chrome-arrow"></i>
+                                    </a>
+                                    <ul class="chrome-flyout">
+                                        <li class="chrome-flyout-item">
+                                            <a href="{% url 'resume_cv:templates' %}" class="chrome-flyout-link {% if url_name == 'templates' %}active{% endif %}">
+                                                <span class="chrome-icon" style="background:#f0f9ff;color:#0284c7;"><i class="fa fa-file-text-o"></i></span>
+                                                <span>{% trans "Create Resume / CV" %}</span>
+                                            </a>
+                                        </li>
+                                        <li class="chrome-flyout-item">
+                                            <a href="{% url 'resume_cv:auto_builder' %}" class="chrome-flyout-link">
+                                                <span class="chrome-icon" style="background:#faf5ff;color:#7c3aed;"><i class="fa fa-wand"></i></span>
+                                                <span>{% trans "Auto CV Builder" %}</span>
+                                            </a>
+                                        </li>
+                                        <li class="chrome-flyout-item">
+                                            <a href="{% url 'jobs:salary-calculator' %}" class="chrome-flyout-link {% if url_name == 'salary-calculator' %}active{% endif %}">
+                                                <span class="chrome-icon" style="background:#f0fdf4;color:#16a34a;"><i class="fa fa-calculator"></i></span>
+                                                <span>{% trans "Salary Calculator" %}</span>
+                                            </a>
+                                        </li>
+                                        <li class="chrome-flyout-item">
+                                            <a href="{% url 'payments:pricing' %}" class="chrome-flyout-link {% if url_name == 'pricing' %}active{% endif %}">
+                                                <span class="chrome-icon" style="background:#fffbeb;color:#d97706;"><i class="fa fa-diamond"></i></span>
+                                                <span>{% trans "Pricing & VIP" %}</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+
+                            </ul>
                         </li>
                         <li class="nav-item {% if url_name == 'companies-list' or url_name == 'company-detail' %}active{% endif %}">
                             <a href="{% url 'jobs:companies-list' %}" class="nav-link">
