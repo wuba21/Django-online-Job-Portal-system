@@ -1,4 +1,4 @@
-﻿{% load static i18n %}
+{% load static i18n %}
 {% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}">
@@ -965,16 +965,20 @@
                                    class="nav-link dropdown-toggle">
                                     <i class="fa fa-user-plus nav-icon"></i><span>{% trans "Register" %}</span>
                                 </a>
-                                <div aria-labelledby="pages" class="dropdown-menu">
-                                    <a href="{% url 'accounts:employee-register' %}"
-                                       class="dropdown-item {% if url_name == 'employee-register' %}active{% endif %}">
-                                        <i class="fa fa-user mr-2 text-primary"></i>{% trans "Job Seeker" %}
-                                    </a>
-                                    <a href="{% url 'accounts:employer-register' %}"
-                                       class="dropdown-item {% if url_name == 'employer-register' %}active{% endif %}">
-                                        <i class="fa fa-building-o mr-2 text-success"></i>{% trans "Employer" %}
-                                    </a>
-                                </div>
+                                <ul aria-labelledby="pages" class="dropdown-menu chrome-menu" style="min-width: 210px !important;">
+                                    <li class="chrome-item">
+                                        <a href="{% url 'accounts:employee-register' %}" class="chrome-link {% if url_name == 'employee-register' %}active{% endif %}">
+                                            <span class="chrome-icon" style="background:#eff6ff;color:#2563eb;"><i class="fa fa-user"></i></span>
+                                            <span class="chrome-label">{% trans "Job Seeker" %}</span>
+                                        </a>
+                                    </li>
+                                    <li class="chrome-item">
+                                        <a href="{% url 'accounts:employer-register' %}" class="chrome-link {% if url_name == 'employer-register' %}active{% endif %}">
+                                            <span class="chrome-icon" style="background:#f0fdf4;color:#16a34a;"><i class="fa fa-building-o"></i></span>
+                                            <span class="chrome-label">{% trans "Employer" %}</span>
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                             <li class="nav-item nav-item-auth">
                                 <a href="{% url 'accounts:login' %}"
