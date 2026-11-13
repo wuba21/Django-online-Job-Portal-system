@@ -57,6 +57,10 @@ if schema_view is not None:
 
 from django.http import HttpResponse
 
+def google_site_verification(request):
+    content = "google-site-verification: google6d39bcc584718b95.html"
+    return HttpResponse(content, content_type="text/html; charset=utf-8")
+
 def robots_txt(request):
     content = (
         "User-agent: *\n"
@@ -82,6 +86,7 @@ def security_txt(request):
     return HttpResponse(content, content_type="text/plain; charset=utf-8")
 
 urlpatterns = lang_patterns + [
+    path("google6d39bcc584718b95.html", google_site_verification, name="google-site-verification"),
     path("robots.txt", robots_txt, name="robots-txt"),
     path(".well-known/security.txt", security_txt, name="security-txt"),
     path("security.txt", security_txt, name="security-txt-root"),
