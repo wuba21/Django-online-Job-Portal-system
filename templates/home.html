@@ -12,9 +12,9 @@
             <div class="row">
                 <div class="col-lg-8 mx-auto">
                     <div class="job-form-box">
-                        <h2 class="heading">{% trans "Find a job you will" %}
+                        <h1 class="heading">{% trans "Find a job you will" %}
                             <span class="accent">{% trans "love" %}</span>.
-                        </h2>
+                        </h1>
                         <form id="job-main-form" method="get" action="{% url 'jobs:search' %}" class="job-main-form">
                             <div class="controls">
                                 <div class="row align-items-center">
@@ -48,7 +48,7 @@
     </section>
     <section class="bg-light-gray">
         <div class="container">
-            <h3 class="heading">{% trans "Featured jobs" %}</h3>
+            <h2 class="heading">{% trans "Featured jobs" %}</h2>
             <div class="row featured align-items-stretch">
                 {% for job in jobs %}
                     <div class="col-lg-4 mb-5 mb-lg-0">
@@ -74,7 +74,7 @@
                                 {% if job.is_featured %}
                                     <span class="badge bg-warning text-dark mb-2 px-2 py-1"><i class="fa fa-star me-1"></i> VIP FEATURED</span>
                                 {% endif %}
-                                <h5><a href="{% url 'jobs:jobs-detail' job.id %}">{{ job.title }}</a></h5>
+                                <h3 class="h5"><a href="{% url 'jobs:jobs-detail' job.id %}">{{ job.title }}</a></h3>
                                 <p class="featured__details"><i class="fa fa-map-marker job__location"></i>
                                     {{ job.location }}
                                     {% if job.type == '1' %}
@@ -101,7 +101,7 @@
     {% if trendings %}
         <section>
             <div class="container">
-                <h4 class="heading">{% trans "Trending this month" %}</h4>
+                <h2 class="heading">{% trans "Trending this month" %}</h2>
                 {% for trending in trendings %}
                     <div class="job-listing mb-3 p-3 bg-white rounded shadow-sm border">
                         <div class="row align-items-center">
@@ -116,9 +116,9 @@
                                         </div>
                                     {% endif %}
                                     <div>
-                                        <h5 class="job__title mb-1 font-weight-bold">
+                                        <h3 class="job__title mb-1 font-weight-bold h5">
                                             <a href="{% url 'jobs:jobs-detail' trending.id %}">{{ trending.title }}</a>
-                                        </h5>
+                                        </h3>
                                         <p class="job__company text-muted mb-1 small">{{ trending.company_name }}</p>
                                     </div>
                                 </div>
@@ -145,8 +145,8 @@
                         <span class="badge badge-warning text-dark font-weight-bold px-3 py-1 mb-2" style="font-size: 0.82rem;">
                             <i class="fa fa-bell-o mr-1"></i> FREE INSTANT JOB ALERTS
                         </span>
-                        <h3 class="font-weight-bold text-white mb-2">Be the First to Apply for New Vacancies</h3>
-                        <p class="text-white-50 mb-0" style="font-size: 1rem;">
+                        <h2 class="font-weight-bold text-white mb-2 h3">Be the First to Apply for New Vacancies</h2>
+                        <p class="mb-0" style="font-size: 1rem; color: rgba(255,255,255,0.85);">
                             Get immediate email notifications when top companies and NGOs post jobs matching your skills and location.
                         </p>
                     </div>
@@ -162,7 +162,7 @@
                                 </div>
                             </div>
                         </form>
-                        <small class="text-white-50 d-block mt-2 text-center text-lg-left">
+                        <small class="d-block mt-2 text-center text-lg-left" style="color: rgba(255,255,255,0.8);">
                             <i class="fa fa-shield mr-1"></i> 100% Free &bull; No spam &bull; Unsubscribe anytime
                         </small>
                     </div>
@@ -174,7 +174,7 @@
     <!-- Top Employers Teaser Section -->
     <section class="py-5 bg-light-gray">
         <div class="container text-center">
-            <h3 class="heading mb-2">Explore Verified Employers</h3>
+            <h2 class="heading mb-2 h3">Explore Verified Employers</h2>
             <p class="text-muted mb-4">Discover leading Ethiopian and international companies actively hiring on our platform.</p>
             <div>
                 <a href="{% url 'jobs:companies-list' %}" class="btn btn-outline-primary font-weight-bold px-4 py-2">
