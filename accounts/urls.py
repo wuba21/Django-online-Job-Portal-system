@@ -22,4 +22,6 @@ urlpatterns = [
     path("accounts/post-login-redirect/", LoginRedirectRouteView.as_view(), name="accounts-post-login-redirect-alias"),
     path("employer/verify-license/", EmployerLicenseVerifyView.as_view(), name="employer-verify-license"),
     path("google-one-tap-login/", GoogleOneTapLoginView.as_view(), name="google-one-tap-login"),
+    path("verify-email-otp/", VerifyEmailOtpView.as_view(), name="verify-email-otp"),
+    path("resend-email-otp/", ResendEmailOtpView.as_view(), name="resend-email-otp"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

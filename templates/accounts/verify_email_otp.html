@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}
+    {% trans "Verify Your Email" %}
+{% endblock %}
+
+{% block content %}
+<section class="py-5" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); min-height: 80vh; display: flex; align-items: center;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-5">
+                <div class="card border-0 shadow-lg rounded-lg overflow-hidden">
+                    <div class="card-header bg-primary text-white text-center py-4" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;">
+                        <div class="mb-2">
+                            <i class="fa fa-envelope-open-o fa-3x text-white"></i>
+                        </div>
+                        <h2 class="h4 font-weight-bold mb-1 text-white">{% trans "Email Verification" %}</h2>
+                        <p class="small mb-0 text-white-50">{% trans "Enter the 6-digit code sent to your Google/Gmail account" %}</p>
+                    </div>
+
+                    <div class="card-body p-4 p-md-5">
+                        <div class="alert alert-info text-center py-2 mb-4" style="font-size: 0.92rem;">
+                            <i class="fa fa-info-circle mr-1"></i>
+                            {% trans "We sent a 6-digit verification code to:" %}<br>
+                            <strong class="text-dark">{{ email }}</strong>
+                        </div>
+
+                        {% if error %}
+                            <div class="alert alert-danger text-center py-2 mb-4" style="font-size: 0.9rem;">
+                                <i class="fa fa-exclamation-triangle mr-1"></i> {{ error }}
+                            </div>
+                        {% endif %}
+
+                        <form method="post" action="{% url 'accounts:verify-email-otp' %}" id="otpForm">
+                            {% csrf_token %}
+                            <input type="hidden" name="email" value="{{ email }}">
+
+                            <div class="form-group text-center mb-4">
+                                <label for="otp_code" class="font-weight-bold mb-2">{% trans "6-Digit Security Code (OTP)" %}</label>
+                                <input type="text"
+                                       name="otp_code"
+                                       id="otp_code"
+                                       class="form-control text-center font-weight-bold"
+                                       style="font-size: 1.8rem; letter-spacing: 0.35em; height: 60px; max-width: 260px; margin: 0 auto; border: 2px solid #2563eb; border-radius: 10px;"
+                                       maxlength="6"
+                                       pattern="[0-9]{6}"
+                                       placeholder="------"
+                                       inputmode="numeric"
+                                       required
+                                       autofocus>
+                                <small class="form-text text-muted mt-2">
+                                    <i class="fa fa-clock-o mr-1"></i> {% trans "Code expires in 10 minutes" %}
+                                </small>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block font-weight-bold py-3 shadow" style="border-radius: 8px; font-size: 1.05rem;">
+                                <i class="fa fa-check-circle mr-1"></i> {% trans "Verify & Activate Account" %}
+                            </button>
+                        </form>
+
+                        <hr class="my-4">
+
+                        <div class="text-center">
+                            <p class="small text-muted mb-2">{% trans "Didn't receive the verification code?" %}</p>
+                            <form method="post" action="{% url 'accounts:resend-email-otp' %}" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="email" value="{{ email }}">
+                                <button type="submit" class="btn btn-sm btn-outline-secondary font-weight-bold px-3 py-1">
+                                    <i class="fa fa-refresh mr-1"></i> {% trans "Resend Verification Code" %}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card-footer bg-light text-center py-3 border-0">
+                        <small class="text-muted">
+                            {% trans "Wrong email address?" %}
+                            <a href="{% url 'accounts:employee-register' %}" class="font-weight-bold text-primary">{% trans "Register again" %}</a>
+                            &bull;
+                            <a href="{% url 'accounts:login' %}" class="font-weight-bold text-primary">{% trans "Sign In" %}</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

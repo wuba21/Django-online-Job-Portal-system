@@ -45,13 +45,19 @@ class RegisterEmployeeView(CreateView):
             user.gender = form.cleaned_data.get("gender")
             user.phone_number = form.cleaned_data.get("phone_number", "").strip()
             user.role = "employee"
-            user.is_active = True
+            user.is_active = False  # Account stays inactive until OTP verified
             user.save()
-            messages.success(
+
+            # Send Email OTP
+            from accounts.otp_service import generate_and_send_email_otp
+            generate_and_send_email_otp(user)
+
+            request.session["pending_verification_email"] = user.email
+            messages.info(
                 request,
-                f"Employee account registered successfully for {user.first_name} {user.last_name}! Please log in with your email ({user.email}), Google, or GitHub."
+                f"We sent a 6-digit verification code to {user.email}. Please verify your email to activate your account."
             )
-            return redirect("accounts:login")
+            return redirect("accounts:verify-email-otp")
         else:
             messages.error(request, "Please check the form and correct the highlighted errors.")
             return render(request, "accounts/employee/register.html", {"form": form})
@@ -91,7 +97,7 @@ class RegisterEmployerView(CreateView):
             user.gender = form.cleaned_data.get("gender")
             user.phone_number = form.cleaned_data.get("phone_number", "").strip()
             user.role = "employer"
-            user.is_active = True
+            user.is_active = False  # Account stays inactive until OTP verified
             user.save()
 
             # Ensure Company record is created for this employer
@@ -99,11 +105,16 @@ class RegisterEmployerView(CreateView):
             company_name = form.cleaned_data.get("company_name", "").strip() or f"{user.first_name}'s Company"
             Company.objects.update_or_create(user=user, defaults={"name": company_name})
 
-            messages.success(
+            # Send Email OTP
+            from accounts.otp_service import generate_and_send_email_otp
+            generate_and_send_email_otp(user)
+
+            request.session["pending_verification_email"] = user.email
+            messages.info(
                 request,
-                f"Employer account for '{company_name}' registered successfully! Please log in with your email ({user.email}), Google, or GitHub."
+                f"We sent a 6-digit verification code to {user.email}. Please verify your email to activate your account."
             )
-            return redirect("accounts:login")
+            return redirect("accounts:verify-email-otp")
         else:
             messages.error(request, "Please check the form and correct the highlighted errors.")
             return render(request, "accounts/employer/register.html", {"form": form})
@@ -429,3 +440,108 @@ class GoogleOneTapLoginView(View):
                 "name": user.get_full_name() or user.email
             }
         })
+
+
+class VerifyEmailOtpView(View):
+    """
+    Handles user email verification with the 6-digit OTP code.
+    Activates the user account upon correct code entry.
+    """
+    template_name = "accounts/verify_email_otp.html"
+
+    def get(self, request, *args, **kwargs):
+        email = request.session.get("pending_verification_email") or request.GET.get("email", "").strip()
+        if not email:
+            messages.warning(request, "No pending email verification found. Please sign in or register.")
+            return redirect("accounts:login")
+        return render(request, self.template_name, {"email": email})
+
+    def post(self, request, *args, **kwargs):
+        email = request.POST.get("email", "").strip().lower()
+        otp_code = request.POST.get("otp_code", "").strip()
+
+        if not email or not otp_code:
+            return render(request, self.template_name, {
+                "email": email,
+                "error": "Please enter both your email address and the 6-digit code."
+            })
+
+        user = User.objects.filter(email__iexact=email).first()
+        if not user:
+            return render(request, self.template_name, {
+                "email": email,
+                "error": "No account found with this email. Please register again."
+            })
+
+        # Fetch latest valid OTP record
+        from accounts.models import EmailVerificationOTP
+        from django.utils import timezone
+
+        otp_record = EmailVerificationOTP.objects.filter(
+            user=user,
+            otp_code=otp_code,
+            is_used=False
+        ).first()
+
+        if not otp_record:
+            return render(request, self.template_name, {
+                "email": email,
+                "error": "Invalid verification code. Please check your email and try again."
+            })
+
+        if otp_record.is_expired:
+            return render(request, self.template_name, {
+                "email": email,
+                "error": "This verification code has expired. Please click 'Resend Verification Code' below."
+            })
+
+        # Mark OTP as used and activate user account
+        otp_record.is_used = True
+        otp_record.save()
+
+        user.is_active = True
+        user.is_verified = True
+        user.email_verified_at = timezone.now()
+        user.save()
+
+        # Clear session
+        request.session.pop("pending_verification_email", None)
+
+        # Automatically log the user in
+        auth.login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+        messages.success(
+            request,
+            f"Email verified successfully! Welcome to EthioJobs Portal, {user.first_name}."
+        )
+
+        # Redirect user based on role
+        if user.is_superuser or user.is_staff:
+            return redirect("jobs:admin-analytics-dashboard")
+        elif getattr(user, "role", None) == "employer":
+            company = getattr(user, "company", None)
+            if not company or not company.is_license_verified:
+                return redirect("accounts:employer-verify-license")
+            return redirect("jobs:employer-dashboard")
+        return redirect("jobs:applicant-dashboard")
+
+
+class ResendEmailOtpView(View):
+    """
+    Resends a new 6-digit OTP code to the user's email.
+    """
+    def post(self, request, *args, **kwargs):
+        email = request.POST.get("email", "").strip().lower()
+        if not email:
+            email = request.session.get("pending_verification_email", "")
+
+        user = User.objects.filter(email__iexact=email).first()
+        if not user:
+            messages.error(request, "Account not found for email resend.")
+            return redirect("accounts:login")
+
+        from accounts.otp_service import generate_and_send_email_otp
+        generate_and_send_email_otp(user)
+        request.session["pending_verification_email"] = user.email
+        messages.success(request, f"A fresh 6-digit verification code has been sent to {user.email}.")
+        return redirect("accounts:verify-email-otp")
+
