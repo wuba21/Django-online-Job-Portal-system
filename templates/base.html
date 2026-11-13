@@ -7,28 +7,30 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="robots" content="all,follow">
     <meta name="theme-color" content="#111827">
     <title>{% block title %}{% trans "EthioJobs" %}{% endblock %} | EthioJobs - {% trans "Career Portal" %}</title>
-    <meta name="description" content="{% block meta_description %}EthioJobs Portal - Find the latest jobs in Ethiopia: NGO vacancies, Banking, Accounting, IT & Tech, Healthcare, Fresh Graduate and remote jobs in Addis Ababa and across Ethiopia.{% endblock %}">
-    <meta name="keywords" content="Ethio jobs, Jobs in Ethiopia, Ethiopian vacancy, NGO jobs Ethiopia, Banking vacancies Addis Ababa, Fresh graduate jobs Ethiopia, Ethiojobs vacancy, work in Ethiopia, የስራ ማስታወቂያ, አዲስ የስራ ማስታወቂያ">
+    <meta name="description" content="{% block meta_description %}Ethiopia's premier job portal — find NGO, Banking, Fresh Graduate and other jobs in Addis Ababa and across Ethiopia.{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}jobs in Ethiopia, ethio jobs, vacancy Ethiopia, NGO jobs Ethiopia, banking jobs Ethiopia, fresh graduate jobs Addis Ababa, ስራ, vacancy 2025, job portal Ethiopia, online jobs Ethiopia{% endblock %}">
     <meta name="author" content="EthioJobs Portal">
+    <link rel="canonical" href="{% block canonical_url %}{{ request.build_absolute_uri }}{% endblock %}">
 
-    <!-- Open Graph / Facebook / Telegram SEO Meta Tags -->
-    <meta property="og:type" content="website">
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
-    <meta property="og:title" content="{% block og_title %}EthioJobs - #1 Career & Vacancy Portal in Ethiopia{% endblock %}">
-    <meta property="og:description" content="{% block og_description %}Discover verified vacancies, NGO careers, Banking, and IT jobs across Ethiopia. Post jobs or apply directly with free instant alerts.{% endblock %}">
-    <meta property="og:image" content="{% block og_image %}{% static 'img/favicon.svg' %}{% endblock %}">
     <meta property="og:site_name" content="EthioJobs Portal">
+    <meta property="og:title" content="{% block og_title %}EthioJobs | Ethiopia's #1 Job Portal{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Ethiopia's premier job portal — find NGO, Banking, Fresh Graduate and other jobs in Addis Ababa and across Ethiopia.{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'img/og-image.png' %}{% endblock %}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="en_ET">
 
-    <!-- Twitter Card SEO -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="EthioJobs - Career Portal in Ethiopia">
-    <meta name="twitter:description" content="Find the latest NGO, Banking, Fresh Graduate, and IT vacancies in Ethiopia.">
-
-    <!-- Canonical URL -->
-    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+    <meta name="twitter:title" content="{% block twitter_title %}EthioJobs | Ethiopia's #1 Job Portal{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}Find NGO, Banking, Fresh Graduate and other jobs in Ethiopia. ስራ ለማግኘት ቀባሉ መንገድ!{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'img/og-image.png' %}{% endblock %}">
 
     <!-- DNS Prefetch for speed -->
     <link rel="dns-prefetch" href="//fonts.googleapis.com">
@@ -64,6 +66,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"></noscript>
 
+    {% block extra_head %}{% endblock %}
     {% block styles %}{% endblock %}
 
     <!-- PWA Web App Manifest & Mobile Meta -->

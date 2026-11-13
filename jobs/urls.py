@@ -57,6 +57,19 @@ if schema_view is not None:
 
 from django.http import HttpResponse
 
+def robots_txt(request):
+    content = (
+        "User-agent: *\n"
+        "Allow: /\n"
+        "Disallow: /admin/\n"
+        "Disallow: /api/\n"
+        "Disallow: /accounts/\n"
+        "Disallow: /en/employer/\n"
+        "Disallow: /am/employer/\n"
+        "Sitemap: https://wubante.pythonanywhere.com/sitemap.xml/\n"
+    )
+    return HttpResponse(content, content_type="text/plain; charset=utf-8")
+
 def security_txt(request):
     content = (
         "Contact: mailto:info@jobportal.com\n"
@@ -65,19 +78,6 @@ def security_txt(request):
         "Preferred-Languages: en, am\n"
         "Canonical: https://wubante.pythonanywhere.com/.well-known/security.txt\n"
         "Policy: https://wubante.pythonanywhere.com/en/privacy-policy/\n"
-    )
-    return HttpResponse(content, content_type="text/plain; charset=utf-8")
-
-def robots_txt(request):
-    content = (
-        "User-agent: *\n"
-        "Allow: /\n"
-        "Disallow: /admin/\n"
-        "Disallow: /employer/\n"
-        "Disallow: /employee/\n"
-        "Disallow: /payments/\n"
-        "Disallow: /api/\n\n"
-        "Sitemap: https://wubante.pythonanywhere.com/sitemap.xml/\n"
     )
     return HttpResponse(content, content_type="text/plain; charset=utf-8")
 
