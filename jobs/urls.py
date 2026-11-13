@@ -55,7 +55,22 @@ if importlib.util.find_spec("social_django") is not None:
 if schema_view is not None:
     api_patterns.insert(0, path("swagger", schema_view.with_ui("swagger", cache_timeout=0)))
 
+from django.http import HttpResponse
+
+def security_txt(request):
+    content = (
+        "Contact: mailto:info@jobportal.com\n"
+        "Contact: https://linkedin.com/in/wubante-tilahun\n"
+        "Expires: 2027-12-31T23:59:59.000Z\n"
+        "Preferred-Languages: en, am\n"
+        "Canonical: https://wubante.pythonanywhere.com/.well-known/security.txt\n"
+        "Policy: https://wubante.pythonanywhere.com/en/privacy-policy/\n"
+    )
+    return HttpResponse(content, content_type="text/plain; charset=utf-8")
+
 urlpatterns = lang_patterns + [
+    path(".well-known/security.txt", security_txt, name="security-txt"),
+    path("security.txt", security_txt, name="security-txt-root"),
     path("i18n/setlang/", set_language, name="set_language"),
     re_path(r"^i18n/", include("django.conf.urls.i18n")),
     path("admin/", admin.site.urls),

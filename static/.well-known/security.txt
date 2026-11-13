@@ -1,0 +1,6 @@
+Contact: mailto:info@jobportal.com
+Contact: https://linkedin.com/in/wubante-tilahun
+Expires: 2027-12-31T23:59:59.000Z
+Preferred-Languages: en, am
+Canonical: https://wubante.pythonanywhere.com/.well-known/security.txt
+Policy: https://wubante.pythonanywhere.com/en/privacy-policy/

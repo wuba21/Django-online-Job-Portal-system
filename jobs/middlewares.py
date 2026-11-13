@@ -30,6 +30,40 @@ class CustomMiddleware(MiddlewareMixin):
         return response
 
 
+class SecurityHeadersMiddleware:
+    """
+    Production-grade Security Headers Middleware.
+    Adds Content-Security-Policy (CSP) and Permissions-Policy to harden the application
+    against XSS, clickjacking, and data injection.
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
+        # Content-Security-Policy (allows self, Google OAuth, fonts, CDNs used in base.html)
+        csp_directives = [
+            "default-src 'self'",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://apis.google.com https://cdnjs.cloudflare.com https://oss.maxcdn.com",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com",
+            "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com",
+            "img-src 'self' data: blob: https: http:",
+            "connect-src 'self' https://accounts.google.com https://apis.google.com https://api.chapa.co",
+            "frame-src 'self' https://accounts.google.com https://checkout.chapa.co",
+            "object-src 'none'",
+            "base-uri 'self'",
+        ]
+        if "Content-Security-Policy" not in response:
+            response["Content-Security-Policy"] = "; ".join(csp_directives)
+
+        # Permissions-Policy
+        if "Permissions-Policy" not in response:
+            response["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+
+        return response
+
+
 class ResponseTimeMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
