@@ -40,6 +40,11 @@ class SecurityHeadersMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        # Block dangerous or unsupported HTTP methods (TRACE, TRACK, OPTIONS probe mitigation)
+        if request.method in ("TRACE", "TRACK"):
+            from django.http import HttpResponseNotAllowed
+            return HttpResponseNotAllowed(["GET", "POST", "HEAD"])
+
         response = self.get_response(request)
 
         # Content-Security-Policy (allows self, Google OAuth, fonts, CDNs used in base.html)
@@ -83,6 +88,11 @@ class ErrorTrackingMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        # Block dangerous or unsupported HTTP methods (TRACE, TRACK, OPTIONS probe mitigation)
+        if request.method in ("TRACE", "TRACK"):
+            from django.http import HttpResponseNotAllowed
+            return HttpResponseNotAllowed(["GET", "POST", "HEAD"])
+
         response = self.get_response(request)
         if 400 <= response.status_code < 600:
             error_rates_counter.labels(status_code=response.status_code, endpoint=request.path).inc()

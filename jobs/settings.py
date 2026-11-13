@@ -35,6 +35,15 @@ SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"
 
+# Session Lifecycle & Inactivity Timeout (Enterprise Hardening)
+SESSION_COOKIE_AGE = 86400  # 24 hours max session life
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Automatically invalidate on browser exit
+SESSION_SAVE_EVERY_REQUEST = True
+
+# File Upload Protection: Max 5MB per upload to prevent DoS & disk exhaustion
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+
 # Reverse proxy SSL header (e.g., PythonAnywhere, Nginx)
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 

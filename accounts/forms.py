@@ -180,6 +180,17 @@ class UserLoginForm(forms.Form):
 
         if email and password:
             email = email.strip().lower()
+
+            # Brute-force protection: check cache for failed attempts
+            from django.core.cache import cache
+            lockout_key = f"login_lockout_{email}"
+            attempts_key = f"login_attempts_{email}"
+
+            if cache.get(lockout_key):
+                raise forms.ValidationError(
+                    "Too many failed login attempts. This account is temporarily locked for 15 minutes for security. Please try again later."
+                )
+
             user_obj = User.objects.filter(email__iexact=email).first()
             if user_obj is None:
                 raise forms.ValidationError("No account found with this email address.")
@@ -193,7 +204,23 @@ class UserLoginForm(forms.Form):
 
             self.user = authenticate(email=user_obj.email, password=password)
             if self.user is None:
-                raise forms.ValidationError("Invalid password. Please check your password and try again.")
+                attempts = cache.get(attempts_key, 0) + 1
+                if attempts >= 5:
+                    cache.set(lockout_key, True, timeout=900)  # Lock for 15 minutes
+                    cache.delete(attempts_key)
+                    raise forms.ValidationError(
+                        "Security Alert: 5 consecutive failed attempts detected. Account temporarily locked for 15 minutes."
+                    )
+                else:
+                    cache.set(attempts_key, attempts, timeout=900)
+                    remaining = 5 - attempts
+                    raise forms.ValidationError(
+                        f"Invalid password. ({remaining} attempts remaining before temporary account lockout)"
+                    )
+            else:
+                # Login succeeded: clear any failed attempts counter
+                cache.delete(attempts_key)
+                cache.delete(lockout_key)
 
         return super(UserLoginForm, self).clean(*args, **kwargs)
 
