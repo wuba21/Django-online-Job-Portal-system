@@ -78,6 +78,8 @@ class CreateJobForm(forms.ModelForm):
         self.fields["work_mode"].required = False
         self.fields["currency"].required = False
         self.fields["company_description"].required = False
+        self.fields["company_name"].required = False
+        self.fields["last_date"].required = False
         self.fields["website"].required = False
         self.fields["vacancy"].required = False
         if "logo" in self.fields:
@@ -112,10 +114,19 @@ class CreateJobForm(forms.ModelForm):
         return val if val else 1
 
     def clean_last_date(self):
+        from jobsapp.models import default_deadline
         date = self.cleaned_data.get("last_date")
-        if date and date.date() < timezone.now().date():
+        if not date:
+            return default_deadline()
+        if hasattr(date, "date") and date.date() < timezone.now().date():
             raise ValidationError("Deadline cannot be in the past.")
         return date
+
+    def clean_company_name(self):
+        name = self.cleaned_data.get("company_name")
+        if not name:
+            return "Company"
+        return name
 
     def clean_tags(self):
         tags = self.cleaned_data.get("tags")
