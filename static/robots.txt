@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /employer/
+Disallow: /employee/
+Disallow: /payments/
+Disallow: /api/
+
+# Sitemap location for Googlebot, Bingbot, etc.
+Sitemap: https://wubante.pythonanywhere.com/sitemap.xml/

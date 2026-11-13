@@ -68,7 +68,21 @@ def security_txt(request):
     )
     return HttpResponse(content, content_type="text/plain; charset=utf-8")
 
+def robots_txt(request):
+    content = (
+        "User-agent: *\n"
+        "Allow: /\n"
+        "Disallow: /admin/\n"
+        "Disallow: /employer/\n"
+        "Disallow: /employee/\n"
+        "Disallow: /payments/\n"
+        "Disallow: /api/\n\n"
+        "Sitemap: https://wubante.pythonanywhere.com/sitemap.xml/\n"
+    )
+    return HttpResponse(content, content_type="text/plain; charset=utf-8")
+
 urlpatterns = lang_patterns + [
+    path("robots.txt", robots_txt, name="robots-txt"),
     path(".well-known/security.txt", security_txt, name="security-txt"),
     path("security.txt", security_txt, name="security-txt-root"),
     path("i18n/setlang/", set_language, name="set_language"),

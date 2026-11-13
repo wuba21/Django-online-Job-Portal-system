@@ -3,6 +3,45 @@
 {% load humanize %}
 {% block title %}{{ job.title }} | {{ job.company_name }}{% endblock %}
 
+{% block meta_description %}{{ job.title }} at {{ job.company_name }} in {{ job.location }}. Mode: {{ job.get_work_mode_display }}. Deadline: {{ job.last_date|date:'M d, Y' }}. Apply now on EthioJobs Portal.{% endblock %}
+
+{% block styles %}
+<!-- Google for Jobs Schema.org Structured Data (JSON-LD) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "JobPosting",
+  "title": "{{ job.title|escapejs }}",
+  "description": "{{ job.description|striptags|truncatewords:60|escapejs }}",
+  "datePosted": "{{ job.created_at|date:'c' }}",
+  "validThrough": "{{ job.last_date|date:'c' }}",
+  "employmentType": "{% if job.type == '1' %}FULL_TIME{% elif job.type == '2' %}PART_TIME{% else %}INTERN{% endif %}",
+  "hiringOrganization": {
+    "@type": "Organization",
+    "name": "{{ job.company_name|escapejs }}",
+    "sameAs": "https://wubante.pythonanywhere.com"
+  },
+  "jobLocation": {
+    "@type": "Place",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "{{ job.location|escapejs }}",
+      "addressCountry": "ET"
+    }
+  },
+  "baseSalary": {
+    "@type": "MonetaryAmount",
+    "currency": "ETB",
+    "value": {
+      "@type": "QuantitativeValue",
+      "value": {% if job.salary %}{{ job.salary }}{% else %}0{% endif %},
+      "unitText": "MONTH"
+    }
+  }
+}
+</script>
+{% endblock %}
+
 {% block content %}
 <section class="bg-light-gray py-4">
     <div class="container">

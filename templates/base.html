@@ -7,10 +7,28 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="robots" content="all,follow">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     <meta name="theme-color" content="#111827">
     <title>{% block title %}{% trans "EthioJobs" %}{% endblock %} | EthioJobs - {% trans "Career Portal" %}</title>
-    <meta name="description" content="{% block meta_description %}Ethiopia's premier job portal ΓÇö find NGO, Banking, Fresh Graduate and other jobs.{% endblock %}">
+    <meta name="description" content="{% block meta_description %}EthioJobs Portal - Find the latest jobs in Ethiopia: NGO vacancies, Banking, Accounting, IT & Tech, Healthcare, Fresh Graduate and remote jobs in Addis Ababa and across Ethiopia.{% endblock %}">
+    <meta name="keywords" content="Ethio jobs, Jobs in Ethiopia, Ethiopian vacancy, NGO jobs Ethiopia, Banking vacancies Addis Ababa, Fresh graduate jobs Ethiopia, Ethiojobs vacancy, work in Ethiopia, የስራ ማስታወቂያ, አዲስ የስራ ማስታወቂያ">
+    <meta name="author" content="EthioJobs Portal">
+
+    <!-- Open Graph / Facebook / Telegram SEO Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:title" content="{% block og_title %}EthioJobs - #1 Career & Vacancy Portal in Ethiopia{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Discover verified vacancies, NGO careers, Banking, and IT jobs across Ethiopia. Post jobs or apply directly with free instant alerts.{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% static 'img/favicon.svg' %}{% endblock %}">
+    <meta property="og:site_name" content="EthioJobs Portal">
+
+    <!-- Twitter Card SEO -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="EthioJobs - Career Portal in Ethiopia">
+    <meta name="twitter:description" content="Find the latest NGO, Banking, Fresh Graduate, and IT vacancies in Ethiopia.">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
 
     <!-- DNS Prefetch for speed -->
     <link rel="dns-prefetch" href="//fonts.googleapis.com">
