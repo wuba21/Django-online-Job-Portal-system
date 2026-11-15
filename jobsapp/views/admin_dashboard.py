@@ -111,6 +111,13 @@ def approve_job(request, job_id):
                 action_text="View Live Job Listing"
             )
 
+    # Automatically broadcast approved vacancy to Telegram channel
+    try:
+        from jobsapp.utils.telegram import broadcast_job_to_telegram
+        broadcast_job_to_telegram(job, request=request)
+    except Exception:
+        pass
+
     messages.success(request, f"Job '{job.title}' approved successfully.")
     referer = request.META.get("HTTP_REFERER")
     if referer and ("jobs/" in referer or "platform-admin" in referer):
@@ -143,6 +150,12 @@ def set_job_status(request, job_id, status):
             try:
                 from jobsapp.views.home import send_job_alert_notifications
                 send_job_alert_notifications(job, request=request)
+            except Exception:
+                pass
+            # Automatically broadcast approved vacancy to Telegram channel
+            try:
+                from jobsapp.utils.telegram import broadcast_job_to_telegram
+                broadcast_job_to_telegram(job, request=request)
             except Exception:
                 pass
         elif status == "rejected":

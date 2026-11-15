@@ -16,16 +16,29 @@
   "employmentType": "{% if job.type == '1' %}FULL_TIME{% elif job.type == '2' %}PART_TIME{% elif job.type == '3' %}CONTRACTOR{% else %}OTHER{% endif %}",
   "hiringOrganization": {
     "@type": "Organization",
-    "name": "{{ job.company_name|escapejs }}"
+    "name": "{{ job.company_name|default:'Company'|escapejs }}"{% if job.get_logo_url %},
+    "logo": "{{ request.scheme }}://{{ request.get_host }}{{ job.get_logo_url }}"{% endif %}
   },
   "jobLocation": {
     "@type": "Place",
     "address": {
       "@type": "PostalAddress",
-      "addressLocality": "{{ job.location|escapejs }}",
+      "addressLocality": "{{ job.location|default:'Addis Ababa'|escapejs }}",
       "addressCountry": "ET"
     }
   },
+  {% if job.salary and job.salary > 0 %}
+  "baseSalary": {
+    "@type": "MonetaryAmount",
+    "currency": "ETB",
+    "value": {
+      "@type": "QuantitativeValue",
+      "value": {{ job.salary }},
+      "unitText": "MONTH"
+    }
+  },
+  {% endif %}
+  "directApply": true,
   "url": "{{ request.build_absolute_uri }}",
   "applicationContact": {
     "@type": "ContactPoint",
